@@ -75,6 +75,33 @@ func TestAddHandler(t *testing.T) {
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
 			}
+
+			// ===================================
+
+			// // Prepare the HTTP request
+			// body, _ = json.Marshal(map[string][]string{
+			// 	"repo_urls": tt.repoUrls,
+			// })
+			// req, _ = http.NewRequest("POST", "/add", bytes.NewBuffer(body))
+			// rr = httptest.NewRecorder()
+
+			// repoURLMockRow1 := sqlmock.NewRows([]string{"url"}).AddRow("https://github.com/org/repo1")
+			// repoURLMockRow2 := sqlmock.NewRows([]string{"url"}).AddRow("https://github.com/org/repo2")
+
+			// mock.ExpectQuery("^-- name: GetRepoURL :one.*").WithArgs("https://github.com/org/repo1").WillReturnRows(repoURLMockRow1)
+			// mock.ExpectQuery("^-- name: GetRepoURL :one.*").WithArgs("https://github.com/org/repo2").WillReturnRows(repoURLMockRow2)
+
+			// // Call the handler function
+			// apiCfg.HandlerAdd(rr, req)
+
+			// // Check if there were any unexpected calls to the mock DB
+			// if err := mock.ExpectationsWereMet(); err != nil {
+			// 	t.Errorf("there were unfulfilled expectations: %s", err)
+			// }
+
+			// // Check the response body
+			// secondExpectedResponse := `{"accepted":[],"already_in_queue":["https://github.com/org/repo1","https://github.com/org/repo2"]}`
+			// assert.Equal(t, secondExpectedResponse, rr.Body.String())
 		})
 	}
 }
