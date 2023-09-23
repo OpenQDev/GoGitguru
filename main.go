@@ -22,6 +22,9 @@ func main() {
 		log.Fatal("Error loading .env file: ", err)
 	}
 
+	// The prefix path in which subsequent file operations will occur
+	prefixPath := "repos"
+
 	// Define the repo name
 	organization := ""
 	repo := ""
@@ -32,11 +35,11 @@ func main() {
 
 	// At the end of function execution, delete the repo and .tar.gz repo from the local filesystem
 	// The great thing with this defer is it will run regardless of the outcomes of subsequent subprocesses
-	defer util.DeleteLocalRepoAndTarball("repos", repo)
+	defer util.DeleteLocalRepoAndTarball(prefixPath, repo)
 
 	// Clone the git repo
 	fmt.Printf("\033[94mCloning https://github.com/%s/%s.git...\033[0m\n", organization, repo)
-	err = util.CloneRepo("repos", organization, repo)
+	err = util.CloneRepo(prefixPath, organization, repo)
 	if err != nil {
 		log.Fatal("\033[91mFailed to clone: ", err, "\033[0m")
 	}
@@ -45,14 +48,14 @@ func main() {
 	// Upload the repo to S3
 	fmt.Printf("\033[94mUploading %s/%s to S3...\033[0m", organization, repo)
 	fmt.Println()
-	err = uploadRepoToS3(organization, repo)
+	err = uploadRepoToS3(prefixPath, organization, repo)
 	if err != nil {
 		log.Fatalf("\033[91mFailed to upload to S3: %s\033[0m", err)
 	}
 	fmt.Printf("\033[32m%s/%s uploaded to S3!\033[0m\n", organization, repo)
 }
 
-func uploadRepoToS3(organization string, repo string) error {
+func uploadRepoToS3(prefixPath string, organization string, repo string) error {
 	// Get AWS API key and secret from environment variables
 	awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
 	awsSecretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
@@ -71,13 +74,13 @@ func uploadRepoToS3(organization string, repo string) error {
 	uploader := s3manager.NewUploader(sess)
 
 	// Create a tarball of the .git directory
-	err = exec.Command("tar", "-czf", filepath.Join("repos", repo+".tar.gz"), filepath.Join("repos", repo+"/.git")).Run()
+	err = exec.Command("tar", "-czf", filepath.Join(prefixPath, repo+".tar.gz"), filepath.Join(prefixPath, repo+"/.git")).Run()
 	if err != nil {
 		return err
 	}
 
 	// Open the tarball
-	tarball, err := os.Open(filepath.Join("repos", repo+".tar.gz"))
+	tarball, err := os.Open(filepath.Join(prefixPath, repo+".tar.gz"))
 	if err != nil {
 		return err
 	}
