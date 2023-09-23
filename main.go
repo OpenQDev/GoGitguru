@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"main/internal/database"
 	"net/http"
@@ -22,7 +21,6 @@ func main() {
 	godotenv.Load(".env")
 	portString := os.Getenv("PORT")
 	dbUrl := os.Getenv("DB_URL")
-	fmt.Println(dbUrl)
 
 	if portString == "" || dbUrl == "" {
 		log.Fatal("PORT | DB_URL is not found in the environment")
@@ -53,6 +51,7 @@ func main() {
 	v1Router := chi.NewRouter()
 	v1Router.Get("/healthz", handlerReadiness)
 	v1Router.Get("/version", apiCfg.handler_version)
+	v1Router.Post("/add", apiCfg.addHandler)
 
 	router.Mount("/", v1Router)
 

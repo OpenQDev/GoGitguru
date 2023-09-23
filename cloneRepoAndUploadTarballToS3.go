@@ -12,7 +12,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func cloneRepoAndUploadTarballToS3(organization string, repo string) {
+func CloneRepoAndUploadTarballToS3(organization string, repo string) {
 	// Initialize go dotenv
 	err := godotenv.Load()
 	if err != nil {

@@ -5,16 +5,13 @@
 package database
 
 import (
+	"database/sql"
 	"time"
-
-	"github.com/google/uuid"
 )
 
-type Repo struct {
-	ID           uuid.UUID `json:"id"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-	Organization string    `json:"organization"`
-	Repository   string    `json:"repository"`
-	Url          string    `json:"url"`
+type RepoUrl struct {
+	Url       string       `json:"url"`
+	Status    string       `json:"status"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
 }
