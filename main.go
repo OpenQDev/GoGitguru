@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"main/internal/pkg/util"
 	"os"
 	"os/exec"
 
@@ -34,7 +35,7 @@ func main() {
 
 	// Clone the git repo
 	fmt.Printf("\033[94mCloning https://github.com/%s/%s.git...\033[0m\n", organization, repo)
-	err = cloneRepo(repo, organization)
+	err = util.CloneRepo(repo, organization)
 	if err != nil {
 		log.Fatal("\033[91mFailed to clone: ", err, "\033[0m")
 	}
@@ -48,17 +49,6 @@ func main() {
 		log.Fatalf("\033[91mFailed to upload to S3: %s\033[0m", err)
 	}
 	fmt.Printf("\033[32m%s/%s uploaded to S3!\033[0m\n", organization, repo)
-}
-
-func cloneRepo(repo string, organization string) error {
-	cmd := exec.Command("git", "clone", fmt.Sprintf("https://github.com/%s/%s.git", organization, repo))
-
-	// This allows you to see the stdout and stderr of the command being run on the host machine
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	err := cmd.Run()
-	return err
 }
 
 func uploadRepoToS3(organization string, repo string) error {
