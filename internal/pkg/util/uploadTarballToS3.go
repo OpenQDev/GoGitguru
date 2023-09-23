@@ -12,6 +12,7 @@ import (
 )
 
 func UploadTarballToS3(prefixPath string, organization string, repo string, uploader s3manageriface.UploaderAPI) error {
+	fmt.Println(prefixPath)
 	// Create a tarball of the .git directory
 	err := exec.Command("tar", "-czf", filepath.Join(prefixPath, repo+".tar.gz"), filepath.Join(prefixPath, repo+"/.git")).Run()
 	if err != nil {

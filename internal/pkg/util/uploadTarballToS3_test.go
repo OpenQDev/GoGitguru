@@ -30,13 +30,18 @@ func TestUploadTarballToS3(t *testing.T) {
 
 	// Pre-populate a tempDir at testPrefixPath/testRepo with a README.md file
 	prefixPath, _ := os.MkdirTemp("", "repos")
-	file, err := os.Create(filepath.Join(prefixPath, repo, "README.md"))
+	gitDir := filepath.Join(prefixPath, repo, ".git")
+	err := os.MkdirAll(gitDir, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
-	file.Close()
 
-	fmt.Println(file)
+	// Create a README.md file in the .git directory
+	readme, err := os.Create(filepath.Join(gitDir, "README.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	readme.Close()
 
 	uploader := &mockUploader{}
 
@@ -49,6 +54,4 @@ func TestUploadTarballToS3(t *testing.T) {
 	}
 
 	// Add more assertions as needed
-
-	fmt.Println(uploader.input)
 }
