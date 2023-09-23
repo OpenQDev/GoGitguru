@@ -38,7 +38,7 @@ func (apiCfg *apiConfig) addHandler(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				// handle error
 				http.Error(w, err.Error(), http.StatusInternalServerError)
-				logger.LogRed("Error inserting repo url", err)
+				logger.LogFatalRedAndExit("Error inserting repo url", err)
 				continue
 			}
 			accepted = append(accepted, repoUrl)
@@ -64,7 +64,7 @@ func isListed(repoUrl string, w http.ResponseWriter, r *http.Request, apiCfg *ap
 		} else {
 			// handle error
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			logger.LogRed("Error checking for repo url", err)
+			logger.LogFatalRedAndExit("Error checking for repo url", err)
 		}
 	}
 

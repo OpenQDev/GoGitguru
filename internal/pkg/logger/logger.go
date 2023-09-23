@@ -15,6 +15,11 @@ func LogGreen(format string, a ...interface{}) {
 	fmt.Println()
 }
 
-func LogRed(format string, a ...interface{}) {
+func LogFatalRedAndExit(format string, a ...interface{}) {
 	log.Fatalf("\033[91m"+format+"\033[0m", a)
+}
+
+func LogError(format string, a ...interface{}) {
+	fmt.Printf("\033[97m"+format+"\033[0m", a...)
+	fmt.Println()
 }

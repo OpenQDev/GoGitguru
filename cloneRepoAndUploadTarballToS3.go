@@ -16,7 +16,7 @@ func CloneRepoAndUploadTarballToS3(organization string, repo string) {
 	// Initialize go dotenv
 	err := godotenv.Load()
 	if err != nil {
-		logger.LogRed("error loading .env file: ", err)
+		logger.LogFatalRedAndExit("error loading .env file: ", err)
 	}
 
 	// The prefix path in which subsequent file operations will occur
@@ -37,7 +37,7 @@ func CloneRepoAndUploadTarballToS3(organization string, repo string) {
 	err = util.CloneRepo(prefixPath, organization, repo)
 
 	if err != nil {
-		logger.LogRed("failed to clone: %s", err)
+		logger.LogFatalRedAndExit("failed to clone: %s", err)
 	}
 	logger.LogGreen("%s/%s successfully cloned!", organization, repo)
 
@@ -54,7 +54,7 @@ func CloneRepoAndUploadTarballToS3(organization string, repo string) {
 	},
 	)
 	if err != nil {
-		logger.LogRed("error initializing AWS session:", err)
+		logger.LogFatalRedAndExit("error initializing AWS session:", err)
 	}
 
 	// Create an uploader with the session and default options
@@ -64,7 +64,7 @@ func CloneRepoAndUploadTarballToS3(organization string, repo string) {
 	logger.LogBlue("uploading %s/%s to S3...", organization, repo)
 	err = util.UploadTarballToS3(prefixPath, organization, repo, uploader)
 	if err != nil {
-		logger.LogRed("failed to upload to S3: %s", err)
+		logger.LogFatalRedAndExit("failed to upload to S3: %s", err)
 	}
 	logger.LogGreen("%s/%s uploaded to S3!", organization, repo)
 }

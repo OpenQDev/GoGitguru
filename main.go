@@ -2,8 +2,8 @@ package main
 
 import (
 	"database/sql"
-	"log"
 	"main/internal/database"
+	"main/internal/pkg/logger"
 	"net/http"
 	"os"
 
@@ -23,12 +23,12 @@ func main() {
 	dbUrl := os.Getenv("DB_URL")
 
 	if portString == "" || dbUrl == "" {
-		log.Fatal("PORT | DB_URL is not found in the environment")
+		logger.LogFatalRedAndExit("PORT | DB_URL is not found in the environment")
 	}
 
 	conn, err := sql.Open("postgres", dbUrl)
 	if err != nil {
-		log.Fatal("Can't connect to DB")
+		logger.LogFatalRedAndExit("can't connect to DB:", err)
 	}
 
 	queries := database.New(conn)
@@ -60,10 +60,10 @@ func main() {
 		Addr:    ":" + portString,
 	}
 
-	log.Printf("Server starting on port %v", portString)
+	logger.LogBlue("server starting on port %v", portString)
 	srverr := srv.ListenAndServe()
 
 	if srverr != nil {
-		log.Fatal(srverr)
+		logger.LogFatalRedAndExit("the gitguru server encountered an error:", srverr)
 	}
 }
