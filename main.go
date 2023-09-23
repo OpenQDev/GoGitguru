@@ -34,6 +34,9 @@ func main() {
 		DB: queries,
 	}
 
+	// Initialize periodic syncing in the background
+	go startSyncing()
+
 	router := chi.NewRouter()
 
 	router.Use(cors.Handler(cors.Options{
