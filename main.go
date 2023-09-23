@@ -8,6 +8,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
@@ -23,16 +27,15 @@ func main() {
 		logger.LogFatalRedAndExit("PORT | DB_URL is not found in the environment")
 	}
 
-	conn, err := sql.Open("postgres", dbUrl)
+	apiCfg, err := getApiConfig(dbUrl)
 	if err != nil {
 		logger.LogFatalRedAndExit("can't connect to DB: %s", err)
 	}
 
-	queries := database.New(conn)
-
-	apiCfg := handlers.ApiConfig{
-		DB: queries,
-	}
+	// uploader, err := getS3Uploader()
+	// if err != nil {
+	// 	logger.LogFatalRedAndExit("error initializing AWS session: %s", err)
+	// }
 
 	// Initialize periodic syncing in the background
 	logger.LogBlue("Beginning sync for all repo urls...")
@@ -67,4 +70,39 @@ func main() {
 	if srverr != nil {
 		logger.LogFatalRedAndExit("the gitguru server encountered an error: %s", srverr)
 	}
+}
+
+func getApiConfig(dbUrl string) (handlers.ApiConfig, error) {
+	conn, err := sql.Open("postgres", dbUrl)
+	if err != nil {
+		return handlers.ApiConfig{}, err
+	}
+
+	queries := database.New(conn)
+
+	apiCfg := handlers.ApiConfig{
+		DB: queries,
+	}
+	return apiCfg, nil
+}
+
+func getS3Uploader() (*s3manager.Uploader, error) {
+	// Get AWS API key and secret from environment variables
+	awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
+	awsSecretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
+
+	// Create a session using SharedConfigEnable
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String("us-east-2"),
+		Credentials: credentials.NewStaticCredentials(awsAccessKeyID, awsSecretAccessKey, ""),
+	},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create an uploader with the session and default options
+	uploader := s3manager.NewUploader(sess)
+
+	return uploader, nil
 }
