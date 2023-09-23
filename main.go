@@ -31,7 +31,7 @@ func main() {
 
 	// At the end of function execution, delete the repo and .tar.gz repo from the local filesystem
 	// The great thing with this defer is it will run regardless of the outcomes of subsequent subprocesses
-	defer util.DeleteLocalRepoAndTarball("repos/", repo)
+	defer util.DeleteLocalRepoAndTarball("repos", repo)
 
 	// Clone the git repo
 	fmt.Printf("\033[94mCloning https://github.com/%s/%s.git...\033[0m\n", organization, repo)
