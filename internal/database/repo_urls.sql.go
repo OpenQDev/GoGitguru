@@ -25,9 +25,42 @@ func (q *Queries) GetRepoURL(ctx context.Context, url string) (RepoUrl, error) {
 	return i, err
 }
 
+const getRepoURLs = `-- name: GetRepoURLs :many
+SELECT url, status, created_at, updated_at FROM repo_urls
+`
+
+func (q *Queries) GetRepoURLs(ctx context.Context) ([]RepoUrl, error) {
+	rows, err := q.query(ctx, q.getRepoURLsStmt, getRepoURLs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []RepoUrl
+	for rows.Next() {
+		var i RepoUrl
+		if err := rows.Scan(
+			&i.Url,
+			&i.Status,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const insertRepoURL = `-- name: InsertRepoURL :exec
 INSERT INTO repo_urls (url, created_at, updated_at) 
 VALUES ($1, NOW(), NOW())
+RETURNING url, status, created_at, updated_at
 `
 
 func (q *Queries) InsertRepoURL(ctx context.Context, url string) error {

@@ -27,6 +27,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getRepoURLStmt, err = db.PrepareContext(ctx, getRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRepoURL: %w", err)
 	}
+	if q.getRepoURLsStmt, err = db.PrepareContext(ctx, getRepoURLs); err != nil {
+		return nil, fmt.Errorf("error preparing query GetRepoURLs: %w", err)
+	}
 	if q.insertRepoURLStmt, err = db.PrepareContext(ctx, insertRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertRepoURL: %w", err)
 	}
@@ -38,6 +41,11 @@ func (q *Queries) Close() error {
 	if q.getRepoURLStmt != nil {
 		if cerr := q.getRepoURLStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getRepoURLStmt: %w", cerr)
+		}
+	}
+	if q.getRepoURLsStmt != nil {
+		if cerr := q.getRepoURLsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getRepoURLsStmt: %w", cerr)
 		}
 	}
 	if q.insertRepoURLStmt != nil {
@@ -85,6 +93,7 @@ type Queries struct {
 	db                DBTX
 	tx                *sql.Tx
 	getRepoURLStmt    *sql.Stmt
+	getRepoURLsStmt   *sql.Stmt
 	insertRepoURLStmt *sql.Stmt
 }
 
@@ -93,6 +102,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		db:                tx,
 		tx:                tx,
 		getRepoURLStmt:    q.getRepoURLStmt,
+		getRepoURLsStmt:   q.getRepoURLsStmt,
 		insertRepoURLStmt: q.insertRepoURLStmt,
 	}
 }
