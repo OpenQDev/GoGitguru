@@ -1,8 +1,7 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	"main/internal/pkg/logger"
 	"main/internal/pkg/util"
 	"os"
 
@@ -13,7 +12,7 @@ func main() {
 	// Initialize go dotenv
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file: ", err)
+		logger.LogRed("error loading .env file: ", err)
 	}
 
 	// The prefix path in which subsequent file operations will occur
@@ -34,34 +33,19 @@ func main() {
 	defer util.DeleteLocalRepoAndTarball(prefixPath, repo)
 
 	// Clone the git repo
-	logBlue("Cloning https://github.com/%s/%s.git...", organization, repo)
+	logger.LogBlue("cloning https://github.com/%s/%s.git...", organization, repo)
 	err = util.CloneRepo(prefixPath, organization, repo)
 
 	if err != nil {
-		logRed("failed to clone: %s", err)
+		logger.LogRed("failed to clone: %s", err)
 	}
-	logGreen("%s/%s successfully cloned!", organization, repo)
+	logger.LogGreen("%s/%s successfully cloned!", organization, repo)
 
 	// Upload the repo to S3
-	fmt.Printf("\033[94mUploading %s/%s to S3...\033[0m", organization, repo)
-	fmt.Println()
+	logger.LogBlue("uploading %s/%s to S3...", organization, repo)
 	err = util.UploadTarballToS3(prefixPath, organization, repo)
 	if err != nil {
-		logRed("failed to upload to S3: %s", err)
+		logger.LogRed("failed to upload to S3: %s", err)
 	}
-	logGreen("%s/%s uploaded to S3!", organization, repo)
-}
-
-func logBlue(format string, a ...interface{}) {
-	fmt.Printf("\033[94m"+format+"\033[0m", a...)
-	fmt.Println()
-}
-
-func logGreen(format string, a ...interface{}) {
-	fmt.Printf("\033[32m"+format+"\033[0m", a...)
-	fmt.Println()
-}
-
-func logRed(format string, a ...interface{}) {
-	log.Fatalf("\033[91m"+format, a)
+	logger.LogGreen("%s/%s uploaded to S3!", organization, repo)
 }
