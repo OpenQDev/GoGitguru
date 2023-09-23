@@ -6,6 +6,7 @@ import (
 	"main/internal/pkg/util"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -70,7 +71,7 @@ func uploadRepoToS3(organization string, repo string) error {
 	uploader := s3manager.NewUploader(sess)
 
 	// Create a tarball of the .git directory
-	err = exec.Command("tar", "-czf", "repos/"+repo+".tar.gz", "repos/"+repo+"/.git").Run()
+	err = exec.Command("tar", "-czf", filepath.Join("repos", repo+".tar.gz"), "repos/"+repo+"/.git").Run()
 	if err != nil {
 		return err
 	}
