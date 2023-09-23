@@ -7,7 +7,7 @@ import (
 )
 
 func CloneRepo(organization string, repo string) error {
-	cmd := exec.Command("git", "clone", fmt.Sprintf("https://github.com/%s/%s.git", organization, repo))
+	cmd := exec.Command("git", "clone", fmt.Sprintf("https://github.com/%s/%s.git", organization, repo), fmt.Sprintf("repos/%s", repo))
 
 	// This allows you to see the stdout and stderr of the command being run on the host machine
 	cmd.Stdout = os.Stdout
