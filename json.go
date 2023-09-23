@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"main/internal/pkg/logger"
 	"net/http"
 )
@@ -20,8 +21,9 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 
 	if err != nil {
 		logger.LogError("failed to marshall JSON response: %v", payload)
+		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(500)
-		return
+		w.Write([]byte(fmt.Sprintf("failed to marshall JSON response: %v", payload)))
 	}
 
 	w.Header().Add("Content-Type", "application/json")

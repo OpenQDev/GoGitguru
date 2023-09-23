@@ -20,6 +20,6 @@ func LogFatalRedAndExit(format string, a ...interface{}) {
 }
 
 func LogError(format string, a ...interface{}) {
-	fmt.Printf("\033[97m"+format+"\033[0m", a...)
+	fmt.Printf("\033[91m"+format+"\033[0m", a...)
 	fmt.Println()
 }
