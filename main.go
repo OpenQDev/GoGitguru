@@ -70,13 +70,13 @@ func uploadRepoToS3(organization string, repo string) error {
 	uploader := s3manager.NewUploader(sess)
 
 	// Create a tarball of the .git directory
-	err = exec.Command("tar", "-czf", repo+".tar.gz", repo+"/.git").Run()
+	err = exec.Command("tar", "-czf", "repos/"+repo+".tar.gz", "repos/"+repo+"/.git").Run()
 	if err != nil {
 		return err
 	}
 
 	// Open the tarball
-	tarball, err := os.Open(repo + ".tar.gz")
+	tarball, err := os.Open("repos/" + repo + ".tar.gz")
 	if err != nil {
 		return err
 	}
@@ -91,11 +91,11 @@ func uploadRepoToS3(organization string, repo string) error {
 }
 
 func deleteLocalRepoAndTarball(repo string) error {
-	err := os.RemoveAll(repo)
+	err := os.RemoveAll("repos/" + repo)
 	if err != nil {
 		return err
 	}
-	err = os.RemoveAll(repo + ".tar.gz")
+	err = os.RemoveAll("repos/" + repo + ".tar.gz")
 	if err != nil {
 		return err
 	}
