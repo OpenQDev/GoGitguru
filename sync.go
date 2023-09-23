@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"log"
 	"main/internal/database"
+	"main/internal/pkg/gitutil"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/s3util"
-	"main/internal/pkg/util"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -64,7 +64,7 @@ func startSyncing() {
 	for _, repoUrl := range repoUrls {
 		// If the item does not exist, clone the repository and upload the tarball to S3
 		// Extract the organization and the repository from the github url
-		organization, repo := util.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
+		organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 
 		// Check if the item exists in S3
 		item := fmt.Sprintf("%s/%s.tar.gz", organization, repo)
@@ -83,7 +83,7 @@ func startSyncing() {
 				logger.LogError("error uploading tarball for %s to s3: %s", repoUrl, err)
 			}
 		} else {
-			util.CloneRepoAndUploadTarballToS3(organization, repo)
+			gitutil.CloneRepoAndUploadTarballToS3(organization, repo)
 		}
 	}
 }
