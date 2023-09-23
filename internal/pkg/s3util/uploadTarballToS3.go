@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 )
 
-func UploadTarballToS3(prefixPath string, organization string, repo string, uploader s3manageriface.UploaderAPI) error {
+func CompressAndUploadToS3(prefixPath string, organization string, repo string, uploader s3manageriface.UploaderAPI) error {
 	tarPath := filepath.Join(prefixPath, repo+".tar.gz")
 
 	path, err := TarAndGzip(tarPath, filepath.Join(prefixPath, repo+"/.git"))

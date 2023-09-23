@@ -62,7 +62,7 @@ func CloneRepoAndUploadTarballToS3(organization string, repo string) {
 
 	// Upload the repo to S3
 	logger.LogBlue("uploading %s/%s to S3...", organization, repo)
-	err = s3util.UploadTarballToS3(prefixPath, organization, repo, uploader)
+	err = s3util.CompressAndUploadToS3(prefixPath, organization, repo, uploader)
 	if err != nil {
 		logger.LogFatalRedAndExit("failed to upload to S3: %s", err)
 	}

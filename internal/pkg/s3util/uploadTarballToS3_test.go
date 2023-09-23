@@ -46,7 +46,7 @@ func TestUploadTarballToS3(t *testing.T) {
 	uploader := &mockUploader{}
 
 	// Call the function
-	err = UploadTarballToS3(prefixPath, organization, repo, uploader)
+	err = CompressAndUploadToS3(prefixPath, organization, repo, uploader)
 
 	// Assert
 	if err != nil {

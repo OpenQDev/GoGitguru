@@ -78,7 +78,7 @@ func startSyncing() {
 			// If the item exists, pull the latest changes and re-upload the tarball to S3
 			cmd := exec.Command("git", "-C", filepath.Join(prefixPath, repoUrl.Url), "pull")
 			cmd.Run()
-			err = s3util.UploadTarballToS3(prefixPath, organization, repoUrl.Url, uploader)
+			err = s3util.CompressAndUploadToS3(prefixPath, organization, repoUrl.Url, uploader)
 			if err != nil {
 				logger.LogError("error uploading tarball for %s to s3: %s", repoUrl, err)
 			}
