@@ -67,6 +67,10 @@ func TestAddHandler(t *testing.T) {
 			// Check the status code
 			assert.Equal(t, tt.expectedStatus, rr.Code)
 
+			// Check the response body
+			expectedResponse := `{"accepted":["https://github.com/org/repo1","https://github.com/org/repo2"],"already_in_queue":[]}`
+			assert.Equal(t, expectedResponse, rr.Body.String())
+
 			// Check if there were any unexpected calls to the mock DB
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
