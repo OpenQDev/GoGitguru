@@ -24,6 +24,8 @@ func TestAddHandler(t *testing.T) {
 	// For example:
 	// mock.ExpectQuery("^SELECT (.+) FROM users$").WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(1, "John"))
 
+	// Initialize queries with the mocked DB collection. All other queries and models are identical
+	// Only now we can use db as a spy to ensure methods were called
 	queries := database.New(db)
 
 	apiCfg := ApiConfig{
@@ -52,6 +54,11 @@ func TestAddHandler(t *testing.T) {
 			})
 			req, _ := http.NewRequest("POST", "/add", bytes.NewBuffer(body))
 			rr := httptest.NewRecorder()
+
+			mock.ExpectQuery("^-- name: GetRepoURL :one.*").WithArgs("https://github.com/org/repo1").WillReturnRows(sqlmock.NewRows([]string{}))
+			mock.ExpectQuery("^-- name: GetRepoURL :one.*").WithArgs("https://github.com/org/repo2").WillReturnRows(sqlmock.NewRows([]string{}))
+			mock.ExpectExec("^-- name: InsertRepoURL :exec.*").WithArgs("https://github.com/org/repo1").WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectExec("^-- name: InsertRepoURL :exec.*").WithArgs("https://github.com/org/repo2").WillReturnResult(sqlmock.NewResult(1, 1))
 
 			// Call the handler function
 			apiCfg.HandlerAdd(rr, req)
