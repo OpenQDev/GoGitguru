@@ -57,7 +57,7 @@ func startSyncing() {
 	repoUrls, err := queries.GetRepoURLs(context.Background())
 
 	if err != nil {
-		logger.LogFatalRedAndExit("error getting repo urls: ", err)
+		logger.LogFatalRedAndExit("error getting repo urls: %s ", err)
 	}
 
 	for _, repoUrl := range repoUrls {
@@ -66,10 +66,11 @@ func startSyncing() {
 		organization, repo := util.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 
 		// Check if the item exists in S3
-		exists, err := util.ItemExistsInS3(uploader.S3, "openqrepos", fmt.Sprintf("%s/%s", organization, repo))
+		item := fmt.Sprintf("%s/%s.tar.gz", organization, repo)
+		exists, err := util.ItemExistsInS3(uploader.S3, "openqrepos", item)
 
 		if err != nil {
-			logger.LogError("error checking if item %s exists in S3: ", repoUrl, err)
+			logger.LogError("error checking if item %s for repository %s exists in S3: ", item, repoUrl, err)
 		}
 
 		if exists {

@@ -25,7 +25,7 @@ func main() {
 
 	conn, err := sql.Open("postgres", dbUrl)
 	if err != nil {
-		logger.LogFatalRedAndExit("can't connect to DB:", err)
+		logger.LogFatalRedAndExit("can't connect to DB: %s", err)
 	}
 
 	queries := database.New(conn)
@@ -35,6 +35,7 @@ func main() {
 	}
 
 	// Initialize periodic syncing in the background
+	logger.LogBlue("Beginning sync for all repo urls...")
 	go startSyncing()
 
 	router := chi.NewRouter()
@@ -64,6 +65,6 @@ func main() {
 	srverr := srv.ListenAndServe()
 
 	if srverr != nil {
-		logger.LogFatalRedAndExit("the gitguru server encountered an error:", srverr)
+		logger.LogFatalRedAndExit("the gitguru server encountered an error: %s", srverr)
 	}
 }

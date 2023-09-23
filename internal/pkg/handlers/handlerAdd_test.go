@@ -19,7 +19,7 @@ func TestAddHandler(t *testing.T) {
 	// Initialize a new instance of ApiConfig with mocked DB
 	db, mock, err := sqlmock.New()
 	if err != nil {
-		logger.LogFatalRedAndExit("can't create mock DB:", err)
+		logger.LogFatalRedAndExit("can't create mock DB: %s", err)
 	}
 
 	// Expectations and actions for the mock DB can be defined here

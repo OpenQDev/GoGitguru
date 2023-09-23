@@ -53,7 +53,7 @@ func CloneRepoAndUploadTarballToS3(organization string, repo string) {
 	},
 	)
 	if err != nil {
-		logger.LogFatalRedAndExit("error initializing AWS session:", err)
+		logger.LogFatalRedAndExit("error initializing AWS session: %s", err)
 	}
 
 	// Create an uploader with the session and default options
