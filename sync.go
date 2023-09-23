@@ -11,7 +11,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -64,9 +63,7 @@ func startSyncing() {
 	for _, repoUrl := range repoUrls {
 		// If the item does not exist, clone the repository and upload the tarball to S3
 		// Extract the organization and the repository from the github url
-		urlParts := strings.Split(repoUrl.Url, "/")
-		organization := urlParts[len(urlParts)-2]
-		repo := urlParts[len(urlParts)-1]
+		organization, repo := util.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 
 		// Check if the item exists in S3
 		exists, err := util.ItemExistsInS3(uploader.S3, "openqrepos", fmt.Sprintf("%s/%s", organization, repo))
@@ -75,13 +72,16 @@ func startSyncing() {
 			logger.LogError("error checking if item %s exists in S3: ", repoUrl, err)
 		}
 
-		if !exists {
-			util.CloneRepoAndUploadTarballToS3(organization, repo)
-		} else {
+		if exists {
 			// If the item exists, pull the latest changes and re-upload the tarball to S3
 			cmd := exec.Command("git", "-C", filepath.Join(prefixPath, repoUrl.Url), "pull")
 			cmd.Run()
-			util.UploadTarballToS3(prefixPath, organization, repoUrl.Url, uploader)
+			err = util.UploadTarballToS3(prefixPath, organization, repoUrl.Url, uploader)
+			if err != nil {
+				logger.LogError("error uploading tarball for %s to s3: %s", repoUrl, err)
+			}
+		} else {
+			util.CloneRepoAndUploadTarballToS3(organization, repo)
 		}
 	}
 }
