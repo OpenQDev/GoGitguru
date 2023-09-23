@@ -21,19 +21,48 @@ func main() {
 	}
 
 	// Define the repo name
-	repo := "OpenQ-Workflows"
-	organization := "OpenQDev"
+	organization := ""
+	repo := ""
+	if len(os.Args) > 2 {
+		organization = os.Args[1]
+		repo = os.Args[2]
+	}
 
 	// At the end of function execution, delete the repo and .tar.gz repo from the local filesystem
+	// The great thing with this defer is it will run regardless of the outcomes of subsequent subprocesses
 	defer os.RemoveAll(repo)
 	defer os.RemoveAll(repo + ".tar.gz")
 
 	// Clone the git repo
-	_, err = exec.Command("git", "clone", fmt.Sprintf("https://github.com/%s/%s.git", organization, repo)).Output()
+	fmt.Printf("\033[94mCloning https://github.com/%s/%s.git...\033[0m\n", organization, repo)
+	err = cloneRepo(repo, organization)
 	if err != nil {
-		log.Fatal("Failed to clone: ", err)
+		log.Fatal("\033[91mFailed to clone: ", err, "\033[0m")
 	}
+	fmt.Printf("\033[32m%s/%s successfully cloned!\033[0m\n", organization, repo)
 
+	// Upload the repo to S3
+	fmt.Printf("\033[94mUploading %s/%s to S3...\033[0m", organization, repo)
+	fmt.Println()
+	err = uploadRepoToS3(organization, repo)
+	if err != nil {
+		log.Fatalf("\033[91mFailed to upload to S3: %s\033[0m", err)
+	}
+	fmt.Printf("\033[32m%s/%s uploaded to S3!\033[0m\n", organization, repo)
+}
+
+func cloneRepo(repo string, organization string) error {
+	cmd := exec.Command("git", "clone", fmt.Sprintf("https://github.com/%s/%s.git", organization, repo))
+
+	// This allows you to see the stdout and stderr of the command being run on the host machine
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	return err
+}
+
+func uploadRepoToS3(organization string, repo string) error {
 	// Get AWS API key and secret from environment variables
 	awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
 	awsSecretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
@@ -45,7 +74,7 @@ func main() {
 	},
 	)
 	if err != nil {
-		log.Fatal("Failed to start AWS session:", err)
+		return err
 	}
 
 	// Create an uploader with the session and default options
@@ -54,24 +83,20 @@ func main() {
 	// Create a tarball of the .git directory
 	err = exec.Command("tar", "-czf", repo+".tar.gz", repo+"/.git").Run()
 	if err != nil {
-		log.Fatal("Failed to create tarball:", err)
+		return err
 	}
 
 	// Open the tarball
 	tarball, err := os.Open(repo + ".tar.gz")
 	if err != nil {
-		log.Fatal("Failed to open tarball:", err)
+		return err
 	}
 
 	// Upload the file to S3
 	_, err = uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String("openqrepos"),
-		Key:    aws.String(repo + ".tar.gz"),
+		Key:    aws.String(fmt.Sprintf("%s/%s.tar.gz", organization, repo)),
 		Body:   tarball,
 	})
-	if err != nil {
-		log.Fatal("Failed to upload to S3:", err)
-	}
-
-	// The file is automatically closed by the uploader
+	return err
 }
