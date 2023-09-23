@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -25,7 +24,6 @@ func TestDeleteLocalRepoAndTarball(t *testing.T) {
 	os.WriteFile(tarballPath, []byte("test"), 0644)
 
 	// Run the function
-	fmt.Println(tempDir + "repos")
 	err = DeleteLocalRepoAndTarball(prefixPath, repo)
 	if err != nil {
 		t.Fatalf("Failed to delete repo and tarball: %v", err)

@@ -36,7 +36,7 @@ func main() {
 
 	// Clone the git repo
 	fmt.Printf("\033[94mCloning https://github.com/%s/%s.git...\033[0m\n", organization, repo)
-	err = util.CloneRepo(organization, repo)
+	err = util.CloneRepo("repos", organization, repo)
 	if err != nil {
 		log.Fatal("\033[91mFailed to clone: ", err, "\033[0m")
 	}
@@ -71,13 +71,13 @@ func uploadRepoToS3(organization string, repo string) error {
 	uploader := s3manager.NewUploader(sess)
 
 	// Create a tarball of the .git directory
-	err = exec.Command("tar", "-czf", filepath.Join("repos", repo+".tar.gz"), "repos/"+repo+"/.git").Run()
+	err = exec.Command("tar", "-czf", filepath.Join("repos", repo+".tar.gz"), filepath.Join("repos", repo+"/.git")).Run()
 	if err != nil {
 		return err
 	}
 
 	// Open the tarball
-	tarball, err := os.Open("repos/" + repo + ".tar.gz")
+	tarball, err := os.Open(filepath.Join("repos", repo+".tar.gz"))
 	if err != nil {
 		return err
 	}
