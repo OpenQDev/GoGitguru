@@ -26,3 +26,11 @@ go tool cover -html=coverage.out
 
 `-cover` - Provide coverage percentage to stdout
 `-coverprofile=coverage.out` - Provide a coverage report to `coverage.out` that can be opened in the browser
+
+## Local Setup Commands
+
+`docker run -e POSTGRES_HOST_AUTH_METHOD=trust -p 5432:5432 postgres`
+
+`psql "postgres://postgres:@localhost:5432/postgres?sslmode=disable"`
+
+`goose postgres "postgres://postgres:@localhost:5432/postgres?sslmode=disable" up`
