@@ -35,7 +35,7 @@ func main() {
 
 	// Clone the git repo
 	fmt.Printf("\033[94mCloning https://github.com/%s/%s.git...\033[0m\n", organization, repo)
-	err = util.CloneRepo(repo, organization)
+	err = util.CloneRepo(organization, repo)
 	if err != nil {
 		log.Fatal("\033[91mFailed to clone: ", err, "\033[0m")
 	}
