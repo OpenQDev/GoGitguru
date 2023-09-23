@@ -17,6 +17,12 @@ go test -v
 go test -v -run TestUploadTarballToS3
 ```
 
+### Run All Tests from Root
+
+```bash
+go test ./...
+```
+
 ### Test with Coverage
 
 ```bash
