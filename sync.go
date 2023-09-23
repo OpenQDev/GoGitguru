@@ -7,6 +7,7 @@ import (
 	"log"
 	"main/internal/database"
 	"main/internal/pkg/logger"
+	"main/internal/pkg/s3util"
 	"main/internal/pkg/util"
 	"os"
 	"os/exec"
@@ -67,7 +68,7 @@ func startSyncing() {
 
 		// Check if the item exists in S3
 		item := fmt.Sprintf("%s/%s.tar.gz", organization, repo)
-		exists, err := util.ItemExistsInS3(uploader.S3, "openqrepos", item)
+		exists, err := s3util.ItemExistsInS3(uploader.S3, "openqrepos", item)
 
 		if err != nil {
 			logger.LogError("error checking if item %s for repository %s exists in S3: ", item, repoUrl, err)
@@ -77,7 +78,7 @@ func startSyncing() {
 			// If the item exists, pull the latest changes and re-upload the tarball to S3
 			cmd := exec.Command("git", "-C", filepath.Join(prefixPath, repoUrl.Url), "pull")
 			cmd.Run()
-			err = util.UploadTarballToS3(prefixPath, organization, repoUrl.Url, uploader)
+			err = s3util.UploadTarballToS3(prefixPath, organization, repoUrl.Url, uploader)
 			if err != nil {
 				logger.LogError("error uploading tarball for %s to s3: %s", repoUrl, err)
 			}

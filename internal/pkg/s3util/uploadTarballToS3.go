@@ -1,9 +1,9 @@
-package util
+package s3util
 
 import (
 	"fmt"
+	"main/internal/pkg/logger"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -12,15 +12,16 @@ import (
 )
 
 func UploadTarballToS3(prefixPath string, organization string, repo string, uploader s3manageriface.UploaderAPI) error {
-	fmt.Println(prefixPath)
-	// Create a tarball of the .git directory
-	err := exec.Command("tar", "-czf", filepath.Join(prefixPath, repo+".tar.gz"), filepath.Join(prefixPath, repo+"/.git")).Run()
+	tarPath := filepath.Join(prefixPath, repo+".tar.gz")
+
+	path, err := TarAndGzip(tarPath, filepath.Join(prefixPath, repo+"/.git"))
 	if err != nil {
-		return err
+		logger.LogError("error tarring and gzipping", err)
 	}
+	fmt.Println(path)
 
 	// Open the tarball
-	tarball, err := os.Open(filepath.Join(prefixPath, repo+".tar.gz"))
+	tarball, err := os.Open(tarPath)
 	if err != nil {
 		return err
 	}

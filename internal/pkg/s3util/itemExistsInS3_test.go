@@ -1,4 +1,4 @@
-package util
+package s3util
 
 import (
 	"testing"

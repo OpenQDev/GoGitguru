@@ -1,4 +1,4 @@
-package util
+package s3util
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
