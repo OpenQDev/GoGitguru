@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"main/internal/pkg/logger"
-	"main/internal/pkg/util"
 	"net/http"
 	"strings"
 )
@@ -37,7 +36,7 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 	if err != nil || len(repoUrls.RepoUrls) == 0 {
 		msg := fmt.Sprintf("error parsing JSON for: %s", string(bodyBytes))
 		logger.LogError(msg)
-		util.RespondWithError(w, 400, msg)
+		RespondWithError(w, 400, msg)
 		return
 	}
 
@@ -50,7 +49,7 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			msg := fmt.Sprintf("error checking if repo is listed: %s", err)
 			logger.LogError(msg)
-			util.RespondWithError(w, 500, msg)
+			RespondWithError(w, 500, msg)
 			return
 		}
 
@@ -61,7 +60,7 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				msg := fmt.Sprintf("error adding %s to repo_urls: %s", repoUrl, err)
 				logger.LogError(msg)
-				util.RespondWithError(w, 500, msg)
+				RespondWithError(w, 500, msg)
 				return
 			}
 			accepted = append(accepted, repoUrl)
@@ -73,7 +72,7 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 		AlreadyInQueue: alreadyInQueue,
 	}
 
-	util.RespondWithJSON(w, 202, response)
+	RespondWithJSON(w, 202, response)
 }
 
 func addToList(apiCfg *ApiConfig, r *http.Request, repoUrl string, w http.ResponseWriter) error {

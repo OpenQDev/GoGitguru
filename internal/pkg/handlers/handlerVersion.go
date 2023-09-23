@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"main/internal/pkg/util"
 	"net/http"
 	"os"
 )
@@ -11,5 +10,5 @@ func (apiCfg *ApiConfig) HandlerVersion(w http.ResponseWriter, r *http.Request) 
 	type gitguruVersion struct {
 		Version string `json:"version"`
 	}
-	util.RespondWithJSON(w, 200, gitguruVersion{Version: version})
+	RespondWithJSON(w, 200, gitguruVersion{Version: version})
 }
