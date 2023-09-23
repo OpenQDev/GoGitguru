@@ -48,5 +48,6 @@ func UploadTarballToS3(prefixPath string, organization string, repo string) erro
 		Key:    aws.String(fmt.Sprintf("%s/%s.tar.gz", organization, repo)),
 		Body:   tarball,
 	})
+
 	return err
 }
