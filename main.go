@@ -21,12 +21,15 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Define the repo name
+	repoName := "OpenQ-Workflows"
+
 	// Clone the git repo
 
-	defer os.RemoveAll("OpenQ-Workflows")
-	defer os.RemoveAll("OpenQ-Workflows.tar.gz")
+	defer os.RemoveAll(repoName)
+	defer os.RemoveAll(repoName + ".tar.gz")
 
-	_, err = exec.Command("git", "clone", "https://github.com/OpenQDev/OpenQ-Workflows.git").Output()
+	_, err = exec.Command("git", "clone", "https://github.com/OpenQDev/"+repoName+".git").Output()
 	if err != nil {
 		fmt.Println("Failed to clone")
 		log.Fatal(err)
@@ -52,14 +55,14 @@ func main() {
 	uploader := s3manager.NewUploader(sess)
 
 	// Create a tarball of the .git directory
-	err = exec.Command("tar", "-czf", "OpenQ-Workflows.tar.gz", "OpenQ-Workflows/.git").Run()
+	err = exec.Command("tar", "-czf", repoName+".tar.gz", repoName+"/.git").Run()
 	if err != nil {
 		fmt.Println("Failed to create tarball")
 		log.Fatal(err)
 	}
 
 	// Open the tarball
-	tarball, err := os.Open("OpenQ-Workflows.tar.gz")
+	tarball, err := os.Open(repoName + ".tar.gz")
 	if err != nil {
 		fmt.Println("Failed to open tarball")
 		log.Fatal(err)
@@ -68,7 +71,7 @@ func main() {
 	// Upload the file to S3
 	_, err = uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String("openqrepos"),
-		Key:    aws.String("OpenQ-Workflows.tar.gz"),
+		Key:    aws.String(repoName + ".tar.gz"),
 		Body:   tarball,
 	})
 	if err != nil {
