@@ -7,8 +7,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
-	"time"
 )
 
 const getRepoURL = `-- name: GetRepoURL :one
@@ -28,23 +26,11 @@ func (q *Queries) GetRepoURL(ctx context.Context, url string) (RepoUrl, error) {
 }
 
 const insertRepoURL = `-- name: InsertRepoURL :exec
-INSERT INTO repo_urls (url, status, created_at, updated_at) 
-VALUES ($1, $2, $3, $4)
+INSERT INTO repo_urls (url, created_at, updated_at) 
+VALUES ($1, NOW(), NOW())
 `
 
-type InsertRepoURLParams struct {
-	Url       string       `json:"url"`
-	Status    string       `json:"status"`
-	CreatedAt time.Time    `json:"created_at"`
-	UpdatedAt sql.NullTime `json:"updated_at"`
-}
-
-func (q *Queries) InsertRepoURL(ctx context.Context, arg InsertRepoURLParams) error {
-	_, err := q.exec(ctx, q.insertRepoURLStmt, insertRepoURL,
-		arg.Url,
-		arg.Status,
-		arg.CreatedAt,
-		arg.UpdatedAt,
-	)
+func (q *Queries) InsertRepoURL(ctx context.Context, url string) error {
+	_, err := q.exec(ctx, q.insertRepoURLStmt, insertRepoURL, url)
 	return err
 }

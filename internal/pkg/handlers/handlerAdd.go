@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"main/internal/database"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/util"
 	"net/http"
@@ -78,9 +77,7 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 }
 
 func addToList(apiCfg *ApiConfig, r *http.Request, repoUrl string, w http.ResponseWriter) error {
-	err := apiCfg.DB.InsertRepoURL(r.Context(), database.InsertRepoURLParams{
-		Url: repoUrl,
-	})
+	err := apiCfg.DB.InsertRepoURL(r.Context(), repoUrl)
 
 	return err
 }
