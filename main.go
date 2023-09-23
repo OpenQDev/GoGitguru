@@ -19,9 +19,11 @@ func main() {
 	// The prefix path in which subsequent file operations will occur
 	prefixPath := "repos"
 
-	// Define the repo name
+	// Define the repo and organization name
 	organization := ""
 	repo := ""
+
+	// If args for organization and repo are provided from the command line, use them
 	if len(os.Args) > 2 {
 		organization = os.Args[1]
 		repo = os.Args[2]
@@ -32,19 +34,34 @@ func main() {
 	defer util.DeleteLocalRepoAndTarball(prefixPath, repo)
 
 	// Clone the git repo
-	fmt.Printf("\033[94mCloning https://github.com/%s/%s.git...\033[0m\n", organization, repo)
+	logBlue("Cloning https://github.com/%s/%s.git...", organization, repo)
 	err = util.CloneRepo(prefixPath, organization, repo)
+
 	if err != nil {
-		log.Fatal("\033[91mFailed to clone: ", err, "\033[0m")
+		logRed("failed to clone: %s", err)
 	}
-	fmt.Printf("\033[32m%s/%s successfully cloned!\033[0m\n", organization, repo)
+	logGreen("%s/%s successfully cloned!", organization, repo)
 
 	// Upload the repo to S3
 	fmt.Printf("\033[94mUploading %s/%s to S3...\033[0m", organization, repo)
 	fmt.Println()
 	err = util.UploadTarballToS3(prefixPath, organization, repo)
 	if err != nil {
-		log.Fatalf("\033[91mFailed to upload to S3: %s\033[0m", err)
+		logRed("failed to upload to S3: %s", err)
 	}
-	fmt.Printf("\033[32m%s/%s uploaded to S3!\033[0m\n", organization, repo)
+	logGreen("%s/%s uploaded to S3!", organization, repo)
+}
+
+func logBlue(format string, a ...interface{}) {
+	fmt.Printf("\033[94m"+format+"\033[0m", a...)
+	fmt.Println()
+}
+
+func logGreen(format string, a ...interface{}) {
+	fmt.Printf("\033[32m"+format+"\033[0m", a...)
+	fmt.Println()
+}
+
+func logRed(format string, a ...interface{}) {
+	log.Fatalf("\033[91m"+format, a)
 }
