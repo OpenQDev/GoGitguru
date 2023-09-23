@@ -5,6 +5,10 @@ import (
 	"main/internal/pkg/util"
 	"os"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/joho/godotenv"
 )
 
@@ -41,9 +45,28 @@ func main() {
 	}
 	logger.LogGreen("%s/%s successfully cloned!", organization, repo)
 
+	logger.LogBlue("initializing AWS session...")
+
+	// Get AWS API key and secret from environment variables
+	awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
+	awsSecretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
+
+	// Create a session using SharedConfigEnable
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String("us-east-2"),
+		Credentials: credentials.NewStaticCredentials(awsAccessKeyID, awsSecretAccessKey, ""),
+	},
+	)
+	if err != nil {
+		logger.LogRed("error initializing AWS session:", err)
+	}
+
+	// Create an uploader with the session and default options
+	uploader := s3manager.NewUploader(sess)
+
 	// Upload the repo to S3
 	logger.LogBlue("uploading %s/%s to S3...", organization, repo)
-	err = util.UploadTarballToS3(prefixPath, organization, repo)
+	err = util.UploadTarballToS3(prefixPath, organization, repo, uploader)
 	if err != nil {
 		logger.LogRed("failed to upload to S3: %s", err)
 	}

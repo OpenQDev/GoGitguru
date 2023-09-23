@@ -11,6 +11,12 @@ go test -v
 
 `-v` - Run in verbose mode, showing all tests as they run
 
+### Run One Test
+
+```bash
+go test -v -run TestUploadTarballToS3
+```
+
 ### Test with Coverage
 
 ```bash
