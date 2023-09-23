@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"main/internal/database"
+	"main/internal/pkg/handlers"
 	"main/internal/pkg/logger"
 	"net/http"
 	"os"
@@ -12,10 +13,6 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
-
-type apiConfig struct {
-	DB *database.Queries
-}
 
 func main() {
 	godotenv.Load(".env")
@@ -33,7 +30,7 @@ func main() {
 
 	queries := database.New(conn)
 
-	apiCfg := apiConfig{
+	apiCfg := handlers.ApiConfig{
 		DB: queries,
 	}
 
@@ -49,9 +46,9 @@ func main() {
 	}))
 
 	v1Router := chi.NewRouter()
-	v1Router.Get("/healthz", handlerReadiness)
-	v1Router.Get("/version", apiCfg.handler_version)
-	v1Router.Post("/add", apiCfg.addHandler)
+	v1Router.Get("/healthz", apiCfg.HandlerReadiness)
+	v1Router.Get("/version", apiCfg.HandlerVersion)
+	v1Router.Post("/add", apiCfg.HandlerAdd)
 
 	router.Mount("/", v1Router)
 

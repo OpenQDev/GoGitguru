@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"bytes"
@@ -14,7 +14,7 @@ import (
 )
 
 func TestAddHandler(t *testing.T) {
-	// Initialize a new instance of apiConfig with mocked DB
+	// Initialize a new instance of ApiConfig with mocked DB
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.LogFatalRedAndExit("can't create mock DB:", err)
@@ -26,7 +26,7 @@ func TestAddHandler(t *testing.T) {
 
 	queries := database.New(db)
 
-	apiCfg := apiConfig{
+	apiCfg := ApiConfig{
 		DB: queries,
 	}
 
@@ -54,7 +54,7 @@ func TestAddHandler(t *testing.T) {
 			rr := httptest.NewRecorder()
 
 			// Call the handler function
-			apiCfg.addHandler(rr, req)
+			apiCfg.HandlerAdd(rr, req)
 
 			// Check the status code
 			assert.Equal(t, tt.expectedStatus, rr.Code)

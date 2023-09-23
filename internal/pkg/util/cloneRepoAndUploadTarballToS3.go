@@ -1,8 +1,7 @@
-package main
+package util
 
 import (
 	"main/internal/pkg/logger"
-	"main/internal/pkg/util"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -30,11 +29,11 @@ func CloneRepoAndUploadTarballToS3(organization string, repo string) {
 
 	// At the end of function execution, delete the repo and .tar.gz repo from the local filesystem
 	// The great thing with this defer is it will run regardless of the outcomes of subsequent subprocesses
-	defer util.DeleteLocalRepoAndTarball(prefixPath, repo)
+	defer DeleteLocalRepoAndTarball(prefixPath, repo)
 
 	// Clone the git repo
 	logger.LogBlue("cloning https://github.com/%s/%s.git...", organization, repo)
-	err = util.CloneRepo(prefixPath, organization, repo)
+	err = CloneRepo(prefixPath, organization, repo)
 
 	if err != nil {
 		logger.LogFatalRedAndExit("failed to clone: %s", err)
@@ -62,7 +61,7 @@ func CloneRepoAndUploadTarballToS3(organization string, repo string) {
 
 	// Upload the repo to S3
 	logger.LogBlue("uploading %s/%s to S3...", organization, repo)
-	err = util.UploadTarballToS3(prefixPath, organization, repo, uploader)
+	err = UploadTarballToS3(prefixPath, organization, repo, uploader)
 	if err != nil {
 		logger.LogFatalRedAndExit("failed to upload to S3: %s", err)
 	}
