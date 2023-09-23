@@ -6,7 +6,7 @@ import (
 )
 
 // Create a tarball
-func TarAndGzip(directoryToArchive string, tarballOutputPath string) (string, error) {
+func CompressDirectory(directoryToArchive string, tarballOutputPath string) (string, error) {
 	err := exec.Command("tar", "-czf", directoryToArchive, tarballOutputPath).Run()
 	if err != nil {
 		return "", err
