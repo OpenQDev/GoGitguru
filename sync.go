@@ -69,7 +69,7 @@ func startSyncing() {
 		repo := urlParts[len(urlParts)-1]
 
 		// Check if the item exists in S3
-		exists, err := util.ItemExistsInS3(uploader, "openqrepos", fmt.Sprintf("%s/%s", organization, repo))
+		exists, err := util.ItemExistsInS3(uploader.S3, "openqrepos", fmt.Sprintf("%s/%s", organization, repo))
 
 		if err != nil {
 			logger.LogError("error checking if item %s exists in S3: ", repoUrl, err)

@@ -1,18 +1,14 @@
 package util
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 )
 
-func ItemExistsInS3(uploader *s3manager.Uploader, bucket, key string) (bool, error) {
-	fmt.Println(bucket)
-	fmt.Println(key)
-	_, err := uploader.S3.HeadObject(&s3.HeadObjectInput{
+func ItemExistsInS3(S3 s3iface.S3API, bucket, key string) (bool, error) {
+	_, err := S3.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	})
