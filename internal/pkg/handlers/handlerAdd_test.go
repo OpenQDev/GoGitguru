@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
@@ -78,30 +79,31 @@ func TestAddHandler(t *testing.T) {
 
 			// ===================================
 
-			// // Prepare the HTTP request
-			// body, _ = json.Marshal(map[string][]string{
-			// 	"repo_urls": tt.repoUrls,
-			// })
-			// req, _ = http.NewRequest("POST", "/add", bytes.NewBuffer(body))
-			// rr = httptest.NewRecorder()
+			// Prepare the HTTP request
+			body, _ = json.Marshal(map[string][]string{
+				"repo_urls": tt.repoUrls,
+			})
+			req, _ = http.NewRequest("POST", "/add", bytes.NewBuffer(body))
+			rr = httptest.NewRecorder()
 
-			// repoURLMockRow1 := sqlmock.NewRows([]string{"url"}).AddRow("https://github.com/org/repo1")
-			// repoURLMockRow2 := sqlmock.NewRows([]string{"url"}).AddRow("https://github.com/org/repo2")
+			currentTime := time.Now()
+			repoURLMockRow1 := sqlmock.NewRows([]string{"url", "status", "created_at", "updated_at"}).AddRow("https://github.com/org/repo1", "pending", currentTime, currentTime)
+			repoURLMockRow2 := sqlmock.NewRows([]string{"url", "status", "created_at", "updated_at"}).AddRow("https://github.com/org/repo2", "pending", currentTime, currentTime)
 
-			// mock.ExpectQuery("^-- name: GetRepoURL :one.*").WithArgs("https://github.com/org/repo1").WillReturnRows(repoURLMockRow1)
-			// mock.ExpectQuery("^-- name: GetRepoURL :one.*").WithArgs("https://github.com/org/repo2").WillReturnRows(repoURLMockRow2)
+			mock.ExpectQuery("^-- name: GetRepoURL :one.*").WithArgs("https://github.com/org/repo1").WillReturnRows(repoURLMockRow1)
+			mock.ExpectQuery("^-- name: GetRepoURL :one.*").WithArgs("https://github.com/org/repo2").WillReturnRows(repoURLMockRow2)
 
-			// // Call the handler function
-			// apiCfg.HandlerAdd(rr, req)
+			// Call the handler function
+			apiCfg.HandlerAdd(rr, req)
 
-			// // Check if there were any unexpected calls to the mock DB
-			// if err := mock.ExpectationsWereMet(); err != nil {
-			// 	t.Errorf("there were unfulfilled expectations: %s", err)
-			// }
+			// Check if there were any unexpected calls to the mock DB
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
 
-			// // Check the response body
-			// secondExpectedResponse := `{"accepted":[],"already_in_queue":["https://github.com/org/repo1","https://github.com/org/repo2"]}`
-			// assert.Equal(t, secondExpectedResponse, rr.Body.String())
+			// Check the response body
+			secondExpectedResponse := `{"accepted":[],"already_in_queue":["https://github.com/org/repo1","https://github.com/org/repo2"]}`
+			assert.Equal(t, secondExpectedResponse, rr.Body.String())
 		})
 	}
 }
