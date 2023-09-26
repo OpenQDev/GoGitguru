@@ -26,7 +26,11 @@ func startSyncing(
 	}
 
 	for _, repoUrl := range repoUrls {
-		organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl.Url)
+		repoUrl := repoUrl.Url
+
+		organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
+
+		defer gitutil.DeleteLocalRepo(prefixPath, repo)
 
 		gitutil.CloneRepo(prefixPath, organization, repo)
 	}

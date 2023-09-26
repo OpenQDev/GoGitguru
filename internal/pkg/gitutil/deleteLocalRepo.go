@@ -1,12 +1,15 @@
 package gitutil
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 )
 
 func DeleteLocalRepo(prefixPath string, repo string) error {
-	err := os.RemoveAll(filepath.Join(prefixPath, repo))
+	path := filepath.Join(prefixPath, repo)
+	fmt.Println(path)
+	err := os.RemoveAll(path)
 
 	if err != nil {
 		return err
