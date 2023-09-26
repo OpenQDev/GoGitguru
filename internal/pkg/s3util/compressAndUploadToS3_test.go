@@ -1,7 +1,6 @@
 package s3util
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -17,8 +16,7 @@ type mockUploader struct {
 
 // Implement the methods of the s3manageriface.UploaderAPI interface
 func (m *mockUploader) Upload(input *s3manager.UploadInput, foo ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
-	fmt.Println(input)
-
+	m.input = input
 	output := s3manager.UploadOutput{}
 	return &output, nil
 }
@@ -36,13 +34,6 @@ func TestUploadTarballToS3(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Create a README.md file in the .git directory
-	readme, err := os.Create(filepath.Join(gitDir, "README.md"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	readme.Close()
-
 	uploader := &mockUploader{}
 
 	// Call the function
@@ -54,4 +45,7 @@ func TestUploadTarballToS3(t *testing.T) {
 	}
 
 	// Add more assertions as needed
+	if uploader.input == nil {
+		t.Errorf("Expected uploader.input to be set, but it was nil")
+	}
 }
