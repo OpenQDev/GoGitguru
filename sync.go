@@ -33,5 +33,7 @@ func startSyncing(
 		defer gitutil.DeleteLocalRepo(prefixPath, repo)
 
 		gitutil.CloneRepo(prefixPath, organization, repo)
+
+		gitutil.ProcessRepo(prefixPath, repo, db)
 	}
 }

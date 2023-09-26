@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-func GitLogCsv(prefixPath string, repo string, fromCommitDate string) []byte {
+func FormatGitLogs(prefixPath string, repo string, fromCommitDate string) []GitLog {
 	fullRepoPath := filepath.Join(prefixPath, repo)
 
 	cmdCheck := exec.Command("git", "-C", fullRepoPath, "rev-parse", "--is-inside-work-tree")
@@ -30,9 +30,9 @@ func GitLogCsv(prefixPath string, repo string, fromCommitDate string) []byte {
 		logger.LogFatalRedAndExit("error running git log in %s: %s", fullRepoPath, err)
 	}
 
-	_ = ProcessGitLog(string(out))
+	gitLogs := ProcessGitLogs(string(out))
 
-	return out
+	return gitLogs
 
 	// lines := strings.Split(string(out), "\n")
 	// csvFile, err := os.Create("git_log.csv")

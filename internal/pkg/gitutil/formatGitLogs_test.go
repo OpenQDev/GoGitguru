@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestGitLogCsv(t *testing.T) {
+func TestFormatGitLogs(t *testing.T) {
 	// Setup a temporary directory for testing
 	tempDir, err := os.MkdirTemp("", "testing")
 	if err != nil {
@@ -16,5 +16,5 @@ func TestGitLogCsv(t *testing.T) {
 	CloneRepo(tempDir, "OpenQDev", "OpenQ-Workflows")
 
 	// Call the function under test
-	_ = GitLogCsv(tempDir, "OpenQ-Workflows", "2020-01-01")
+	_ = FormatGitLogs(tempDir, "OpenQ-Workflows", "2020-01-01")
 }

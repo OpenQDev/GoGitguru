@@ -1,7 +1,7 @@
 package gitutil
 
 import (
-	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -26,5 +26,26 @@ initial commit - clones repo, TAR and GZIP .git directory, upload to S3, delete 
 
 	output := ProcessGitLogs(testString)
 
-	fmt.Println(output)
+	expected := []GitLog{
+		{
+			CommitHash:    "141bd5216b3e95c0559de5704e97883214048e94",
+			AuthorName:    "FlacoJones",
+			AuthorEmail:   "andrew@openq.dev",
+			AuthorData:    "1695429111",
+			CommitDate:    "1695429111",
+			CommitMessage: "initial commit - clones repo, TAR and GZIP .git directory, upload to S3, delete from local",
+		},
+		{
+			CommitHash:    "141bd5216b3e95c0559de5704e97883214048e95",
+			AuthorName:    "FlacoJones",
+			AuthorEmail:   "andrew@openq.dev",
+			AuthorData:    "1695429111",
+			CommitDate:    "1695429111",
+			CommitMessage: "initial commit - clones repo, TAR and GZIP .git directory, upload to S3, delete from local",
+		},
+	}
+
+	if !reflect.DeepEqual(output, expected) {
+		t.Errorf("Expected %v, but got %v", expected, output)
+	}
 }
