@@ -4,7 +4,6 @@ package gitutil
 // git -C . rev-parse --is-inside-work-tree
 
 import (
-	"fmt"
 	"main/internal/pkg/logger"
 	"os/exec"
 	"path/filepath"
@@ -31,8 +30,7 @@ func GitLogCsv(prefixPath string, repo string, fromCommitDate string) []byte {
 		logger.LogFatalRedAndExit("error running git log in %s: %s", fullRepoPath, err)
 	}
 
-	output := ProcessGitLog(string(out))
-	fmt.Println(output)
+	_ = ProcessGitLog(string(out))
 
 	return out
 

@@ -1,7 +1,6 @@
 package gitutil
 
 import (
-	"fmt"
 	"os"
 	"testing"
 )
@@ -17,7 +16,5 @@ func TestGitLogCsv(t *testing.T) {
 	CloneRepo(tempDir, "OpenQDev", "OpenQ-Workflows")
 
 	// Call the function under test
-	out := GitLogCsv(tempDir, "OpenQ-Workflows", "2020-01-01")
-
-	fmt.Println(string(out))
+	_ = GitLogCsv(tempDir, "OpenQ-Workflows", "2020-01-01")
 }

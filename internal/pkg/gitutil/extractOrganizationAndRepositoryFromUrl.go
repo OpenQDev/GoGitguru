@@ -1,7 +1,7 @@
 package gitutil
 
 import (
-	"fmt"
+	"main/internal/pkg/logger"
 	"net/url"
 	"strings"
 )
@@ -9,7 +9,7 @@ import (
 func ExtractOrganizationAndRepositoryFromUrl(repoUrl string) (string, string) {
 	parsedUrl, err := url.Parse(repoUrl)
 	if err != nil {
-		fmt.Println("Error parsing URL: ", err)
+		logger.LogError("Error parsing URL: %s", err)
 		return "", ""
 	}
 

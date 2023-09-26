@@ -1,16 +1,14 @@
 package gitutil
 
 import (
-	"fmt"
 	"main/internal/database"
+	"main/internal/pkg/logger"
 )
 
 func StoreCommits(prefixPath string, repo string, db *database.Queries) {
-	gitLogOutput := GitLogCsv(prefixPath, repo, "")
-
-	fmt.Println(string(gitLogOutput))
+	_ = GitLogCsv(prefixPath, repo, "")
 
 	// TODO : Pipe into Postgres
 
-	fmt.Println("Successfully stored commits in the database.")
+	logger.LogBlue("Successfully stored commits in the database.")
 }
