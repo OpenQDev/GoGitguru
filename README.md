@@ -40,3 +40,4 @@ go tool cover -html=coverage.out
 `psql "postgres://postgres:@localhost:5432/postgres?sslmode=disable"`
 
 `cd sql/schema && goose postgres "postgres://postgres:@localhost:5432/postgres?sslmode=disable" up && cd ~/Gitguru`
+
