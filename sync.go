@@ -66,6 +66,10 @@ func startSyncing() {
 		// Extract the organization and the repository from the github url
 		organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 
+		// At the end of function execution, delete the repo and .tar.gz repo from the local filesystem
+		// The great thing with this defer is it will run regardless of the outcomes of subsequent subprocesses
+		defer gitutil.DeleteLocalRepoAndTarball(prefixPath, repo)
+
 		// Check if the item exists in S3
 		item := fmt.Sprintf("%s/%s.tar.gz", organization, repo)
 		exists, err := s3util.ItemExistsInS3(uploader.S3, "openqrepos", item)
@@ -83,7 +87,7 @@ func startSyncing() {
 				logger.LogError("error uploading tarball for %s to s3: %s", repoUrl, err)
 			}
 		} else {
-			gitutil.CloneRepoAndUploadTarballToS3(organization, repo)
+			gitutil.CloneRepoAndUploadTarballToS3(uploader, prefixPath, organization, repo)
 		}
 	}
 }

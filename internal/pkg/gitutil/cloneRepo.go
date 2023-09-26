@@ -16,6 +16,7 @@ import (
 func CloneRepo(prefixPath string, organization string, repo string) error {
 	cloneString := fmt.Sprintf("https://github.com/%s/%s.git", organization, repo)
 	cloneDestination := filepath.Join(prefixPath, repo)
+	fmt.Println(cloneDestination)
 	cmd := exec.Command("git", "clone", cloneString, cloneDestination)
 
 	// This allows you to see the stdout and stderr of the command being run on the host machine
