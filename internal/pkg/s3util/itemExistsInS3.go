@@ -12,6 +12,7 @@ func ItemExistsInS3(S3 s3iface.S3API, bucket, key string) (bool, error) {
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	})
+
 	if err != nil {
 		awsErr, ok := err.(awserr.Error)
 		if ok && awsErr.Code() == s3.ErrCodeNoSuchKey {

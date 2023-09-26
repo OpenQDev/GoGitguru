@@ -28,7 +28,7 @@ func CompressAndUploadToS3(prefixPath string, organization string, repo string, 
 	// Upload the file to S3
 	_, err = uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String("openqrepos"),
-		Key:    aws.String(fmt.Sprintf("%s/%s", organization, repo)),
+		Key:    aws.String(fmt.Sprintf("%s/%s.tar.gz", organization, repo)),
 		Body:   tarball,
 	})
 

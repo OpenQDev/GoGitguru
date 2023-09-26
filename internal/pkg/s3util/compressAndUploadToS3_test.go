@@ -1,9 +1,9 @@
 package s3util
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -53,7 +53,7 @@ func TestUploadTarballToS3(t *testing.T) {
 	if *uploader.bucket != "openqrepos" {
 		t.Errorf("Expected uploader.buckey to be 'openqrepos', but it was %s", *uploader.key)
 	}
-	if *uploader.key != strings.Join([]string{organization, repo}, "/") {
-		t.Errorf("Expected uploader.key to be %s/%s, but it was %s", organization, repo, *uploader.key)
+	if *uploader.key != fmt.Sprintf("%s/%s.tar.gz", organization, repo) {
+		t.Errorf("Expected uploader.key to be %s/%s.tar.gz, but it was %s", organization, repo, *uploader.key)
 	}
 }
