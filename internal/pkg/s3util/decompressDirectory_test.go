@@ -1,7 +1,6 @@
 package s3util
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -49,7 +48,6 @@ func TestDecompressDirectory(t *testing.T) {
 
 // createDummyTarball creates a dummy tarball file for testing
 func createDummyTarball(path string, dirPath string) error {
-	fmt.Println(path)
 	// Create a new file
 	file, err := os.Create(path)
 	if err != nil {

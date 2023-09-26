@@ -1,5 +1,5 @@
 -- +goose Up
-CREATE TYPE repo_status AS ENUM ('pending', 'syncing_database', 'failed', 'syncing_repo');
+CREATE TYPE repo_status AS ENUM ('pending', 'queued', 'syncing_database', 'syncing_repo', 'synced', 'failed');
 
 -- In order to add a repo_status typed default to status, we need to
 -- 1) DROP the default
