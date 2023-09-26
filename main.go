@@ -7,6 +7,7 @@ import (
 	"main/internal/pkg/logger"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -27,19 +28,24 @@ func main() {
 		logger.LogFatalRedAndExit("PORT | DB_URL is not found in the environment")
 	}
 
-	apiCfg, err := getApiConfig(dbUrl)
+	database, err := getDatbase(dbUrl)
+	if err != nil {
+		logger.LogError("error getting database: %s", err)
+	}
+
+	apiCfg, err := getApiConfig(database)
 	if err != nil {
 		logger.LogFatalRedAndExit("can't connect to DB: %s", err)
 	}
 
-	// uploader, err := getS3Uploader()
-	// if err != nil {
-	// 	logger.LogFatalRedAndExit("error initializing AWS session: %s", err)
-	// }
+	uploader, err := getS3Uploader()
+	if err != nil {
+		logger.LogFatalRedAndExit("error initializing AWS session: %s", err)
+	}
 
 	// Initialize periodic syncing in the background
 	logger.LogBlue("Beginning sync for all repo urls...")
-	go startSyncing()
+	go startSyncing(uploader, database, "repos", 10, 10*time.Second)
 
 	router := chi.NewRouter()
 
@@ -72,17 +78,22 @@ func main() {
 	}
 }
 
-func getApiConfig(dbUrl string) (handlers.ApiConfig, error) {
+func getDatbase(dbUrl string) (*database.Queries, error) {
 	conn, err := sql.Open("postgres", dbUrl)
 	if err != nil {
-		return handlers.ApiConfig{}, err
+		return nil, err
 	}
 
 	queries := database.New(conn)
 
+	return queries, nil
+}
+
+func getApiConfig(database *database.Queries) (handlers.ApiConfig, error) {
 	apiCfg := handlers.ApiConfig{
-		DB: queries,
+		DB: database,
 	}
+
 	return apiCfg, nil
 }
 

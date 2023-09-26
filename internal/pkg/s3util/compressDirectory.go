@@ -8,6 +8,7 @@ import (
 
 // Create a tarball
 func CompressDirectory(archiveFilename string, directoryToArchive string) (string, error) {
+	fmt.Println(archiveFilename)
 	cmd := exec.Command("tar", "-czf", archiveFilename, directoryToArchive)
 
 	// Print any errors from running tar

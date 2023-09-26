@@ -2,13 +2,12 @@ package gitutil
 
 import (
 	"fmt"
-	"main/internal/database"
 	"net/url"
 	"strings"
 )
 
-func ExtractOrganizationAndRepositoryFromUrl(repoUrl database.RepoUrl) (string, string) {
-	parsedUrl, err := url.Parse(repoUrl.Url)
+func ExtractOrganizationAndRepositoryFromUrl(repoUrl string) (string, string) {
+	parsedUrl, err := url.Parse(repoUrl)
 	if err != nil {
 		fmt.Println("Error parsing URL: ", err)
 		return "", ""
