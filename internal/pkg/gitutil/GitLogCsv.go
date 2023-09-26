@@ -1,9 +1,10 @@
 package gitutil
 
-// git -C . log --reverse --pretty=format:'%H-;-%an-;-%ae-;-%at-;-%ct%n%s' --numstat --since=2020-01-01
+// git -C . log --reverse --pretty=format:"%H-;-%an-;-%ae-;-%at-;-%ct%n%s" --numstat --since=2020-01-01
 // git -C . rev-parse --is-inside-work-tree
 
 import (
+	"fmt"
 	"main/internal/pkg/logger"
 	"os/exec"
 	"path/filepath"
@@ -22,13 +23,16 @@ func GitLogCsv(prefixPath string, repo string, fromCommitDate string) []byte {
 		fromCommitDate = "2020-01-01"
 	}
 
-	cmd := exec.Command("git", "-C", fullRepoPath, "log", "--reverse", "--pretty=format:'%H-;-%an-;-%ae-;-%at-;-%ct%n%s'", "--numstat", "--since="+fromCommitDate)
+	cmd := exec.Command("git", "-C", fullRepoPath, "log", "--reverse", "--pretty=format:%H-;-%an-;-%ae-;-%at-;-%ct%n%s", "--numstat", "--since="+fromCommitDate)
 
 	out, err := cmd.Output()
 
 	if err != nil {
 		logger.LogFatalRedAndExit("error running git log in %s: %s", fullRepoPath, err)
 	}
+
+	output := ProcessGitLog(string(out))
+	fmt.Println(output)
 
 	return out
 
