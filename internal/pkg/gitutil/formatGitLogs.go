@@ -5,24 +5,20 @@ package gitutil
 
 import (
 	"main/internal/pkg/logger"
-	"os/exec"
 	"path/filepath"
 )
 
 func FormatGitLogs(prefixPath string, repo string, fromCommitDate string) []GitLog {
 	fullRepoPath := filepath.Join(prefixPath, repo)
 
-	cmdCheck := exec.Command("git", "-C", fullRepoPath, "rev-parse", "--is-inside-work-tree")
-	err := cmdCheck.Run()
-	if err != nil {
-		logger.LogFatalRedAndExit("%s/%s is not a git repository: %s", prefixPath, repo, err)
-	}
+	checkIsAGitRepo(fullRepoPath, prefixPath, repo)
 
+	defaultCommitStartDate := "2020-01-01"
 	if fromCommitDate == "" {
-		fromCommitDate = "2020-01-01"
+		fromCommitDate = defaultCommitStartDate
 	}
 
-	cmd := exec.Command("git", "-C", fullRepoPath, "log", "--reverse", "--pretty=format:%H-;-%an-;-%ae-;-%at-;-%ct%n%s", "--numstat", "--since="+fromCommitDate)
+	cmd := GitLogCommand(fullRepoPath, fromCommitDate)
 
 	out, err := cmd.Output()
 
@@ -33,18 +29,12 @@ func FormatGitLogs(prefixPath string, repo string, fromCommitDate string) []GitL
 	gitLogs := ProcessGitLogs(string(out))
 
 	return gitLogs
+}
 
-	// lines := strings.Split(string(out), "\n")
-	// csvFile, err := os.Create("git_log.csv")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer csvFile.Close()
-
-	// writer := csv.NewWriter(csvFile)
-	// defer writer.Flush()
-
-	// for _, line := range lines {
-	// 	writer.Write(strings.Split(line, ";"))
-	// }
+func checkIsAGitRepo(fullRepoPath string, prefixPath string, repo string) {
+	cmdCheck := CheckIsAGitRepo(fullRepoPath)
+	err := cmdCheck.Run()
+	if err != nil {
+		logger.LogFatalRedAndExit("%s/%s is not a git repository: %s", prefixPath, repo, err)
+	}
 }

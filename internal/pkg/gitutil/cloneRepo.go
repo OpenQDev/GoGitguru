@@ -3,7 +3,6 @@ package gitutil
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 )
 
@@ -16,7 +15,8 @@ import (
 func CloneRepo(prefixPath string, organization string, repo string) error {
 	cloneString := fmt.Sprintf("https://github.com/%s/%s.git", organization, repo)
 	cloneDestination := filepath.Join(prefixPath, repo)
-	cmd := exec.Command("git", "clone", cloneString, cloneDestination)
+
+	cmd := GitCloneCommand(cloneString, cloneDestination)
 
 	// This allows you to see the stdout and stderr of the command being run on the host machine
 	cmd.Stdout = os.Stdout

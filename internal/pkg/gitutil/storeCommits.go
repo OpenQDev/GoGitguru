@@ -6,7 +6,7 @@ import (
 )
 
 func StoreCommits(prefixPath string, repo string, db *database.Queries) {
-	_ = GitLogCsv(prefixPath, repo, "")
+	_ = FormatGitLogs(prefixPath, repo, "")
 
 	// TODO : Pipe into Postgres
 
