@@ -10,12 +10,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 func startSyncing(
-	uploader *s3manageriface.UploaderAPI,
-	database *database.Queries,
+	uploader *s3manager.Uploader,
+	db *database.Queries,
 	prefixPath string,
 	concurrency int,
 	timeBetweenSyncs time.Duration) {
@@ -54,12 +54,12 @@ func startSyncing(
 			// If the item exists, pull the latest changes and re-upload the tarball to S3
 			cmd := exec.Command("git", "-C", filepath.Join(prefixPath, repoUrl.Url), "pull")
 			cmd.Run()
-			err = s3util.CompressAndUploadToS3(prefixPath, organization, repo, *uploader)
+			err = s3util.CompressAndUploadToS3(prefixPath, organization, repo, uploader)
 			if err != nil {
 				logger.LogError("error uploading tarball for %s to s3: %s", repoUrl, err)
 			}
 		} else {
-			gitutil.CloneRepoAndUploadTarballToS3(*uploader, prefixPath, organization, repo)
+			gitutil.CloneRepoAndUploadTarballToS3(uploader, prefixPath, organization, repo)
 		}
 	}
 }
