@@ -6,6 +6,7 @@ import (
 	"main/internal/pkg/gitutil"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/s3util"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
@@ -14,6 +15,7 @@ import (
 )
 
 func startSyncing(
+	downloader *s3manager.Downloader,
 	uploader *s3manager.Uploader,
 	db *database.Queries,
 	prefixPath string,
@@ -38,6 +40,8 @@ func startSyncing(
 		// Extract the organization and the repository from the github url
 		organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl.Url)
 
+		fmt.Println(organization, repo)
+
 		// At the end of function execution, delete the repo and .tar.gz repo from the local filesystem
 		// The great thing with this defer is it will run regardless of the outcomes of subsequent subprocesses
 		defer gitutil.DeleteLocalRepoAndTarball(prefixPath, repo)
@@ -51,9 +55,32 @@ func startSyncing(
 		}
 
 		if exists {
-			// If the item exists, pull the latest changes and re-upload the tarball to S3
-			cmd := exec.Command("git", "-C", filepath.Join(prefixPath, repoUrl.Url), "pull")
-			cmd.Run()
+			logger.LogBlue("%s/%s found in S3. downloading tar and pulling latest changes", organization, repo)
+
+			// pull down the tar.gz repo from S3 to local filesystem
+			err = s3util.DownloadFromS3(downloader, "openqrepos", item)
+			if err != nil {
+				logger.LogFatalRedAndExit("error downloading %s from S3: %s", item, err)
+			}
+
+			// Untar the .tar.gz located at repos/repo.tar.gz
+			err = s3util.DecompressDirectory(item, filepath.Join(prefixPath, repo))
+			if err != nil {
+				logger.LogError("error untarring %s: %s", item, err)
+			}
+
+			// Pull the latest changes and re-upload the tarball to S3
+			cmd := exec.Command("git", "-C", filepath.Join(prefixPath, repo), "pull")
+			// Print any errors from running tar
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			err := cmd.Run()
+
+			if err != nil {
+				logger.LogFatalRedAndExit("error pulling changes for %s: %s", repoUrl, err)
+			}
+
+			// Re-compress and upload to S3
 			err = s3util.CompressAndUploadToS3(prefixPath, organization, repo, uploader)
 			if err != nil {
 				logger.LogError("error uploading tarball for %s to s3: %s", repoUrl, err)
