@@ -67,3 +67,31 @@ func (q *Queries) InsertRepoURL(ctx context.Context, url string) error {
 	_, err := q.exec(ctx, q.insertRepoURLStmt, insertRepoURL, url)
 	return err
 }
+
+const updateStatus = `-- name: UpdateStatus :exec
+UPDATE repo_urls SET status = $1 WHERE url = $2 AND status != 'failed'
+`
+
+type UpdateStatusParams struct {
+	Status string `json:"status"`
+	Url    string `json:"url"`
+}
+
+func (q *Queries) UpdateStatus(ctx context.Context, arg UpdateStatusParams) error {
+	_, err := q.exec(ctx, q.updateStatusStmt, updateStatus, arg.Status, arg.Url)
+	return err
+}
+
+const updateStatusAndUpdatedAt = `-- name: UpdateStatusAndUpdatedAt :exec
+UPDATE repo_urls SET status = $1, updated_at = NOW() WHERE url = $2 AND status != 'failed'
+`
+
+type UpdateStatusAndUpdatedAtParams struct {
+	Status string `json:"status"`
+	Url    string `json:"url"`
+}
+
+func (q *Queries) UpdateStatusAndUpdatedAt(ctx context.Context, arg UpdateStatusAndUpdatedAtParams) error {
+	_, err := q.exec(ctx, q.updateStatusAndUpdatedAtStmt, updateStatusAndUpdatedAt, arg.Status, arg.Url)
+	return err
+}

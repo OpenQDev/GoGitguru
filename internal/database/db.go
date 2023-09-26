@@ -33,6 +33,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.insertRepoURLStmt, err = db.PrepareContext(ctx, insertRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertRepoURL: %w", err)
 	}
+	if q.updateStatusStmt, err = db.PrepareContext(ctx, updateStatus); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateStatus: %w", err)
+	}
+	if q.updateStatusAndUpdatedAtStmt, err = db.PrepareContext(ctx, updateStatusAndUpdatedAt); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateStatusAndUpdatedAt: %w", err)
+	}
 	return &q, nil
 }
 
@@ -51,6 +57,16 @@ func (q *Queries) Close() error {
 	if q.insertRepoURLStmt != nil {
 		if cerr := q.insertRepoURLStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing insertRepoURLStmt: %w", cerr)
+		}
+	}
+	if q.updateStatusStmt != nil {
+		if cerr := q.updateStatusStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateStatusStmt: %w", cerr)
+		}
+	}
+	if q.updateStatusAndUpdatedAtStmt != nil {
+		if cerr := q.updateStatusAndUpdatedAtStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateStatusAndUpdatedAtStmt: %w", cerr)
 		}
 	}
 	return err
@@ -90,19 +106,23 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                DBTX
-	tx                *sql.Tx
-	getRepoURLStmt    *sql.Stmt
-	getRepoURLsStmt   *sql.Stmt
-	insertRepoURLStmt *sql.Stmt
+	db                           DBTX
+	tx                           *sql.Tx
+	getRepoURLStmt               *sql.Stmt
+	getRepoURLsStmt              *sql.Stmt
+	insertRepoURLStmt            *sql.Stmt
+	updateStatusStmt             *sql.Stmt
+	updateStatusAndUpdatedAtStmt *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                tx,
-		tx:                tx,
-		getRepoURLStmt:    q.getRepoURLStmt,
-		getRepoURLsStmt:   q.getRepoURLsStmt,
-		insertRepoURLStmt: q.insertRepoURLStmt,
+		db:                           tx,
+		tx:                           tx,
+		getRepoURLStmt:               q.getRepoURLStmt,
+		getRepoURLsStmt:              q.getRepoURLsStmt,
+		insertRepoURLStmt:            q.insertRepoURLStmt,
+		updateStatusStmt:             q.updateStatusStmt,
+		updateStatusAndUpdatedAtStmt: q.updateStatusAndUpdatedAtStmt,
 	}
 }
