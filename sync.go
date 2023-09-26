@@ -4,13 +4,9 @@ import (
 	"main/internal/database"
 	"main/internal/pkg/gitutil"
 	"time"
-
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 func startSyncing(
-	downloader *s3manager.Downloader,
-	uploader *s3manager.Uploader,
 	db *database.Queries,
 	prefixPath string,
 	concurrency int,

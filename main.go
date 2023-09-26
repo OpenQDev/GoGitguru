@@ -9,10 +9,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
@@ -38,14 +34,9 @@ func main() {
 		logger.LogFatalRedAndExit("can't connect to DB: %s", err)
 	}
 
-	downloader, uploader, err := getS3DownloaderAndUploader()
-	if err != nil {
-		logger.LogFatalRedAndExit("error initializing AWS session: %s", err)
-	}
-
 	// Initialize periodic syncing in the background
 	logger.LogBlue("Beginning sync for all repo urls...")
-	go startSyncing(downloader, uploader, database, "repos", 10, 10*time.Second)
+	go startSyncing(database, "repos", 10, 10*time.Second)
 
 	router := chi.NewRouter()
 
@@ -95,47 +86,4 @@ func getApiConfig(database *database.Queries) (handlers.ApiConfig, error) {
 	}
 
 	return apiCfg, nil
-}
-
-func getS3DownloaderAndUploader() (*s3manager.Downloader, *s3manager.Uploader, error) {
-	// Get AWS API key and secret from environment variables
-	awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
-	awsSecretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
-
-	// Create a session using SharedConfigEnable
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String("us-east-2"),
-		Credentials: credentials.NewStaticCredentials(awsAccessKeyID, awsSecretAccessKey, ""),
-	},
-	)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Create an uploader with the session and default options
-	uploader := s3manager.NewUploader(sess)
-	downloader := s3manager.NewDownloader(sess)
-
-	return downloader, uploader, nil
-}
-
-func getS3Downloader() (*s3manager.Downloader, error) {
-	// Get AWS API key and secret from environment variables
-	awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
-	awsSecretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
-
-	// Create a session using SharedConfigEnable
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String("us-east-2"),
-		Credentials: credentials.NewStaticCredentials(awsAccessKeyID, awsSecretAccessKey, ""),
-	},
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	// Create a downloader with the session and default options
-	downloader := s3manager.NewDownloader(sess)
-
-	return downloader, nil
 }
