@@ -14,11 +14,10 @@ import (
 func CompressAndUploadToS3(prefixPath string, organization string, repo string, uploader s3manageriface.UploaderAPI) error {
 	tarPath := filepath.Join(prefixPath, repo+".tar.gz")
 
-	path, err := CompressDirectory(tarPath, filepath.Join(prefixPath, repo+"/.git"))
+	_, err := CompressDirectory(tarPath, filepath.Join(prefixPath, repo+"/.git"))
 	if err != nil {
 		logger.LogError("error tarring and gzipping", err)
 	}
-	fmt.Println(path)
 
 	// Open the tarball
 	tarball, err := os.Open(tarPath)
