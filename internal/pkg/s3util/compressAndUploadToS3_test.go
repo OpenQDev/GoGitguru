@@ -3,6 +3,7 @@ package s3util
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -11,12 +12,16 @@ import (
 
 type mockUploader struct {
 	s3manageriface.UploaderAPI
-	input *s3manager.UploadInput
+	bucket *string
+	key    *string
 }
 
 // Implement the methods of the s3manageriface.UploaderAPI interface
 func (m *mockUploader) Upload(input *s3manager.UploadInput, foo ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
-	m.input = input
+	// Assign the bucket and key on our spyUploader to ensure that it's being called with the appropriate args
+	m.bucket = input.Bucket
+	m.key = input.Key
+
 	output := s3manager.UploadOutput{}
 	return &output, nil
 }
@@ -45,7 +50,10 @@ func TestUploadTarballToS3(t *testing.T) {
 	}
 
 	// Add more assertions as needed
-	if uploader.input == nil {
-		t.Errorf("Expected uploader.input to be set, but it was nil")
+	if *uploader.bucket != "openqrepos" {
+		t.Errorf("Expected uploader.buckey to be 'openqrepos', but it was %s", *uploader.key)
+	}
+	if *uploader.key != strings.Join([]string{organization, repo}, "/") {
+		t.Errorf("Expected uploader.key to be %s/%s, but it was %s", organization, repo, *uploader.key)
 	}
 }
