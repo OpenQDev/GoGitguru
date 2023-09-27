@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-func FormatGitLogs(prefixPath string, repo string, fromCommitDate string) []GitLog {
+func GetFormattedGitLogs(prefixPath string, repo string, fromCommitDate string) []GitLog {
 	fullRepoPath := filepath.Join(prefixPath, repo)
 
 	checkIsAGitRepo(fullRepoPath, prefixPath, repo)

@@ -16,5 +16,5 @@ func TestFormatGitLogs(t *testing.T) {
 	CloneRepo(tempDir, "OpenQDev", "OpenQ-Workflows")
 
 	// Call the function under test
-	_ = FormatGitLogs(tempDir, "OpenQ-Workflows", "")
+	_ = GetFormattedGitLogs(tempDir, "OpenQ-Workflows", "")
 }

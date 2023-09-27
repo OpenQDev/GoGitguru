@@ -8,8 +8,8 @@ type GitLog struct {
 	CommitHash    string
 	AuthorName    string
 	AuthorEmail   string
-	AuthorData    string
-	CommitDate    string
+	AuthorDate    int64
+	CommitDate    int64
 	CommitMessage string
 }
 

@@ -73,8 +73,8 @@ UPDATE repo_urls SET status = $1 WHERE url = $2 AND status != 'failed'
 `
 
 type UpdateStatusParams struct {
-	Status string `json:"status"`
-	Url    string `json:"url"`
+	Status RepoStatus `json:"status"`
+	Url    string     `json:"url"`
 }
 
 func (q *Queries) UpdateStatus(ctx context.Context, arg UpdateStatusParams) error {
@@ -87,8 +87,8 @@ UPDATE repo_urls SET status = $1, updated_at = NOW() WHERE url = $2 AND status !
 `
 
 type UpdateStatusAndUpdatedAtParams struct {
-	Status string `json:"status"`
-	Url    string `json:"url"`
+	Status RepoStatus `json:"status"`
+	Url    string     `json:"url"`
 }
 
 func (q *Queries) UpdateStatusAndUpdatedAt(ctx context.Context, arg UpdateStatusAndUpdatedAtParams) error {

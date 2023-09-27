@@ -24,11 +24,20 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
+	if q.getCommitStmt, err = db.PrepareContext(ctx, getCommit); err != nil {
+		return nil, fmt.Errorf("error preparing query GetCommit: %w", err)
+	}
+	if q.getCommitsStmt, err = db.PrepareContext(ctx, getCommits); err != nil {
+		return nil, fmt.Errorf("error preparing query GetCommits: %w", err)
+	}
 	if q.getRepoURLStmt, err = db.PrepareContext(ctx, getRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRepoURL: %w", err)
 	}
 	if q.getRepoURLsStmt, err = db.PrepareContext(ctx, getRepoURLs); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRepoURLs: %w", err)
+	}
+	if q.insertCommitStmt, err = db.PrepareContext(ctx, insertCommit); err != nil {
+		return nil, fmt.Errorf("error preparing query InsertCommit: %w", err)
 	}
 	if q.insertRepoURLStmt, err = db.PrepareContext(ctx, insertRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertRepoURL: %w", err)
@@ -44,6 +53,16 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
+	if q.getCommitStmt != nil {
+		if cerr := q.getCommitStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getCommitStmt: %w", cerr)
+		}
+	}
+	if q.getCommitsStmt != nil {
+		if cerr := q.getCommitsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getCommitsStmt: %w", cerr)
+		}
+	}
 	if q.getRepoURLStmt != nil {
 		if cerr := q.getRepoURLStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getRepoURLStmt: %w", cerr)
@@ -52,6 +71,11 @@ func (q *Queries) Close() error {
 	if q.getRepoURLsStmt != nil {
 		if cerr := q.getRepoURLsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getRepoURLsStmt: %w", cerr)
+		}
+	}
+	if q.insertCommitStmt != nil {
+		if cerr := q.insertCommitStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing insertCommitStmt: %w", cerr)
 		}
 	}
 	if q.insertRepoURLStmt != nil {
@@ -108,8 +132,11 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 type Queries struct {
 	db                           DBTX
 	tx                           *sql.Tx
+	getCommitStmt                *sql.Stmt
+	getCommitsStmt               *sql.Stmt
 	getRepoURLStmt               *sql.Stmt
 	getRepoURLsStmt              *sql.Stmt
+	insertCommitStmt             *sql.Stmt
 	insertRepoURLStmt            *sql.Stmt
 	updateStatusStmt             *sql.Stmt
 	updateStatusAndUpdatedAtStmt *sql.Stmt
@@ -119,8 +146,11 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
 		db:                           tx,
 		tx:                           tx,
+		getCommitStmt:                q.getCommitStmt,
+		getCommitsStmt:               q.getCommitsStmt,
 		getRepoURLStmt:               q.getRepoURLStmt,
 		getRepoURLsStmt:              q.getRepoURLsStmt,
+		insertCommitStmt:             q.insertCommitStmt,
 		insertRepoURLStmt:            q.insertRepoURLStmt,
 		updateStatusStmt:             q.updateStatusStmt,
 		updateStatusAndUpdatedAtStmt: q.updateStatusAndUpdatedAtStmt,

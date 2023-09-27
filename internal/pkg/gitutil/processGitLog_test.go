@@ -19,8 +19,8 @@ initial commit - adds README.md
 		CommitHash:    "141bd5216b3e95c0559de5704e97883214048e94",
 		AuthorName:    "FlacoJones",
 		AuthorEmail:   "andrew@openq.dev",
-		AuthorData:    "1695429111",
-		CommitDate:    "1695429111",
+		AuthorDate:    1695429111,
+		CommitDate:    1695429111,
 		CommitMessage: "initial commit - adds README.md",
 	}
 

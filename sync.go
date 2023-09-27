@@ -34,6 +34,6 @@ func startSyncing(
 
 		gitutil.CloneRepo(prefixPath, organization, repo)
 
-		gitutil.ProcessRepo(prefixPath, repo, db)
+		gitutil.ProcessRepo(prefixPath, repo, repoUrl, db)
 	}
 }

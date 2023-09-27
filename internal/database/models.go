@@ -6,12 +6,74 @@ package database
 
 import (
 	"database/sql"
+	"database/sql/driver"
+	"fmt"
 	"time"
 )
 
+type RepoStatus string
+
+const (
+	RepoStatusPending         RepoStatus = "pending"
+	RepoStatusQueued          RepoStatus = "queued"
+	RepoStatusSyncingDatabase RepoStatus = "syncing_database"
+	RepoStatusSyncingRepo     RepoStatus = "syncing_repo"
+	RepoStatusSynced          RepoStatus = "synced"
+	RepoStatusFailed          RepoStatus = "failed"
+)
+
+func (e *RepoStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = RepoStatus(s)
+	case string:
+		*e = RepoStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for RepoStatus: %T", src)
+	}
+	return nil
+}
+
+type NullRepoStatus struct {
+	RepoStatus RepoStatus `json:"repo_status"`
+	Valid      bool       `json:"valid"` // Valid is true if RepoStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullRepoStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.RepoStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.RepoStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullRepoStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.RepoStatus), nil
+}
+
+type Commit struct {
+	CommitHash    string         `json:"commit_hash"`
+	Author        sql.NullString `json:"author"`
+	AuthorEmail   sql.NullString `json:"author_email"`
+	AuthorDate    sql.NullInt64  `json:"author_date"`
+	CommitterDate sql.NullInt64  `json:"committer_date"`
+	Message       sql.NullString `json:"message"`
+	Insertions    sql.NullInt32  `json:"insertions"`
+	Deletions     sql.NullInt32  `json:"deletions"`
+	LinesChanged  sql.NullInt32  `json:"lines_changed"`
+	FilesChanged  sql.NullInt32  `json:"files_changed"`
+	RepoUrl       sql.NullString `json:"repo_url"`
+}
+
 type RepoUrl struct {
 	Url       string       `json:"url"`
-	Status    string       `json:"status"`
+	Status    RepoStatus   `json:"status"`
 	CreatedAt time.Time    `json:"created_at"`
 	UpdatedAt sql.NullTime `json:"updated_at"`
 }
