@@ -73,8 +73,8 @@ func (q *Queries) GetCommits(ctx context.Context) ([]Commit, error) {
 }
 
 const insertCommit = `-- name: InsertCommit :exec
-INSERT INTO commits (commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url) 
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+INSERT INTO commits (commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, files_changed, repo_url) 
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 RETURNING commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url
 `
 
@@ -87,7 +87,6 @@ type InsertCommitParams struct {
 	Message       sql.NullString `json:"message"`
 	Insertions    sql.NullInt32  `json:"insertions"`
 	Deletions     sql.NullInt32  `json:"deletions"`
-	LinesChanged  sql.NullInt32  `json:"lines_changed"`
 	FilesChanged  sql.NullInt32  `json:"files_changed"`
 	RepoUrl       sql.NullString `json:"repo_url"`
 }
@@ -102,7 +101,6 @@ func (q *Queries) InsertCommit(ctx context.Context, arg InsertCommitParams) erro
 		arg.Message,
 		arg.Insertions,
 		arg.Deletions,
-		arg.LinesChanged,
 		arg.FilesChanged,
 		arg.RepoUrl,
 	)

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"main/internal/database"
 	"main/internal/pkg/gitutil"
+	"main/internal/pkg/logger"
 	"time"
 )
 
@@ -23,6 +25,11 @@ func startSyncing(
 		{
 			Url: "https://github.com/OpenQDev/OpenQ-Workflows",
 		},
+	}
+
+	err := db.InsertRepoURL(context.Background(), "https://github.com/OpenQDev/OpenQ-Workflows")
+	if err != nil {
+		logger.LogFatalRedAndExit("Failed to insert repo url: %s", err)
 	}
 
 	for _, repoUrl := range repoUrls {
