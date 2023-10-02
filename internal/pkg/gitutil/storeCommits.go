@@ -8,7 +8,7 @@ import (
 	"main/internal/pkg/logger"
 )
 
-func StoreCommits(gitLogs []GitLog, repoUrl string, db *database.Queries) {
+func StoreCommits(gitLogs []GitLog, repoUrl string, db *database.Queries) error {
 	for _, gitLog := range gitLogs {
 		fmt.Println(gitLog)
 		err := db.InsertCommit(context.Background(), database.InsertCommitParams{
@@ -25,8 +25,10 @@ func StoreCommits(gitLogs []GitLog, repoUrl string, db *database.Queries) {
 		})
 
 		if err != nil {
-			logger.LogFatalRedAndExit("Failed to insert commit: %s", err)
+			return err
 		}
 	}
 	logger.LogBlue("Successfully stored commits in the database.")
+
+	return nil
 }

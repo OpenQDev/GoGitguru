@@ -19,6 +19,7 @@ const (
 	RepoStatusSyncingDatabase RepoStatus = "syncing_database"
 	RepoStatusSyncingRepo     RepoStatus = "syncing_repo"
 	RepoStatusSynced          RepoStatus = "synced"
+	RepoStatusStoringCommits  RepoStatus = "storing_commits"
 	RepoStatusFailed          RepoStatus = "failed"
 )
 
