@@ -16,9 +16,9 @@ func StoreCommits(gitLogs []GitLog, repoUrl string, db *database.Queries) (*data
 			AuthorDate:    sql.NullInt64{Int64: gitLog.AuthorDate, Valid: gitLog.AuthorDate != 0},
 			CommitterDate: sql.NullInt64{Int64: gitLog.CommitDate, Valid: gitLog.CommitDate != 0},
 			Message:       sql.NullString{String: gitLog.CommitMessage, Valid: gitLog.CommitMessage != ""},
-			Insertions:    sql.NullInt32{Int32: 0, Valid: true},
-			Deletions:     sql.NullInt32{Int32: 0, Valid: true},
-			FilesChanged:  sql.NullInt32{Int32: 0, Valid: true},
+			Insertions:    sql.NullInt32{Int32: int32(gitLog.Insertions), Valid: true},
+			Deletions:     sql.NullInt32{Int32: int32(gitLog.Deletions), Valid: true},
+			FilesChanged:  sql.NullInt32{Int32: int32(gitLog.FilesChanged), Valid: true},
 			RepoUrl:       sql.NullString{String: repoUrl, Valid: repoUrl != ""},
 		}
 
@@ -28,7 +28,8 @@ func StoreCommits(gitLogs []GitLog, repoUrl string, db *database.Queries) (*data
 			return &params, err
 		}
 	}
-	logger.LogBlue("Successfully stored commits in the database.")
+
+	logger.LogBlue("Successfully stored %d commits in the database.", len(gitLogs))
 
 	return nil, nil
 }
