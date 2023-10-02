@@ -4,7 +4,6 @@ import (
 	"main/internal/database"
 	"main/internal/pkg/handlers"
 	"main/internal/pkg/logger"
-	"net/http"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -27,10 +26,10 @@ func TestStoreCommits(t *testing.T) {
 
 	// Define test cases
 	tests := []struct {
-		name           string
-		repoUrl        string
-		gitLogs        []GitLog
-		expectedStatus int
+		name       string
+		repoUrl    string
+		gitLogs    []GitLog
+		shouldPass bool
 	}{
 		{
 			name:    "Valid git logs",
@@ -59,7 +58,7 @@ func TestStoreCommits(t *testing.T) {
 					Deletions:     2,
 				},
 			},
-			expectedStatus: http.StatusAccepted,
+			shouldPass: true,
 		},
 		// Add more test cases as needed
 	}
@@ -109,7 +108,7 @@ func TestStoreCommits(t *testing.T) {
 
 			// Call the StoreCommits function
 			commit, err := StoreCommits(tt.gitLogs, tt.repoUrl, apiCfg.DB)
-			if err != nil {
+			if err != nil && tt.shouldPass == true {
 				t.Errorf("there was an error storing this commit: %v - the error was: %s", commit, err)
 			}
 
