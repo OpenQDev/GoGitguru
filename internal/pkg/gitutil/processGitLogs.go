@@ -1,6 +1,7 @@
 package gitutil
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -25,6 +26,19 @@ func ProcessGitLogs(logs string) []GitLog {
 	for _, logEntry := range logEntries {
 		gitLog := ProcessGitLog(logEntry)
 		gitLogs = append(gitLogs, gitLog)
+	}
+
+	for _, gitLog := range gitLogs {
+		fmt.Printf("CommitHash: %s\n", gitLog.CommitHash)
+		fmt.Printf("AuthorName: %s\n", gitLog.AuthorName)
+		fmt.Printf("AuthorEmail: %s\n", gitLog.AuthorEmail)
+		fmt.Printf("AuthorDate: %d\n", gitLog.AuthorDate)
+		fmt.Printf("CommitDate: %d\n", gitLog.CommitDate)
+		fmt.Printf("CommitMessage: %s\n", gitLog.CommitMessage)
+		fmt.Printf("FilesChanged: %d\n", gitLog.FilesChanged)
+		fmt.Printf("Insertions: %d\n", gitLog.Insertions)
+		fmt.Printf("Deletions: %d\n", gitLog.Deletions)
+		fmt.Println("-----------------------------")
 	}
 
 	return gitLogs

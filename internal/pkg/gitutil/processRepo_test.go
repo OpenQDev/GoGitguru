@@ -39,12 +39,37 @@ func TestProcessRepo(t *testing.T) {
 		organization string
 		repo         string
 		repoUrl      string
+		gitLogs      []GitLog
 	}{
 		{
 			name:         "Valid git logs",
 			organization: "OpenQDev",
-			repo:         "OpenQ-Workflows",
-			repoUrl:      "https://github.com/OpenQ-Dev/OpenQ-Workflows",
+			repo:         "OpenQ-DRM-TestRepo",
+			repoUrl:      "https://github.com/OpenQ-Dev/OpenQ-DRM-TestRepo",
+			gitLogs: []GitLog{
+				{
+					CommitHash:    "9fae86bc8e89895b961d81bd7e9e4e897501c8bb",
+					AuthorName:    "FlacoJones",
+					AuthorEmail:   "andrew@openq.dev",
+					AuthorDate:    1696277205,
+					CommitDate:    1696277205,
+					CommitMessage: "initial commit",
+					FilesChanged:  1,
+					Insertions:    0,
+					Deletions:     0,
+				},
+				{
+					CommitHash:    "06a12f9c203112a149707ff73e4298749744c358",
+					AuthorName:    "FlacoJones",
+					AuthorEmail:   "andrew@openq.dev",
+					AuthorDate:    1696277247,
+					CommitDate:    1696277247,
+					CommitMessage: "updates README",
+					FilesChanged:  1,
+					Insertions:    1,
+					Deletions:     0,
+				},
+			},
 		},
 		// Add more test cases as needed
 	}
@@ -52,12 +77,57 @@ func TestProcessRepo(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Clone repo to tmp dir. Will be deleted at end of test
-			CloneRepo(prefixPath, "OpenQDev", "OpenQ-Workflows")
+			CloneRepo(prefixPath, tt.organization, tt.repo)
 
-			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs(
-				"storing_commits",
-				tt.repoUrl,
-			).WillReturnResult(sqlmock.NewResult(1, 1))
+			// Order expected database calls here
+
+			// SET REPO STATUS TO storing_commits
+			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs("storing_commits", tt.repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
+
+			// INSERT FIRST COMMIT
+			for _, gitLog := range tt.gitLogs {
+				linesChanged := gitLog.Insertions + gitLog.Deletions
+
+				mock.ExpectQuery("^-- name: InsertCommit :one.*").WithArgs(
+					gitLog.CommitHash,
+					gitLog.AuthorName,
+					gitLog.AuthorEmail,
+					gitLog.AuthorDate,
+					gitLog.CommitDate,
+					gitLog.CommitMessage,
+					gitLog.Insertions,
+					gitLog.Deletions,
+					gitLog.FilesChanged,
+					tt.repoUrl,
+				).WillReturnRows(sqlmock.NewRows([]string{
+					"commit_hash",
+					"author",
+					"author_email",
+					"author_date",
+					"committer_date",
+					"message",
+					"insertions",
+					"deletions",
+					"lines_changed",
+					"files_changed",
+					"repo_url",
+				}).AddRow(
+					gitLog.CommitHash,
+					gitLog.AuthorName,
+					gitLog.AuthorEmail,
+					gitLog.AuthorDate,
+					gitLog.CommitDate,
+					gitLog.CommitMessage,
+					gitLog.Insertions,
+					gitLog.Deletions,
+					linesChanged,
+					gitLog.FilesChanged,
+					tt.repoUrl,
+				))
+			}
+
+			// SET REPO STATUS TO synced
+			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs("synced", tt.repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
 
 			// Call the ProcessRepo function
 			ProcessRepo(prefixPath, tt.repo, tt.repoUrl, apiCfg.DB)

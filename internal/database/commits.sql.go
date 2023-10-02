@@ -72,7 +72,7 @@ func (q *Queries) GetCommits(ctx context.Context) ([]Commit, error) {
 	return items, nil
 }
 
-const insertCommit = `-- name: InsertCommit :exec
+const insertCommit = `-- name: InsertCommit :one
 INSERT INTO commits (commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, files_changed, repo_url) 
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 RETURNING commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url
@@ -91,8 +91,8 @@ type InsertCommitParams struct {
 	RepoUrl       sql.NullString `json:"repo_url"`
 }
 
-func (q *Queries) InsertCommit(ctx context.Context, arg InsertCommitParams) error {
-	_, err := q.exec(ctx, q.insertCommitStmt, insertCommit,
+func (q *Queries) InsertCommit(ctx context.Context, arg InsertCommitParams) (Commit, error) {
+	row := q.queryRow(ctx, q.insertCommitStmt, insertCommit,
 		arg.CommitHash,
 		arg.Author,
 		arg.AuthorEmail,
@@ -104,5 +104,19 @@ func (q *Queries) InsertCommit(ctx context.Context, arg InsertCommitParams) erro
 		arg.FilesChanged,
 		arg.RepoUrl,
 	)
-	return err
+	var i Commit
+	err := row.Scan(
+		&i.CommitHash,
+		&i.Author,
+		&i.AuthorEmail,
+		&i.AuthorDate,
+		&i.CommitterDate,
+		&i.Message,
+		&i.Insertions,
+		&i.Deletions,
+		&i.LinesChanged,
+		&i.FilesChanged,
+		&i.RepoUrl,
+	)
+	return i, err
 }
