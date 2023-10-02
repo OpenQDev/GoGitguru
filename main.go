@@ -7,6 +7,7 @@ import (
 	"main/internal/pkg/logger"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -16,7 +17,7 @@ import (
 )
 
 func main() {
-	portString, dbUrl, originUrl := extractAndVerifyEnvironment()
+	portString, dbUrl, originUrl, _ := extractAndVerifyEnvironment()
 
 	database, apiCfg := prepareDatabase(dbUrl)
 
@@ -76,16 +77,23 @@ func prepareDatabase(dbUrl string) (*database.Queries, handlers.ApiConfig) {
 	return database, apiCfg
 }
 
-func extractAndVerifyEnvironment() (string, string, string) {
+func extractAndVerifyEnvironment() (string, string, string, bool) {
 	godotenv.Load(".env")
 	portString := os.Getenv("PORT")
 	dbUrl := os.Getenv("DB_URL")
 	originUrl := os.Getenv("ORIGIN_URL")
+	debugMode := os.Getenv("DEBUG_MODE")
 
-	if portString == "" || dbUrl == "" || originUrl == "" {
-		logger.LogFatalRedAndExit("PORT | DB_URL | ORIGIN_URL is not found in the environment")
+	if portString == "" || dbUrl == "" || originUrl == "" || debugMode == "" {
+		logger.LogFatalRedAndExit("PORT | DB_URL | ORIGIN_URL | DEBUG_MODE is not found in the environment")
 	}
-	return portString, dbUrl, originUrl
+
+	debug, err := strconv.ParseBool(debugMode)
+	if err != nil {
+		logger.LogFatalRedAndExit("DEBUG_MODE must be a boolean")
+	}
+
+	return portString, dbUrl, originUrl, debug
 }
 
 func getDatbase(dbUrl string) (*database.Queries, error) {
