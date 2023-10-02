@@ -20,4 +20,4 @@ cd ~/Gitguru
 
 psql -h "localhost" -U "postgres" -p 5432 -f ./repos.sql
 
-air
+go run .
