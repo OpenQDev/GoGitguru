@@ -26,7 +26,12 @@ func GetFormattedGitLogs(prefixPath string, repo string, fromCommitDate string) 
 		logger.LogFatalRedAndExit("error running git log in %s: %s", fullRepoPath, err)
 	}
 
-	gitLogs := ProcessGitLogs(string(out))
+	outStr := string(out)
+	if outStr != "" && outStr[len(outStr)-1] == '\n' {
+		outStr = outStr[:len(outStr)-1]
+	}
+
+	gitLogs := ProcessGitLogs(outStr)
 
 	return gitLogs
 }
