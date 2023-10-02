@@ -7,12 +7,13 @@ bin = "tmp/main"
 # Customize binary.
 full_bin = "APP_ENV=development APP_USER=air ./tmp/main"
 
+# Excluding these files or directories
+exclude_dir = ["tmp", "repos"]
+
 # These are the default values
 [watch]
 # Directories to watch
 includes = ["."]
-# Excluding these files or directories
-excludes = ["tmp", "*repos*"]
 # Watching these filename suffixes
 suffixes = [".go"]
 
