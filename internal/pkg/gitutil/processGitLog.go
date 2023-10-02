@@ -32,10 +32,12 @@ func ProcessGitLog(log string) GitLog {
 		}
 
 		fileData := strings.Fields(file)
+
 		insertion, err := strconv.ParseInt(fileData[0], 10, 64)
 		if err != nil {
 			logger.LogError("error parsing insertions", err)
 		}
+
 		deletion, err := strconv.ParseInt(fileData[1], 10, 64)
 		if err != nil {
 			logger.LogError("error parsing deletions", err)
