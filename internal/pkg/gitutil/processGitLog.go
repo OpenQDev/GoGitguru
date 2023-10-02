@@ -1,23 +1,24 @@
 package gitutil
 
 import (
+	"fmt"
 	"main/internal/pkg/logger"
 	"strconv"
 	"strings"
 )
 
-func ProcessGitLog(log string) GitLog {
+func ProcessGitLog(log string) (*GitLog, error) {
 	lines := strings.Split(log, "\n")
 	firstLine := strings.Split(lines[0], "-;-")
 
 	authorDate, err := strconv.ParseInt(firstLine[3], 10, 64)
 	if err != nil {
-		logger.LogError("error parsing author date", err)
+		return nil, fmt.Errorf("error parsing author date", err)
 	}
 
 	commitDate, err := strconv.ParseInt(firstLine[4], 10, 64)
 	if err != nil {
-		logger.LogError("error parsing commit date", err)
+		return nil, fmt.Errorf("error parsing commit date", err)
 	}
 
 	files := lines[2:]
@@ -42,7 +43,7 @@ func ProcessGitLog(log string) GitLog {
 			var err error
 			insertion, err = strconv.ParseInt(fileData[0], 10, 64)
 			if err != nil {
-				logger.LogError("error parsing insertions", err)
+				return nil, fmt.Errorf("error parsing insertions", err)
 			}
 		}
 
@@ -50,7 +51,7 @@ func ProcessGitLog(log string) GitLog {
 			var err error
 			deletion, err = strconv.ParseInt(fileData[1], 10, 64)
 			if err != nil {
-				logger.LogError("error parsing deletions", err)
+				return nil, fmt.Errorf("error parsing deletions", err)
 			}
 		}
 
@@ -70,5 +71,5 @@ func ProcessGitLog(log string) GitLog {
 		Deletions:     deletions,
 	}
 
-	return output
+	return &output, nil
 }

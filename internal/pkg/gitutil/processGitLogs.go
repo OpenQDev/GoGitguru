@@ -16,16 +16,19 @@ type GitLog struct {
 	Deletions     int64
 }
 
-func ProcessGitLogs(logs string) []GitLog {
+func ProcessGitLogs(logs string) ([]GitLog, error) {
 	gitLogs := make([]GitLog, 0)
 
 	emptyNewline := "\n\n"
 	logEntries := strings.Split(logs, emptyNewline)
 
 	for _, logEntry := range logEntries {
-		gitLog := ProcessGitLog(logEntry)
-		gitLogs = append(gitLogs, gitLog)
+		gitLog, err := ProcessGitLog(logEntry)
+		if err != nil {
+			return nil, err
+		}
+		gitLogs = append(gitLogs, *gitLog)
 	}
 
-	return gitLogs
+	return gitLogs, nil
 }

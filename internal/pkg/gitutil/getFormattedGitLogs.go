@@ -4,14 +4,16 @@ package gitutil
 // git -C . rev-parse --is-inside-work-tree
 
 import (
-	"main/internal/pkg/logger"
+	"fmt"
 	"path/filepath"
 )
 
-func GetFormattedGitLogs(prefixPath string, repo string, fromCommitDate string) []GitLog {
+func GetFormattedGitLogs(prefixPath string, repo string, fromCommitDate string) ([]GitLog, error) {
 	fullRepoPath := filepath.Join(prefixPath, repo)
 
-	checkIsAGitRepo(fullRepoPath, prefixPath, repo)
+	if !isAGitRepo(fullRepoPath, prefixPath, repo) {
+		return nil, fmt.Errorf("%s/%s is not a git repo", prefixPath, repo)
+	}
 
 	defaultCommitStartDate := "2020-01-01"
 	if fromCommitDate == "" {
@@ -23,7 +25,7 @@ func GetFormattedGitLogs(prefixPath string, repo string, fromCommitDate string) 
 	out, err := cmd.Output()
 
 	if err != nil {
-		logger.LogFatalRedAndExit("error running git log in %s: %s", fullRepoPath, err)
+		return nil, fmt.Errorf("error running git log in %s: %s", fullRepoPath, err)
 	}
 
 	outStr := string(out)
@@ -31,15 +33,20 @@ func GetFormattedGitLogs(prefixPath string, repo string, fromCommitDate string) 
 		outStr = outStr[:len(outStr)-1]
 	}
 
-	gitLogs := ProcessGitLogs(outStr)
+	gitLogs, err := ProcessGitLogs(outStr)
+	if err != nil {
+		return nil, fmt.Errorf("error processing git logs for repo %s: %s", fullRepoPath, err)
+	}
 
-	return gitLogs
+	return gitLogs, nil
 }
 
-func checkIsAGitRepo(fullRepoPath string, prefixPath string, repo string) {
+func isAGitRepo(fullRepoPath string, prefixPath string, repo string) bool {
 	cmdCheck := CheckIsAGitRepo(fullRepoPath)
 	err := cmdCheck.Run()
 	if err != nil {
-		logger.LogFatalRedAndExit("%s/%s is not a git repository: %s", prefixPath, repo, err)
+		return false
+	} else {
+		return true
 	}
 }

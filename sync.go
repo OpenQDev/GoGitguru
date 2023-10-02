@@ -33,6 +33,9 @@ func startSyncing(
 
 		// gitutil.CloneRepo(prefixPath, organization, repo)
 
-		gitutil.ProcessRepo(prefixPath, repo, repoUrl, db)
+		err := gitutil.ProcessRepo(prefixPath, repo, repoUrl, db)
+		if err != nil {
+			logger.LogFatalRedAndExit("error while processing repository %s: %s", repoUrl, err)
+		}
 	}
 }

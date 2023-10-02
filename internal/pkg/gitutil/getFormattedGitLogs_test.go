@@ -17,7 +17,7 @@ func TestFormatGitLogs(t *testing.T) {
 	CloneRepo(tempDir, "OpenQDev", "OpenQ-DRM-TestRepo")
 
 	// Call the function under test
-	gitLogs := GetFormattedGitLogs(tempDir, "OpenQ-DRM-TestRepo", "")
+	gitLogs, _ := GetFormattedGitLogs(tempDir, "OpenQ-DRM-TestRepo", "")
 
 	// Create a test data
 	expectedGitLogs := []GitLog{

@@ -2,18 +2,32 @@ package gitutil
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"main/internal/database"
 	"main/internal/pkg/logger"
 )
 
-func ProcessRepo(prefixPath string, repo string, repoUrl string, db *database.Queries) {
+func ProcessRepo(prefixPath string, repo string, repoUrl string, db *database.Queries) error {
+	logger.LogGreenDebug("beginning to process %s", repoUrl)
+
 	// Set repo status to storing_commits
 	db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
 		Status: database.RepoStatusStoringCommits,
 		Url:    repoUrl,
 	})
 
-	commit, err := StoreCommits(GetFormattedGitLogs(prefixPath, repo, ""), repoUrl, db)
+	gitLogs, err := GetFormattedGitLogs(prefixPath, repo, "")
+	if err != nil {
+		// Set repo status to failed
+		db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
+			Status: database.RepoStatusFailed,
+			Url:    repoUrl,
+		})
+		return err
+	}
+
+	commit, err := StoreCommits(gitLogs, repoUrl, db)
 	if err != nil {
 		// Set repo status to failed
 		db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
@@ -21,7 +35,7 @@ func ProcessRepo(prefixPath string, repo string, repoUrl string, db *database.Qu
 			Url:    repoUrl,
 		})
 
-		logger.LogFatalRedAndExit("for repository %s, failed to insert this commit: %s with the following error: %s", repoUrl, commit, err)
+		return errors.New(fmt.Sprintf("failed to insert this commit: %s with the following error: %s", commit, err))
 	}
 
 	// Set repo status to synced
@@ -29,4 +43,6 @@ func ProcessRepo(prefixPath string, repo string, repoUrl string, db *database.Qu
 		Status: database.RepoStatusSynced,
 		Url:    repoUrl,
 	})
+
+	return nil
 }
