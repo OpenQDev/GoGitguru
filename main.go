@@ -16,20 +16,20 @@ import (
 )
 
 func main() {
-	portString, dbUrl := extractAndVerifyEnvironment()
+	portString, dbUrl, originUrl := extractAndVerifyEnvironment()
 
 	database, apiCfg := prepareDatabase(dbUrl)
 
 	beginSyncingInBackground(database)
 
-	startServer(apiCfg, portString)
+	startServer(apiCfg, portString, originUrl)
 }
 
-func startServer(apiCfg handlers.ApiConfig, portString string) {
+func startServer(apiCfg handlers.ApiConfig, portString string, originUrl string) {
 	router := chi.NewRouter()
 
 	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://example.com"},
+		AllowedOrigins:   []string{originUrl},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"*"},
 		ExposedHeaders:   []string{"Link"},
@@ -76,15 +76,16 @@ func prepareDatabase(dbUrl string) (*database.Queries, handlers.ApiConfig) {
 	return database, apiCfg
 }
 
-func extractAndVerifyEnvironment() (string, string) {
+func extractAndVerifyEnvironment() (string, string, string) {
 	godotenv.Load(".env")
 	portString := os.Getenv("PORT")
 	dbUrl := os.Getenv("DB_URL")
+	originUrl := os.Getenv("ORIGIN_URL")
 
-	if portString == "" || dbUrl == "" {
-		logger.LogFatalRedAndExit("PORT | DB_URL is not found in the environment")
+	if portString == "" || dbUrl == "" || originUrl == "" {
+		logger.LogFatalRedAndExit("PORT | DB_URL | ORIGIN_URL is not found in the environment")
 	}
-	return portString, dbUrl
+	return portString, dbUrl, originUrl
 }
 
 func getDatbase(dbUrl string) (*database.Queries, error) {
