@@ -79,11 +79,11 @@ initial commit - adds README.md
 	}
 
 	for _, tt := range tests {
-		output := ProcessGitLog(tt.gitLogString)
+		output, _ := ProcessGitLog(tt.gitLogString)
 
 		expected := tt.expectedGitLog
 
-		if output != expected {
+		if *output != expected {
 			t.Errorf("Expected %v, but got %v", expected, output)
 		}
 	}

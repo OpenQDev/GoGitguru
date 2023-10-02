@@ -2,7 +2,6 @@ package gitutil
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"main/internal/database"
 	"main/internal/pkg/logger"
@@ -35,7 +34,7 @@ func ProcessRepo(prefixPath string, repo string, repoUrl string, db *database.Qu
 			Url:    repoUrl,
 		})
 
-		return errors.New(fmt.Sprintf("failed to insert this commit: %s with the following error: %s", commit, err))
+		return fmt.Errorf("failed to insert this commit: %v with the following error: %s", commit, err)
 	}
 
 	// Set repo status to synced

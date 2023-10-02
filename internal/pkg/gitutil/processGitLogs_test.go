@@ -25,7 +25,7 @@ initial commit - clones repo, TAR and GZIP .git directory, upload to S3, delete 
 
 	testString := log1 + "\n\n" + log2
 
-	output := ProcessGitLogs(testString)
+	output, _ := ProcessGitLogs(testString)
 
 	expected := []GitLog{
 		{

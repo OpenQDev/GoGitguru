@@ -13,12 +13,12 @@ func ProcessGitLog(log string) (*GitLog, error) {
 
 	authorDate, err := strconv.ParseInt(firstLine[3], 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing author date", err)
+		return nil, fmt.Errorf("error parsing author date: %s", err)
 	}
 
 	commitDate, err := strconv.ParseInt(firstLine[4], 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing commit date", err)
+		return nil, fmt.Errorf("error parsing commit date: %s", err)
 	}
 
 	files := lines[2:]
@@ -43,7 +43,7 @@ func ProcessGitLog(log string) (*GitLog, error) {
 			var err error
 			insertion, err = strconv.ParseInt(fileData[0], 10, 64)
 			if err != nil {
-				return nil, fmt.Errorf("error parsing insertions", err)
+				return nil, fmt.Errorf("error parsing insertions: %s", err)
 			}
 		}
 
@@ -51,7 +51,7 @@ func ProcessGitLog(log string) (*GitLog, error) {
 			var err error
 			deletion, err = strconv.ParseInt(fileData[1], 10, 64)
 			if err != nil {
-				return nil, fmt.Errorf("error parsing deletions", err)
+				return nil, fmt.Errorf("error parsing deletions: %s", err)
 			}
 		}
 
