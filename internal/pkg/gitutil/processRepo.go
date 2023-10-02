@@ -21,7 +21,7 @@ func ProcessRepo(prefixPath string, repo string, repoUrl string, db *database.Qu
 			Url:    repoUrl,
 		})
 
-		logger.LogFatalRedAndExit("for repository %s, failed to insert this commit: %s with the following error: ", repoUrl, commit, err)
+		logger.LogFatalRedAndExit("for repository %s, failed to insert this commit: %s with the following error: %s", repoUrl, commit, err)
 	}
 
 	// Set repo status to synced
