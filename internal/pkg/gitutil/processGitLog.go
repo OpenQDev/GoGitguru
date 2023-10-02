@@ -20,6 +20,9 @@ func ProcessGitLog(log string) GitLog {
 		logger.LogError("error parsing commit date", err)
 	}
 
+	files := lines[2:]
+	filesChanged := int64(len(files))
+
 	output := GitLog{
 		CommitHash:    firstLine[0],
 		AuthorName:    firstLine[1],
@@ -27,6 +30,7 @@ func ProcessGitLog(log string) GitLog {
 		AuthorDate:    authorDate,
 		CommitDate:    commitDate,
 		CommitMessage: lines[1],
+		FilesChanged:  filesChanged,
 	}
 
 	return output

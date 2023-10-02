@@ -34,6 +34,7 @@ initial commit - clones repo, TAR and GZIP .git directory, upload to S3, delete 
 			AuthorDate:    1695429111,
 			CommitDate:    1695429111,
 			CommitMessage: "initial commit - clones repo, TAR and GZIP .git directory, upload to S3, delete from local",
+			FilesChanged:  5,
 		},
 		{
 			CommitHash:    "141bd5216b3e95c0559de5704e97883214048e95",
@@ -42,6 +43,7 @@ initial commit - clones repo, TAR and GZIP .git directory, upload to S3, delete 
 			AuthorDate:    1695429111,
 			CommitDate:    1695429111,
 			CommitMessage: "initial commit - clones repo, TAR and GZIP .git directory, upload to S3, delete from local",
+			FilesChanged:  5,
 		},
 	}
 

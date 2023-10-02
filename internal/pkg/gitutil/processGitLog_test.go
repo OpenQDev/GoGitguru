@@ -22,6 +22,7 @@ initial commit - adds README.md
 		AuthorDate:    1695429111,
 		CommitDate:    1695429111,
 		CommitMessage: "initial commit - adds README.md",
+		FilesChanged:  5,
 	}
 
 	if output != expected {
