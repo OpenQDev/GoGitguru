@@ -17,7 +17,9 @@ import (
 )
 
 func main() {
-	portString, dbUrl, originUrl, _ := extractAndVerifyEnvironment()
+	portString, dbUrl, originUrl, debugMode := extractAndVerifyEnvironment()
+
+	logger.SetDebugMode(debugMode)
 
 	database, apiCfg := prepareDatabase(dbUrl)
 

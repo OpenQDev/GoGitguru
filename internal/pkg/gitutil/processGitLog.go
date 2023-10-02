@@ -33,6 +33,8 @@ func ProcessGitLog(log string) GitLog {
 
 		fileData := strings.Fields(file)
 
+		logger.LogGreenDebug("file: %v", fileData)
+
 		insertion := int64(0)
 		deletion := int64(0)
 
