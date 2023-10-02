@@ -20,7 +20,8 @@ initial commit - clones repo, TAR and GZIP .git directory, upload to S3, delete 
 1       0       README.md
 9       0       go.mod
 40      0       go.sum
-81      0       main.go`
+81      0       main.go
+0      1       main.go`
 
 	testString := log1 + "\n\n" + log2
 
@@ -35,6 +36,8 @@ initial commit - clones repo, TAR and GZIP .git directory, upload to S3, delete 
 			CommitDate:    1695429111,
 			CommitMessage: "initial commit - clones repo, TAR and GZIP .git directory, upload to S3, delete from local",
 			FilesChanged:  5,
+			Insertions:    132,
+			Deletions:     0,
 		},
 		{
 			CommitHash:    "141bd5216b3e95c0559de5704e97883214048e95",
@@ -43,7 +46,9 @@ initial commit - clones repo, TAR and GZIP .git directory, upload to S3, delete 
 			AuthorDate:    1695429111,
 			CommitDate:    1695429111,
 			CommitMessage: "initial commit - clones repo, TAR and GZIP .git directory, upload to S3, delete from local",
-			FilesChanged:  5,
+			FilesChanged:  6,
+			Insertions:    132,
+			Deletions:     1,
 		},
 	}
 

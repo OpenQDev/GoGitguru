@@ -12,6 +12,8 @@ type GitLog struct {
 	CommitDate    int64
 	CommitMessage string
 	FilesChanged  int64
+	Insertions    int64
+	Deletions     int64
 }
 
 func ProcessGitLogs(logs string) []GitLog {
