@@ -7,7 +7,7 @@ import (
 	"main/internal/pkg/logger"
 )
 
-func StoreCommits(gitLogs []GitLog, repoUrl string, db *database.Queries) (*database.InsertCommitParams, error) {
+func StoreCommits(gitLogs []GitLog, repoUrl string, db *database.Queries) (*database.Commit, error) {
 	for _, gitLog := range gitLogs {
 		params := database.InsertCommitParams{
 			CommitHash:    gitLog.CommitHash,
@@ -22,10 +22,10 @@ func StoreCommits(gitLogs []GitLog, repoUrl string, db *database.Queries) (*data
 			RepoUrl:       sql.NullString{String: repoUrl, Valid: repoUrl != ""},
 		}
 
-		err := db.InsertCommit(context.Background(), params)
+		commit, err := db.InsertCommit(context.Background(), params)
 
 		if err != nil {
-			return &params, err
+			return &commit, err
 		}
 	}
 
