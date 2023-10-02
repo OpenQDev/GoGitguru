@@ -33,14 +33,23 @@ func ProcessGitLog(log string) GitLog {
 
 		fileData := strings.Fields(file)
 
-		insertion, err := strconv.ParseInt(fileData[0], 10, 64)
-		if err != nil {
-			logger.LogError("error parsing insertions", err)
+		insertion := int64(0)
+		deletion := int64(0)
+
+		if fileData[0] != "-" {
+			var err error
+			insertion, err = strconv.ParseInt(fileData[0], 10, 64)
+			if err != nil {
+				logger.LogError("error parsing insertions", err)
+			}
 		}
 
-		deletion, err := strconv.ParseInt(fileData[1], 10, 64)
-		if err != nil {
-			logger.LogError("error parsing deletions", err)
+		if fileData[1] != "-" {
+			var err error
+			deletion, err = strconv.ParseInt(fileData[1], 10, 64)
+			if err != nil {
+				logger.LogError("error parsing deletions", err)
+			}
 		}
 
 		insertions += insertion

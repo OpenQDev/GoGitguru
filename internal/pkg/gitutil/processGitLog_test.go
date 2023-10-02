@@ -22,6 +22,14 @@ initial commit - adds README.md
 40      0       go.sum
 81      0       main.go`
 
+	logWithDashForLinesChanged := `b8cc8b9e5252d470e559a55c841778cb99957cdb-;-mktcode-;-kontakt@markus-kottlaender.de-;-1609951502-;-1609951502
+initial commit - adds README.md
+1       0       .gitignore
+1       0       README.md
+9       0       go.mod
+-      -       static/logo-new.png
+81      0       main.go`
+
 	tests := []struct {
 		gitLogString   string
 		expectedGitLog GitLog
@@ -51,6 +59,20 @@ initial commit - adds README.md
 				CommitMessage: "initial commit - adds README.md",
 				FilesChanged:  5,
 				Insertions:    132,
+				Deletions:     0,
+			},
+		},
+		{
+			gitLogString: logWithDashForLinesChanged,
+			expectedGitLog: GitLog{
+				CommitHash:    "b8cc8b9e5252d470e559a55c841778cb99957cdb",
+				AuthorName:    "mktcode",
+				AuthorEmail:   "kontakt@markus-kottlaender.de",
+				AuthorDate:    1609951502,
+				CommitDate:    1609951502,
+				CommitMessage: "initial commit - adds README.md",
+				FilesChanged:  5,
+				Insertions:    92,
 				Deletions:     0,
 			},
 		},
