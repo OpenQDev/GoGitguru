@@ -8,6 +8,18 @@ import (
 	"path/filepath"
 )
 
+type GitLog struct {
+	CommitHash    string
+	AuthorName    string
+	AuthorEmail   string
+	AuthorDate    int64
+	CommitDate    int64
+	CommitMessage string
+	FilesChanged  int64
+	Insertions    int64
+	Deletions     int64
+}
+
 func GetFormattedGitLogs(prefixPath string, repo string, fromCommitDate string) ([]GitLog, error) {
 	fullRepoPath := filepath.Join(prefixPath, repo)
 
@@ -20,25 +32,7 @@ func GetFormattedGitLogs(prefixPath string, repo string, fromCommitDate string) 
 		fromCommitDate = defaultCommitStartDate
 	}
 
-	cmd := GitLogCommand(fullRepoPath, fromCommitDate)
-
-	out, err := cmd.Output()
-
-	if err != nil {
-		return nil, fmt.Errorf("error running git log in %s: %s", fullRepoPath, err)
-	}
-
-	outStr := string(out)
-	if outStr != "" && outStr[len(outStr)-1] == '\n' {
-		outStr = outStr[:len(outStr)-1]
-	}
-
-	gitLogs, err := ProcessGitLogs(outStr)
-	if err != nil {
-		return nil, fmt.Errorf("error processing git logs for repo %s: %s", fullRepoPath, err)
-	}
-
-	return gitLogs, nil
+	return nil, nil
 }
 
 func isAGitRepo(fullRepoPath string, prefixPath string, repo string) bool {
