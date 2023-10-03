@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestFormatGitLogs(t *testing.T) {
+func TestGetGitLogs(t *testing.T) {
 	// Setup a temporary directory for testing
 	tempDir, err := os.MkdirTemp("", "testing")
 	if err != nil {
@@ -17,21 +17,10 @@ func TestFormatGitLogs(t *testing.T) {
 	CloneRepo(tempDir, "OpenQDev", "OpenQ-DRM-TestRepo")
 
 	// Call the function under test
-	gitLogs, _ := GetFormattedGitLogs(tempDir, "OpenQ-DRM-TestRepo", "")
+	gitLogs, _ := GetGitLogs(tempDir, "OpenQ-DRM-TestRepo", "")
 
 	// Create a test data
 	expectedGitLogs := []GitLog{
-		{
-			CommitHash:    "9fae86bc8e89895b961d81bd7e9e4e897501c8bb",
-			AuthorName:    "FlacoJones",
-			AuthorEmail:   "andrew@openq.dev",
-			AuthorDate:    1696277205,
-			CommitDate:    1696277205,
-			CommitMessage: "initial commit",
-			FilesChanged:  1,
-			Insertions:    0,
-			Deletions:     0,
-		},
 		{
 			CommitHash:    "06a12f9c203112a149707ff73e4298749744c358",
 			AuthorName:    "FlacoJones",
@@ -41,6 +30,17 @@ func TestFormatGitLogs(t *testing.T) {
 			CommitMessage: "updates README",
 			FilesChanged:  1,
 			Insertions:    1,
+			Deletions:     0,
+		},
+		{
+			CommitHash:    "9fae86bc8e89895b961d81bd7e9e4e897501c8bb",
+			AuthorName:    "FlacoJones",
+			AuthorEmail:   "andrew@openq.dev",
+			AuthorDate:    1696277205,
+			CommitDate:    1696277205,
+			CommitMessage: "initial commit",
+			FilesChanged:  0,
+			Insertions:    0,
 			Deletions:     0,
 		},
 	}
