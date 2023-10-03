@@ -15,7 +15,7 @@ func ProcessRepo(prefixPath string, repo string, repoUrl string, db *database.Qu
 		Url:    repoUrl,
 	})
 
-	commitCount, err := GetGitLogs(prefixPath, repo, repoUrl, "", db)
+	commitCount, err := StoreGitLogs(prefixPath, repo, repoUrl, "", db)
 	if err != nil {
 		// Set repo status to failed
 		db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
