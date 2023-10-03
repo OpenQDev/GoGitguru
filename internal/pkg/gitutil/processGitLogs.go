@@ -1,6 +1,7 @@
 package gitutil
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -22,10 +23,10 @@ func ProcessGitLogs(logs string) ([]GitLog, error) {
 	emptyNewline := "\n\n"
 	logEntries := strings.Split(logs, emptyNewline)
 
-	for _, logEntry := range logEntries {
+	for commitNumber, logEntry := range logEntries {
 		gitLog, err := ProcessGitLog(logEntry)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error processing commit number %d: %s", commitNumber, err)
 		}
 		gitLogs = append(gitLogs, *gitLog)
 	}
