@@ -97,6 +97,9 @@ func GetGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate s
 		}
 
 		_, err = db.InsertCommit(context.Background(), params)
+		if err != nil {
+			return 0, fmt.Errorf("error loading commit number %d for %s: %s", commitCount, repoUrl, err)
+		}
 
 		commitCount++
 	}

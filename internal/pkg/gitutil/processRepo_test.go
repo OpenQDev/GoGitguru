@@ -140,7 +140,7 @@ func TestProcessRepo(t *testing.T) {
 				t.Errorf("there were unfulfilled expectations: %s", err)
 			}
 
-			// Check if StoreCommits returned an error
+			// Check if ProcessRepo returned an error
 			assert.Nil(t, err)
 		})
 	}
