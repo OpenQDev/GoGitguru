@@ -27,11 +27,11 @@ func startSyncing(
 	for _, repoUrl := range repoUrls {
 		repoUrl := repoUrl.Url
 
-		_, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
+		organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 
-		// defer gitutil.DeleteLocalRepo(prefixPath, repo)
+		defer gitutil.DeleteLocalRepo(prefixPath, repo)
 
-		// gitutil.CloneRepo(prefixPath, organization, repo)
+		gitutil.CloneRepo(prefixPath, organization, repo)
 
 		err := gitutil.ProcessRepo(prefixPath, repo, repoUrl, db)
 		if err != nil {
