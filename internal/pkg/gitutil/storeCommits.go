@@ -3,11 +3,13 @@ package gitutil
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"main/internal/database"
 	"main/internal/pkg/logger"
 )
 
 func StoreCommits(gitLogs []GitLog, repoUrl string, db *database.Queries) (*database.Commit, error) {
+	fmt.Println(gitLogs)
 	for _, gitLog := range gitLogs {
 		params := database.InsertCommitParams{
 			CommitHash:    gitLog.CommitHash,
