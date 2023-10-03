@@ -2,7 +2,6 @@ package gitutil
 
 import (
 	"context"
-	"fmt"
 	"main/internal/database"
 	"main/internal/pkg/logger"
 )
@@ -16,7 +15,7 @@ func ProcessRepo(prefixPath string, repo string, repoUrl string, db *database.Qu
 		Url:    repoUrl,
 	})
 
-	gitLogs, err := GetGitLogs(prefixPath, repo, "")
+	commitCount, err := GetGitLogs(prefixPath, repo, repoUrl, "", db)
 	if err != nil {
 		// Set repo status to failed
 		db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
@@ -26,22 +25,13 @@ func ProcessRepo(prefixPath string, repo string, repoUrl string, db *database.Qu
 		return err
 	}
 
-	commit, err := StoreCommits(gitLogs, repoUrl, db)
-	if err != nil {
-		// Set repo status to failed
-		db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
-			Status: database.RepoStatusFailed,
-			Url:    repoUrl,
-		})
-
-		return fmt.Errorf("failed to insert this commit: %v with the following error: %s", commit, err)
-	}
-
 	// Set repo status to synced
 	db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
 		Status: database.RepoStatusSynced,
 		Url:    repoUrl,
 	})
+
+	logger.LogBlue("Successfully stored %d commits for %s in the database.", commitCount, repoUrl)
 
 	return nil
 }
