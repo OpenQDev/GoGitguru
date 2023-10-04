@@ -104,6 +104,27 @@ type GithubRepo struct {
 	DefaultBranch   sql.NullString `json:"default_branch"`
 }
 
+type GithubUser struct {
+	InternalID      int32          `json:"internal_id"`
+	GithubRestID    int32          `json:"github_rest_id"`
+	GithubGraphqlID string         `json:"github_graphql_id"`
+	Login           string         `json:"login"`
+	Name            sql.NullString `json:"name"`
+	Email           sql.NullString `json:"email"`
+	AvatarUrl       sql.NullString `json:"avatar_url"`
+	Company         sql.NullString `json:"company"`
+	Location        sql.NullString `json:"location"`
+	Bio             sql.NullString `json:"bio"`
+	Blog            sql.NullString `json:"blog"`
+	Hireable        sql.NullBool   `json:"hireable"`
+	TwitterUsername sql.NullString `json:"twitter_username"`
+	Followers       sql.NullInt32  `json:"followers"`
+	Following       sql.NullInt32  `json:"following"`
+	Type            string         `json:"type"`
+	CreatedAt       sql.NullTime   `json:"created_at"`
+	UpdatedAt       sql.NullTime   `json:"updated_at"`
+}
+
 type RepoUrl struct {
 	Url       string       `json:"url"`
 	Status    RepoStatus   `json:"status"`
