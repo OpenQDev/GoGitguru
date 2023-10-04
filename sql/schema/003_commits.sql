@@ -1,6 +1,6 @@
 -- +goose Up
 
-CREATE TABLE IF NOT EXISTS commits (
+CREATE TABLE commits (
     commit_hash VARCHAR(40) NOT NULL,
     author VARCHAR(120),
     author_email VARCHAR(255),

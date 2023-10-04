@@ -1,6 +1,6 @@
 -- +goose Up
 
-CREATE TABLE IF NOT EXISTS github_repos (
+CREATE TABLE github_repos (
     internal_id SERIAL PRIMARY KEY,
     github_rest_id INT NOT NULL,
     github_graphql_id VARCHAR(60) NOT NULL,
