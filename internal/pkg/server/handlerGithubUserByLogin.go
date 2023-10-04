@@ -2,17 +2,19 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"main/internal/database"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi"
 )
 
 type User struct {
 	InternalID      int    `json:"internal_id"`
-	GithubRestID    int    `json:"github_rest_id"`
-	GithubGraphqlID string `json:"github_graphql_id"`
+	GithubRestID    int    `json:"id"`
+	GithubGraphqlID string `json:"node_id"`
 	Login           string `json:"login"`
 	Name            string `json:"name"`
 	Email           string `json:"email"`
@@ -40,17 +42,16 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 
 	login := chi.URLParam(r, "login")
 
-	// Fetch user from database
-	user, err := apiConfig.DB.GetUserByLogin(context.Background(), login)
-	if err != nil {
-		RespondWithError(w, 500, "Failed to fetch user from database.")
-		return
-	}
+	// Fetch initialDbUser from database
+	initialDbUser, err := apiConfig.DB.GetGithubUser(context.Background(), login)
 
-	// If user is not found in database, fetch from GitHub API
-	if user == nil {
+	if err == nil {
+		RespondWithJSON(w, 200, initialDbUser)
+		return
+	} else {
 		client := &http.Client{}
 		req, err := http.NewRequest("GET", "https://api.github.com/users/"+login, nil)
+
 		if err != nil {
 			RespondWithError(w, 500, "Failed to create request.")
 			return
@@ -72,9 +73,37 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 			return
 		}
 
+		layout := "2006-01-02T15:04:05Z" // ISO 8601 format
+		createdAt, err := time.Parse(layout, user.CreatedAt)
+		if err != nil {
+			RespondWithError(w, 500, "Failed to parse CreatedAt.")
+			return
+		}
+		updatedAt, err := time.Parse(layout, user.UpdatedAt)
+		if err != nil {
+			RespondWithError(w, 500, "Failed to parse UpdatedAt.")
+			return
+		}
+
 		// Insert the user into the database using sqlc generated methods
 		params := database.InsertUserParams{
-			// Fill in the fields based on your database schema
+			GithubRestID:    int32(user.GithubRestID),
+			GithubGraphqlID: user.GithubGraphqlID,
+			Login:           user.Login,
+			Name:            sql.NullString{String: user.Name, Valid: user.Name != ""},
+			Email:           sql.NullString{String: user.Email, Valid: user.Email != ""},
+			AvatarUrl:       sql.NullString{String: user.AvatarURL, Valid: user.AvatarURL != ""},
+			Company:         sql.NullString{String: user.Company, Valid: user.Company != ""},
+			Location:        sql.NullString{String: user.Location, Valid: user.Location != ""},
+			Bio:             sql.NullString{String: user.Bio, Valid: user.Bio != ""},
+			Blog:            sql.NullString{String: user.Blog, Valid: user.Blog != ""},
+			Hireable:        sql.NullBool{Bool: user.Hireable, Valid: true},
+			TwitterUsername: sql.NullString{String: user.TwitterUsername, Valid: user.TwitterUsername != ""},
+			Followers:       sql.NullInt32{Int32: int32(user.Followers), Valid: true},
+			Following:       sql.NullInt32{Int32: int32(user.Following), Valid: true},
+			Type:            user.Type,
+			CreatedAt:       sql.NullTime{Time: createdAt, Valid: true},
+			UpdatedAt:       sql.NullTime{Time: updatedAt, Valid: true},
 		}
 
 		_, err = apiConfig.DB.InsertUser(context.Background(), params)
@@ -82,7 +111,7 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 			RespondWithError(w, 500, "Failed to insert user into database.")
 			return
 		}
-	}
 
-	RespondWithJSON(w, 200, user)
+		RespondWithJSON(w, 200, user)
+	}
 }

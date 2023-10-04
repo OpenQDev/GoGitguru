@@ -21,4 +21,6 @@ cd ../..
 
 psql -h "localhost" -U "postgres" -p 5432 -f ./repos.sql
 
-go run .
+# To install go air, a Go runtime with live reloads on code changes,
+# run the following command: go get -u github.com/cosmtrek/air
+air
