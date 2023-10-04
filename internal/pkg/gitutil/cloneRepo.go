@@ -14,7 +14,7 @@ import (
 // It returns an error if the cloning process fails.
 func CloneRepo(prefixPath string, organization string, repo string) error {
 	cloneString := fmt.Sprintf("https://github.com/%s/%s.git", organization, repo)
-	cloneDestination := filepath.Join(prefixPath, repo)
+	cloneDestination := filepath.Join(prefixPath, organization, repo)
 
 	cmd := GitCloneCommand(cloneString, cloneDestination)
 

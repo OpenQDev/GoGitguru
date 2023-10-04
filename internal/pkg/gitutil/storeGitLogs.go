@@ -29,8 +29,8 @@ type GitLog struct {
 	Deletions     int64
 }
 
-func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate string, db *database.Queries) (int, error) {
-	fullRepoPath := filepath.Join(prefixPath, repo)
+func StoreGitLogs(prefixPath string, organization string, repo string, repoUrl string, fromCommitDate string, db *database.Queries) (int, error) {
+	fullRepoPath := filepath.Join(prefixPath, organization, repo)
 
 	defaultCommitStartDate := "2020-01-01"
 	if fromCommitDate == "" {

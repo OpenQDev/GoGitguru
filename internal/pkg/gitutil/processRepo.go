@@ -6,7 +6,7 @@ import (
 	"main/internal/pkg/logger"
 )
 
-func ProcessRepo(prefixPath string, repo string, repoUrl string, db *database.Queries) error {
+func ProcessRepo(prefixPath string, organization string, repo string, repoUrl string, db *database.Queries) error {
 	logger.LogGreenDebug("beginning to process %s", repoUrl)
 
 	// Set repo status to storing_commits
@@ -15,7 +15,7 @@ func ProcessRepo(prefixPath string, repo string, repoUrl string, db *database.Qu
 		Url:    repoUrl,
 	})
 
-	commitCount, err := StoreGitLogs(prefixPath, repo, repoUrl, "", db)
+	commitCount, err := StoreGitLogs(prefixPath, organization, repo, repoUrl, "", db)
 	if err != nil {
 		// Set repo status to failed
 		db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
