@@ -2,7 +2,6 @@ package gitutil
 
 import (
 	"main/internal/database"
-	"main/internal/pkg/handlers"
 	"main/internal/pkg/logger"
 	"os"
 	"testing"
@@ -21,7 +20,7 @@ func TestProcessRepo(t *testing.T) {
 	// Initialize queries with the mocked DB collection.
 	queries := database.New(db)
 
-	apiCfg := handlers.ApiConfig{
+	apiCfg := server.ApiConfig{
 		DB: queries,
 	}
 

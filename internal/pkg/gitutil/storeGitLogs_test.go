@@ -3,7 +3,6 @@ package gitutil
 import (
 	"errors"
 	"main/internal/database"
-	"main/internal/pkg/handlers"
 	"main/internal/pkg/logger"
 	"os"
 	"testing"
@@ -31,7 +30,7 @@ func TestStoreGitLogs(t *testing.T) {
 	// Initialize queries with the mocked DB collection.
 	queries := database.New(db)
 
-	apiCfg := handlers.ApiConfig{
+	apiCfg := server.ApiConfig{
 		DB: queries,
 	}
 

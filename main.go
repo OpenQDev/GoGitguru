@@ -1,8 +1,8 @@
 package main
 
 import (
-	"main/internal/pkg/handlers"
 	"main/internal/pkg/logger"
+	"main/internal/pkg/server"
 	"main/internal/pkg/setup"
 	"main/internal/pkg/sync"
 	"time"
@@ -13,5 +13,5 @@ func main() {
 	database, apiCfg := setup.PrepareDatabase(dbUrl)
 	logger.SetDebugMode(debugMode)
 	go sync.StartSyncing(database, "repos", 10, 10*time.Second)
-	handlers.StartServer(apiCfg, portString, originUrl)
+	server.StartServer(apiCfg, portString, originUrl)
 }

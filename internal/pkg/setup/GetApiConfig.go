@@ -2,11 +2,11 @@ package setup
 
 import (
 	"main/internal/database"
-	"main/internal/pkg/handlers"
+	"main/internal/pkg/server"
 )
 
-func GetApiConfig(database *database.Queries) (handlers.ApiConfig, error) {
-	apiCfg := handlers.ApiConfig{
+func GetApiConfig(database *database.Queries) (server.ApiConfig, error) {
+	apiCfg := server.ApiConfig{
 		DB: database,
 	}
 
