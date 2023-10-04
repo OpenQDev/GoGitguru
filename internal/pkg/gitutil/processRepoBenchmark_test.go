@@ -1,23 +1,20 @@
 package gitutil
 
 import (
-	"main/internal/database"
 	"main/internal/pkg/logger"
+	"main/internal/pkg/setup"
 	"os"
 	"testing"
-
-	"github.com/DATA-DOG/go-sqlmock"
 )
 
 func BenchmarkProcessRepo(b *testing.B) {
 	// Setup
-	db, _, err := sqlmock.New()
-	if err != nil {
-		b.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-	defer db.Close()
+	_, dbUrl, _, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
 
-	queries := database.New(db)
+	db, err := setup.GetDatbase(dbUrl)
+	if err != nil {
+		logger.LogFatalRedAndExit("unable to run BenchmarkProcessRepo. unable to connect to database: %s", err)
+	}
 
 	repo := "OpenQ-Contracts"
 	organization := "OpenQDev"
@@ -37,7 +34,7 @@ func BenchmarkProcessRepo(b *testing.B) {
 	CloneRepo(prefixPath, organization, repo)
 
 	for i := 0; i < b.N; i++ {
-		err := ProcessRepo(prefixPath, repo, repoUrl, queries)
+		err := ProcessRepo(prefixPath, repo, repoUrl, db)
 		if err != nil {
 			b.Fatal(err)
 		}

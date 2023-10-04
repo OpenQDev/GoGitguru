@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"main/internal/database"
+	"main/internal/pkg/logger"
 	"path/filepath"
 	"strings"
 	"time"
@@ -101,6 +102,9 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 			return 0, fmt.Errorf("error loading commit number %d for %s: %s", commitCount, repoUrl, err)
 		}
 
+		if commitCount%100 == 0 {
+			logger.LogGreenDebug("stored %d commits for %s", commitCount, repoUrl)
+		}
 		commitCount++
 	}
 
