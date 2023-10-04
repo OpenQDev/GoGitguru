@@ -125,6 +125,11 @@ type GithubUser struct {
 	UpdatedAt       sql.NullTime   `json:"updated_at"`
 }
 
+type GithubUserRestIDAuthorEmail struct {
+	RestID sql.NullInt32 `json:"rest_id"`
+	Email  string        `json:"email"`
+}
+
 type RepoUrl struct {
 	Url       string       `json:"url"`
 	Status    RepoStatus   `json:"status"`
