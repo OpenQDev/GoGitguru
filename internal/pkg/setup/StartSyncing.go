@@ -1,20 +1,32 @@
-package main
+package setup
 
 import (
 	"context"
 	"main/internal/database"
 	"main/internal/pkg/gitutil"
 	"main/internal/pkg/logger"
+	"sort"
+	"strings"
 	"time"
 )
 
-func startSyncing(
+func StartSyncing(
 	db *database.Queries,
 	prefixPath string,
 	concurrency int,
 	timeBetweenSyncs time.Duration) {
 	// Fetch all repository URLs
-	repoUrls, err := db.GetRepoURLs(context.Background())
+	repoUrlObjects, err := db.GetRepoURLs(context.Background())
+
+	// Prepare an alphabetically ordered list of only repoUrls
+	// Log them with new lines
+	repoUrls := make([]string, len(repoUrlObjects))
+	for i, repo := range repoUrlObjects {
+		repoUrls[i] = strings.ToLower(repo.Url)
+	}
+
+	sort.Strings(repoUrls)
+	logger.LogGreenDebug("beginning sync for the following repos:\n%v", strings.Join(repoUrls, "\n"))
 
 	if err != nil {
 		logger.LogFatalRedAndExit("error getting repo urls: %s ", err)
@@ -25,8 +37,6 @@ func startSyncing(
 	}
 
 	for _, repoUrl := range repoUrls {
-		repoUrl := repoUrl.Url
-
 		organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 
 		defer gitutil.DeleteLocalRepo(prefixPath, repo)
