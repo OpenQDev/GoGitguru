@@ -30,6 +30,12 @@ go test -cover -v -coverprofile=coverage.out
 go tool cover -html=coverage.out
 ```
 
+### Run Benchmark Tests
+
+```bash
+go test -bench=BenchmarkProcessRepo
+```
+
 `-cover` - Provide coverage percentage to stdout
 `-coverprofile=coverage.out` - Provide a coverage report to `coverage.out` that can be opened in the browser
 
