@@ -18,14 +18,9 @@ func StartSyncing(
 	// Fetch all repository URLs
 	repoUrlObjects, err := db.GetRepoURLs(context.Background())
 
-	// Prepare an alphabetically ordered list of only repoUrls
+	// Prepare an alphabetical, lowercased list of only repoUrls
 	// Log them with new lines
-	repoUrls := make([]string, len(repoUrlObjects))
-	for i, repo := range repoUrlObjects {
-		repoUrls[i] = strings.ToLower(repo.Url)
-	}
-
-	sort.Strings(repoUrls)
+	repoUrls := sortRepoUrls(repoUrlObjects)
 	logger.LogGreenDebug("beginning sync for the following repos:\n%v", strings.Join(repoUrls, "\n"))
 
 	if err != nil {
@@ -50,4 +45,16 @@ func StartSyncing(
 			logger.LogFatalRedAndExit("error while processing repository %s: %s", repoUrl, err)
 		}
 	}
+}
+
+func sortRepoUrls(repoUrlObjects []database.RepoUrl) []string {
+	repoUrls := make([]string, len(repoUrlObjects))
+
+	for i, repo := range repoUrlObjects {
+		// since sort.Strings uses case-sensitive lexicographic ordering, we must lowercase
+		repoUrls[i] = strings.ToLower(repo.Url)
+	}
+
+	sort.Strings(repoUrls)
+	return repoUrls
 }
