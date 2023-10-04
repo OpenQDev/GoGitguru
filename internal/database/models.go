@@ -72,6 +72,38 @@ type Commit struct {
 	RepoUrl       sql.NullString `json:"repo_url"`
 }
 
+type GithubRepo struct {
+	InternalID      int32          `json:"internal_id"`
+	GithubRestID    int32          `json:"github_rest_id"`
+	GithubGraphqlID string         `json:"github_graphql_id"`
+	Url             string         `json:"url"`
+	Name            string         `json:"name"`
+	FullName        string         `json:"full_name"`
+	Private         sql.NullBool   `json:"private"`
+	OwnerLogin      string         `json:"owner_login"`
+	OwnerAvatarUrl  sql.NullString `json:"owner_avatar_url"`
+	Description     sql.NullString `json:"description"`
+	Homepage        sql.NullString `json:"homepage"`
+	Fork            sql.NullBool   `json:"fork"`
+	ForksCount      sql.NullInt32  `json:"forks_count"`
+	Archived        sql.NullBool   `json:"archived"`
+	Disabled        sql.NullBool   `json:"disabled"`
+	License         sql.NullString `json:"license"`
+	Language        sql.NullString `json:"language"`
+	StargazersCount sql.NullInt32  `json:"stargazers_count"`
+	WatchersCount   sql.NullInt32  `json:"watchers_count"`
+	OpenIssuesCount sql.NullInt32  `json:"open_issues_count"`
+	HasIssues       sql.NullBool   `json:"has_issues"`
+	HasDiscussions  sql.NullBool   `json:"has_discussions"`
+	HasProjects     sql.NullBool   `json:"has_projects"`
+	CreatedAt       sql.NullTime   `json:"created_at"`
+	UpdatedAt       sql.NullTime   `json:"updated_at"`
+	PushedAt        sql.NullTime   `json:"pushed_at"`
+	Visibility      sql.NullString `json:"visibility"`
+	Size            sql.NullInt32  `json:"size"`
+	DefaultBranch   sql.NullString `json:"default_branch"`
+}
+
 type RepoUrl struct {
 	Url       string       `json:"url"`
 	Status    RepoStatus   `json:"status"`

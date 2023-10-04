@@ -39,6 +39,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.insertCommitStmt, err = db.PrepareContext(ctx, insertCommit); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertCommit: %w", err)
 	}
+	if q.insertGithubRepoStmt, err = db.PrepareContext(ctx, insertGithubRepo); err != nil {
+		return nil, fmt.Errorf("error preparing query InsertGithubRepo: %w", err)
+	}
 	if q.insertRepoURLStmt, err = db.PrepareContext(ctx, insertRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertRepoURL: %w", err)
 	}
@@ -76,6 +79,11 @@ func (q *Queries) Close() error {
 	if q.insertCommitStmt != nil {
 		if cerr := q.insertCommitStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing insertCommitStmt: %w", cerr)
+		}
+	}
+	if q.insertGithubRepoStmt != nil {
+		if cerr := q.insertGithubRepoStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing insertGithubRepoStmt: %w", cerr)
 		}
 	}
 	if q.insertRepoURLStmt != nil {
@@ -137,6 +145,7 @@ type Queries struct {
 	getRepoURLStmt               *sql.Stmt
 	getRepoURLsStmt              *sql.Stmt
 	insertCommitStmt             *sql.Stmt
+	insertGithubRepoStmt         *sql.Stmt
 	insertRepoURLStmt            *sql.Stmt
 	updateStatusStmt             *sql.Stmt
 	updateStatusAndUpdatedAtStmt *sql.Stmt
@@ -151,6 +160,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getRepoURLStmt:               q.getRepoURLStmt,
 		getRepoURLsStmt:              q.getRepoURLsStmt,
 		insertCommitStmt:             q.insertCommitStmt,
+		insertGithubRepoStmt:         q.insertGithubRepoStmt,
 		insertRepoURLStmt:            q.insertRepoURLStmt,
 		updateStatusStmt:             q.updateStatusStmt,
 		updateStatusAndUpdatedAtStmt: q.updateStatusAndUpdatedAtStmt,
