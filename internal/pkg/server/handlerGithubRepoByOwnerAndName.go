@@ -1,11 +1,10 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"strings"
+
+	"github.com/go-chi/chi"
 )
 
 type Repo struct {
@@ -39,43 +38,42 @@ type Repo struct {
 	DefaultBranch   string `json:"default_branch"`
 }
 
-func (apiCfg *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *http.Request) {
-	owner := strings.TrimPrefix(r.URL.Path, "/repos/github/")
-	githubAccessToken := r.Header.Get("GH-Authorization")
+func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWriter, r *http.Request) {
+	owner := chi.URLParam(r, "owner")
+	name := chi.URLParam(r, "name")
 
-	if githubAccessToken == "" {
-		RespondWithError(w, 400, "You must provide a GitHub access token.")
-		return
-	}
+	fmt.Println(owner)
+	fmt.Println(name)
 
-	var repos []Repo
-	page := 1
+	// githubAccessToken := r.Header.Get("GH-Authorization")
 
-	for {
-		requestURL := fmt.Sprintf("https://api.github.com/users/%s/repos?per_page=100&page=%d", owner, page)
-		req, _ := http.NewRequest("GET", requestURL, nil)
-		req.Header.Set("Authorization", "Bearer "+githubAccessToken)
+	// if githubAccessToken == "" {
+	// 	RespondWithError(w, 400, "You must provide a GitHub access token.")
+	// 	return
+	// }
 
-		resp, err := http.DefaultClient.Do(req)
-		if err != nil || resp.StatusCode != 200 {
-			RespondWithError(w, 500, "Error fetching data from GitHub.")
-			return
-		}
+	// client := &http.Client{}
+	// req, err := http.NewRequest("GET", "https://api.github.com/repos/"+owner+"/"+name, nil)
+	// if err != nil {
+	// 	RespondWithError(w, 500, "Failed to create request.")
+	// 	return
+	// }
 
-		body, _ := io.ReadAll(resp.Body)
-		var jsonRepos []Repo
-		json.Unmarshal(body, &jsonRepos)
+	// req.Header.Add("Authorization", "token "+githubAccessToken)
+	// resp, err := client.Do(req)
+	// if err != nil {
+	// 	RespondWithError(w, 500, "Failed to make request.")
+	// 	return
+	// }
 
-		repos = append(repos, jsonRepos...)
+	// defer resp.Body.Close()
 
-		if len(jsonRepos) < 100 {
-			break
-		} else {
-			page++
-		}
-	}
+	// var repo Repo
+	// err = json.NewDecoder(resp.Body).Decode(&repo)
+	// if err != nil {
+	// 	RespondWithError(w, 500, "Failed to decode response.")
+	// 	return
+	// }
 
-	// TODO: Insert data into the database
-
-	RespondWithJSON(w, 200, repos)
+	RespondWithJSON(w, 200, struct{}{})
 }

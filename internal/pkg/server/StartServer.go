@@ -24,6 +24,7 @@ func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
 	v1Router.Get("/healthz", apiCfg.HandlerReadiness)
 	v1Router.Get("/version", apiCfg.HandlerVersion)
 	v1Router.Post("/add", apiCfg.HandlerAdd)
+	v1Router.Get("/repos/github/{owner}/{name}", apiCfg.HandlerGithubRepoByOwnerAndName)
 
 	router.Mount("/", v1Router)
 

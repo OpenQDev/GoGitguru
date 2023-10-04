@@ -9,9 +9,11 @@ import (
 )
 
 func main() {
-	portString, dbUrl, originUrl, debugMode := setup.ExtractAndVerifyEnvironment(".env")
+	portString, dbUrl, originUrl, debugMode, syncMode, syncIntervalMinutes := setup.ExtractAndVerifyEnvironment(".env")
 	database, apiCfg := setup.PrepareDatabase(dbUrl)
 	logger.SetDebugMode(debugMode)
-	go sync.StartSyncing(database, "repos", 10, 10*time.Second)
+	if syncMode {
+		go sync.StartSyncing(database, "repos", 10, time.Duration(syncIntervalMinutes)*time.Minute)
+	}
 	server.StartServer(apiCfg, portString, originUrl)
 }
