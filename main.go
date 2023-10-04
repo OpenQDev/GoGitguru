@@ -1,27 +1,23 @@
 package main
 
 import (
-	"database/sql"
 	"main/internal/database"
 	"main/internal/pkg/handlers"
 	"main/internal/pkg/logger"
+	"main/internal/pkg/setup"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 )
 
 func main() {
-	portString, dbUrl, originUrl, debugMode := extractAndVerifyEnvironment()
+	portString, dbUrl, originUrl, debugMode := setup.ExtractAndVerifyEnvironment(".env")
 
 	logger.SetDebugMode(debugMode)
 
-	database, apiCfg := prepareDatabase(dbUrl)
+	database, apiCfg := setup.PrepareDatabase(dbUrl)
 
 	beginSyncingInBackground(database)
 
@@ -64,55 +60,4 @@ func startServer(apiCfg handlers.ApiConfig, portString string, originUrl string)
 func beginSyncingInBackground(database *database.Queries) {
 	logger.LogBlue("Beginning sync for all repo urls...")
 	go startSyncing(database, "repos", 10, 10*time.Second)
-}
-
-func prepareDatabase(dbUrl string) (*database.Queries, handlers.ApiConfig) {
-	database, err := getDatbase(dbUrl)
-	if err != nil {
-		logger.LogError("error getting database: %s", err)
-	}
-
-	apiCfg, err := getApiConfig(database)
-	if err != nil {
-		logger.LogFatalRedAndExit("can't connect to DB: %s", err)
-	}
-	return database, apiCfg
-}
-
-func extractAndVerifyEnvironment() (string, string, string, bool) {
-	godotenv.Load(".env")
-	portString := os.Getenv("PORT")
-	dbUrl := os.Getenv("DB_URL")
-	originUrl := os.Getenv("ORIGIN_URL")
-	debugMode := os.Getenv("DEBUG_MODE")
-
-	if portString == "" || dbUrl == "" || originUrl == "" || debugMode == "" {
-		logger.LogFatalRedAndExit("PORT | DB_URL | ORIGIN_URL | DEBUG_MODE is not found in the environment")
-	}
-
-	debug, err := strconv.ParseBool(debugMode)
-	if err != nil {
-		logger.LogFatalRedAndExit("DEBUG_MODE must be a boolean")
-	}
-
-	return portString, dbUrl, originUrl, debug
-}
-
-func getDatbase(dbUrl string) (*database.Queries, error) {
-	conn, err := sql.Open("postgres", dbUrl)
-	if err != nil {
-		return nil, err
-	}
-
-	queries := database.New(conn)
-
-	return queries, nil
-}
-
-func getApiConfig(database *database.Queries) (handlers.ApiConfig, error) {
-	apiCfg := handlers.ApiConfig{
-		DB: database,
-	}
-
-	return apiCfg, nil
 }
