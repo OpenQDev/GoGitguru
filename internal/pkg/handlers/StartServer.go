@@ -1,7 +1,6 @@
-package setup
+package handlers
 
 import (
-	"main/internal/pkg/handlers"
 	"main/internal/pkg/logger"
 	"net/http"
 
@@ -9,7 +8,7 @@ import (
 	"github.com/go-chi/cors"
 )
 
-func StartServer(apiCfg handlers.ApiConfig, portString string, originUrl string) {
+func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
 	router := chi.NewRouter()
 
 	router.Use(cors.Handler(cors.Options{
