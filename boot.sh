@@ -16,7 +16,7 @@ echo "Postgres is up - executing command"
 cd ./sql/schema
 goose postgres "postgres://postgres:@localhost:5432/postgres?sslmode=disable" up
 
-cd ~/Gitguru
+cd ../..
 
 psql -h "localhost" -U "postgres" -p 5432 -f ./repos.sql
 
