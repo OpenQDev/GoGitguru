@@ -1,5 +1,12 @@
 # Gitguru
 
+## Getting Started
+
+```bash
+cp .env.sample .env
+./boot.sh
+```
+
 ## Testing
 
 ### Test
