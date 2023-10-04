@@ -23,3 +23,6 @@ INSERT INTO github_users (
 )
 RETURNING *;
 
+-- name: GetGithubUser :one
+
+SELECT * FROM github_users WHERE login = $1;

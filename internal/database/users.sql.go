@@ -10,6 +10,37 @@ import (
 	"database/sql"
 )
 
+const getGithubUser = `-- name: GetGithubUser :one
+
+SELECT internal_id, github_rest_id, github_graphql_id, login, name, email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at FROM github_users WHERE login = $1
+`
+
+func (q *Queries) GetGithubUser(ctx context.Context, login string) (GithubUser, error) {
+	row := q.queryRow(ctx, q.getGithubUserStmt, getGithubUser, login)
+	var i GithubUser
+	err := row.Scan(
+		&i.InternalID,
+		&i.GithubRestID,
+		&i.GithubGraphqlID,
+		&i.Login,
+		&i.Name,
+		&i.Email,
+		&i.AvatarUrl,
+		&i.Company,
+		&i.Location,
+		&i.Bio,
+		&i.Blog,
+		&i.Hireable,
+		&i.TwitterUsername,
+		&i.Followers,
+		&i.Following,
+		&i.Type,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const insertUser = `-- name: InsertUser :one
 
 INSERT INTO github_users (

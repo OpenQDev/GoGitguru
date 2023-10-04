@@ -30,6 +30,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getCommitsStmt, err = db.PrepareContext(ctx, getCommits); err != nil {
 		return nil, fmt.Errorf("error preparing query GetCommits: %w", err)
 	}
+	if q.getGithubUserStmt, err = db.PrepareContext(ctx, getGithubUser); err != nil {
+		return nil, fmt.Errorf("error preparing query GetGithubUser: %w", err)
+	}
 	if q.getRepoURLStmt, err = db.PrepareContext(ctx, getRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRepoURL: %w", err)
 	}
@@ -67,6 +70,11 @@ func (q *Queries) Close() error {
 	if q.getCommitsStmt != nil {
 		if cerr := q.getCommitsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getCommitsStmt: %w", cerr)
+		}
+	}
+	if q.getGithubUserStmt != nil {
+		if cerr := q.getGithubUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getGithubUserStmt: %w", cerr)
 		}
 	}
 	if q.getRepoURLStmt != nil {
@@ -150,6 +158,7 @@ type Queries struct {
 	tx                           *sql.Tx
 	getCommitStmt                *sql.Stmt
 	getCommitsStmt               *sql.Stmt
+	getGithubUserStmt            *sql.Stmt
 	getRepoURLStmt               *sql.Stmt
 	getRepoURLsStmt              *sql.Stmt
 	insertCommitStmt             *sql.Stmt
@@ -166,6 +175,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		tx:                           tx,
 		getCommitStmt:                q.getCommitStmt,
 		getCommitsStmt:               q.getCommitsStmt,
+		getGithubUserStmt:            q.getGithubUserStmt,
 		getRepoURLStmt:               q.getRepoURLStmt,
 		getRepoURLsStmt:              q.getRepoURLsStmt,
 		insertCommitStmt:             q.insertCommitStmt,
