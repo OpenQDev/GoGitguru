@@ -25,34 +25,27 @@ func StartSyncingUser(
 	prefixPath string,
 	concurrency int,
 	timeBetweenSyncs time.Duration) {
-	/*
-	   [
-	     {
-	       65062be663cc004b77ca8a3b13255bc5efa42f25
-	       {andrew@openq.dev true}
-	       {https://github.com/openqdev/openq-workflows true}
-	     }
-	   ]
-	   **/
-
 	newCommitAuthorsRaw, err := db.GetLatestUncheckedCommitPerAuthor(context.Background())
+	if err != nil {
+		logger.LogError("errerrerr", err)
+	}
 
 	if len(newCommitAuthorsRaw) == 0 {
 		logger.LogBlue("No new authors to process.")
 		return
 	}
 
+	logger.LogBlue("identifying %d new authors", len(newCommitAuthorsRaw))
+
+	// Convert to database object to local type
 	newCommitAuthors := convertToUserSync(newCommitAuthorsRaw)
+	fmt.Println("newCommitAuthors", newCommitAuthors)
 
-	if err != nil {
-		logger.LogError("errerrerr", err)
-	}
-
-	fmt.Println(newCommitAuthors)
-
-	logger.LogBlue("identifying %d new authors", len(newCommitAuthors))
-
+	// Create map of repoUrl -> []authors
 	repoUrlToAuthorsMap := getRepoToAuthorsMap(newCommitAuthors)
+	fmt.Println("repoUrlToAuthorsMap", repoUrlToAuthorsMap)
 
-	fmt.Println(repoUrlToAuthorsMap)
+	// Create batches of repos for GraphQL query
+	authorBatches := batchAuthors(repoUrlToAuthorsMap, 2)
+	fmt.Println("authorBatches", authorBatches)
 }
