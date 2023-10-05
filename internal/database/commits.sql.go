@@ -8,7 +8,53 @@ package database
 import (
 	"context"
 	"database/sql"
+
+	"github.com/lib/pq"
 )
+
+const bulkInsertCommits = `-- name: BulkInsertCommits :exec
+INSERT INTO commits (commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, files_changed, repo_url) VALUES (  
+  unnest($1::varchar[]),  
+  unnest($2::varchar[]),  
+  unnest($3::varchar[]),  
+  unnest($4::bigint[]),  
+  unnest($5::bigint[]),  
+  unnest($6::text[]),  
+  unnest($7::int[]),  
+  unnest($8::int[]),  
+  unnest($9::int[]),  
+  unnest($10::varchar[])  
+)
+`
+
+type BulkInsertCommitsParams struct {
+	Column1  []string `json:"column_1"`
+	Column2  []string `json:"column_2"`
+	Column3  []string `json:"column_3"`
+	Column4  []int64  `json:"column_4"`
+	Column5  []int64  `json:"column_5"`
+	Column6  []string `json:"column_6"`
+	Column7  []int32  `json:"column_7"`
+	Column8  []int32  `json:"column_8"`
+	Column9  []int32  `json:"column_9"`
+	Column10 []string `json:"column_10"`
+}
+
+func (q *Queries) BulkInsertCommits(ctx context.Context, arg BulkInsertCommitsParams) error {
+	_, err := q.exec(ctx, q.bulkInsertCommitsStmt, bulkInsertCommits,
+		pq.Array(arg.Column1),
+		pq.Array(arg.Column2),
+		pq.Array(arg.Column3),
+		pq.Array(arg.Column4),
+		pq.Array(arg.Column5),
+		pq.Array(arg.Column6),
+		pq.Array(arg.Column7),
+		pq.Array(arg.Column8),
+		pq.Array(arg.Column9),
+		pq.Array(arg.Column10),
+	)
+	return err
+}
 
 const getCommit = `-- name: GetCommit :one
 SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url FROM commits WHERE commit_hash = $1

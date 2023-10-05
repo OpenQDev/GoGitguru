@@ -22,3 +22,17 @@ ON c.author_email = gure.email
 INNER JOIN github_users gu
 ON gure.rest_id = gu.github_rest_id
 ORDER BY author_date DESC;
+
+-- name: BulkInsertCommits :exec
+INSERT INTO commits (commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, files_changed, repo_url) VALUES (  
+  unnest($1::varchar[]),  
+  unnest($2::varchar[]),  
+  unnest($3::varchar[]),  
+  unnest($4::bigint[]),  
+  unnest($5::bigint[]),  
+  unnest($6::text[]),  
+  unnest($7::int[]),  
+  unnest($8::int[]),  
+  unnest($9::int[]),  
+  unnest($10::varchar[])  
+);

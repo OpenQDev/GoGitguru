@@ -1,9 +1,7 @@
 package gitutil
 
-// git -C . log --reverse --pretty=format:"%H-;-%an-;-%ae-;-%at-;-%ct%n%s" --numstat --since=2020-01-01
-// git -C . rev-parse --is-inside-work-tree
-
 import (
+	"context"
 	"fmt"
 	"io"
 	"main/internal/database"
@@ -61,8 +59,20 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 
 	// Iterate through the commit history
 	commitCount := 0
-	var values []string
-	var args []interface{}
+
+	var (
+		commitHash    []string
+		author        []string
+		authorEmail   []string
+		authorDate    []int64
+		committerDate []int64
+		message       []string
+		insertions    []int32
+		deletions     []int32
+		filesChanged  []int32
+		repoUrls      []string
+	)
+
 	for {
 		commit, err := log.Next()
 		if err != nil {
@@ -75,20 +85,25 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 
 		stats, _ := commit.Stats()
 
-		filesChanged := 0
-		insertions := 0
-		deletions := 0
+		totalFilesChanged := 0
+		totalInsertions := 0
+		totalDeletions := 0
 		for _, stat := range stats {
-			insertions += stat.Addition
-			deletions += stat.Deletion
-			filesChanged++
+			totalInsertions += stat.Addition
+			totalDeletions += stat.Deletion
+			totalFilesChanged++
 		}
 
-		// Create a placeholder for each commit
-		values = append(values, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)", commitCount*10+1, commitCount*10+2, commitCount*10+3, commitCount*10+4, commitCount*10+5, commitCount*10+6, commitCount*10+7, commitCount*10+8, commitCount*10+9, commitCount*10+10))
-
-		// Append the actual values
-		args = append(args, commit.Hash.String(), commit.Author.Name, commit.Author.Email, commit.Author.When.Unix(), commit.Committer.When.Unix(), strings.TrimRight(commit.Message, "\n"), int32(insertions), int32(deletions), int32(filesChanged), repoUrl)
+		commitHash = append(commitHash, commit.Hash.String())
+		author = append(author, commit.Author.Name)
+		authorEmail = append(authorEmail, commit.Author.Email)
+		authorDate = append(authorDate, int64(commit.Author.When.Unix()))
+		committerDate = append(committerDate, int64(commit.Committer.When.Unix()))
+		message = append(message, strings.TrimRight(commit.Message, "\n"))
+		insertions = append(insertions, int32(totalInsertions))
+		deletions = append(deletions, int32(totalDeletions))
+		filesChanged = append(filesChanged, int32(totalFilesChanged))
+		repoUrls = append(repoUrls, repoUrl)
 
 		if commitCount%100 == 0 {
 			logger.LogGreenDebug("stored %d commits for %s", commitCount, repoUrl)
@@ -96,14 +111,50 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 		commitCount++
 	}
 
-	err = BatchInsertCommits(args, values)
+	err = BatchInsertCommits(
+		db,
+		commitHash,
+		author,
+		authorEmail,
+		authorDate,
+		committerDate,
+		message,
+		insertions,
+		deletions,
+		filesChanged,
+		repoUrls,
+	)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("error storing commits for %s: %s", repoUrl, err)
 	}
 
 	return commitCount, nil
 }
 
-func BatchInsertCommits(args []interface{}, values []string) error {
-	return nil
+func BatchInsertCommits(
+	db *database.Queries,
+	commitHash []string,
+	author []string,
+	authorEmail []string,
+	authorDate []int64,
+	committerDate []int64,
+	message []string,
+	insertions []int32,
+	deletions []int32,
+	filesChanged []int32,
+	repoUrls []string,
+) error {
+	params := database.BulkInsertCommitsParams{
+		Column1:  commitHash,
+		Column2:  author,
+		Column3:  authorEmail,
+		Column4:  authorDate,
+		Column5:  committerDate,
+		Column6:  message,
+		Column7:  insertions,
+		Column8:  deletions,
+		Column9:  filesChanged,
+		Column10: repoUrls,
+	}
+	return db.BulkInsertCommits(context.Background(), params)
 }

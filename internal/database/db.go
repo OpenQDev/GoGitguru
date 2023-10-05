@@ -24,6 +24,9 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
+	if q.bulkInsertCommitsStmt, err = db.PrepareContext(ctx, bulkInsertCommits); err != nil {
+		return nil, fmt.Errorf("error preparing query BulkInsertCommits: %w", err)
+	}
 	if q.getCommitStmt, err = db.PrepareContext(ctx, getCommit); err != nil {
 		return nil, fmt.Errorf("error preparing query GetCommit: %w", err)
 	}
@@ -65,6 +68,11 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
+	if q.bulkInsertCommitsStmt != nil {
+		if cerr := q.bulkInsertCommitsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing bulkInsertCommitsStmt: %w", cerr)
+		}
+	}
 	if q.getCommitStmt != nil {
 		if cerr := q.getCommitStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getCommitStmt: %w", cerr)
@@ -164,6 +172,7 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 type Queries struct {
 	db                           DBTX
 	tx                           *sql.Tx
+	bulkInsertCommitsStmt        *sql.Stmt
 	getCommitStmt                *sql.Stmt
 	getCommitsStmt               *sql.Stmt
 	getCommitsWithAuthorInfoStmt *sql.Stmt
@@ -182,6 +191,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
 		db:                           tx,
 		tx:                           tx,
+		bulkInsertCommitsStmt:        q.bulkInsertCommitsStmt,
 		getCommitStmt:                q.getCommitStmt,
 		getCommitsStmt:               q.getCommitsStmt,
 		getCommitsWithAuthorInfoStmt: q.getCommitsWithAuthorInfoStmt,
