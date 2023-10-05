@@ -61,7 +61,7 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 	}
 
 	// Execute the command to get the number of commits
-	cmd := exec.Command("git", "-C", fullRepoPath, "rev-list", "--all", "--count")
+	cmd := exec.Command("git", "-C", fullRepoPath, "rev-list", "--count", "HEAD")
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
@@ -80,9 +80,6 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 
 	fmt.Printf("%s has %d commits\n", repoUrl, numberOfCommits)
 
-	// Iterate through the commit history
-	commitCount := 0
-
 	var (
 		commitHash    = make([]string, numberOfCommits)
 		author        = make([]string, numberOfCommits)
@@ -96,6 +93,8 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 		repoUrls      = make([]string, numberOfCommits)
 	)
 
+	// Iterate through the commit history
+	commitCount := 0
 	for {
 		commit, err := log.Next()
 		if err != nil {
@@ -117,19 +116,19 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 			totalFilesChanged++
 		}
 
-		commitHash = append(commitHash, commit.Hash.String())
-		author = append(author, commit.Author.Name)
-		authorEmail = append(authorEmail, commit.Author.Email)
-		authorDate = append(authorDate, int64(commit.Author.When.Unix()))
-		committerDate = append(committerDate, int64(commit.Committer.When.Unix()))
-		message = append(message, strings.TrimRight(commit.Message, "\n"))
-		insertions = append(insertions, int32(totalInsertions))
-		deletions = append(deletions, int32(totalDeletions))
-		filesChanged = append(filesChanged, int32(totalFilesChanged))
-		repoUrls = append(repoUrls, repoUrl)
+		commitHash[commitCount] = commit.Hash.String()
+		author[commitCount] = commit.Author.Name
+		authorEmail[commitCount] = commit.Author.Email
+		authorDate[commitCount] = int64(commit.Author.When.Unix())
+		committerDate[commitCount] = int64(commit.Committer.When.Unix())
+		message[commitCount] = strings.TrimRight(commit.Message, "\n")
+		insertions[commitCount] = int32(totalInsertions)
+		deletions[commitCount] = int32(totalDeletions)
+		filesChanged[commitCount] = int32(totalFilesChanged)
+		repoUrls[commitCount] = repoUrl
 
 		if commitCount%100 == 0 {
-			logger.LogGreenDebug("stored %d commits for %s", commitCount, repoUrl)
+			logger.LogGreenDebug("process %d commits for %s", commitCount, repoUrl)
 		}
 		commitCount++
 	}
