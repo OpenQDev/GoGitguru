@@ -4,8 +4,6 @@ package gitutil
 // git -C . rev-parse --is-inside-work-tree
 
 import (
-	"context"
-	"database/sql"
 	"fmt"
 	"io"
 	"main/internal/database"
@@ -63,6 +61,8 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 
 	// Iterate through the commit history
 	commitCount := 0
+	var values []string
+	var args []interface{}
 	for {
 		commit, err := log.Next()
 		if err != nil {
@@ -84,23 +84,11 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 			filesChanged++
 		}
 
-		params := database.InsertCommitParams{
-			CommitHash:    commit.Hash.String(),
-			Author:        sql.NullString{String: commit.Author.Name, Valid: commit.Author.Name != ""},
-			AuthorEmail:   sql.NullString{String: commit.Author.Email, Valid: commit.Author.Email != ""},
-			AuthorDate:    sql.NullInt64{Int64: commit.Author.When.Unix(), Valid: commit.Author.When.Unix() != 0},
-			CommitterDate: sql.NullInt64{Int64: commit.Committer.When.Unix(), Valid: commit.Committer.When.Unix() != 0},
-			Message:       sql.NullString{String: strings.TrimRight(commit.Message, "\n"), Valid: strings.TrimRight(commit.Message, "\n") != ""},
-			Insertions:    sql.NullInt32{Int32: int32(insertions), Valid: true},
-			Deletions:     sql.NullInt32{Int32: int32(deletions), Valid: true},
-			FilesChanged:  sql.NullInt32{Int32: int32(filesChanged), Valid: true},
-			RepoUrl:       sql.NullString{String: repoUrl, Valid: repoUrl != ""},
-		}
+		// Create a placeholder for each commit
+		values = append(values, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)", commitCount*10+1, commitCount*10+2, commitCount*10+3, commitCount*10+4, commitCount*10+5, commitCount*10+6, commitCount*10+7, commitCount*10+8, commitCount*10+9, commitCount*10+10))
 
-		_, err = db.InsertCommit(context.Background(), params)
-		if err != nil {
-			return 0, fmt.Errorf("error loading commit number %d for %s: %s", commitCount, repoUrl, err)
-		}
+		// Append the actual values
+		args = append(args, commit.Hash.String(), commit.Author.Name, commit.Author.Email, commit.Author.When.Unix(), commit.Committer.When.Unix(), strings.TrimRight(commit.Message, "\n"), int32(insertions), int32(deletions), int32(filesChanged), repoUrl)
 
 		if commitCount%100 == 0 {
 			logger.LogGreenDebug("stored %d commits for %s", commitCount, repoUrl)
@@ -108,5 +96,14 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 		commitCount++
 	}
 
+	err = BatchInsertCommits(args, values)
+	if err != nil {
+		return 0, err
+	}
+
 	return commitCount, nil
+}
+
+func BatchInsertCommits(args []interface{}, values []string) error {
+	return nil
 }
