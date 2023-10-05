@@ -26,3 +26,6 @@ RETURNING *;
 -- name: GetGithubUser :one
 
 SELECT * FROM github_users WHERE login = $1;
+
+-- name: GetGroupOfEmails :one
+SELECT github_rest_id FROM github_users WHERE github_rest_id = ANY($1::INT[]);

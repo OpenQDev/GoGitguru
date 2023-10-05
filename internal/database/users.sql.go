@@ -8,6 +8,8 @@ package database
 import (
 	"context"
 	"database/sql"
+
+	"github.com/lib/pq"
 )
 
 const getGithubUser = `-- name: GetGithubUser :one
@@ -39,6 +41,17 @@ func (q *Queries) GetGithubUser(ctx context.Context, login string) (GithubUser, 
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getGroupOfEmails = `-- name: GetGroupOfEmails :one
+SELECT github_rest_id FROM github_users WHERE github_rest_id = ANY($1::INT[])
+`
+
+func (q *Queries) GetGroupOfEmails(ctx context.Context, dollar_1 []int32) (int32, error) {
+	row := q.queryRow(ctx, q.getGroupOfEmailsStmt, getGroupOfEmails, pq.Array(dollar_1))
+	var github_rest_id int32
+	err := row.Scan(&github_rest_id)
+	return github_rest_id, err
 }
 
 const insertUser = `-- name: InsertUser :one

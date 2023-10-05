@@ -39,6 +39,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getGithubUserStmt, err = db.PrepareContext(ctx, getGithubUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGithubUser: %w", err)
 	}
+	if q.getGroupOfEmailsStmt, err = db.PrepareContext(ctx, getGroupOfEmails); err != nil {
+		return nil, fmt.Errorf("error preparing query GetGroupOfEmails: %w", err)
+	}
 	if q.getLatestUncheckedCommitPerAuthorStmt, err = db.PrepareContext(ctx, getLatestUncheckedCommitPerAuthor); err != nil {
 		return nil, fmt.Errorf("error preparing query GetLatestUncheckedCommitPerAuthor: %w", err)
 	}
@@ -56,6 +59,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.insertRepoURLStmt, err = db.PrepareContext(ctx, insertRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertRepoURL: %w", err)
+	}
+	if q.insertRestIdToEmailStmt, err = db.PrepareContext(ctx, insertRestIdToEmail); err != nil {
+		return nil, fmt.Errorf("error preparing query InsertRestIdToEmail: %w", err)
 	}
 	if q.insertUserStmt, err = db.PrepareContext(ctx, insertUser); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertUser: %w", err)
@@ -96,6 +102,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getGithubUserStmt: %w", cerr)
 		}
 	}
+	if q.getGroupOfEmailsStmt != nil {
+		if cerr := q.getGroupOfEmailsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getGroupOfEmailsStmt: %w", cerr)
+		}
+	}
 	if q.getLatestUncheckedCommitPerAuthorStmt != nil {
 		if cerr := q.getLatestUncheckedCommitPerAuthorStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getLatestUncheckedCommitPerAuthorStmt: %w", cerr)
@@ -124,6 +135,11 @@ func (q *Queries) Close() error {
 	if q.insertRepoURLStmt != nil {
 		if cerr := q.insertRepoURLStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing insertRepoURLStmt: %w", cerr)
+		}
+	}
+	if q.insertRestIdToEmailStmt != nil {
+		if cerr := q.insertRestIdToEmailStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing insertRestIdToEmailStmt: %w", cerr)
 		}
 	}
 	if q.insertUserStmt != nil {
@@ -185,12 +201,14 @@ type Queries struct {
 	getCommitsStmt                        *sql.Stmt
 	getCommitsWithAuthorInfoStmt          *sql.Stmt
 	getGithubUserStmt                     *sql.Stmt
+	getGroupOfEmailsStmt                  *sql.Stmt
 	getLatestUncheckedCommitPerAuthorStmt *sql.Stmt
 	getRepoURLStmt                        *sql.Stmt
 	getRepoURLsStmt                       *sql.Stmt
 	insertCommitStmt                      *sql.Stmt
 	insertGithubRepoStmt                  *sql.Stmt
 	insertRepoURLStmt                     *sql.Stmt
+	insertRestIdToEmailStmt               *sql.Stmt
 	insertUserStmt                        *sql.Stmt
 	updateStatusStmt                      *sql.Stmt
 	updateStatusAndUpdatedAtStmt          *sql.Stmt
@@ -205,12 +223,14 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getCommitsStmt:                        q.getCommitsStmt,
 		getCommitsWithAuthorInfoStmt:          q.getCommitsWithAuthorInfoStmt,
 		getGithubUserStmt:                     q.getGithubUserStmt,
+		getGroupOfEmailsStmt:                  q.getGroupOfEmailsStmt,
 		getLatestUncheckedCommitPerAuthorStmt: q.getLatestUncheckedCommitPerAuthorStmt,
 		getRepoURLStmt:                        q.getRepoURLStmt,
 		getRepoURLsStmt:                       q.getRepoURLsStmt,
 		insertCommitStmt:                      q.insertCommitStmt,
 		insertGithubRepoStmt:                  q.insertGithubRepoStmt,
 		insertRepoURLStmt:                     q.insertRepoURLStmt,
+		insertRestIdToEmailStmt:               q.insertRestIdToEmailStmt,
 		insertUserStmt:                        q.insertUserStmt,
 		updateStatusStmt:                      q.updateStatusStmt,
 		updateStatusAndUpdatedAtStmt:          q.updateStatusAndUpdatedAtStmt,
