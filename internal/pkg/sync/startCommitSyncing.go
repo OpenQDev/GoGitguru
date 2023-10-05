@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func StartSyncing(
+func StartSyncingCommits(
 	db *database.Queries,
 	prefixPath string,
 	concurrency int,

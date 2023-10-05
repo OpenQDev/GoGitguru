@@ -105,16 +105,16 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 			}
 		}
 
-		stats, _ := commit.Stats()
+		// stats, _ := commit.Stats()
 
 		totalFilesChanged := 0
 		totalInsertions := 0
 		totalDeletions := 0
-		for _, stat := range stats {
-			totalInsertions += stat.Addition
-			totalDeletions += stat.Deletion
-			totalFilesChanged++
-		}
+		// for _, stat := range stats {
+		// 	totalInsertions += stat.Addition
+		// 	totalDeletions += stat.Deletion
+		// 	totalFilesChanged++
+		// }
 
 		commitHash[commitCount] = commit.Hash.String()
 		author[commitCount] = commit.Author.Name

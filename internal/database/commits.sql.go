@@ -228,6 +228,59 @@ func (q *Queries) GetCommitsWithAuthorInfo(ctx context.Context, arg GetCommitsWi
 	return items, nil
 }
 
+const getLatestUncheckedCommitPerAuthor = `-- name: GetLatestUncheckedCommitPerAuthor :many
+
+WITH LatestUncheckedCommitPerAuthor AS (
+    SELECT DISTINCT ON (author_email)
+    commit_hash,
+    author_email,
+    repo_url
+    FROM commits
+    WHERE author_email NOT IN (
+        SELECT email FROM github_user_rest_id_author_emails
+    )
+    ORDER BY author_email, author_date DESC
+)
+
+SELECT
+    commit_hash,
+    author_email,
+    repo_url
+FROM
+    LatestUncheckedCommitPerAuthor
+ORDER BY
+    repo_url DESC
+`
+
+type GetLatestUncheckedCommitPerAuthorRow struct {
+	CommitHash  string         `json:"commit_hash"`
+	AuthorEmail sql.NullString `json:"author_email"`
+	RepoUrl     sql.NullString `json:"repo_url"`
+}
+
+func (q *Queries) GetLatestUncheckedCommitPerAuthor(ctx context.Context) ([]GetLatestUncheckedCommitPerAuthorRow, error) {
+	rows, err := q.query(ctx, q.getLatestUncheckedCommitPerAuthorStmt, getLatestUncheckedCommitPerAuthor)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetLatestUncheckedCommitPerAuthorRow
+	for rows.Next() {
+		var i GetLatestUncheckedCommitPerAuthorRow
+		if err := rows.Scan(&i.CommitHash, &i.AuthorEmail, &i.RepoUrl); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const insertCommit = `-- name: InsertCommit :one
 INSERT INTO commits (commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, files_changed, repo_url) 
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)

@@ -39,6 +39,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getGithubUserStmt, err = db.PrepareContext(ctx, getGithubUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGithubUser: %w", err)
 	}
+	if q.getLatestUncheckedCommitPerAuthorStmt, err = db.PrepareContext(ctx, getLatestUncheckedCommitPerAuthor); err != nil {
+		return nil, fmt.Errorf("error preparing query GetLatestUncheckedCommitPerAuthor: %w", err)
+	}
 	if q.getRepoURLStmt, err = db.PrepareContext(ctx, getRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRepoURL: %w", err)
 	}
@@ -91,6 +94,11 @@ func (q *Queries) Close() error {
 	if q.getGithubUserStmt != nil {
 		if cerr := q.getGithubUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getGithubUserStmt: %w", cerr)
+		}
+	}
+	if q.getLatestUncheckedCommitPerAuthorStmt != nil {
+		if cerr := q.getLatestUncheckedCommitPerAuthorStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getLatestUncheckedCommitPerAuthorStmt: %w", cerr)
 		}
 	}
 	if q.getRepoURLStmt != nil {
@@ -170,39 +178,41 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                           DBTX
-	tx                           *sql.Tx
-	bulkInsertCommitsStmt        *sql.Stmt
-	getCommitStmt                *sql.Stmt
-	getCommitsStmt               *sql.Stmt
-	getCommitsWithAuthorInfoStmt *sql.Stmt
-	getGithubUserStmt            *sql.Stmt
-	getRepoURLStmt               *sql.Stmt
-	getRepoURLsStmt              *sql.Stmt
-	insertCommitStmt             *sql.Stmt
-	insertGithubRepoStmt         *sql.Stmt
-	insertRepoURLStmt            *sql.Stmt
-	insertUserStmt               *sql.Stmt
-	updateStatusStmt             *sql.Stmt
-	updateStatusAndUpdatedAtStmt *sql.Stmt
+	db                                    DBTX
+	tx                                    *sql.Tx
+	bulkInsertCommitsStmt                 *sql.Stmt
+	getCommitStmt                         *sql.Stmt
+	getCommitsStmt                        *sql.Stmt
+	getCommitsWithAuthorInfoStmt          *sql.Stmt
+	getGithubUserStmt                     *sql.Stmt
+	getLatestUncheckedCommitPerAuthorStmt *sql.Stmt
+	getRepoURLStmt                        *sql.Stmt
+	getRepoURLsStmt                       *sql.Stmt
+	insertCommitStmt                      *sql.Stmt
+	insertGithubRepoStmt                  *sql.Stmt
+	insertRepoURLStmt                     *sql.Stmt
+	insertUserStmt                        *sql.Stmt
+	updateStatusStmt                      *sql.Stmt
+	updateStatusAndUpdatedAtStmt          *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                           tx,
-		tx:                           tx,
-		bulkInsertCommitsStmt:        q.bulkInsertCommitsStmt,
-		getCommitStmt:                q.getCommitStmt,
-		getCommitsStmt:               q.getCommitsStmt,
-		getCommitsWithAuthorInfoStmt: q.getCommitsWithAuthorInfoStmt,
-		getGithubUserStmt:            q.getGithubUserStmt,
-		getRepoURLStmt:               q.getRepoURLStmt,
-		getRepoURLsStmt:              q.getRepoURLsStmt,
-		insertCommitStmt:             q.insertCommitStmt,
-		insertGithubRepoStmt:         q.insertGithubRepoStmt,
-		insertRepoURLStmt:            q.insertRepoURLStmt,
-		insertUserStmt:               q.insertUserStmt,
-		updateStatusStmt:             q.updateStatusStmt,
-		updateStatusAndUpdatedAtStmt: q.updateStatusAndUpdatedAtStmt,
+		db:                                    tx,
+		tx:                                    tx,
+		bulkInsertCommitsStmt:                 q.bulkInsertCommitsStmt,
+		getCommitStmt:                         q.getCommitStmt,
+		getCommitsStmt:                        q.getCommitsStmt,
+		getCommitsWithAuthorInfoStmt:          q.getCommitsWithAuthorInfoStmt,
+		getGithubUserStmt:                     q.getGithubUserStmt,
+		getLatestUncheckedCommitPerAuthorStmt: q.getLatestUncheckedCommitPerAuthorStmt,
+		getRepoURLStmt:                        q.getRepoURLStmt,
+		getRepoURLsStmt:                       q.getRepoURLsStmt,
+		insertCommitStmt:                      q.insertCommitStmt,
+		insertGithubRepoStmt:                  q.insertGithubRepoStmt,
+		insertRepoURLStmt:                     q.insertRepoURLStmt,
+		insertUserStmt:                        q.insertUserStmt,
+		updateStatusStmt:                      q.updateStatusStmt,
+		updateStatusAndUpdatedAtStmt:          q.updateStatusAndUpdatedAtStmt,
 	}
 }

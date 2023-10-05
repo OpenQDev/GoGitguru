@@ -12,8 +12,14 @@ func main() {
 	portString, dbUrl, originUrl, debugMode, syncMode, syncIntervalMinutes := setup.ExtractAndVerifyEnvironment(".env")
 	database, apiCfg := setup.PrepareDatabase(dbUrl)
 	logger.SetDebugMode(debugMode)
+
 	if syncMode {
-		go sync.StartSyncing(database, "repos", 10, time.Duration(syncIntervalMinutes)*time.Minute)
+		go sync.StartSyncingCommits(database, "repos", 10, time.Duration(syncIntervalMinutes)*time.Minute)
 	}
+
+	if true {
+		go sync.StartSyncingCommits(database, "repos", 10, time.Duration(syncIntervalMinutes)*time.Minute)
+	}
+
 	server.StartServer(apiCfg, portString, originUrl)
 }
