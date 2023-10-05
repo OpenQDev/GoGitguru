@@ -9,7 +9,16 @@ import (
 )
 
 func main() {
-	portString, dbUrl, originUrl, debugMode, syncMode, syncIntervalMinutes := setup.ExtractAndVerifyEnvironment(".env")
+
+	portString,
+		dbUrl,
+		originUrl,
+		debugMode,
+		syncMode,
+		syncIntervalMinutes,
+		syncUsersMode,
+		syncUsersIntervalMinutes := setup.ExtractAndVerifyEnvironment(".env")
+
 	database, apiCfg := setup.PrepareDatabase(dbUrl)
 	logger.SetDebugMode(debugMode)
 
@@ -17,8 +26,8 @@ func main() {
 		go sync.StartSyncingCommits(database, "repos", 10, time.Duration(syncIntervalMinutes)*time.Minute)
 	}
 
-	if true {
-		go sync.StartSyncingCommits(database, "repos", 10, time.Duration(syncIntervalMinutes)*time.Minute)
+	if syncUsersMode {
+		go sync.StartSyncingUser(database, "repos", 10, time.Duration(syncUsersIntervalMinutes)*time.Minute)
 	}
 
 	server.StartServer(apiCfg, portString, originUrl)
