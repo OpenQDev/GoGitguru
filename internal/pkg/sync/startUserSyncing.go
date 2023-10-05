@@ -24,7 +24,9 @@ func StartSyncingUser(
 	db *database.Queries,
 	prefixPath string,
 	concurrency int,
-	timeBetweenSyncs time.Duration) {
+	timeBetweenSyncs time.Duration,
+	ghAccessToken string,
+) {
 	newCommitAuthorsRaw, err := db.GetLatestUncheckedCommitPerAuthor(context.Background())
 	if err != nil {
 		logger.LogError("errerrerr", err)
@@ -50,4 +52,7 @@ func StartSyncingUser(
 	fmt.Println("authorBatches", authorBatches)
 
 	// Get info for each batch
+	// for _, authorBatch := range authorBatches {
+	// 	identifyRepoAuthorsBatch(authorBatch.repoUrl, authorBatch.authorList, ghAccessToken)
+	// }
 }

@@ -17,17 +17,17 @@ func main() {
 		syncMode,
 		syncIntervalMinutes,
 		syncUsersMode,
-		syncUsersIntervalMinutes := setup.ExtractAndVerifyEnvironment(".env")
+		syncUsersIntervalMinutes, ghAccessToken := setup.ExtractAndVerifyEnvironment(".env")
 
 	database, apiCfg := setup.PrepareDatabase(dbUrl)
 	logger.SetDebugMode(debugMode)
 
 	if syncMode {
-		sync.StartSyncingCommits(database, "repos", 10, time.Duration(syncIntervalMinutes)*time.Minute)
+		go sync.StartSyncingCommits(database, "repos", 10, time.Duration(syncIntervalMinutes)*time.Minute)
 	}
 
 	if syncUsersMode {
-		sync.StartSyncingUser(database, "repos", 10, time.Duration(syncUsersIntervalMinutes)*time.Minute)
+		go sync.StartSyncingUser(database, "repos", 10, time.Duration(syncUsersIntervalMinutes)*time.Minute, ghAccessToken)
 	}
 
 	server.StartServer(apiCfg, portString, originUrl)
