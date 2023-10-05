@@ -1,12 +1,11 @@
 package gitutil
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"net/http/httputil"
-	"strings"
 )
 
 type Author struct {
@@ -60,6 +59,10 @@ type CommitAuthorsResponse struct {
 	} `json:"errors"`
 }
 
+type GraphQLPayload struct {
+	Query string `json:"query"`
+}
+
 func GithubGetCommitAuthors(query string, ghAccessToken string) (CommitAuthorsResponse, error) {
 	// Queries the GitHub GraphQL API.
 	// Parameters:
@@ -76,19 +79,22 @@ func GithubGetCommitAuthors(query string, ghAccessToken string) (CommitAuthorsRe
 
 	url := "https://api.github.com/graphql"
 
-	payload := strings.NewReader(fmt.Sprintf(`"query": "%s"`, query))
-	fmt.Println(payload)
+	payloadObj := GraphQLPayload{
+		Query: query,
+	}
+
+	payloadBytes, err := json.Marshal(payloadObj)
+	if err != nil {
+		return CommitAuthorsResponse{}, err
+	}
+
+	payload := bytes.NewReader(payloadBytes)
+
 	req, _ := http.NewRequest("POST", url, payload)
 
 	for key, value := range headers {
 		req.Header.Add(key, value)
 	}
-
-	_, err := httputil.DumpRequest(req, true)
-	if err != nil {
-		return CommitAuthorsResponse{}, err
-	}
-	// fmt.Println(string(reqDump))
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {

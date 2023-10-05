@@ -1,6 +1,7 @@
 package gitutil
 
 import (
+	"encoding/json"
 	"fmt"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/setup"
@@ -30,5 +31,10 @@ func TestGithubGetCommitAuthors(t *testing.T) {
 		logger.LogError("error in GithubGetCommitAuthors", err)
 	}
 
-	fmt.Println(res)
+	resBytes, err := json.MarshalIndent(res, "", "  ")
+	if err != nil {
+		logger.LogError("error in json.MarshalIndent", err)
+	}
+
+	fmt.Println(string(resBytes))
 }
