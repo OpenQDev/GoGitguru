@@ -9,7 +9,7 @@ import (
 
 func BenchmarkProcessRepo(b *testing.B) {
 	// Setup
-	_, dbUrl, _, _, _, _, _, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
+	_, dbUrl, _, _, _, _, _, _, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
 
 	db, err := setup.GetDatbase(dbUrl)
 	if err != nil {

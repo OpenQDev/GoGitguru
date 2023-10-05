@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httputil"
 	"strings"
 )
 
@@ -33,10 +34,6 @@ type Author struct {
 		CreatedAt string `json:"created_at"`
 		UpdatedAt string `json:"updated_at"`
 	} `json:"user"`
-}
-
-type Repository struct {
-	Author `json:"author"`
 }
 
 type CommitAuthorsResponse struct {
@@ -73,18 +70,25 @@ func GithubGetCommitAuthors(query string, ghAccessToken string) (CommitAuthorsRe
 	// - error: If the request failed.
 
 	headers := map[string]string{
-		"Authorization": fmt.Sprintf("Bearer %s", ghAccessToken),
+		"Authorization": fmt.Sprintf("token %s", ghAccessToken),
 		"Content-Type":  "application/json",
 	}
 
 	url := "https://api.github.com/graphql"
 
-	payload := strings.NewReader(fmt.Sprintf(`{"query": "%s"}`, query))
+	payload := strings.NewReader(fmt.Sprintf(`"query": "%s"`, query))
+	fmt.Println(payload)
 	req, _ := http.NewRequest("POST", url, payload)
 
 	for key, value := range headers {
 		req.Header.Add(key, value)
 	}
+
+	_, err := httputil.DumpRequest(req, true)
+	if err != nil {
+		return CommitAuthorsResponse{}, err
+	}
+	// fmt.Println(string(reqDump))
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
