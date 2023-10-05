@@ -48,4 +48,6 @@ func StartSyncingUser(
 	// Create batches of repos for GraphQL query
 	authorBatches := batchAuthors(repoUrlToAuthorsMap, 2)
 	fmt.Println("authorBatches", authorBatches)
+
+	// Get info for each batch
 }
