@@ -8,6 +8,7 @@ import (
 
 func PrepareDatabase(dbUrl string) (*database.Queries, server.ApiConfig) {
 	database, err := GetDatbase(dbUrl)
+
 	if err != nil {
 		logger.LogError("error getting database: %s", err)
 	}
