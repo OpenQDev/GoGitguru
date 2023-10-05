@@ -1,12 +1,15 @@
 package gitutil
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"main/internal/database"
 	"main/internal/pkg/logger"
+	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -57,20 +60,40 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 		return 0, err
 	}
 
+	// Execute the command to get the number of commits
+	cmd := exec.Command("git", "-C", fullRepoPath, "rev-list", "--all", "--count")
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	err = cmd.Run()
+
+	if err != nil {
+		fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
+		return 0, err
+	}
+
+	numberOfCommits, err := strconv.Atoi(strings.TrimSpace(out.String()))
+	if err != nil {
+		return 0, err
+	}
+
+	fmt.Printf("%s has %d commits\n", repoUrl, numberOfCommits)
+
 	// Iterate through the commit history
 	commitCount := 0
 
 	var (
-		commitHash    []string
-		author        []string
-		authorEmail   []string
-		authorDate    []int64
-		committerDate []int64
-		message       []string
-		insertions    []int32
-		deletions     []int32
-		filesChanged  []int32
-		repoUrls      []string
+		commitHash    = make([]string, numberOfCommits)
+		author        = make([]string, numberOfCommits)
+		authorEmail   = make([]string, numberOfCommits)
+		authorDate    = make([]int64, numberOfCommits)
+		committerDate = make([]int64, numberOfCommits)
+		message       = make([]string, numberOfCommits)
+		insertions    = make([]int32, numberOfCommits)
+		deletions     = make([]int32, numberOfCommits)
+		filesChanged  = make([]int32, numberOfCommits)
+		repoUrls      = make([]string, numberOfCommits)
 	)
 
 	for {
