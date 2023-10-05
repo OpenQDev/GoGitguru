@@ -32,13 +32,13 @@ func StartSyncingCommits(
 	}
 
 	for _, repoUrl := range repoUrls {
-		organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
+		_, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 
-		defer gitutil.DeleteLocalRepo(prefixPath, repo)
+		// defer gitutil.DeleteLocalRepo(prefixPath, repo)
 
 		// just returns an error and continues if already there. otherwise clones
 		// no need to even check for "isGitRepo"
-		gitutil.CloneRepo(prefixPath, organization, repo)
+		// gitutil.CloneRepo(prefixPath, organization, repo)
 
 		err := gitutil.ProcessRepo(prefixPath, repo, repoUrl, db)
 		if err != nil {
