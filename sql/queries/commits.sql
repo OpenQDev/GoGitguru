@@ -50,12 +50,6 @@ WITH LatestUncheckedCommitPerAuthor AS (
     )
     ORDER BY author_email, author_date DESC
 )
-
-SELECT
-    commit_hash,
-    author_email,
-    repo_url
-FROM
-    LatestUncheckedCommitPerAuthor
-ORDER BY
-    repo_url DESC;
+SELECT commit_hash, author_email, repo_url
+FROM LatestUncheckedCommitPerAuthor
+ORDER BY repo_url DESC;
