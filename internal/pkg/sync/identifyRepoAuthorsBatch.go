@@ -13,21 +13,27 @@ func identifyRepoAuthorsBatch(repoUrl string, authorList []string, ghAccessToken
 
 	queryString := generateAuthorBatchGqlQuery(organization, repo, authorList)
 
-	data, err := gitutil.GithubGraphQL(queryString, ghAccessToken)
+	commitAuthorsResponse, err := gitutil.GithubGetCommitAuthors(queryString, ghAccessToken)
 
 	if err != nil {
 		logger.LogError("error occured while fetching from GraphQL API: %s", err)
 	}
 
-	if _, ok := data["errors"]; ok {
-		fmt.Printf("GraphQL Error: %v\n", data["errors"])
+	if commitAuthorsResponse.Errors != nil {
+		fmt.Printf("GraphQL Error: %v\n", commitAuthorsResponse.Errors)
 		fmt.Println("Skipping...")
 		return
 	}
 
-	if data == nil {
+	if commitAuthorsResponse.Data == nil {
 		fmt.Println("Skipping...")
 		return
 	}
+
+	commits := make(map[string]gitutil.Author, 0)
+	for key, value := range commitAuthorsResponse.Data.Repository {
+		commits[key] = value
+	}
+	fmt.Println(commits)
 
 }
