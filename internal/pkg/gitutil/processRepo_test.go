@@ -3,7 +3,6 @@ package gitutil
 import (
 	"main/internal/database"
 	"main/internal/pkg/logger"
-	"main/internal/pkg/server"
 	"os"
 	"testing"
 
@@ -12,7 +11,7 @@ import (
 )
 
 func TestProcessRepo(t *testing.T) {
-	// Initialize a new instance of ApiConfig with mocked DB
+	// Initialize a new instance of mock DB
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.LogFatalRedAndExit("can't create mock DB: %s", err)
@@ -20,10 +19,6 @@ func TestProcessRepo(t *testing.T) {
 
 	// Initialize queries with the mocked DB collection.
 	queries := database.New(db)
-
-	apiCfg := server.ApiConfig{
-		DB: queries,
-	}
 
 	tmpDir, err := os.MkdirTemp("", "prefixPath")
 	if err != nil {
@@ -130,7 +125,7 @@ func TestProcessRepo(t *testing.T) {
 			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs("synced", tt.repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
 
 			// Call the ProcessRepo function
-			ProcessRepo(prefixPath, tt.repo, tt.repoUrl, apiCfg.DB)
+			ProcessRepo(prefixPath, tt.repo, tt.repoUrl, queries)
 			if err != nil {
 				t.Errorf("there was an error processing repo: %s", err)
 			}

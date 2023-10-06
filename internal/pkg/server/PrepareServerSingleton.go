@@ -1,13 +1,13 @@
-package setup
+package server
 
 import (
 	"main/internal/database"
 	"main/internal/pkg/logger"
-	"main/internal/pkg/server"
+	"main/internal/pkg/setup"
 )
 
-func PrepareDatabase(dbUrl string) (*database.Queries, server.ApiConfig) {
-	database, err := GetDatbase(dbUrl)
+func PrepareServerSingleton(dbUrl string) (*database.Queries, ApiConfig) {
+	database, err := setup.GetDatbase(dbUrl)
 
 	if err != nil {
 		logger.LogError("error getting database: %s", err)

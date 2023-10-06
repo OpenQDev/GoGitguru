@@ -4,7 +4,6 @@ import (
 	"errors"
 	"main/internal/database"
 	"main/internal/pkg/logger"
-	"main/internal/pkg/server"
 	"os"
 	"testing"
 
@@ -22,7 +21,7 @@ func TestStoreGitLogs(t *testing.T) {
 
 	CloneRepo(tempDir, "OpenQDev", "OpenQ-DRM-TestRepo")
 
-	// Initialize a new instance of ApiConfig with mocked DB
+	// Initialize a new instance of mock DB
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.LogFatalRedAndExit("can't create mock DB: %s", err)
@@ -30,10 +29,6 @@ func TestStoreGitLogs(t *testing.T) {
 
 	// Initialize queries with the mocked DB collection.
 	queries := database.New(db)
-
-	apiCfg := server.ApiConfig{
-		DB: queries,
-	}
 
 	// Define test cases
 	tests := []struct {
@@ -123,7 +118,7 @@ func TestStoreGitLogs(t *testing.T) {
 				}
 			}
 
-			commit, err := StoreGitLogs(tempDir, "OpenQ-DRM-TestRepo", tt.repoUrl, "", apiCfg.DB)
+			commit, err := StoreGitLogs(tempDir, "OpenQ-DRM-TestRepo", tt.repoUrl, "", queries)
 			if err != nil && tt.shouldError == false {
 				t.Errorf("there was an error storing this commit: %v - the error was: %s", commit, err)
 			}
