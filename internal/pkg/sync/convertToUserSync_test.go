@@ -27,6 +27,17 @@ func TestConvertToUserSync(t *testing.T) {
 						Valid:  true,
 					},
 				},
+				{
+					CommitHash: "abc123",
+					AuthorEmail: sql.NullString{
+						String: "",
+						Valid:  false,
+					},
+					RepoUrl: sql.NullString{
+						String: "",
+						Valid:  false,
+					},
+				},
 			},
 			expectedOutput: []UserSync{
 				{
@@ -44,6 +55,23 @@ func TestConvertToUserSync(t *testing.T) {
 					}{
 						URL:     "https://github.com/test/repo",
 						NotNull: true,
+					},
+				},
+				{
+					CommitHash: "abc123",
+					Author: struct {
+						Email   string
+						NotNull bool
+					}{
+						Email:   "",
+						NotNull: false,
+					},
+					Repo: struct {
+						URL     string
+						NotNull bool
+					}{
+						URL:     "",
+						NotNull: false,
 					},
 				},
 			},
