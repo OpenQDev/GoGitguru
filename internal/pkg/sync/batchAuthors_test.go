@@ -30,6 +30,8 @@ func TestBatchAuthors(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := BatchAuthors(tt.input, tt.batchSize)
 			fmt.Println(result)
+			fmt.Printf("Type of result: %T\n", result)
+			fmt.Printf("Type of expected output: %T\n", tt.expectedOutput)
 			if !reflect.DeepEqual(result, tt.expectedOutput) {
 				t.Errorf("batchAuthors() = %v, want %v", result, tt.expectedOutput)
 			}

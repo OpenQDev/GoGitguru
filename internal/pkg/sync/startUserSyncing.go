@@ -14,6 +14,7 @@ func StartSyncingUser(
 	concurrency int,
 	timeBetweenSyncs time.Duration,
 	ghAccessToken string,
+	batchSize int,
 ) {
 	newCommitAuthorsRaw, err := db.GetLatestUncheckedCommitPerAuthor(context.Background())
 	if err != nil {
