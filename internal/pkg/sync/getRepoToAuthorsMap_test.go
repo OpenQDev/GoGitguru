@@ -31,9 +31,27 @@ func TestGetRepoToAuthorsMap(t *testing.T) {
 						NotNull: true,
 					},
 				},
+				{
+					CommitHash: "abc123",
+					Author: struct {
+						Email   string
+						NotNull bool
+					}{
+						Email:   "otherperson@example.com",
+						NotNull: true,
+					},
+					Repo: struct {
+						URL     string
+						NotNull bool
+					}{
+						URL:     "https://github.com/example/other-repo",
+						NotNull: true,
+					},
+				},
 			},
 			expectedOutput: map[string][]string{
-				"https://github.com/example/repo": {"test@example.com"},
+				"https://github.com/example/repo":       {"test@example.com"},
+				"https://github.com/example/other-repo": {"otherperson@example.com"},
 			},
 		},
 	}
