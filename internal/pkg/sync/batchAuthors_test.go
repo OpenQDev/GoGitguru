@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestBatchAuthors(t *testing.T) {
+func TestGenerateBatchAuthors(t *testing.T) {
 	tests := []struct {
 		name           string
 		input          map[string][]AuthorCommitTuple
@@ -68,7 +68,7 @@ func TestBatchAuthors(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := BatchAuthors(tt.input, tt.batchSize)
+			result := GenerateBatchAuthors(tt.input, tt.batchSize)
 			if !reflect.DeepEqual(result, tt.expectedOutput) {
 				t.Errorf("batchAuthors() = %v, want %v", result, tt.expectedOutput)
 			}

@@ -6,12 +6,12 @@ import (
 	"main/internal/pkg/logger"
 )
 
-func IdentifyRepoAuthorsBatch(repoUrl string, authorList []string, ghAccessToken string) (*map[string]gitutil.Commit, error) {
-	logger.LogBlue("Identifying %d authors for repo %s", len(authorList), repoUrl)
+func IdentifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTuple, ghAccessToken string) (*map[string]gitutil.Commit, error) {
+	logger.LogBlue("Identifying %d authors for repo %s", len(authorCommitList), repoUrl)
 
 	organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 
-	queryString := GenerateAuthorBatchGqlQuery(organization, repo, authorList)
+	queryString := GenerateAuthorBatchGqlQuery(organization, repo, authorCommitList)
 
 	commitAuthorsResponse, err := gitutil.GithubGetCommitAuthors(queryString, ghAccessToken)
 
@@ -28,7 +28,7 @@ func IdentifyRepoAuthorsBatch(repoUrl string, authorList []string, ghAccessToken
 	}
 
 	if commitAuthorsResponse.Data == nil {
-		logger.LogError("github graphQL api return no data for %s and %s", repoUrl, authorList)
+		logger.LogError("github graphQL api return no data for %s and %s", repoUrl, authorCommitList)
 		return nil, nil
 	}
 

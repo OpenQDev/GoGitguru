@@ -38,30 +38,19 @@ func StartSyncingUser(
 	logger.LogGreenDebug("repoUrlToAuthorsMap", repoUrlToAuthorsMap)
 
 	// Create batches of repos for GraphQL query
-	repoToAuthorBatches := BatchAuthors(repoUrlToAuthorsMap, 2)
+	repoToAuthorBatches := GenerateBatchAuthors(repoUrlToAuthorsMap, 2)
 	logger.LogGreenDebug("repoToAuthorBatches", repoToAuthorBatches)
 
 	// Get info for each batch
 	for _, repoToAuthorBatch := range repoToAuthorBatches {
-		repoUrl, ok := repoToAuthorBatch[0].(string)
-		if !ok {
-			logger.LogError("Unable to cast repoToAuthorBatch[0] to string")
-			continue
-		}
-		authors, ok := repoToAuthorBatch[1].([]string)
-		if !ok {
-			logger.LogError("Unable to cast repoToAuthorBatch[1] to []string")
-			continue
-		}
+		logger.LogGreenDebug("%s", repoToAuthorBatch.RepoURL)
 
-		logger.LogGreenDebug("%s: %v", repoUrl, authors)
-
-		commits, err := IdentifyRepoAuthorsBatch(repoUrl, authors, ghAccessToken)
+		commits, err := IdentifyRepoAuthorsBatch(repoToAuthorBatch.RepoURL, repoToAuthorBatch.Tuples, ghAccessToken)
 		if err != nil {
 			logger.LogError("error occured while identifying authors: %s", err)
 		}
 
-		logger.LogGreenDebug("successfully fetched info for batch %s -> %v", repoUrl, authors)
+		logger.LogGreenDebug("successfully fetched info for batch %s", repoToAuthorBatch.RepoURL)
 
 		logger.LogGreenDebug("got the following info: %v", commits)
 	}

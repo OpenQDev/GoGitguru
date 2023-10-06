@@ -5,7 +5,7 @@ import (
 	"main/internal/pkg/gitutil"
 )
 
-func GenerateAuthorBatchGqlQuery(organization string, repo string, authorList []string) string {
+func GenerateAuthorBatchGqlQuery(organization string, repo string, authorList []AuthorCommitTuple) string {
 	gqlQuery := fmt.Sprintf(`{
 		rateLimit {
 			limit
@@ -16,11 +16,11 @@ func GenerateAuthorBatchGqlQuery(organization string, repo string, authorList []
 
 	// gql_query operates on the repository level, ordered by repositoryUrl
 	// prepares 100 of these objects
-	for i, author := range authorList {
+	for i, commit := range authorList {
 		gqlQuery += fmt.Sprintf(`
 			commit_%d: object(oid: "%s") {
 				...commitDetails
-			}`, i, author)
+			}`, i, commit.CommitHash)
 	}
 
 	gqlQuery += `
