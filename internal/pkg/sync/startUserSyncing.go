@@ -3,7 +3,6 @@ package sync
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"main/internal/database"
 	"main/internal/pkg/gitutil"
 	"main/internal/pkg/logger"
@@ -49,13 +48,17 @@ func StartSyncingUser(
 		logger.LogGreenDebug("%s", repoToAuthorBatch.RepoURL)
 
 		commits, err := IdentifyRepoAuthorsBatch(repoToAuthorBatch.RepoURL, repoToAuthorBatch.Tuples, ghAccessToken)
+
+		if commits == nil {
+			logger.LogError("commits is nil")
+			continue
+		}
+
 		commitValues := make([]gitutil.Commit, 0, len(*commits))
 
 		for _, value := range *commits {
 			commitValues = append(commitValues, value)
 		}
-
-		fmt.Println("commitValues", commitValues)
 
 		if err != nil {
 			logger.LogError("error occured while identifying authors: %s", err)
@@ -81,21 +84,22 @@ func StartSyncingUser(
 				GithubRestID:    int32(author.User.GithubRestID),
 				GithubGraphqlID: author.User.GithubGraphqlID,
 				Login:           author.User.Login,
-				Name:            sql.NullString{String: author.User.Name, Valid: author.User.Name != ""},
-				Email:           sql.NullString{String: author.User.Email, Valid: author.User.Email != ""},
-				AvatarUrl:       sql.NullString{String: author.User.AvatarURL, Valid: author.User.AvatarURL != ""},
-				Company:         sql.NullString{String: *author.User.Company, Valid: author.User.Company != nil},
-				Location:        sql.NullString{String: *author.User.Location, Valid: author.User.Location != nil},
-				Bio:             sql.NullString{String: author.User.Bio, Valid: author.User.Bio != ""},
-				Blog:            sql.NullString{String: *author.User.Blog, Valid: author.User.Blog != nil},
+				Name:            sql.NullString{String: author.User.Name, Valid: true},
+				Email:           sql.NullString{String: author.User.Email, Valid: true},
+				AvatarUrl:       sql.NullString{String: author.User.AvatarURL, Valid: true},
+				Company:         sql.NullString{String: author.User.Company, Valid: true},
+				Location:        sql.NullString{String: author.User.Location, Valid: true},
+				Bio:             sql.NullString{String: author.User.Bio, Valid: true},
+				Blog:            sql.NullString{String: author.User.Blog, Valid: true},
 				Hireable:        sql.NullBool{Bool: author.User.Hireable, Valid: true},
-				TwitterUsername: sql.NullString{String: *author.User.TwitterUsername, Valid: author.User.TwitterUsername != nil},
+				TwitterUsername: sql.NullString{String: author.User.TwitterUsername, Valid: true},
 				Followers:       sql.NullInt32{Int32: int32(author.User.Followers.TotalCount), Valid: true},
 				Following:       sql.NullInt32{Int32: int32(author.User.Following.TotalCount), Valid: true},
 				Type:            "User",
 				CreatedAt:       sql.NullTime{Time: createdAt, Valid: true},
 				UpdatedAt:       sql.NullTime{Time: updatedAt, Valid: true},
 			})
+
 			if err != nil {
 				logger.LogError("error occured while inserting author: %s", err)
 			}
