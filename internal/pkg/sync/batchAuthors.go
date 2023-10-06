@@ -1,22 +1,19 @@
 package sync
 
-import "fmt"
+func BatchAuthors(repoUrlToAuthorsMap map[string][]string, batchSize int) [][]interface{} {
+	var result [][]interface{}
 
-func BatchAuthors(repoUrlToAuthorsMap map[string][]string, batchSize int) []map[string][]string {
+	for repoUrl, authors := range repoUrlToAuthorsMap {
+		for i := 0; i < len(authors); i += batchSize {
+			end := i + batchSize
+			if end > len(authors) {
+				end = len(authors)
+			}
 
-	var myMap [][]map[string][]string
-
-	for repoUrl, authorList := range repoUrlToAuthorsMap {
-		for i := 0; i < len(authorList); i += batchSize {
-			itemMap := make(map[string][]string)
-
-			authorBatch := authorList[i:min(i+batchSize, len(authorList))]
-			fmt.Println(authorBatch)
-
-			itemMap[repoUrl] = authorBatch
-			myMap = append(myMap, itemMap)
+			batch := authors[i:end]
+			result = append(result, []interface{}{repoUrl, batch})
 		}
 	}
 
-	return myMap
+	return result
 }
