@@ -24,7 +24,8 @@ git log -p --raw --unified=0 -i -S'github.com/lib/pq v1.10.9' go.mod
 git log -p --raw --unified=0 -i -S'<dependency-name>' <path-to-dependency-file>
 */
 func GitDepFileHistory(repoDir string, dependencyName string, dependencyFilePath string) *exec.Cmd {
-	return exec.Command(fmt.Sprintf("git log -p --raw --unified=0 -i -S'%s' %s", dependencyName, dependencyFilePath))
+	cmd := fmt.Sprintf("git log -p --raw --unified=0 -i -S'%s' %s", dependencyName, dependencyFilePath)
+	return exec.Command("/bin/sh", "-c", cmd)
 }
 
 /*

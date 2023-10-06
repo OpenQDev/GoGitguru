@@ -2,7 +2,7 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"main/internal/pkg/gitutil"
 	"main/internal/pkg/logger"
 	"net/http"
@@ -47,25 +47,51 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 		return
 	}
 
-	checkGitPathExists(body, repoDir, err)
+	err = checkGitPathExists(body, repoDir)
+	if err != nil {
+		logger.LogError("not a git repository", err)
+	}
 
 	filesPathsFormatted := formatDependenciesSearched(body)
 
-	fmt.Println(filesPathsFormatted)
+	logger.LogGreenDebug("filesPathsFormatted: %s", filesPathsFormatted)
+
+	dependencyHistoryCmd := gitutil.GitDepFileHistory(repoDir, body.DependencySearched, filesPathsFormatted)
+
+	out, err := dependencyHistoryCmd.Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	logger.LogGreenDebug("dependencyHistoryCmd: %s", out)
+
+	if len(out) == 0 {
+		dependencyHistory = DependencyHistoryReturn{}
+	}
+
+	cmd := gitutil.GitDependencySearch(repoDir, body.DependencySearched, filesPathsFormatted)
+	out, err = cmd.Output()
+	if err != nil {
+		logger.LogError("error in GitDependencySearch: %s", err)
+	}
+
+	logger.LogGreenDebug("GitDependencySearch: %s", out)
 
 	RespondWithJSON(w, 202, dependencyHistory)
 }
 
-func checkGitPathExists(body DependencyHistoryBody, repoDir string, err error) {
+func checkGitPathExists(body DependencyHistoryBody, repoDir string) error {
 	gitGrepExists := strings.Join(body.FilePaths, "|")
 	gitGrepExists = strings.ReplaceAll(gitGrepExists, "*", "")
 
 	cmd := gitutil.GitPathExists(repoDir, gitGrepExists)
 
-	_, err = cmd.Output()
+	_, err := cmd.Output()
 	if err != nil {
-		logger.LogFatalRedAndExit("error checking for path: %s", err)
+		return err
 	}
+
+	return nil
 }
 
 // This formats the dependency_searched array with wildcards around it
