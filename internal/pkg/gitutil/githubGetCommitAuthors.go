@@ -111,8 +111,6 @@ func GithubGetCommitAuthors(query string, ghAccessToken string) (CommitAuthorsRe
 	defer res.Body.Close()
 	body, _ := io.ReadAll(res.Body)
 
-	fmt.Printf("%s\n", body)
-
 	var jsonData CommitAuthorsResponse
 	json.Unmarshal(body, &jsonData)
 

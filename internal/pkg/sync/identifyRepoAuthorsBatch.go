@@ -30,7 +30,7 @@ func identifyRepoAuthorsBatch(repoUrl string, authorList []string, ghAccessToken
 		return
 	}
 
-	commits := make(map[string]gitutil.Author, 0)
+	commits := make(map[string]gitutil.Commit, 0)
 	for key, value := range commitAuthorsResponse.Data.Repository {
 		commits[key] = value
 	}
