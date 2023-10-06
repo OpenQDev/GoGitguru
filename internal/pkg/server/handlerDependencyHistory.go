@@ -2,8 +2,10 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
+	"main/internal/pkg/gitutil"
 	"net/http"
+	"os"
+	"path/filepath"
 )
 
 type DependencyHistoryBody struct {
@@ -26,7 +28,14 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 		return
 	}
 
-	fmt.Println(body)
+	_, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(body.RepoUrl)
+
+	repoDir := filepath.Join("repos", repo)
+
+	if _, err := os.Stat(repoDir); os.IsNotExist(err) {
+		RespondWithError(w, 404, "Repository directory does not exist.")
+		return
+	}
 
 	RespondWithJSON(w, 202, struct{}{})
 }
