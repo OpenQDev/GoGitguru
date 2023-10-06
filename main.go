@@ -27,7 +27,7 @@ func main() {
 	}
 
 	if syncUsersMode {
-		sync.StartSyncingUser(database, "repos", 10, time.Duration(syncUsersIntervalMinutes)*time.Minute, ghAccessToken)
+		sync.StartSyncingUser(database, "repos", 10, time.Duration(syncUsersIntervalMinutes)*time.Minute, ghAccessToken, 2)
 	}
 
 	server.StartServer(apiCfg, portString, originUrl)

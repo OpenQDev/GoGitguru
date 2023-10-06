@@ -39,11 +39,24 @@ func StartSyncingUser(
 	fmt.Println("repoUrlToAuthorsMap", repoUrlToAuthorsMap)
 
 	// Create batches of repos for GraphQL query
-	authorBatches := BatchAuthors(repoUrlToAuthorsMap, 2)
-	fmt.Println("authorBatches", authorBatches)
+	repoToAuthorBatches := BatchAuthors(repoUrlToAuthorsMap, 2)
+	fmt.Println("repoToAuthorBatches", repoToAuthorBatches)
 
 	// Get info for each batch
-	// for _, authorBatch := range authorBatches {
-	// 	identifyRepoAuthorsBatch(authorBatch.repoUrl, authorBatch.authorList, ghAccessToken)
-	// }
+	for _, repoToAuthorBatch := range repoToAuthorBatches {
+		repoUrl, ok := repoToAuthorBatch[0].(string)
+		if !ok {
+			logger.LogError("Unable to cast repoToAuthorBatch[0] to string")
+			continue
+		}
+		authors, ok := repoToAuthorBatch[1].([]string)
+		if !ok {
+			logger.LogError("Unable to cast repoToAuthorBatch[1] to []string")
+			continue
+		}
+
+		fmt.Println(repoUrl)
+		fmt.Println(authors)
+		IdentifyRepoAuthorsBatch(repoUrl, authors, ghAccessToken)
+	}
 }
