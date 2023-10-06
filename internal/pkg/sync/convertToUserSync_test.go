@@ -1,4 +1,4 @@
-package usersync
+package sync
 
 import (
 	"database/sql"
@@ -53,7 +53,7 @@ func TestConvertToUserSync(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := convertToUserSync(tt.input)
+			result := ConvertToUserSync(tt.input)
 			if !reflect.DeepEqual(result, tt.expectedOutput) {
 				t.Errorf("convertToUserSync() = %v, want %v", result, tt.expectedOutput)
 			}

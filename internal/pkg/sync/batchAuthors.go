@@ -1,4 +1,4 @@
-package usersync
+package sync
 
 func BatchAuthors(repoUrlToAuthorsMap map[string][]string, batchSize int) []interface{} {
 	var batches []interface{}

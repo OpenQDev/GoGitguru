@@ -1,4 +1,4 @@
-package usersync
+package sync
 
 type UserSync struct {
 	CommitHash string

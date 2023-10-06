@@ -25,9 +25,11 @@ func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
 	v1Router.Get("/version", apiCfg.HandlerVersion)
 	v1Router.Post("/add", apiCfg.HandlerAdd)
 	v1Router.Get("/repos/github/{owner}/{name}", apiCfg.HandlerGithubRepoByOwnerAndName)
+
 	v1Router.Get("/users/github/{login}", apiCfg.HandlerGithubUserByLogin)
 	v1Router.Post("/users/github/{login}/commits", apiCfg.HandlerGithubUserCommits)
 	v1Router.Post("/repos/commits", apiCfg.HandlerRepoCommits)
+
 	v1Router.Post("/dependency-history", apiCfg.HandlerDependencyHistory)
 
 	router.Mount("/", v1Router)

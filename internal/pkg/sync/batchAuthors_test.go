@@ -1,4 +1,4 @@
-package usersync
+package sync
 
 import (
 	"fmt"
@@ -28,7 +28,7 @@ func TestBatchAuthors(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := batchAuthors(tt.input, tt.batchSize)
+			result := BatchAuthors(tt.input, tt.batchSize)
 			fmt.Println(result)
 			if !reflect.DeepEqual(result, tt.expectedOutput) {
 				t.Errorf("batchAuthors() = %v, want %v", result, tt.expectedOutput)

@@ -1,4 +1,4 @@
-package usersync
+package sync
 
 /*
 Creates batches of authors grouped by repo_url.
