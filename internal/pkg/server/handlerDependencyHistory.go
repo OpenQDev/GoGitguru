@@ -17,18 +17,13 @@ type DependencyHistoryBody struct {
 	DependencySearched string   `json:"dependency_searched"`
 }
 
-type DependencyHistoryReturn struct {
-	CommitsSummary []string `json:"commits_summary"`
-	DatesAdded     []string `json:"dates_added"`
-	DatesRemoved   []string `json:"dates_removed"`
-}
-
 func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http.Request) {
-	var dependencyHistory DependencyHistoryReturn
+	var dependencyHistory gitutil.DiffHistoryResult
+
 	var body DependencyHistoryBody
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		RespondWithError(w, 202, err.Error())
+		RespondWithError(w, 200, err.Error())
 		return
 	}
 
@@ -58,26 +53,28 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 
 	dependencyHistoryCmd := gitutil.GitDepFileHistory(repoDir, body.DependencySearched, filesPathsFormatted)
 
-	out, err := dependencyHistoryCmd.Output()
+	dependencyHistoryOutput, err := dependencyHistoryCmd.Output()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	logger.LogGreenDebug("dependencyHistoryCmd: %s", out)
+	logger.LogGreenDebug("dependencyHistoryCmd: %s", dependencyHistoryOutput)
 
-	if len(out) == 0 {
-		dependencyHistory = DependencyHistoryReturn{}
+	if len(dependencyHistoryOutput) == 0 {
+		RespondWithJSON(w, 200, dependencyHistory)
 	}
 
 	cmd := gitutil.GitDependencySearch(repoDir, body.DependencySearched, filesPathsFormatted)
-	out, err = cmd.Output()
+	dependencySearchOutput, err := cmd.Output()
 	if err != nil {
 		logger.LogError("error in GitDependencySearch: %s", err)
 	}
 
-	logger.LogGreenDebug("GitDependencySearch: %s", out)
+	logger.LogGreenDebug("GitDependencySearch: %s", dependencyHistoryOutput)
 
-	RespondWithJSON(w, 202, dependencyHistory)
+	dependencyHistory = gitutil.DiffHistoryObject(string(dependencyHistoryOutput), body.DependencySearched, string(dependencySearchOutput))
+
+	RespondWithJSON(w, 200, dependencyHistory)
 }
 
 func checkGitPathExists(body DependencyHistoryBody, repoDir string) error {
