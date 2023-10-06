@@ -2,7 +2,6 @@ package sync
 
 import (
 	"context"
-	"fmt"
 	"main/internal/database"
 	"main/internal/pkg/logger"
 	"time"
@@ -32,15 +31,15 @@ func StartSyncingUser(
 
 	// Convert to database object to local type
 	newCommitAuthors := ConvertToUserSync(newCommitAuthorsRaw)
-	fmt.Println("newCommitAuthors", newCommitAuthors)
+	logger.LogGreenDebug("newCommitAuthors", newCommitAuthors)
 
 	// Create map of repoUrl -> []authors
 	repoUrlToAuthorsMap := GetRepoToAuthorsMap(newCommitAuthors)
-	fmt.Println("repoUrlToAuthorsMap", repoUrlToAuthorsMap)
+	logger.LogGreenDebug("repoUrlToAuthorsMap", repoUrlToAuthorsMap)
 
 	// Create batches of repos for GraphQL query
 	repoToAuthorBatches := BatchAuthors(repoUrlToAuthorsMap, 2)
-	fmt.Println("repoToAuthorBatches", repoToAuthorBatches)
+	logger.LogGreenDebug("repoToAuthorBatches", repoToAuthorBatches)
 
 	// Get info for each batch
 	for _, repoToAuthorBatch := range repoToAuthorBatches {
@@ -55,8 +54,15 @@ func StartSyncingUser(
 			continue
 		}
 
-		fmt.Println(repoUrl)
-		fmt.Println(authors)
-		IdentifyRepoAuthorsBatch(repoUrl, authors, ghAccessToken)
+		logger.LogGreenDebug("%s: %v", repoUrl, authors)
+
+		commits, err := IdentifyRepoAuthorsBatch(repoUrl, authors, ghAccessToken)
+		if err != nil {
+			logger.LogError("error occured while identifying authors: %s", err)
+		}
+
+		logger.LogGreenDebug("successfully fetched info for batch %s -> %v", repoUrl, authors)
+
+		logger.LogGreenDebug("got the following info: %v", commits)
 	}
 }

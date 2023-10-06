@@ -6,7 +6,7 @@ import (
 	"main/internal/pkg/logger"
 )
 
-func IdentifyRepoAuthorsBatch(repoUrl string, authorList []string, ghAccessToken string) {
+func IdentifyRepoAuthorsBatch(repoUrl string, authorList []string, ghAccessToken string) (*map[string]gitutil.Commit, error) {
 	logger.LogBlue("Identifying %d authors for repo %s", len(authorList), repoUrl)
 
 	organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
@@ -22,12 +22,12 @@ func IdentifyRepoAuthorsBatch(repoUrl string, authorList []string, ghAccessToken
 	if commitAuthorsResponse.Errors != nil {
 		fmt.Printf("GraphQL Error: %v\n", commitAuthorsResponse.Errors)
 		fmt.Println("Skipping...")
-		return
+		return nil, err
 	}
 
 	if commitAuthorsResponse.Data == nil {
-		fmt.Println("Skipping...")
-		return
+		logger.LogError("github graphQL api return no data for %s and %s", repoUrl, authorList)
+		return nil, nil
 	}
 
 	commits := make(map[string]gitutil.Commit, 0)
@@ -36,4 +36,5 @@ func IdentifyRepoAuthorsBatch(repoUrl string, authorList []string, ghAccessToken
 	}
 	fmt.Println(commits)
 
+	return &commits, nil
 }
