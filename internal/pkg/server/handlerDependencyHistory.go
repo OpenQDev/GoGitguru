@@ -17,7 +17,14 @@ type DependencyHistoryBody struct {
 	DependencySearched string   `json:"dependency_searched"`
 }
 
+type DependencyHistoryReturn struct {
+	CommitsSummary []string `json:"commits_summary"`
+	DatesAdded     []string `json:"dates_added"`
+	DatesRemoved   []string `json:"dates_removed"`
+}
+
 func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http.Request) {
+	var dependencyHistory DependencyHistoryReturn
 	var body DependencyHistoryBody
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
@@ -39,21 +46,34 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 		RespondWithError(w, 404, "Repository directory does not exist.")
 		return
 	}
+
+	checkGitPathExists(body, repoDir, err)
+
+	filesPathsFormatted := formatDependenciesSearched(body)
+
+	fmt.Println(filesPathsFormatted)
+
+	RespondWithJSON(w, 202, dependencyHistory)
+}
+
+func checkGitPathExists(body DependencyHistoryBody, repoDir string, err error) {
 	gitGrepExists := strings.Join(body.FilePaths, "|")
 	gitGrepExists = strings.ReplaceAll(gitGrepExists, "*", "")
 
 	cmd := gitutil.GitPathExists(repoDir, gitGrepExists)
 
-	// // This allows you to see the stdout and stderr of the command being run on the host machine
-	// cmd.Stdout = os.Stdout
-	// cmd.Stderr = os.Stderr
-
-	output, err := cmd.Output()
+	_, err = cmd.Output()
 	if err != nil {
 		logger.LogFatalRedAndExit("error checking for path: %s", err)
 	}
+}
 
-	fmt.Println(string(output))
-
-	RespondWithJSON(w, 202, struct{}{})
+// This formats the dependency_searched array with wildcards around it
+func formatDependenciesSearched(body DependencyHistoryBody) string {
+	var filesPathsFormatted string
+	for _, path := range body.FilePaths {
+		filesPathsFormatted += "'**" + path + "**' "
+	}
+	filesPathsFormatted = strings.TrimSpace(filesPathsFormatted)
+	return filesPathsFormatted
 }
