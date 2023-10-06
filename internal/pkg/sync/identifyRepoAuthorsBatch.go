@@ -15,13 +15,15 @@ func IdentifyRepoAuthorsBatch(repoUrl string, authorList []string, ghAccessToken
 
 	commitAuthorsResponse, err := gitutil.GithubGetCommitAuthors(queryString, ghAccessToken)
 
+	logger.LogGreenDebug("commit authors response: %v", commitAuthorsResponse)
+
 	if err != nil {
 		logger.LogError("error occured while fetching from GraphQL API: %s", err)
 	}
 
 	if commitAuthorsResponse.Errors != nil {
-		fmt.Printf("GraphQL Error: %v\n", commitAuthorsResponse.Errors)
-		fmt.Println("Skipping...")
+		fmt.Printf("skipping due to graphQL error: %v\n", commitAuthorsResponse.Errors)
+		fmt.Println()
 		return nil, err
 	}
 

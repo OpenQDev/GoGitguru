@@ -9,7 +9,7 @@ func TestGetRepoToAuthorsMap(t *testing.T) {
 	tests := []struct {
 		name           string
 		input          []UserSync
-		expectedOutput map[string][]string
+		expectedOutput map[string][]AuthorCommitTuple
 	}{
 		{
 			name: "Single author, single repo",
@@ -32,7 +32,7 @@ func TestGetRepoToAuthorsMap(t *testing.T) {
 					},
 				},
 				{
-					CommitHash: "abc123",
+					CommitHash: "otherCommitHash",
 					Author: struct {
 						Email   string
 						NotNull bool
@@ -49,9 +49,9 @@ func TestGetRepoToAuthorsMap(t *testing.T) {
 					},
 				},
 			},
-			expectedOutput: map[string][]string{
-				"https://github.com/example/repo":       {"test@example.com"},
-				"https://github.com/example/other-repo": {"otherperson@example.com"},
+			expectedOutput: map[string][]AuthorCommitTuple{
+				"https://github.com/example/repo":  []AuthorCommitTuple{AuthorCommitTuple{Author: "test@example.com", CommitHash: "abc123"}},
+				"https://github.com/example/repo2": []AuthorCommitTuple{AuthorCommitTuple{Author: "otherperson@example.com", CommitHash: "otherCommitHash"}},
 			},
 		},
 	}

@@ -1,6 +1,6 @@
 package sync
 
-func BatchAuthors(repoUrlToAuthorsMap map[string][]string, batchSize int) [][]interface{} {
+func BatchAuthors(repoUrlToAuthorsMap map[string][]AuthorCommitTuple, batchSize int) [][]interface{} {
 	var result [][]interface{}
 
 	for repoUrl, authors := range repoUrlToAuthorsMap {
