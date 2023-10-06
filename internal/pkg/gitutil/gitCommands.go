@@ -35,3 +35,18 @@ func GitPathExists(repoDir string, gitGrepExists string) *exec.Cmd {
 	cmd := fmt.Sprintf("git -C %s ls-files | grep -E '%s'", repoDir, gitGrepExists)
 	return exec.Command("/bin/sh", "-c", cmd)
 }
+
+/*
+git -C {repo_dir} grep -rli '{dependency_searched}' -- {files_paths_formatted}
+git -C . grep -rli 'github.com/go-chi/cors' -- **go.mod**
+*/
+
+/*
+if filepaths don't exists -> errors
+if dependency doesn't exist -> empty return
+*
+*/
+func GitDependencySearch(repoDir string, dependencySearched string, filesPathsFormatted string) *exec.Cmd {
+	cmd := fmt.Sprintf("git -C %s grep -rli '%s' -- %s", repoDir, dependencySearched, filesPathsFormatted)
+	return exec.Command("/bin/sh", "-c", cmd)
+}
