@@ -21,6 +21,9 @@ func TestGithubGetCommitAuthors(t *testing.T) {
 			commit_0: object(oid: "8799411585c826b577f632f1ef5c0415914267ed") {
 				...commitDetails
 			}
+			commit_1: object(oid: "657bd8b7f7d83e8b842411cbf65666901d65431c") {
+				...commitDetails
+			}
 		}
 	}
 	` + AUTHOR_GRAPHQL_FRAGMENT
