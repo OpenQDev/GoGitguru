@@ -1,11 +1,11 @@
-package sync
+package usersync
 
 import (
 	"fmt"
 	"main/internal/pkg/gitutil"
 )
 
-func generateAuthorBatchGqlQuery(organization string, repo string, authorList []string) string {
+func GenerateAuthorBatchGqlQuery(organization string, repo string, authorList []string) string {
 	gqlQuery := fmt.Sprintf(`{
 		rateLimit {
 			limit

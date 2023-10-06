@@ -1,4 +1,4 @@
-package sync
+package usersync
 
 /*
 Creates batches of authors grouped by repo_url.
@@ -13,7 +13,7 @@ A: 100, 100, 50, B: 100, 50, C: 90, D: 1, E: 1, F: 1, ..., M: 1
 So identifying 500 authors requires 16 API calls instead of 500 because we
 can group authors by repo url in the GraphQL query.
 */
-func getRepoToAuthorsMap(newCommitAuthors []UserSync) map[string][]string {
+func GetRepoToAuthorsMap(newCommitAuthors []UserSync) map[string][]string {
 	// Create a map with repoUrl as key and array of authors as value
 	repoAuthorsMap := make(map[string][]string)
 

@@ -1,8 +1,8 @@
-package sync
+package usersync
 
 import "main/internal/database"
 
-func convertToUserSync(newCommitAuthorsRaw []database.GetLatestUncheckedCommitPerAuthorRow) []UserSync {
+func ConvertToUserSync(newCommitAuthorsRaw []database.GetLatestUncheckedCommitPerAuthorRow) []UserSync {
 	var newCommitAuthors []UserSync
 
 	for _, author := range newCommitAuthorsRaw {

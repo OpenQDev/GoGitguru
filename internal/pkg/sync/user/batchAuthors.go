@@ -1,6 +1,6 @@
-package sync
+package usersync
 
-func batchAuthors(repoUrlToAuthorsMap map[string][]string, batchSize int) []interface{} {
+func BatchAuthors(repoUrlToAuthorsMap map[string][]string, batchSize int) []interface{} {
 	var batches []interface{}
 
 	for repoUrl, authorList := range repoUrlToAuthorsMap {

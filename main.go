@@ -23,11 +23,11 @@ func main() {
 	logger.SetDebugMode(debugMode)
 
 	if syncMode {
-		go sync.StartSyncingCommits(database, "repos", 10, time.Duration(syncIntervalMinutes)*time.Minute)
+		sync.StartSyncingCommits(database, "repos", 10, time.Duration(syncIntervalMinutes)*time.Minute)
 	}
 
 	if syncUsersMode {
-		go sync.StartSyncingUser(database, "repos", 10, time.Duration(syncUsersIntervalMinutes)*time.Minute, ghAccessToken)
+		sync.StartSyncingUser(database, "repos", 10, time.Duration(syncUsersIntervalMinutes)*time.Minute, ghAccessToken)
 	}
 
 	server.StartServer(apiCfg, portString, originUrl)

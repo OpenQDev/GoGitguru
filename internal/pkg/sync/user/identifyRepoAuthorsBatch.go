@@ -1,4 +1,4 @@
-package sync
+package usersync
 
 import (
 	"fmt"
@@ -6,12 +6,12 @@ import (
 	"main/internal/pkg/logger"
 )
 
-func identifyRepoAuthorsBatch(repoUrl string, authorList []string, ghAccessToken string) {
+func IdentifyRepoAuthorsBatch(repoUrl string, authorList []string, ghAccessToken string) {
 	logger.LogBlue("Identifying %d authors for repo %s", len(authorList), repoUrl)
 
 	organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 
-	queryString := generateAuthorBatchGqlQuery(organization, repo, authorList)
+	queryString := GenerateAuthorBatchGqlQuery(organization, repo, authorList)
 
 	commitAuthorsResponse, err := gitutil.GithubGetCommitAuthors(queryString, ghAccessToken)
 

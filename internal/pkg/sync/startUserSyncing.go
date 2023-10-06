@@ -5,20 +5,9 @@ import (
 	"fmt"
 	"main/internal/database"
 	"main/internal/pkg/logger"
+	usersync "main/internal/pkg/sync/user"
 	"time"
 )
-
-type UserSync struct {
-	CommitHash string
-	Author     struct {
-		Email   string
-		NotNull bool
-	}
-	Repo struct {
-		URL     string
-		NotNull bool
-	}
-}
 
 func StartSyncingUser(
 	db *database.Queries,
@@ -40,15 +29,15 @@ func StartSyncingUser(
 	logger.LogBlue("identifying %d new authors", len(newCommitAuthorsRaw))
 
 	// Convert to database object to local type
-	newCommitAuthors := convertToUserSync(newCommitAuthorsRaw)
+	newCommitAuthors := usersync.ConvertToUserSync(newCommitAuthorsRaw)
 	fmt.Println("newCommitAuthors", newCommitAuthors)
 
 	// Create map of repoUrl -> []authors
-	repoUrlToAuthorsMap := getRepoToAuthorsMap(newCommitAuthors)
+	repoUrlToAuthorsMap := usersync.GetRepoToAuthorsMap(newCommitAuthors)
 	fmt.Println("repoUrlToAuthorsMap", repoUrlToAuthorsMap)
 
 	// Create batches of repos for GraphQL query
-	authorBatches := batchAuthors(repoUrlToAuthorsMap, 2)
+	authorBatches := usersync.BatchAuthors(repoUrlToAuthorsMap, 2)
 	fmt.Println("authorBatches", authorBatches)
 
 	// Get info for each batch
