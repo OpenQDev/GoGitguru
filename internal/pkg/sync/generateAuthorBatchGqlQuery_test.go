@@ -11,14 +11,14 @@ func TestGenerateAuthorBatchGqlQuery(t *testing.T) {
 		name           string
 		organization   string
 		repo           string
-		authorList     []string
+		authorList     []AuthorCommitTuple
 		expectedOutput string
 	}{
 		{
 			name:         "Single author",
 			organization: "testOrg",
 			repo:         "testRepo",
-			authorList:   []string{"author1"},
+			authorList:   []AuthorCommitTuple{{Author: "author1", CommitHash: "commit1"}},
 			expectedOutput: `{
 		rateLimit {
 			limit
@@ -26,7 +26,7 @@ func TestGenerateAuthorBatchGqlQuery(t *testing.T) {
 			resetAt
 		}
 		repository(owner: "testOrg", name: "testRepo") {
-			commit_0: object(oid: "author1") {
+			commit_0: object(oid: "commit1") {
 				...commitDetails
 			}
 		}
