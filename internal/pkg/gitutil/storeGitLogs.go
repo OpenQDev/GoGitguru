@@ -105,16 +105,16 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 			}
 		}
 
-		// stats, _ := commit.Stats()
+		stats, _ := commit.Stats()
 
 		totalFilesChanged := 0
 		totalInsertions := 0
 		totalDeletions := 0
-		// for _, stat := range stats {
-		// 	totalInsertions += stat.Addition
-		// 	totalDeletions += stat.Deletion
-		// 	totalFilesChanged++
-		// }
+		for _, stat := range stats {
+			totalInsertions += stat.Addition
+			totalDeletions += stat.Deletion
+			totalFilesChanged++
+		}
 
 		commitHash[commitCount] = commit.Hash.String()
 		author[commitCount] = commit.Author.Name
@@ -132,6 +132,17 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 		}
 		commitCount++
 	}
+
+	fmt.Println("ACTUAL", commitHash)
+	fmt.Println("ACTUAL", author)
+	fmt.Println("ACTUAL", authorEmail)
+	fmt.Println("ACTUAL", authorDate)
+	fmt.Println("ACTUAL", committerDate)
+	fmt.Println("ACTUAL", message)
+	fmt.Println("ACTUAL", insertions)
+	fmt.Println("ACTUAL", deletions)
+	fmt.Println("ACTUAL", filesChanged)
+	fmt.Println("ACTUAL", repoUrls)
 
 	err = BatchInsertCommits(
 		db,

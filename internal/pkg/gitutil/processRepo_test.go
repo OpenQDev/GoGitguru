@@ -1,6 +1,7 @@
 package gitutil
 
 import (
+	"fmt"
 	"main/internal/database"
 	"main/internal/pkg/logger"
 	"os"
@@ -74,52 +75,57 @@ func TestProcessRepo(t *testing.T) {
 			// Clone repo to tmp dir. Will be deleted at end of test
 			CloneRepo(prefixPath, tt.organization, tt.repo)
 
-			// Order expected database calls here
-
 			// SET REPO STATUS TO storing_commits
 			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs("storing_commits", tt.repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
 
-			// INSERT FIRST COMMIT
-			for _, gitLog := range tt.gitLogs {
-				linesChanged := gitLog.Insertions + gitLog.Deletions
+			commitHash := make([]string, 0)
+			author := make([]string, 0)
+			authorEmail := make([]string, 0)
+			authorDate := make([]int64, 0)
+			committerDate := make([]int64, 0)
+			message := make([]string, 0)
+			insertions := make([]int32, 0)
+			deletions := make([]int32, 0)
+			filesChanged := make([]int32, 0)
+			repoUrls := make([]string, 0)
 
-				mock.ExpectQuery("^-- name: InsertCommit :one.*").WithArgs(
-					gitLog.CommitHash,
-					gitLog.AuthorName,
-					gitLog.AuthorEmail,
-					gitLog.AuthorDate,
-					gitLog.CommitDate,
-					gitLog.CommitMessage,
-					gitLog.Insertions,
-					gitLog.Deletions,
-					gitLog.FilesChanged,
-					tt.repoUrl,
-				).WillReturnRows(sqlmock.NewRows([]string{
-					"commit_hash",
-					"author",
-					"author_email",
-					"author_date",
-					"committer_date",
-					"message",
-					"insertions",
-					"deletions",
-					"lines_changed",
-					"files_changed",
-					"repo_url",
-				}).AddRow(
-					gitLog.CommitHash,
-					gitLog.AuthorName,
-					gitLog.AuthorEmail,
-					gitLog.AuthorDate,
-					gitLog.CommitDate,
-					gitLog.CommitMessage,
-					gitLog.Insertions,
-					gitLog.Deletions,
-					linesChanged,
-					gitLog.FilesChanged,
-					tt.repoUrl,
-				))
+			for _, commit := range tt.gitLogs {
+				commitHash = append(commitHash, commit.CommitHash)
+				author = append(author, commit.AuthorName)
+				authorEmail = append(authorEmail, commit.AuthorEmail)
+				authorDate = append(authorDate, commit.AuthorDate)
+				committerDate = append(committerDate, commit.CommitDate)
+				message = append(message, commit.CommitMessage)
+				insertions = append(insertions, int32(commit.Insertions))
+				deletions = append(deletions, int32(commit.Deletions))
+				filesChanged = append(filesChanged, int32(commit.FilesChanged))
+				repoUrls = append(repoUrls, tt.repoUrl)
 			}
+
+			fmt.Println("EXPECTED", commitHash)
+			fmt.Println("EXPECTED", author)
+			fmt.Println("EXPECTED", authorEmail)
+			fmt.Println("EXPECTED", authorDate)
+			fmt.Println("EXPECTED", committerDate)
+			fmt.Println("EXPECTED", message)
+			fmt.Println("EXPECTED", insertions)
+			fmt.Println("EXPECTED", deletions)
+			fmt.Println("EXPECTED", filesChanged)
+			fmt.Println("EXPECTED", repoUrls)
+
+			// BULK INSERT COMMITS
+			mock.ExpectQuery("^-- name: BulkInsertCommits :one.*").WithArgs(
+				commitHash,
+				author,
+				authorEmail,
+				authorDate,
+				committerDate,
+				message,
+				insertions,
+				deletions,
+				filesChanged,
+				repoUrls,
+			)
 
 			// SET REPO STATUS TO synced
 			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs("synced", tt.repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
