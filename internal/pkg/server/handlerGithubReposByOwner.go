@@ -1,12 +1,12 @@
 package server
 
 import (
-	"context"
-	"database/sql"
+	"bytes"
 	"encoding/json"
-	"main/internal/database"
+	"fmt"
+	"io"
+	"log"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi"
 )
@@ -20,85 +20,62 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 	}
 
 	owner := chi.URLParam(r, "owner")
-	name := chi.URLParam(r, "name")
 
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "https://api.github.com/repos/"+owner+"/"+name, nil)
-	if err != nil {
-		RespondWithError(w, 500, "Failed to create request.")
-		return
+	page := 1
+	var repos []RestRepo
+	for {
+		req, err := http.NewRequest("GET", fmt.Sprintf("https://api.github.com/users/%s/repos?per_page=100&page=%d", owner, page), nil)
+		if err != nil {
+			RespondWithError(w, 500, "Failed to create request.")
+			return
+		}
+
+		req.Header.Add("Authorization", "token "+githubAccessToken)
+		resp, err := client.Do(req)
+		if err != nil {
+			RespondWithError(w, 500, "Failed to make request.")
+			return
+		}
+
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		_ = string(bodyBytes)
+
+		// Create a new reader with the body bytes for the json decoder
+		resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+		var restReposResponse []RestRepo
+		err = json.NewDecoder(resp.Body).Decode(&restReposResponse)
+		if err != nil {
+			RespondWithError(w, 500, "Failed to decode response.")
+			return
+		}
+
+		repos = append(repos, restReposResponse...)
+		if len(restReposResponse) < 100 {
+			break
+		}
+
+		page++
 	}
 
-	req.Header.Add("Authorization", "token "+githubAccessToken)
-	resp, err := client.Do(req)
-	if err != nil {
-		RespondWithError(w, 500, "Failed to make request.")
-		return
-	}
+	// var insertedRepos []GithubRepo
+	// for _, repo := range repos {
+	// 	// Convert Repo to InsertGithubRepoParams and insert into database...
+	// 	// Refer to the code block from filePath: internal/pkg/server/handlerGithubRepoByOwnerAndName.go
+	// 	// startLine: 64
+	// 	// endLine: 95
+	// 	insertedRepo, err := apiConfig.DB.InsertGithubRepo(context.Background(), params)
+	// 	if err != nil {
+	// 		RespondWithError(w, 500, "Failed to insert repo into database.")
+	// 		return
+	// 	}
+	// 	insertedRepos = append(insertedRepos, insertedRepo)
+	// }
 
-	defer resp.Body.Close()
-
-	var repo Repo
-	err = json.NewDecoder(resp.Body).Decode(&repo)
-	if err != nil {
-		RespondWithError(w, 500, "Failed to decode response.")
-		return
-	}
-
-	layout := "2006-01-02T15:04:05Z" // ISO 8601 format
-	createdAt, err := time.Parse(layout, repo.CreatedAt)
-	if err != nil {
-		RespondWithError(w, 500, "Failed to parse CreatedAt.")
-		return
-	}
-	updatedAt, err := time.Parse(layout, repo.UpdatedAt)
-	if err != nil {
-		RespondWithError(w, 500, "Failed to parse UpdatedAt.")
-		return
-	}
-	pushedAt, err := time.Parse(layout, repo.PushedAt)
-	if err != nil {
-		RespondWithError(w, 500, "Failed to parse PushedAt.")
-		return
-	}
-
-	// Insert the repo into the database using sqlc generated methods
-	params := database.InsertGithubRepoParams{
-		GithubRestID:    int32(repo.GithubRestID),
-		GithubGraphqlID: repo.GithubGraphqlID,
-		Url:             repo.URL,
-		Name:            repo.Name,
-		FullName:        repo.FullName,
-		Private:         sql.NullBool{Bool: repo.Private, Valid: true},
-		OwnerLogin:      repo.Owner.Login,
-		OwnerAvatarUrl:  sql.NullString{String: repo.Owner.AvatarURL, Valid: true},
-		Description:     sql.NullString{String: repo.Description, Valid: true},
-		Homepage:        sql.NullString{String: repo.Homepage, Valid: true},
-		Fork:            sql.NullBool{Bool: repo.Fork, Valid: true},
-		ForksCount:      sql.NullInt32{Int32: int32(repo.ForksCount), Valid: true},
-		Archived:        sql.NullBool{Bool: repo.Archived, Valid: true},
-		Disabled:        sql.NullBool{Bool: repo.Disabled, Valid: true},
-		License:         sql.NullString{String: repo.License, Valid: true},
-		Language:        sql.NullString{String: repo.Language, Valid: true},
-		StargazersCount: sql.NullInt32{Int32: int32(repo.StargazersCount), Valid: true},
-		WatchersCount:   sql.NullInt32{Int32: int32(repo.WatchersCount), Valid: true},
-		OpenIssuesCount: sql.NullInt32{Int32: int32(repo.OpenIssuesCount), Valid: true},
-		HasIssues:       sql.NullBool{Bool: repo.HasIssues, Valid: true},
-		HasDiscussions:  sql.NullBool{Bool: repo.HasDiscussions, Valid: true},
-		HasProjects:     sql.NullBool{Bool: repo.HasProjects, Valid: true},
-		CreatedAt:       sql.NullTime{Time: createdAt, Valid: true},
-		UpdatedAt:       sql.NullTime{Time: updatedAt, Valid: true},
-		PushedAt:        sql.NullTime{Time: pushedAt, Valid: true},
-		Visibility:      sql.NullString{String: repo.Visibility, Valid: true},
-		Size:            sql.NullInt32{Int32: int32(repo.Size), Valid: true},
-		DefaultBranch:   sql.NullString{String: repo.DefaultBranch, Valid: true},
-	}
-
-	_, err = apiConfig.DB.InsertGithubRepo(context.Background(), params)
-	if err != nil {
-		RespondWithError(w, 500, "Failed to insert repo into database.")
-		return
-	}
-
-	RespondWithJSON(w, 200, repo)
+	RespondWithJSON(w, 200, repos)
 }
