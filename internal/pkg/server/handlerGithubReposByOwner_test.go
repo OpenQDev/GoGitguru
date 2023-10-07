@@ -1,10 +1,13 @@
 package server
 
 import (
+	"io"
 	"main/internal/database"
 	"main/internal/pkg/logger"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -23,9 +26,23 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 
 	// Create a mock of Github REST API
 	mux := http.NewServeMux()
-	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
-		// Return specific response for any request to this route
-		w.Write([]byte(`{"fakeResponse": true}`))
+	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
+		// Check if the request path is correct
+		if !strings.Contains(r.URL.Path, "/repos") {
+			http.NotFound(w, r)
+			return
+		}
+
+		// Read the JSON file
+		jsonFile, err := os.Open("mockReposReturn.json")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer jsonFile.Close()
+
+		// Write the JSON file to the response
+		io.Copy(w, jsonFile)
 	})
 
 	server := httptest.NewServer(mux)
