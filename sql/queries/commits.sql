@@ -53,3 +53,17 @@ WITH LatestUncheckedCommitPerAuthor AS (
 SELECT commit_hash, author_email, repo_url
 FROM LatestUncheckedCommitPerAuthor
 ORDER BY repo_url DESC;
+
+-- name: MultiRowInsertCommits :exec
+INSERT INTO commits (commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, files_changed, repo_url) VALUES (  
+  unnest($1::varchar[]),  
+  unnest($2::varchar[]),  
+  unnest($3::varchar[]),  
+  unnest($4::bigint[]),  
+  unnest($5::bigint[]),  
+  unnest($6::text[]),  
+  unnest($7::int[]),  
+  unnest($8::int[]),  
+  unnest($9::int[]),  
+  unnest($10::varchar[])  
+);

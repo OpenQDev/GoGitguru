@@ -21,8 +21,19 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 	// Initialize queries with the mocked DB collection.
 	queries := database.New(db)
 
+	// Create a mock of Github REST API
+	mux := http.NewServeMux()
+	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
+		// Return specific response for any request to this route
+		w.Write([]byte(`{"fakeResponse": true}`))
+	})
+
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
 	apiCfg := ApiConfig{
-		DB: queries,
+		DB:                   queries,
+		GithubRestAPIBaseUrl: server.URL,
 	}
 
 	// Define test cases
@@ -30,14 +41,22 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 		name           string
 		owner          string
 		expectedStatus int
+		authorized     bool
 		shouldError    bool
-		// Add more fields as needed
 	}{
 		{
 			name:           "should return 401 if no access token",
 			owner:          "VipassanaInsight",
 			expectedStatus: 401,
+			authorized:     false,
 			shouldError:    true,
+		},
+		{
+			name:           "should return repos",
+			owner:          "TestOwner",
+			expectedStatus: 200,
+			authorized:     true,
+			shouldError:    false,
 		},
 	}
 
@@ -45,6 +64,11 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Prepare the HTTP request
 			req, _ := http.NewRequest("GET", "/repos/github/"+tt.owner, nil)
+
+			if tt.authorized {
+				req.Header.Add("GH-Authorization", "foo")
+			}
+
 			rr := httptest.NewRecorder()
 
 			// Define your expectations here. For example, if you expect the InsertGithubRepo function to be called,

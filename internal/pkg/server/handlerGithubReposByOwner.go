@@ -29,7 +29,7 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 	page := 1
 	var repos []RestRepo
 	for {
-		req, err := http.NewRequest("GET", fmt.Sprintf("https://api.github.com/users/%s/repos?per_page=100&page=%d", owner, page), nil)
+		req, err := http.NewRequest("GET", fmt.Sprintf("%s/users/%s/repos?per_page=100&page=%d", apiConfig.GithubRestAPIBaseUrl, owner, page), nil)
 		if err != nil {
 			RespondWithError(w, 500, "Failed to create request.")
 			return

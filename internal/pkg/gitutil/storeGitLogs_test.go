@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -68,12 +69,10 @@ func TestStoreGitLogs(t *testing.T) {
 			},
 			shouldError: false,
 		},
-		// Add more test cases as needed
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Expectations and actions for the mock DB can be defined here
 			if tt.shouldError {
 				mock.ExpectExec("^-- name: BulkInsertCommits :exec.*").WillReturnError(errors.New("mock error"))
 			} else {

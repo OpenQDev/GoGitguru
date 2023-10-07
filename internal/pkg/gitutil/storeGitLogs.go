@@ -178,5 +178,8 @@ func BatchInsertCommits(
 		Column9:  filesChanged,
 		Column10: repoUrls,
 	}
+
+	fmt.Printf("Parameters:\n%+v\n", params)
+
 	return db.BulkInsertCommits(context.Background(), params)
 }
