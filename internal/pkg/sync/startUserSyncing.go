@@ -69,7 +69,16 @@ func StartSyncingUser(
 		logger.LogGreenDebug("got the following info: %v", commits)
 
 		for _, commit := range commitValues {
+			restId := commit.Author.User.GithubRestID
 			author := commit.Author
+
+			_, err = db.InsertRestIdToEmail(context.Background(), database.InsertRestIdToEmailParams{
+				RestID: sql.NullInt32{Int32: int32(restId), Valid: true},
+				Email:  author.Email,
+			})
+			if err != nil {
+				logger.LogError("error occured while inserting RestID to Email: %s", err)
+			}
 
 			createdAt, err := time.Parse(time.RFC3339, author.User.CreatedAt)
 			if err != nil {
