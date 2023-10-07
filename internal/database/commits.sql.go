@@ -151,7 +151,7 @@ type GetCommitsWithAuthorInfoRow struct {
 	LinesChanged    sql.NullInt32  `json:"lines_changed"`
 	FilesChanged    sql.NullInt32  `json:"files_changed"`
 	RepoUrl         sql.NullString `json:"repo_url"`
-	RestID          sql.NullInt32  `json:"rest_id"`
+	RestID          int32          `json:"rest_id"`
 	Email           string         `json:"email"`
 	InternalID      int32          `json:"internal_id"`
 	GithubRestID    int32          `json:"github_rest_id"`

@@ -126,8 +126,8 @@ type GithubUser struct {
 }
 
 type GithubUserRestIDAuthorEmail struct {
-	RestID sql.NullInt32 `json:"rest_id"`
-	Email  string        `json:"email"`
+	RestID int32  `json:"rest_id"`
+	Email  string `json:"email"`
 }
 
 type RepoUrl struct {

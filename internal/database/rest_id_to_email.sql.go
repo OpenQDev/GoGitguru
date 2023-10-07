@@ -7,7 +7,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
 )
 
 const insertRestIdToEmail = `-- name: InsertRestIdToEmail :one
@@ -22,8 +21,8 @@ RETURNING rest_id, email
 `
 
 type InsertRestIdToEmailParams struct {
-	RestID sql.NullInt32 `json:"rest_id"`
-	Email  string        `json:"email"`
+	RestID int32  `json:"rest_id"`
+	Email  string `json:"email"`
 }
 
 func (q *Queries) InsertRestIdToEmail(ctx context.Context, arg InsertRestIdToEmailParams) (GithubUserRestIDAuthorEmail, error) {
