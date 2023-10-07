@@ -75,47 +75,48 @@ func TestStoreGitLogs(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Expectations and actions for the mock DB can be defined here
 			if tt.shouldError {
-				mock.ExpectExec("^-- name: InsertCommit :one.*").WillReturnError(errors.New("mock error"))
+				mock.ExpectExec("^-- name: BulkInsertCommits :exec.*").WillReturnError(errors.New("mock error"))
 			} else {
-				for _, gitLog := range tt.gitLogs {
-					linesChanged := gitLog.Insertions + gitLog.Deletions
-					mock.ExpectQuery("^-- name: InsertCommit :one.*").WithArgs(
-						gitLog.CommitHash,
-						gitLog.AuthorName,
-						gitLog.AuthorEmail,
-						gitLog.AuthorDate,
-						gitLog.CommitDate,
-						gitLog.CommitMessage,
-						gitLog.Insertions,
-						gitLog.Deletions,
-						gitLog.FilesChanged,
-						tt.repoUrl,
-					).WillReturnRows(sqlmock.NewRows([]string{
-						"commit_hash",
-						"author",
-						"author_email",
-						"author_date",
-						"committer_date",
-						"message",
-						"insertions",
-						"deletions",
-						"lines_changed",
-						"files_changed",
-						"repo_url",
-					}).AddRow(
-						gitLog.CommitHash,
-						gitLog.AuthorName,
-						gitLog.AuthorEmail,
-						gitLog.AuthorDate,
-						gitLog.CommitDate,
-						gitLog.CommitMessage,
-						gitLog.Insertions,
-						gitLog.Deletions,
-						linesChanged,
-						gitLog.FilesChanged,
-						tt.repoUrl,
-					))
+				numberOfCommits := len(tt.gitLogs)
+				var (
+					commitHash    = make([]string, numberOfCommits)
+					author        = make([]string, numberOfCommits)
+					authorEmail   = make([]string, numberOfCommits)
+					authorDate    = make([]int64, numberOfCommits)
+					committerDate = make([]int64, numberOfCommits)
+					message       = make([]string, numberOfCommits)
+					insertions    = make([]int32, numberOfCommits)
+					deletions     = make([]int32, numberOfCommits)
+					filesChanged  = make([]int32, numberOfCommits)
+					repoUrls      = make([]string, numberOfCommits)
+				)
+
+				for i, commit := range tt.gitLogs {
+					commitHash[i] = commit.CommitHash
+					author[i] = commit.AuthorName
+					authorEmail[i] = commit.AuthorEmail
+					authorDate[i] = commit.AuthorDate
+					committerDate[i] = commit.CommitDate
+					message[i] = commit.CommitMessage
+					insertions[i] = int32(commit.Insertions)
+					deletions[i] = int32(commit.Deletions)
+					filesChanged[i] = int32(commit.FilesChanged)
+					repoUrls[i] = tt.repoUrl
 				}
+
+				// BULK INSERT COMMITS
+				mock.ExpectExec("^-- name: BulkInsertCommits :exec.*").WithArgs(
+					commitHash,
+					author,
+					authorEmail,
+					authorDate,
+					committerDate,
+					message,
+					insertions,
+					deletions,
+					filesChanged,
+					repoUrls,
+				)
 			}
 
 			commit, err := StoreGitLogs(tempDir, "OpenQ-DRM-TestRepo", tt.repoUrl, "", queries)

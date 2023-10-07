@@ -133,17 +133,6 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 		commitCount++
 	}
 
-	fmt.Println("ACTUAL", commitHash)
-	fmt.Println("ACTUAL", author)
-	fmt.Println("ACTUAL", authorEmail)
-	fmt.Println("ACTUAL", authorDate)
-	fmt.Println("ACTUAL", committerDate)
-	fmt.Println("ACTUAL", message)
-	fmt.Println("ACTUAL", insertions)
-	fmt.Println("ACTUAL", deletions)
-	fmt.Println("ACTUAL", filesChanged)
-	fmt.Println("ACTUAL", repoUrls)
-
 	err = BatchInsertCommits(
 		db,
 		commitHash,

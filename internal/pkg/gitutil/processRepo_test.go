@@ -1,7 +1,6 @@
 package gitutil
 
 import (
-	"fmt"
 	"main/internal/database"
 	"main/internal/pkg/logger"
 	"os"
@@ -102,19 +101,8 @@ func TestProcessRepo(t *testing.T) {
 				repoUrls = append(repoUrls, tt.repoUrl)
 			}
 
-			fmt.Println("EXPECTED", commitHash)
-			fmt.Println("EXPECTED", author)
-			fmt.Println("EXPECTED", authorEmail)
-			fmt.Println("EXPECTED", authorDate)
-			fmt.Println("EXPECTED", committerDate)
-			fmt.Println("EXPECTED", message)
-			fmt.Println("EXPECTED", insertions)
-			fmt.Println("EXPECTED", deletions)
-			fmt.Println("EXPECTED", filesChanged)
-			fmt.Println("EXPECTED", repoUrls)
-
 			// BULK INSERT COMMITS
-			mock.ExpectQuery("^-- name: BulkInsertCommits :one.*").WithArgs(
+			mock.ExpectExec("^-- name: BulkInsertCommits :exec.*").WithArgs(
 				commitHash,
 				author,
 				authorEmail,
