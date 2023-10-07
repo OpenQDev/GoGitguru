@@ -72,20 +72,30 @@ func StartSyncingUser(
 			restId := commit.Author.User.GithubRestID
 			author := commit.Author
 
-			_, err = db.InsertRestIdToEmail(context.Background(), database.InsertRestIdToEmailParams{
-				RestID: sql.NullInt32{Int32: int32(restId), Valid: true},
-				Email:  author.Email,
-			})
+			var params database.InsertRestIdToEmailParams
+			if restId == 0 {
+				params = database.InsertRestIdToEmailParams{
+					Email: author.Email,
+				}
+			} else {
+				params = database.InsertRestIdToEmailParams{
+					RestID: int32(restId),
+					Email:  author.Email,
+				}
+			}
+
+			_, err = db.InsertRestIdToEmail(context.Background(), params)
 			if err != nil {
 				logger.LogError("error occured while inserting RestID to Email: %s", err)
 			}
 
 			createdAt, err := time.Parse(time.RFC3339, author.User.CreatedAt)
-			if err != nil {
+			if err != nil && !createdAt.IsZero() {
 				logger.LogError("error parsing time: %s", err)
 			}
+
 			updatedAt, err := time.Parse(time.RFC3339, author.User.UpdatedAt)
-			if err != nil {
+			if err != nil && !createdAt.IsZero() {
 				logger.LogError("error parsing time: %s", err)
 			}
 
