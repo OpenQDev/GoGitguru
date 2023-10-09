@@ -1,8 +1,8 @@
 package server
 
 import (
-	"database/sql"
 	"encoding/json"
+	"fmt"
 	"io"
 	"main/internal/database"
 	"main/internal/pkg/logger"
@@ -43,7 +43,8 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 
 	// Create a mock of Github REST API
 	mux := http.NewServeMux()
-	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("jsonFile", jsonFile)
 		io.Copy(w, jsonFile)
 	})
 
@@ -72,14 +73,14 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 	}{
 		{
 			name:           "should return 401 if no access token",
-			owner:          "VipassanaInsight",
+			owner:          "DRM-Test-Organization",
 			expectedStatus: 401,
 			authorized:     false,
 			shouldError:    true,
 		},
 		{
 			name:           "should return repos",
-			owner:          "TestOwner",
+			owner:          "DRM-Test-Organization",
 			expectedStatus: 200,
 			authorized:     true,
 			shouldError:    false,
@@ -90,6 +91,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Prepare the HTTP request
 			req, _ := http.NewRequest("GET", "/repos/github/"+tt.owner, nil)
+			fmt.Println("req.URL", req.URL)
 
 			if tt.authorized {
 				req.Header.Add("GH-Authorization", ghAccessToken)
@@ -98,34 +100,35 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 			rr := httptest.NewRecorder()
 
 			mock.ExpectExec("^-- name: InsertGithubRepo :one.*").WithArgs(
-				repos[0].ID,                              // GithubRestID
-				repos[0].NodeID,                          // GithubGraphqlID
-				"https://github.com/octocat/Hello-World", // Url
-				"Hello-World",                            // Name
-				"octocat/Hello-World",                    // FullName
-				false,                                    // Private
-				"octocat",                                // OwnerLogin
-				"https://github.com/images/error/octocat_happy.gif", // OwnerAvatarUrl
-				"This your first repo!",                             // Description
-				"",                                                  // Homepage
-				false,                                               // Fork
-				9,                                                   // ForksCount
-				false,                                               // Archived
-				false,                                               // Disabled
-				"mit",                                               // License
-				"Ruby",                                              // Language
-				80,                                                  // StargazersCount
-				80,                                                  // WatchersCount
-				9,                                                   // OpenIssuesCount
-				true,                                                // HasIssues
-				false,                                               // HasDiscussions
-				true,                                                // HasProjects
-				sql.NullTime{},                                      // CreatedAt
-				sql.NullTime{},                                      // UpdatedAt
-				sql.NullTime{},                                      // PushedAt
-				"public",                                            // Visibility
-				108,                                                 // Size
-				"master").WillReturnResult(sqlmock.NewResult(1, 1))
+				repos[0].ID,              // GithubRestID
+				repos[0].NodeID,          // GithubGraphqlID
+				repos[0].URL,             // Url
+				repos[0].Name,            // Name
+				repos[0].FullName,        // FullName
+				repos[0].Private,         // Private
+				repos[0].Owner.Login,     // OwnerLogin
+				repos[0].Owner.AvatarURL, // OwnerAvatarUrl
+				repos[0].Description,     // Description
+				repos[0].Homepage,        // Homepage
+				repos[0].Fork,            // Fork
+				repos[0].ForksCount,      // ForksCount
+				repos[0].Archived,        // Archived
+				repos[0].Disabled,        // Disabled
+				repos[0].License,         // License
+				repos[0].Language,        // Language
+				repos[0].StargazersCount, // StargazersCount
+				repos[0].WatchersCount,   // WatchersCount
+				repos[0].OpenIssuesCount, // OpenIssuesCount
+				repos[0].HasIssues,       // HasIssues
+				repos[0].HasDiscussions,  // HasDiscussions
+				repos[0].HasProjects,     // HasProjects
+				repos[0].CreatedAt,       // CreatedAt
+				repos[0].UpdatedAt,       // UpdatedAt
+				repos[0].PushedAt,        // PushedAt
+				repos[0].Visibility,      // Visibility
+				repos[0].Size,            // Size
+				repos[0].DefaultBranch,   // DefaultBranch
+			).WillReturnResult(sqlmock.NewResult(1, 1))
 
 			// Call the handler function
 			apiCfg.HandlerGithubReposByOwner(rr, req)

@@ -24,12 +24,16 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 	}
 
 	owner := chi.URLParam(r, "owner")
+	fmt.Println("owner", owner)
 
 	client := &http.Client{}
 	page := 1
 	var repos []RestRepo
 	for {
-		req, err := http.NewRequest("GET", fmt.Sprintf("%s/users/%s/repos?per_page=100&page=%d", apiConfig.GithubRestAPIBaseUrl, owner, page), nil)
+		fmt.Println("apiConfig.GithubRestAPIBaseUrl", apiConfig.GithubRestAPIBaseUrl)
+		requestUrl := fmt.Sprintf("%s/users/%s/repos?per_page=100&page=%d", apiConfig.GithubRestAPIBaseUrl, owner, page)
+		fmt.Println("requestUrl", requestUrl)
+		req, err := http.NewRequest("GET", requestUrl, nil)
 		if err != nil {
 			RespondWithError(w, 500, "Failed to create request.")
 			return
@@ -48,7 +52,7 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 		}
 
 		foo := string(bodyBytes)
-		fmt.Println("dfsdf", foo)
+		fmt.Println("response body", foo)
 
 		// Create a new reader with the body bytes for the json decoder
 		resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
