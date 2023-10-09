@@ -17,7 +17,9 @@ func main() {
 		syncMode,
 		syncIntervalMinutes,
 		syncUsersMode,
-		syncUsersIntervalMinutes, ghAccessToken := setup.ExtractAndVerifyEnvironment(".env")
+		syncUsersIntervalMinutes,
+		ghAccessToken,
+		_ := setup.ExtractAndVerifyEnvironment(".env")
 
 	database, apiCfg := server.PrepareServerSingleton(dbUrl)
 	logger.SetDebugMode(debugMode)

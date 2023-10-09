@@ -3,10 +3,10 @@ package server
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"io"
 	"main/internal/database"
 	"main/internal/pkg/logger"
+	"main/internal/pkg/setup"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -17,6 +17,8 @@ import (
 )
 
 func TestHandlerGithubReposByOwner(t *testing.T) {
+	_, _, _, _, _, _, _, _, ghAccessToken, targetLiveGithub := setup.ExtractAndVerifyEnvironment("../../../.env")
+
 	// Initialize a new instance of ApiConfig with mocked DB
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -39,8 +41,6 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 	var repos []RestRepo
 	json.Unmarshal(byteValue, &repos)
 
-	fmt.Println(repos)
-
 	// Create a mock of Github REST API
 	mux := http.NewServeMux()
 	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
@@ -50,9 +50,16 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 	server := httptest.NewServer(mux)
 	defer server.Close()
 
+	var serverUrl string
+	if targetLiveGithub {
+		serverUrl = "https://api.github.com"
+	} else {
+		serverUrl = server.URL
+	}
+
 	apiCfg := ApiConfig{
 		DB:                   queries,
-		GithubRestAPIBaseUrl: server.URL,
+		GithubRestAPIBaseUrl: serverUrl,
 	}
 
 	// Define test cases
@@ -85,7 +92,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 			req, _ := http.NewRequest("GET", "/repos/github/"+tt.owner, nil)
 
 			if tt.authorized {
-				req.Header.Add("GH-Authorization", "foo")
+				req.Header.Add("GH-Authorization", ghAccessToken)
 			}
 
 			rr := httptest.NewRecorder()

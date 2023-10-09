@@ -47,7 +47,8 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 			log.Fatal(err)
 		}
 
-		_ = string(bodyBytes)
+		foo := string(bodyBytes)
+		fmt.Println("dfsdf", foo)
 
 		// Create a new reader with the body bytes for the json decoder
 		resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))

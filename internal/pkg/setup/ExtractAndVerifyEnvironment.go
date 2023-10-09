@@ -20,6 +20,7 @@ func ExtractAndVerifyEnvironment(
 	syncUsers bool,
 	syncUsersIntervalMinutesInt int,
 	ghAccessToken string,
+	targetLiveGithub bool,
 ) {
 	godotenv.Load(pathToDotenv)
 	portString = os.Getenv("PORT")
@@ -31,6 +32,7 @@ func ExtractAndVerifyEnvironment(
 	syncUsersMode := os.Getenv("SYNC_USERS_MODE")
 	syncUsersIntervalMinutes := os.Getenv("SYNC_USERS_INTERVAL_MINUTES")
 	ghAccessToken = os.Getenv("GH_ACCESS_TOKEN")
+	targetLiveGithubRaw := os.Getenv("TARGET_LIVE_GITHUB")
 
 	if portString == "" || dbUrl == "" || originUrl == "" || debugMode == "" {
 		logger.LogFatalRedAndExit("PORT | DB_URL | ORIGIN_URL | DEBUG_MODE is not found in the environment")
@@ -56,10 +58,15 @@ func ExtractAndVerifyEnvironment(
 		logger.LogFatalRedAndExit("SYNC_USERS_MODE must be a boolean")
 	}
 
+	targetLiveGithub, err = strconv.ParseBool(targetLiveGithubRaw)
+	if err != nil {
+		logger.LogFatalRedAndExit("TARGET_LIVE_GITHUB must be a boolean")
+	}
+
 	syncUsersIntervalMinutesInt, err = strconv.Atoi(syncUsersIntervalMinutes)
 	if err != nil {
 		logger.LogFatalRedAndExit("SYNC_INTERVAL_MINUTES must be an integer")
 	}
 
-	return portString, dbUrl, originUrl, debug, sync, syncIntervalMinutesInt, syncUsers, syncUsersIntervalMinutesInt, ghAccessToken
+	return portString, dbUrl, originUrl, debug, sync, syncIntervalMinutesInt, syncUsers, syncUsersIntervalMinutesInt, ghAccessToken, targetLiveGithub
 }
