@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"encoding/json"
 	"io"
 	"main/internal/database"
@@ -13,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/go-chi/chi"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -81,7 +79,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 			shouldError:    true,
 		},
 		{
-			name:           "should return repos",
+			name:           "should store repos for organization",
 			owner:          "DRM-Test-Organization",
 			expectedStatus: 200,
 			authorized:     true,
@@ -99,6 +97,9 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 			}
 
 			rr := httptest.NewRecorder()
+
+			// Add {owner} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
+			req = AppendPathParamToChiContext(req, "owner", tt.owner)
 
 			mock.ExpectExec("^-- name: InsertGithubRepo :one.*").WithArgs(
 				repos[0].ID,              // GithubRestID
@@ -130,11 +131,6 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 				repos[0].Size,            // Size
 				repos[0].DefaultBranch,   // DefaultBranch
 			).WillReturnResult(sqlmock.NewResult(1, 1))
-
-			// Add {owner} to the context since we're not calling this via Chi router
-			rctx := chi.NewRouteContext()
-			rctx.URLParams.Add("owner", tt.owner)
-			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
 
 			// Call the handler function
 			apiCfg.HandlerGithubReposByOwner(rr, req)

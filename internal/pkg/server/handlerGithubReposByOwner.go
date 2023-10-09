@@ -32,6 +32,8 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 	var repos []RestRepo
 	for {
 		requestUrl := fmt.Sprintf("%s/users/%s/repos?per_page=100&page=%d", apiConfig.GithubRestAPIBaseUrl, owner, page)
+		logger.LogGreenDebug("calling %s", requestUrl)
+
 		req, err := http.NewRequest("GET", requestUrl, nil)
 		if err != nil {
 			RespondWithError(w, 500, "Failed to create request.")
@@ -46,7 +48,8 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 		}
 
 		// Create a new reader with the body bytes for the json decoder
-		// resp = printResponseBody(resp)
+		resp = printResponseBody(resp)
+		logger.LogGreenDebug("calling %s", requestUrl)
 
 		var restReposResponse []RestRepo
 		err = json.NewDecoder(resp.Body).Decode(&restReposResponse)
@@ -66,10 +69,11 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 	for _, repo := range repos {
 
 		params := ConvertRestRepoToInsertParams(repo)
+		fmt.Println("params", params)
 
 		_, err := apiConfig.DB.InsertGithubRepo(context.Background(), params)
 		if err != nil {
-			RespondWithError(w, 500, "Failed to insert repo into database.")
+			RespondWithError(w, 500, fmt.Sprintf("failed to insert repo into database: %s", err))
 			return
 		}
 	}
@@ -85,7 +89,7 @@ func printResponseBody(resp *http.Response) *http.Response {
 
 	responseBody := string(bodyBytes)
 
-	fmt.Println("responseBody", responseBody)
+	logger.LogGreenDebug("response body %s", responseBody)
 
 	resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
