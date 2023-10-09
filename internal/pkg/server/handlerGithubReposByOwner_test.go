@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"main/internal/database"
 	"main/internal/pkg/logger"
@@ -150,10 +149,18 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 			// Check the status code
 			assert.Equal(t, tt.expectedStatus, rr.Code)
 
+			// Marshall rr.Body into type []RestRepo
+
 			// Check the response body
-			_ = struct{}{}
-			fmt.Println(rr.Body.String())
-			// assert.Equal(t, expectedResponse, rr.Body.String())
+
+			var actualReposReturn []RestRepo
+			err := json.NewDecoder(rr.Body).Decode(&actualReposReturn)
+			if err != nil {
+				t.Errorf("Failed to decode rr.Body into []RestRepo: %s", err)
+				return
+			}
+
+			assert.Equal(t, repos, actualReposReturn)
 
 			// Check if there were any unexpected calls to the mock DB
 			if err := mock.ExpectationsWereMet(); err != nil {
