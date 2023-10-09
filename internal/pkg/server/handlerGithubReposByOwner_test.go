@@ -1,8 +1,8 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"main/internal/database"
 	"main/internal/pkg/logger"
@@ -13,11 +13,13 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/go-chi/chi"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandlerGithubReposByOwner(t *testing.T) {
-	_, _, _, _, _, _, _, _, ghAccessToken, targetLiveGithub := setup.ExtractAndVerifyEnvironment("../../../.env")
+	_, _, _, debugMode, _, _, _, _, ghAccessToken, targetLiveGithub := setup.ExtractAndVerifyEnvironment("../../../.env")
+	logger.SetDebugMode(debugMode)
 
 	// Initialize a new instance of ApiConfig with mocked DB
 	db, mock, err := sqlmock.New()
@@ -43,8 +45,8 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 
 	// Create a mock of Github REST API
 	mux := http.NewServeMux()
-	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("jsonFile", jsonFile)
+
+	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
 		io.Copy(w, jsonFile)
 	})
 
@@ -91,7 +93,6 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Prepare the HTTP request
 			req, _ := http.NewRequest("GET", "/repos/github/"+tt.owner, nil)
-			fmt.Println("req.URL", req.URL)
 
 			if tt.authorized {
 				req.Header.Add("GH-Authorization", ghAccessToken)
@@ -129,6 +130,11 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 				repos[0].Size,            // Size
 				repos[0].DefaultBranch,   // DefaultBranch
 			).WillReturnResult(sqlmock.NewResult(1, 1))
+
+			// Add {owner} to the context since we're not calling this via Chi router
+			rctx := chi.NewRouteContext()
+			rctx.URLParams.Add("owner", tt.owner)
+			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
 
 			// Call the handler function
 			apiCfg.HandlerGithubReposByOwner(rr, req)

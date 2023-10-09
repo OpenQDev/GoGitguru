@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"main/internal/database"
+	"main/internal/pkg/logger"
 	"net/http"
 	"time"
 
@@ -24,15 +25,13 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 	}
 
 	owner := chi.URLParam(r, "owner")
-	fmt.Println("owner", owner)
+	logger.LogGreenDebug("getting repos for owner: %s", owner)
 
 	client := &http.Client{}
 	page := 1
 	var repos []RestRepo
 	for {
-		fmt.Println("apiConfig.GithubRestAPIBaseUrl", apiConfig.GithubRestAPIBaseUrl)
 		requestUrl := fmt.Sprintf("%s/users/%s/repos?per_page=100&page=%d", apiConfig.GithubRestAPIBaseUrl, owner, page)
-		fmt.Println("requestUrl", requestUrl)
 		req, err := http.NewRequest("GET", requestUrl, nil)
 		if err != nil {
 			RespondWithError(w, 500, "Failed to create request.")
@@ -46,16 +45,8 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 			return
 		}
 
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		foo := string(bodyBytes)
-		fmt.Println("response body", foo)
-
 		// Create a new reader with the body bytes for the json decoder
-		resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+		// resp = printResponseBody(resp)
 
 		var restReposResponse []RestRepo
 		err = json.NewDecoder(resp.Body).Decode(&restReposResponse)
@@ -84,6 +75,21 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 	}
 
 	RespondWithJSON(w, 200, repos)
+}
+
+func printResponseBody(resp *http.Response) *http.Response {
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	responseBody := string(bodyBytes)
+
+	fmt.Println("responseBody", responseBody)
+
+	resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	return resp
 }
 
 func ConvertRestRepoToInsertParams(repo RestRepo) database.InsertGithubRepoParams {
