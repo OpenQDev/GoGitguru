@@ -1,13 +1,10 @@
 package server
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"io"
-	"log"
 	"main/internal/database"
 	"main/internal/pkg/logger"
 	"net/http"
@@ -48,8 +45,7 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 		}
 
 		// Create a new reader with the body bytes for the json decoder
-		resp = printResponseBody(resp)
-		logger.LogGreenDebug("calling %s", requestUrl)
+		// resp = PrintResponseBody(resp)
 
 		var restReposResponse []RestRepo
 		err = json.NewDecoder(resp.Body).Decode(&restReposResponse)
@@ -69,7 +65,6 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 	for _, repo := range repos {
 
 		params := ConvertRestRepoToInsertParams(repo)
-		fmt.Println("params", params)
 
 		_, err := apiConfig.DB.InsertGithubRepo(context.Background(), params)
 		if err != nil {
@@ -79,21 +74,6 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 	}
 
 	RespondWithJSON(w, 200, repos)
-}
-
-func printResponseBody(resp *http.Response) *http.Response {
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	responseBody := string(bodyBytes)
-
-	logger.LogGreenDebug("response body %s", responseBody)
-
-	resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
-
-	return resp
 }
 
 func ConvertRestRepoToInsertParams(repo RestRepo) database.InsertGithubRepoParams {
@@ -116,7 +96,7 @@ func ConvertRestRepoToInsertParams(repo RestRepo) database.InsertGithubRepoParam
 		ForksCount:      sql.NullInt32{Int32: int32(repo.ForksCount), Valid: true},
 		Archived:        sql.NullBool{Bool: repo.Archived, Valid: true},
 		Disabled:        sql.NullBool{Bool: repo.Disabled, Valid: true},
-		License:         sql.NullString{String: repo.License.Key, Valid: true},
+		License:         sql.NullString{String: repo.License.Name, Valid: true},
 		Language:        sql.NullString{String: repo.Language, Valid: true},
 		StargazersCount: sql.NullInt32{Int32: int32(repo.StargazersCount), Valid: true},
 		WatchersCount:   sql.NullInt32{Int32: int32(repo.WatchersCount), Valid: true},
