@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"main/internal/database"
 	"main/internal/pkg/logger"
@@ -37,9 +38,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 	defer jsonFile.Close()
 
 	// Parse the JSON file into a slice of RestRepo
-	byteValue, _ := io.ReadAll(jsonFile)
-	var repos []RestRepo
-	json.Unmarshal(byteValue, &repos)
+	repos := ParseJsonFileToRestRepos(jsonFile)
 
 	// Create a mock of Github REST API
 	mux := http.NewServeMux()
@@ -145,6 +144,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 
 			// Check the response body
 			expectedResponse := struct{}{}
+			fmt.Println(rr.Body.String())
 			assert.Equal(t, expectedResponse, rr.Body.String())
 
 			// Check if there were any unexpected calls to the mock DB
@@ -153,4 +153,12 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 			}
 		})
 	}
+}
+
+func ParseJsonFileToRestRepos(jsonFile *os.File) []RestRepo {
+	byteValue, _ := io.ReadAll(jsonFile)
+	var repos []RestRepo
+	json.Unmarshal(byteValue, &repos)
+	jsonFile.Seek(0, 0)
+	return repos
 }

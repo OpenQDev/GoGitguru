@@ -45,7 +45,7 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 		}
 
 		// Create a new reader with the body bytes for the json decoder
-		// resp = PrintResponseBody(resp)
+		resp = PrintResponseBody(resp)
 
 		var restReposResponse []RestRepo
 		err = json.NewDecoder(resp.Body).Decode(&restReposResponse)
