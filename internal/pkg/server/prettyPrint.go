@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"main/internal/pkg/logger"
 	"net/http"
 )
 
@@ -24,9 +23,9 @@ func PrintResponseBody(resp *http.Response) *http.Response {
 		log.Fatal(err)
 	}
 
-	responseBody := string(bodyBytes)
+	_ = string(bodyBytes)
 
-	logger.LogGreenDebug("response body %s", responseBody)
+	// logger.LogGreenDebug("response body %s", responseBody)
 
 	resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
