@@ -17,6 +17,7 @@ import (
 )
 
 func TestHandlerGithubReposByOwner(t *testing.T) {
+	// ARRANGE - GLOBAL
 	_, _, _, debugMode, _, _, _, _, ghAccessToken, targetLiveGithub := setup.ExtractAndVerifyEnvironment("../../../.env")
 	logger.SetDebugMode(debugMode)
 
