@@ -10,16 +10,16 @@ import (
 	"strings"
 )
 
+type HandlerAddRequest struct {
+	RepoUrls []string `json:"repo_urls"`
+}
+
 type HandlerAddResponse struct {
 	Accepted       []string `json:"accepted"`
 	AlreadyInQueue []string `json:"already_in_queue"`
 }
 
 func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
-	type parameters struct {
-		RepoUrls []string `json:"repo_urls"`
-	}
-
 	// Read off the JSON body to bodyBytes for use in error logging if needed
 	bodyBytes, _ := io.ReadAll(r.Body)
 
@@ -30,7 +30,7 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(bytes.NewReader(bodyBytes))
 
 	// Make struct repoUrls to decode the body into
-	repoUrls := parameters{}
+	repoUrls := HandlerAddRequest{}
 
 	err := decoder.Decode(&repoUrls)
 	if err != nil || len(repoUrls.RepoUrls) == 0 {
