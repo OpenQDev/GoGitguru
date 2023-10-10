@@ -21,7 +21,7 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 	logger.SetDebugMode(debugMode)
 
 	// Initialize a new instance of ApiConfig with mocked DB
-	ghAccessToken, targetLiveGithub, mock, queries := mocks.GetMockDatabase(ghAccessToken, targetLiveGithub)
+	mock, queries := mocks.GetMockDatabase()
 
 	// Read the JSON file
 	jsonFile, err := os.Open("./mocks/mockUserCommitsReturn.json")

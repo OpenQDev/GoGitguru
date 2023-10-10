@@ -19,7 +19,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 	_, _, _, debugMode, _, _, _, _, ghAccessToken, targetLiveGithub := setup.ExtractAndVerifyEnvironment("../../../.env")
 	logger.SetDebugMode(debugMode)
 
-	ghAccessToken, targetLiveGithub, _, queries := mocks.GetMockDatabase(ghAccessToken, targetLiveGithub)
+	_, queries := mocks.GetMockDatabase()
 
 	// Read the JSON file
 	jsonFile, err := os.Open("./mocks/mockRepoReturn.json")
