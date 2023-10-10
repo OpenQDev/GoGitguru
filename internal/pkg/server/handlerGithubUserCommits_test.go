@@ -6,6 +6,7 @@ import (
 	"io"
 	"main/internal/database"
 	"main/internal/pkg/logger"
+	"main/internal/pkg/server/mocks"
 	"main/internal/pkg/setup"
 	"net/http"
 	"net/http/httptest"
@@ -20,12 +21,12 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 	logger.SetDebugMode(debugMode)
 
 	// Initialize a new instance of ApiConfig with mocked DB
-	ghAccessToken, targetLiveGithub, mock, queries := GetMockDatabase(ghAccessToken, targetLiveGithub)
+	ghAccessToken, targetLiveGithub, mock, queries := mocks.GetMockDatabase(ghAccessToken, targetLiveGithub)
 
 	// Read the JSON file
-	jsonFile, err := os.Open("mockUserCommitsReturn.json")
+	jsonFile, err := os.Open("./mocks/mockUserCommitsReturn.json")
 	if err != nil {
-		t.Errorf("Failed to open mockReposReturn.json: %s", err)
+		t.Errorf("Failed to open ./mocks/mockReposReturn.json: %s", err)
 		return
 	}
 	defer jsonFile.Close()
@@ -91,7 +92,7 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 			rr := httptest.NewRecorder()
 
 			// Add {owner} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
-			req = AppendPathParamToChiContext(req, "login", tt.login)
+			req = mocks.AppendPathParamToChiContext(req, "login", tt.login)
 
 			mock.ExpectQuery("^-- name: InsertGithubRepo :one.*").WithArgs(
 			// impl here

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"main/internal/pkg/logger"
+	"main/internal/pkg/server/mocks"
 	"main/internal/pkg/setup"
 	"net/http"
 	"net/http/httptest"
@@ -19,12 +20,12 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 	_, _, _, debugMode, _, _, _, _, ghAccessToken, targetLiveGithub := setup.ExtractAndVerifyEnvironment("../../../.env")
 	logger.SetDebugMode(debugMode)
 
-	ghAccessToken, targetLiveGithub, mock, queries := GetMockDatabase(ghAccessToken, targetLiveGithub)
+	ghAccessToken, targetLiveGithub, mock, queries := mocks.GetMockDatabase(ghAccessToken, targetLiveGithub)
 
 	// Read the JSON file
-	jsonFile, err := os.Open("mockReposReturn.json")
+	jsonFile, err := os.Open("./mocks/mockReposReturn.json")
 	if err != nil {
-		t.Errorf("Failed to open mockReposReturn.json: %s", err)
+		t.Errorf("Failed to open ./mocks/mockReposReturn.json: %s", err)
 		return
 	}
 	defer jsonFile.Close()
@@ -90,7 +91,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 			rr := httptest.NewRecorder()
 
 			// Add {owner} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
-			req = AppendPathParamToChiContext(req, "owner", tt.owner)
+			req = mocks.AppendPathParamToChiContext(req, "owner", tt.owner)
 
 			createdAt, _ := time.Parse(time.RFC3339, repos[0].CreatedAt)
 			updatedAt, _ := time.Parse(time.RFC3339, repos[0].UpdatedAt)
