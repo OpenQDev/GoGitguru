@@ -47,7 +47,7 @@ func TestHandlerVersion(t *testing.T) {
 
 			// ARRANGE
 			var actualResponse HandlerVersionResponse
-			UnmarshalReader(rr.Result().Body, &actualResponse)
+			ReaderToType(rr.Result().Body, &actualResponse)
 			defer rr.Result().Body.Close()
 
 			// ASSERT

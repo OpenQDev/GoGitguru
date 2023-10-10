@@ -47,7 +47,7 @@ func TestHandlerReadiness(t *testing.T) {
 
 			// ARRANGE - EXPECT
 			var actualReturnBody HandlerReadinessResponse
-			UnmarshalReader(rr.Result().Body, &actualReturnBody)
+			ReaderToType(rr.Result().Body, &actualReturnBody)
 			defer rr.Result().Body.Close()
 
 			// ASSERT

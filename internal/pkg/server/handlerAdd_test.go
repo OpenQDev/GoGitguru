@@ -1,10 +1,7 @@
 package server
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
-	"io"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/server/mocks"
 	"main/internal/pkg/setup"
@@ -15,14 +12,6 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 )
-
-func TypeToReader[T any](source T) io.Reader {
-	jsonData, err := json.Marshal(source)
-	if err != nil {
-		logger.LogFatalRedAndExit("failed to marshal response to %T: %s", source, err)
-	}
-	return bytes.NewReader(jsonData)
-}
 
 func TestAddHandler(t *testing.T) {
 	// ARRANGE - GLOBAL
@@ -35,6 +24,9 @@ func TestAddHandler(t *testing.T) {
 		DB: queries,
 	}
 
+	/* ARRANGE - TEST DATA **/
+
+	// "Valid repo URLs"
 	targetRepos := []string{"https://github.com/org/repo1", "https://github.com/org/repo2"}
 
 	successReturnBody := HandlerAddResponse{
@@ -46,7 +38,6 @@ func TestAddHandler(t *testing.T) {
 		RepoUrls: targetRepos,
 	}
 
-	// Define test cases
 	tests := []struct {
 		name             string
 		expectedStatus   int
@@ -80,7 +71,7 @@ func TestAddHandler(t *testing.T) {
 
 			// ARRANGE - EXPECT
 			var actualResponse HandlerAddResponse
-			UnmarshalReader(rr.Result().Body, &actualResponse)
+			ReaderToType(rr.Result().Body, &actualResponse)
 
 			// ASSERT
 			assert.Equal(t, tt.expectedStatus, rr.Code)
