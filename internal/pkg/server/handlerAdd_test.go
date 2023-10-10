@@ -4,6 +4,7 @@ import (
 	"errors"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/server/mocks"
+	"main/internal/pkg/server/util"
 	"main/internal/pkg/setup"
 	"net/http"
 	"net/http/httptest"
@@ -55,7 +56,7 @@ func TestAddHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// ARRANGE - LOCAL
-			requestBody := TypeToReader(tt.requestBody)
+			requestBody := util.TypeToReader(tt.requestBody)
 
 			req, _ := http.NewRequest("POST", "", requestBody)
 			rr := httptest.NewRecorder()
@@ -71,7 +72,7 @@ func TestAddHandler(t *testing.T) {
 
 			// ARRANGE - EXPECT
 			var actualResponse HandlerAddResponse
-			ReaderToType(rr.Result().Body, &actualResponse)
+			util.ReaderToType(rr.Result().Body, &actualResponse)
 
 			// ASSERT
 			assert.Equal(t, tt.expectedStatus, rr.Code)

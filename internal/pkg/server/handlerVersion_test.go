@@ -3,6 +3,7 @@ package server
 import (
 	"main/internal/pkg/logger"
 	"main/internal/pkg/server/mocks"
+	"main/internal/pkg/server/util"
 	"main/internal/pkg/setup"
 	"net/http"
 	"net/http/httptest"
@@ -47,7 +48,7 @@ func TestHandlerVersion(t *testing.T) {
 
 			// ARRANGE
 			var actualResponse HandlerVersionResponse
-			ReaderToType(rr.Result().Body, &actualResponse)
+			util.ReaderToType(rr.Result().Body, &actualResponse)
 			defer rr.Result().Body.Close()
 
 			// ASSERT

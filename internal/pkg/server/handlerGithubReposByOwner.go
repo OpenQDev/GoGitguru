@@ -13,6 +13,9 @@ import (
 	"github.com/go-chi/chi"
 )
 
+type HandlerGithubReposByOwnerResponse struct {
+}
+
 func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *http.Request) {
 	githubAccessToken := r.Header.Get("GH-Authorization")
 
