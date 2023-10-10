@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"io"
-	"main/internal/database"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/setup"
 	"net/http"
@@ -20,14 +19,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 	_, _, _, debugMode, _, _, _, _, ghAccessToken, targetLiveGithub := setup.ExtractAndVerifyEnvironment("../../../.env")
 	logger.SetDebugMode(debugMode)
 
-	// Initialize a new instance of ApiConfig with mocked DB
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		logger.LogFatalRedAndExit("can't create mock DB: %s", err)
-	}
-
-	// Initialize queries with the mocked DB collection.
-	queries := database.New(db)
+	ghAccessToken, targetLiveGithub, mock, queries := GetMockDatabase(ghAccessToken, targetLiveGithub)
 
 	// Read the JSON file
 	jsonFile, err := os.Open("mockReposReturn.json")
