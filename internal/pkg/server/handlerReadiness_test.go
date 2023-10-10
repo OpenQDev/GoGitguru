@@ -12,6 +12,7 @@ import (
 )
 
 func TestHandlerReadiness(t *testing.T) {
+	// ARRANGE - GLOBAL
 	_, _, _, debugMode, _, _, _, _, _, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
 	logger.SetDebugMode(debugMode)
 
@@ -21,28 +22,31 @@ func TestHandlerReadiness(t *testing.T) {
 		DB: queries,
 	}
 
+	successReturnBody := HandlerReadinessResponse{}
+
 	tests := []struct {
 		name               string
 		expectedStatus     int
-		expectedReturnBody struct{}
+		expectedReturnBody HandlerReadinessResponse
 	}{
 		{
 			name:               "should return 200 and empty struct",
 			expectedStatus:     200,
-			expectedReturnBody: struct{}{},
+			expectedReturnBody: successReturnBody,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req, _ := http.NewRequest("GET", "/healthz", nil)
+			// ARRANGE - LOCAL
+			req, _ := http.NewRequest("GET", "", nil)
 			rr := httptest.NewRecorder()
 
 			// ACT
 			apiCfg.HandlerReadiness(rr, req)
 
-			// ARRANGE
-			var actualReturnBody struct{}
+			// ARRANGE - EXPECT
+			var actualReturnBody HandlerReadinessResponse
 			err := UnmarshalReader(rr.Result().Body, &actualReturnBody)
 			if err != nil {
 				t.Errorf("error unmarshalling: %s", err)
