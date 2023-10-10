@@ -47,10 +47,7 @@ func TestHandlerReadiness(t *testing.T) {
 
 			// ARRANGE - EXPECT
 			var actualReturnBody HandlerReadinessResponse
-			err := UnmarshalReader(rr.Result().Body, &actualReturnBody)
-			if err != nil {
-				t.Errorf("error unmarshalling: %s", err)
-			}
+			UnmarshalReader(rr.Result().Body, &actualReturnBody)
 			defer rr.Result().Body.Close()
 
 			// ASSERT

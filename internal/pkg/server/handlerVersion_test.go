@@ -39,7 +39,7 @@ func TestHandlerVersion(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// ARRANGE
-			req, _ := http.NewRequest("GET", "/version", nil)
+			req, _ := http.NewRequest("GET", "", nil)
 			rr := httptest.NewRecorder()
 
 			// ACT
@@ -47,10 +47,7 @@ func TestHandlerVersion(t *testing.T) {
 
 			// ARRANGE
 			var actualResponse HandlerVersionResponse
-			err := UnmarshalReader(rr.Result().Body, &actualResponse)
-			if err != nil {
-				logger.LogError("failed to unmarshal", err)
-			}
+			UnmarshalReader(rr.Result().Body, &actualResponse)
 			defer rr.Result().Body.Close()
 
 			// ASSERT

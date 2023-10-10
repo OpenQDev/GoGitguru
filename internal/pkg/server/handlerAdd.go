@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-type AddResponse struct {
+type HandlerAddResponse struct {
 	Accepted       []string `json:"accepted"`
 	AlreadyInQueue []string `json:"already_in_queue"`
 }
@@ -67,7 +67,7 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	response := AddResponse{
+	response := HandlerAddResponse{
 		Accepted:       accepted,
 		AlreadyInQueue: alreadyInQueue,
 	}
