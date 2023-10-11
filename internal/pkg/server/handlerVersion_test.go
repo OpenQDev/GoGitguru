@@ -51,7 +51,7 @@ func TestHandlerVersion(t *testing.T) {
 		), tt.name)
 
 		t.Run(tt.name, func(t *testing.T) {
-			// ARRANGE
+			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 			rr := httptest.NewRecorder()
 

@@ -5,6 +5,7 @@ import (
 	"main/internal/pkg/server/mocks"
 	"main/internal/pkg/server/util"
 	"main/internal/pkg/setup"
+	"main/internal/pkg/testhelpers"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,21 +24,31 @@ func TestHandlerHealth(t *testing.T) {
 		DB: queries,
 	}
 
-	successReturnBody := HandlerHealthResponse{}
-
-	tests := []struct {
+	// ARRANGE - TESTS
+	type HandlerReadinessTest struct {
 		name               string
 		expectedStatus     int
 		expectedReturnBody HandlerHealthResponse
-	}{
-		{
-			name:               "should return 200 and empty struct",
-			expectedStatus:     200,
-			expectedReturnBody: successReturnBody,
-		},
+	}
+
+	const SHOULD_RETURN_200_AND_EMPTY_STRUCT = "should return 200 and empty struct"
+	successReturnBody := HandlerHealthResponse{}
+
+	successTest := HandlerReadinessTest{
+		name:               SHOULD_RETURN_200_AND_EMPTY_STRUCT,
+		expectedStatus:     200,
+		expectedReturnBody: successReturnBody,
+	}
+
+	tests := []HandlerReadinessTest{
+		successTest,
 	}
 
 	for _, tt := range tests {
+		testhelpers.CheckTestSkip(t, testhelpers.Targets(
+			testhelpers.RUN_ALL_TESTS,
+		), tt.name)
+
 		t.Run(tt.name, func(t *testing.T) {
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
