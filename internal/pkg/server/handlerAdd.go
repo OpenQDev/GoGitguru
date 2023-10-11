@@ -35,7 +35,6 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&repoUrls)
 	if err != nil || len(repoUrls.RepoUrls) == 0 {
 		msg := fmt.Sprintf("error parsing JSON for: %s", string(bodyBytes))
-		logger.LogError(msg)
 		RespondWithError(w, 400, msg)
 		return
 	}

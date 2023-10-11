@@ -30,26 +30,42 @@ func TestAddHandler(t *testing.T) {
 	// "Valid repo URLs"
 	targetRepos := []string{"https://github.com/org/repo1", "https://github.com/org/repo2"}
 
+	twoReposRequest := HandlerAddRequest{
+		RepoUrls: targetRepos,
+	}
+
 	successReturnBody := HandlerAddResponse{
 		Accepted:       targetRepos,
 		AlreadyInQueue: []string{},
 	}
 
-	twoReposRequest := HandlerAddRequest{
-		RepoUrls: targetRepos,
+	_ = HandlerAddResponse{
+		Accepted:       []string{},
+		AlreadyInQueue: targetRepos,
 	}
 
 	tests := []struct {
-		name             string
-		expectedStatus   int
-		requestBody      HandlerAddRequest
-		expectedResponse HandlerAddResponse
+		name                    string
+		expectedStatus          int
+		requestBody             HandlerAddRequest
+		expectedSuccessResponse HandlerAddResponse
+		expectedErrorResponse   ErrorResponse
+		shouldError             bool
 	}{
 		{
-			name:             "Valid repo URLs",
-			expectedStatus:   http.StatusAccepted,
-			requestBody:      twoReposRequest,
-			expectedResponse: successReturnBody,
+			name:                    "Valid repo URLs",
+			expectedStatus:          http.StatusAccepted,
+			requestBody:             twoReposRequest,
+			expectedSuccessResponse: successReturnBody,
+			shouldError:             false,
+		},
+		{
+			name:                    "empty repo urls",
+			expectedStatus:          http.StatusBadRequest,
+			requestBody:             HandlerAddRequest{RepoUrls: []string{}},
+			expectedSuccessResponse: HandlerAddResponse{},
+			expectedErrorResponse:   ErrorResponse{Error: `error parsing JSON for: {"repo_urls":[]}`},
+			shouldError:             true,
 		},
 	}
 
@@ -73,6 +89,19 @@ func TestAddHandler(t *testing.T) {
 			// ACT
 			apiCfg.HandlerAdd(rr, req)
 
+			// EXPECT - ERRORS
+			if tt.shouldError {
+				var actualErrorResponse ErrorResponse
+				err = util.ReaderToType(rr.Result().Body, &actualErrorResponse)
+				if err != nil {
+					logger.LogFatalRedAndExit("failed to marshal response to %T: %s", actualErrorResponse, err)
+				}
+
+				assert.Equal(t, tt.expectedStatus, rr.Result().StatusCode)
+				assert.Equal(t, tt.expectedErrorResponse, actualErrorResponse)
+				return
+			}
+
 			// ARRANGE - EXPECT
 			var actualResponse HandlerAddResponse
 			err = util.ReaderToType(rr.Result().Body, &actualResponse)
@@ -83,7 +112,7 @@ func TestAddHandler(t *testing.T) {
 
 			// ASSERT
 			assert.Equal(t, tt.expectedStatus, rr.Code)
-			assert.Equal(t, tt.expectedResponse, actualResponse)
+			assert.Equal(t, tt.expectedSuccessResponse, actualResponse)
 
 			// Check if there were any unexpected calls to the mock DB
 			if err := mock.ExpectationsWereMet(); err != nil {
