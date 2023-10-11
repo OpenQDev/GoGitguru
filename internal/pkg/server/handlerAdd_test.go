@@ -6,6 +6,7 @@ import (
 	"main/internal/pkg/server/mocks"
 	"main/internal/pkg/server/util"
 	"main/internal/pkg/setup"
+	"main/internal/pkg/testhelpers"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -26,9 +27,18 @@ func TestAddHandler(t *testing.T) {
 		DB: queries,
 	}
 
-	/* ARRANGE - TEST DATA **/
+	// ARRANGE - TESTS
+	type HandlerAddTest struct {
+		name                    string
+		expectedStatus          int
+		requestBody             HandlerAddRequest
+		expectedSuccessResponse HandlerAddResponse
+		expectedErrorResponse   ErrorResponse
+		shouldError             bool
+	}
 
-	// "Valid repo URLs"
+	// Success Test
+	const VALID_REPO_URLS = "Valid repo URLs"
 	targetRepos := []string{"https://github.com/org/repo1", "https://github.com/org/repo2"}
 
 	twoReposRequest := HandlerAddRequest{
@@ -45,33 +55,37 @@ func TestAddHandler(t *testing.T) {
 		AlreadyInQueue: targetRepos,
 	}
 
-	tests := []struct {
-		name                    string
-		expectedStatus          int
-		requestBody             HandlerAddRequest
-		expectedSuccessResponse HandlerAddResponse
-		expectedErrorResponse   ErrorResponse
-		shouldError             bool
-	}{
-		{
-			name:                    "Valid repo URLs",
-			expectedStatus:          http.StatusAccepted,
-			requestBody:             twoReposRequest,
-			expectedSuccessResponse: successReturnBody,
-			shouldError:             false,
-		},
-		{
-			name:                    "empty repo urls",
-			expectedStatus:          http.StatusBadRequest,
-			requestBody:             HandlerAddRequest{RepoUrls: []string{}},
-			expectedSuccessResponse: HandlerAddResponse{},
-			expectedErrorResponse:   ErrorResponse{Error: `error parsing JSON for: {"repo_urls":[]}`},
-			shouldError:             true,
-		},
+	validRepoUrls := HandlerAddTest{
+		name:                    VALID_REPO_URLS,
+		expectedStatus:          http.StatusAccepted,
+		requestBody:             twoReposRequest,
+		expectedSuccessResponse: successReturnBody,
+		shouldError:             false,
+	}
+
+	// Empty Repo Urls
+	const EMPTY_REPO_URLS = "empty repo urls"
+
+	emptyRepoUrls := HandlerAddTest{
+		name:                    EMPTY_REPO_URLS,
+		expectedStatus:          http.StatusBadRequest,
+		requestBody:             HandlerAddRequest{RepoUrls: []string{}},
+		expectedSuccessResponse: HandlerAddResponse{},
+		expectedErrorResponse:   ErrorResponse{Error: `error parsing JSON for: {"repo_urls":[]}`},
+		shouldError:             true,
+	}
+
+	tests := []HandlerAddTest{
+		validRepoUrls,
+		emptyRepoUrls,
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			testhelpers.CheckTestSkip(t, testhelpers.Targets(
+				testhelpers.RUN_ALL_TESTS,
+			), tt.name)
+
 			// ARRANGE - LOCAL
 			requestBody, err := util.TypeToReader(tt.requestBody)
 			if err != nil {
