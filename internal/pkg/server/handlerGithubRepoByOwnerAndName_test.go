@@ -2,10 +2,10 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/server/mocks"
+	"main/internal/pkg/server/util"
 	"main/internal/pkg/setup"
 	"net/http"
 	"net/http/httptest"
@@ -16,23 +16,26 @@ import (
 )
 
 func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
+	// ARRANGE - GLOBAL
 	_, _, _, debugMode, _, _, _, _, ghAccessToken, targetLiveGithub := setup.ExtractAndVerifyEnvironment("../../../.env")
 	logger.SetDebugMode(debugMode)
 
 	_, queries := mocks.GetMockDatabase()
 
-	// Read the JSON file
+	// Open the JSON file
 	jsonFile, err := os.Open("./mocks/mockRepoReturn.json")
 	if err != nil {
-		t.Errorf("Failed to open ./mocks/mockReposReturn.json: %s", err)
-		return
+		t.Errorf("error opening json file: %s", err)
+	}
+
+	// Decode the JSON file to type RestRepo
+	var repo RestRepo
+	err = util.JsonFileToType(jsonFile, &repo)
+	if err != nil {
+		t.Errorf("Failed to read JSON file: %s", err)
 	}
 	defer jsonFile.Close()
 
-	// Parse the JSON file into a slice of RestRepo
-	repo := ParseJsonFileToRestRepo(jsonFile)
-
-	// Create a mock of Github REST API
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +57,6 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 		GithubRestAPIBaseUrl: serverUrl,
 	}
 
-	// Define test cases
 	tests := []struct {
 		title          string
 		owner          string
@@ -83,8 +85,11 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Prepare the HTTP request
-			req, _ := http.NewRequest("GET", fmt.Sprintf("/repos/github/%s%s", tt.owner, tt.name), nil)
+			// ARRANGE - LOCAL
+			req, _ := http.NewRequest("GET", "", nil)
+			// Add {owner} and {name} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
+			req = mocks.AppendPathParamToChiContext(req, "owner", tt.owner)
+			req = mocks.AppendPathParamToChiContext(req, "name", tt.name)
 
 			if tt.authorized {
 				req.Header.Add("GH-Authorization", ghAccessToken)
@@ -92,18 +97,10 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 
 			rr := httptest.NewRecorder()
 
-			// Add {owner} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
-			req = mocks.AppendPathParamToChiContext(req, "owner", tt.owner)
-			req = mocks.AppendPathParamToChiContext(req, "name", tt.name)
-
-			// Call the handler function
+			// ACT
 			apiCfg.HandlerGithubReposByOwner(rr, req)
 
-			if tt.shouldError {
-				assert.Equal(t, tt.expectedStatus, rr.Code)
-				return
-			}
-
+			// ARRANGE - EXPECT
 			var actualRepoReturn RestRepo
 			err := json.NewDecoder(rr.Body).Decode(&actualRepoReturn)
 			if err != nil {
@@ -111,15 +108,13 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 				return
 			}
 
+			// ASSERT
+			if tt.shouldError {
+				assert.Equal(t, tt.expectedStatus, rr.Code)
+				return
+			}
+
 			assert.Equal(t, repo, actualRepoReturn)
 		})
 	}
-}
-
-func ParseJsonFileToRestRepo(jsonFile *os.File) RestRepo {
-	byteValue, _ := io.ReadAll(jsonFile)
-	var repo RestRepo
-	json.Unmarshal(byteValue, &repo)
-	jsonFile.Seek(0, 0)
-	return repo
 }

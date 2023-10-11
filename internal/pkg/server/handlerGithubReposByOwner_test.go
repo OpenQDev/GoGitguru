@@ -41,7 +41,6 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 
 	defer jsonFile.Close()
 
-	// Create a mock of Github REST API
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
@@ -89,17 +88,16 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Prepare the HTTP request
-			req, _ := http.NewRequest("GET", "/repos/github/"+tt.owner, nil)
+			// ARRANGE - LOCAL
+			req, _ := http.NewRequest("GET", "", nil)
+			// Add {owner} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
+			req = mocks.AppendPathParamToChiContext(req, "owner", tt.owner)
 
 			if tt.authorized {
 				req.Header.Add("GH-Authorization", ghAccessToken)
 			}
 
 			rr := httptest.NewRecorder()
-
-			// Add {owner} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
-			req = mocks.AppendPathParamToChiContext(req, "owner", tt.owner)
 
 			createdAt, _ := time.Parse(time.RFC3339, repos[0].CreatedAt)
 			updatedAt, _ := time.Parse(time.RFC3339, repos[0].UpdatedAt)
@@ -139,21 +137,10 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 				repos[0].DefaultBranch,   // 27 - DefaultBranch
 			).WillReturnRows(rows)
 
-			// Call the handler function
+			// ACT
 			apiCfg.HandlerGithubReposByOwner(rr, req)
 
-			if tt.shouldError {
-				assert.Equal(t, tt.expectedStatus, rr.Code)
-				return
-			}
-
-			// Check the status code
-			assert.Equal(t, tt.expectedStatus, rr.Code)
-
-			// Marshall rr.Body into type []RestRepo
-
-			// Check the response body
-
+			// ARRANGE - EXPECT
 			var actualReposReturn []RestRepo
 			err := json.NewDecoder(rr.Body).Decode(&actualReposReturn)
 			if err != nil {
@@ -161,9 +148,16 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 				return
 			}
 
+			// ASSERT
+			if tt.shouldError {
+				assert.Equal(t, tt.expectedStatus, rr.Code)
+				return
+			}
+
+			assert.Equal(t, tt.expectedStatus, rr.Code)
+
 			assert.Equal(t, repos, actualReposReturn)
 
-			// Check if there were any unexpected calls to the mock DB
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
 			}
