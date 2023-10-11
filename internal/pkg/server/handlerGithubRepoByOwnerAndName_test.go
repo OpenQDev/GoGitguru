@@ -7,10 +7,10 @@ import (
 	"main/internal/pkg/server/mocks"
 	"main/internal/pkg/server/util"
 	"main/internal/pkg/setup"
+	"main/internal/pkg/testhelpers"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -98,7 +98,8 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.title, func(t *testing.T) {
-			CheckTestSkip(t, targets, tt.title)
+			testhelpers.CheckTestSkip(t, targets, tt.title)
+
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 			// Add {owner} and {name} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
@@ -130,15 +131,5 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 
 			assert.Equal(t, repo, actualRepoReturn)
 		})
-	}
-}
-
-func CheckTestSkip(t *testing.T, targets []string, target string) {
-	if targets[0] == "ALL" {
-		return
-	}
-
-	if !slices.Contains(targets, target) {
-		t.Skipf("skipping %s", target)
 	}
 }
