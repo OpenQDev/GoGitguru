@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -57,38 +58,47 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 		GithubRestAPIBaseUrl: serverUrl,
 	}
 
-	tests := []struct {
+	type testType struct {
 		title          string
 		owner          string
 		name           string
 		expectedStatus int
 		authorized     bool
 		shouldError    bool
-	}{
-		{
-			title:          "should return 401 if no access token",
-			owner:          "DRM-Test-Organization",
-			name:           "DRM-Test-Repo",
-			expectedStatus: 401,
-			authorized:     false,
-			shouldError:    true,
-		},
-		{
-			title:          "should store repos for organization",
-			owner:          "DRM-Test-Organization",
-			name:           "DRM-Test-Repo",
-			expectedStatus: 200,
-			authorized:     true,
-			shouldError:    false,
-		},
 	}
 
-	targetTestName := "should return 401 if no access token"
+	const SHOULD_RETURN_401_IF_NO_ACCESS_TOKEN = "SHOULD_RETURN_401_IF_NO_ACCESS_TOKEN"
+	t1 := testType{
+		title:          SHOULD_RETURN_401_IF_NO_ACCESS_TOKEN,
+		owner:          "DRM-Test-Organization",
+		name:           "DRM-Test-Repo",
+		expectedStatus: 401,
+		authorized:     false,
+		shouldError:    true,
+	}
+
+	const SHOULD_STORE_REPOS_FOR_OGRANIZATION = "SHOULD_STORE_REPOS_FOR_OGRANIZATION"
+	t2 := testType{
+		title:          SHOULD_STORE_REPOS_FOR_OGRANIZATION,
+		owner:          "DRM-Test-Organization",
+		name:           "DRM-Test-Repo",
+		expectedStatus: 200,
+		authorized:     true,
+		shouldError:    false,
+	}
+
+	tests := []testType{
+		t1,
+		t2,
+	}
+
+	targets := []string{
+		SHOULD_RETURN_401_IF_NO_ACCESS_TOKEN,
+	}
+
 	for _, tt := range tests {
 		t.Run(tt.title, func(t *testing.T) {
-			if targetTestName != "" && tt.title != targetTestName {
-				t.Skipf("Skipping %s", tt.title)
-			}
+			CheckTestSkip(t, targets, tt.title)
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 			// Add {owner} and {name} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
@@ -120,5 +130,15 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 
 			assert.Equal(t, repo, actualRepoReturn)
 		})
+	}
+}
+
+func CheckTestSkip(t *testing.T, targets []string, target string) {
+	if targets[0] == "ALL" {
+		return
+	}
+
+	if !slices.Contains(targets, target) {
+		t.Skipf("skipping %s", target)
 	}
 }
