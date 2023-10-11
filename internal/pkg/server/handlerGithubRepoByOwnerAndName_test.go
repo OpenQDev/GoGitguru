@@ -65,14 +65,14 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 		authorized     bool
 		shouldError    bool
 	}{
-		// {
-		// 	title:          "should return 401 if no access token",
-		// 	owner:          "DRM-Test-Organization",
-		// 	name:           "DRM-Test-Repo",
-		// 	expectedStatus: 401,
-		// 	authorized:     false,
-		// 	shouldError:    true,
-		// },
+		{
+			title:          "should return 401 if no access token",
+			owner:          "DRM-Test-Organization",
+			name:           "DRM-Test-Repo",
+			expectedStatus: 401,
+			authorized:     false,
+			shouldError:    true,
+		},
 		{
 			title:          "should store repos for organization",
 			owner:          "DRM-Test-Organization",
@@ -83,8 +83,12 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 		},
 	}
 
+	targetTestName := "should return 401 if no access token"
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(tt.title, func(t *testing.T) {
+			if targetTestName != "" && tt.title != targetTestName {
+				t.Skipf("Skipping %s", tt.title)
+			}
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 			// Add {owner} and {name} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
@@ -100,17 +104,17 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 			// ACT
 			apiCfg.HandlerGithubReposByOwner(rr, req)
 
+			// ASSERT - ERROR
+			if tt.shouldError {
+				assert.Equal(t, tt.expectedStatus, rr.Code)
+				return
+			}
+
 			// ARRANGE - EXPECT
 			var actualRepoReturn RestRepo
 			err := json.NewDecoder(rr.Body).Decode(&actualRepoReturn)
 			if err != nil {
 				t.Errorf("Failed to decode rr.Body into []RestRepo: %s", err)
-				return
-			}
-
-			// ASSERT
-			if tt.shouldError {
-				assert.Equal(t, tt.expectedStatus, rr.Code)
 				return
 			}
 
