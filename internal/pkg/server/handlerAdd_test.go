@@ -28,57 +28,7 @@ func TestAddHandler(t *testing.T) {
 	}
 
 	// ARRANGE - TESTS
-	type HandlerAddTest struct {
-		name                    string
-		expectedStatus          int
-		requestBody             HandlerAddRequest
-		expectedSuccessResponse HandlerAddResponse
-		expectedErrorResponse   ErrorResponse
-		shouldError             bool
-	}
-
-	// Success Test
-	const VALID_REPO_URLS = "Valid repo URLs"
-	targetRepos := []string{"https://github.com/org/repo1", "https://github.com/org/repo2"}
-
-	twoReposRequest := HandlerAddRequest{
-		RepoUrls: targetRepos,
-	}
-
-	successReturnBody := HandlerAddResponse{
-		Accepted:       targetRepos,
-		AlreadyInQueue: []string{},
-	}
-
-	secondReturnBody := HandlerAddResponse{
-		Accepted:       []string{},
-		AlreadyInQueue: targetRepos,
-	}
-
-	validRepoUrls := HandlerAddTest{
-		name:                    VALID_REPO_URLS,
-		expectedStatus:          http.StatusAccepted,
-		requestBody:             twoReposRequest,
-		expectedSuccessResponse: successReturnBody,
-		shouldError:             false,
-	}
-
-	// Empty Repo Urls
-	const EMPTY_REPO_URLS = "empty repo urls"
-
-	emptyRepoUrls := HandlerAddTest{
-		name:                    EMPTY_REPO_URLS,
-		expectedStatus:          http.StatusBadRequest,
-		requestBody:             HandlerAddRequest{RepoUrls: []string{}},
-		expectedSuccessResponse: HandlerAddResponse{},
-		expectedErrorResponse:   ErrorResponse{Error: `error parsing JSON for: {"repo_urls":[]}`},
-		shouldError:             true,
-	}
-
-	tests := []HandlerAddTest{
-		validRepoUrls,
-		emptyRepoUrls,
-	}
+	tests := HandlerAddTestCases()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -164,7 +114,7 @@ func TestAddHandler(t *testing.T) {
 			}
 
 			assert.Equal(t, tt.expectedStatus, rr.Result().StatusCode)
-			assert.Equal(t, secondReturnBody, actualSuccessResponse)
+			assert.Equal(t, tt.secondExpectedSuccessResponse, actualSuccessResponse)
 		})
 	}
 }

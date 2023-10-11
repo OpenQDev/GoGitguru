@@ -25,25 +25,7 @@ func TestHandlerVersion(t *testing.T) {
 	}
 
 	// ARRANGE - TESTS
-	type HandlerVersionTest struct {
-		name                 string
-		expectedStatusCode   int
-		expectedResponseBody HandlerVersionResponse
-	}
-
-	// TEST 1
-	const SHOULD_RETURN_200_AND_CORRECT_VERSION = "should return 200 and version 1.0.0"
-	successResponse := HandlerVersionResponse{Version: "1.0.0"}
-
-	shouldReturn200 := HandlerVersionTest{
-		name:                 SHOULD_RETURN_200_AND_CORRECT_VERSION,
-		expectedStatusCode:   200,
-		expectedResponseBody: successResponse,
-	}
-
-	tests := []HandlerVersionTest{
-		shouldReturn200,
-	}
+	tests := HandlerVersionTestCases()
 
 	for _, tt := range tests {
 		testhelpers.CheckTestSkip(t, testhelpers.Targets(
