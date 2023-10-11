@@ -1,65 +1,118 @@
 package server
 
 import (
+	"encoding/json"
+	"io"
+	"main/internal/pkg/logger"
+	"main/internal/pkg/server/mocks"
+	"main/internal/pkg/server/util"
+	"main/internal/pkg/setup"
+	"net/http"
+	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandlerGithubUserByLogin(t *testing.T) {
-	assert.Equal(t, true, true, "passes")
-	// // Initialize a new instance of ApiConfig with mocked DB
-	// db, mock, err := sqlmock.New()
-	// if err != nil {
-	// 	logger.LogFatalRedAndExit("can't create mock DB: %s", err)
-	// }
+	// ARRANGE - GLOBAL
+	_, _, _, debugMode, _, _, _, _, ghAccessToken, targetLiveGithub := setup.ExtractAndVerifyEnvironment("../../../.env")
+	logger.SetDebugMode(debugMode)
 
-	// // Initialize queries with the mocked DB collection.
-	// queries := database.New(db)
+	_, queries := mocks.GetMockDatabase()
 
-	// apiCfg := ApiConfig{
-	// 	DB: queries,
-	// }
+	jsonFile, err := os.Open("./mocks/mockRepoReturn.json")
+	if err != nil {
+		t.Errorf("error opening json file: %s", err)
+	}
 
-	// // Define test cases
-	// tests := []struct {
-	// 	name           string
-	// 	login          string
-	// 	expectedStatus int
-	// 	// Add more fields as needed
-	// }{
-	// 	{
-	// 		name:           "Github User doesn't exist",
-	// 		login:          "NonExistent",
-	// 		expectedStatus: http.StatusOK,
-	// 	},
-	// 	{
-	// 		name:           "Github User does exist",
-	// 		login:          "IExist",
-	// 		expectedStatus: http.StatusOK,
-	// 	},
-	// }
+	var repo RestRepo
+	err = util.JsonFileToType(jsonFile, &repo)
+	if err != nil {
+		t.Errorf("Failed to read JSON file: %s", err)
+	}
+	defer jsonFile.Close()
 
-	// for _, tt := range tests {
-	// 	t.Run(tt.name, func(t *testing.T) {
-	// 		// Prepare the HTTP request
-	// 		req, _ := http.NewRequest("GET", "/users/github/"+tt.login, nil)
-	// 		rr := httptest.NewRecorder()
+	mux := http.NewServeMux()
 
-	// 		// Define your expectations here. For example, if you expect the GetGithubUser function to be called,
-	// 		// you can set it up like this:
-	// 		mock.ExpectQuery("^-- name: GetGithubUser :one.*").WithArgs(tt.login).WillReturnRows(sqlmock.NewRows([]string{"internal_id", "github_rest_id", "github_graphql_id", "login", "name", "email", "avatar_url", "company", "location", "bio", "blog", "hireable", "twitter_username", "followers", "following", "type", "created_at", "updated_at"}).AddRow(1, 123, "abc", "testuser", "Test User", "test@example.com", "https://example.com/avatar", "Test Company", "Test Location", "Test Bio", "https://example.com/blog", true, "testuser", 100, 50, "User", time.Now(), time.Now()))
+	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
+		io.Copy(w, jsonFile)
+	})
 
-	// 		// Call the handler function
-	// 		apiCfg.HandlerGithubUserByLogin(rr, req)
+	server := httptest.NewServer(mux)
+	defer server.Close()
 
-	// 		// Check the status code
-	// 		assert.Equal(t, tt.expectedStatus, rr.Code)
+	var serverUrl string
+	if targetLiveGithub {
+		serverUrl = "https://api.github.com"
+	} else {
+		serverUrl = server.URL
+	}
 
-	// 		// Check if there were any unexpected calls to the mock DB
-	// 		if err := mock.ExpectationsWereMet(); err != nil {
-	// 			t.Errorf("there were unfulfilled expectations: %s", err)
-	// 		}
-	// 	})
-	// }
+	apiCfg := ApiConfig{
+		DB:                   queries,
+		GithubRestAPIBaseUrl: serverUrl,
+	}
+
+	tests := []struct {
+		title          string
+		owner          string
+		name           string
+		expectedStatus int
+		authorized     bool
+		shouldError    bool
+	}{
+		// {
+		// 	title:          "should return 401 if no access token",
+		// 	owner:          "DRM-Test-Organization",
+		// 	name:           "DRM-Test-Repo",
+		// 	expectedStatus: 401,
+		// 	authorized:     false,
+		// 	shouldError:    true,
+		// },
+		{
+			title:          "should store repos for organization",
+			owner:          "DRM-Test-Organization",
+			name:           "DRM-Test-Repo",
+			expectedStatus: 200,
+			authorized:     true,
+			shouldError:    false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// ARRANGE - LOCAL
+			req, _ := http.NewRequest("GET", "", nil)
+			// Add {owner} and {name} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
+			req = mocks.AppendPathParamToChiContext(req, "owner", tt.owner)
+			req = mocks.AppendPathParamToChiContext(req, "name", tt.name)
+
+			if tt.authorized {
+				req.Header.Add("GH-Authorization", ghAccessToken)
+			}
+
+			rr := httptest.NewRecorder()
+
+			// ACT
+			apiCfg.HandlerGithubReposByOwner(rr, req)
+
+			// ARRANGE - EXPECT
+			var actualRepoReturn RestRepo
+			err := json.NewDecoder(rr.Body).Decode(&actualRepoReturn)
+			if err != nil {
+				t.Errorf("Failed to decode rr.Body into []RestRepo: %s", err)
+				return
+			}
+
+			// ASSERT
+			if tt.shouldError {
+				assert.Equal(t, tt.expectedStatus, rr.Code)
+				return
+			}
+
+			assert.Equal(t, repo, actualRepoReturn)
+		})
+	}
 }

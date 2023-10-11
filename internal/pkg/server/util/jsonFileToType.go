@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// JsonFileToType reads a JSON file and unmarshals its contents into the given target type.
+// JsonFileToType reads a JSON file and decodes its contents into the given target type.
 func JsonFileToType[T any](jsonFile *os.File, target *T) error {
 	defer jsonFile.Seek(0, 0)
 	decoder := json.NewDecoder(jsonFile)

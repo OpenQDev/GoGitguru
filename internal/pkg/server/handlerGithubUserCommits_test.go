@@ -1,12 +1,11 @@
 package server
 
 import (
-	"encoding/json"
-	"fmt"
 	"io"
 	"main/internal/database"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/server/mocks"
+	"main/internal/pkg/server/util"
 	"main/internal/pkg/setup"
 	"net/http"
 	"net/http/httptest"
@@ -17,24 +16,25 @@ import (
 )
 
 func TestHandlerGithubUserCommits(t *testing.T) {
+	// ARRANGE - GLOBAL
 	_, _, _, debugMode, _, _, _, _, ghAccessToken, targetLiveGithub := setup.ExtractAndVerifyEnvironment("../../../.env")
 	logger.SetDebugMode(debugMode)
 
-	// Initialize a new instance of ApiConfig with mocked DB
 	mock, queries := mocks.GetMockDatabase()
 
-	// Read the JSON file
 	jsonFile, err := os.Open("./mocks/mockUserCommitsReturn.json")
 	if err != nil {
-		t.Errorf("Failed to open ./mocks/mockReposReturn.json: %s", err)
+		t.Errorf("Failed to open ./mocks/mockUserCommitsReturn.json: %s", err)
 		return
+	}
+
+	var repo []database.Commit
+	err = util.JsonFileToType(jsonFile, &repo)
+	if err != nil {
+		t.Errorf("Failed to read JSON file: %s", err)
 	}
 	defer jsonFile.Close()
 
-	// Parse the JSON file into a slice of RestRepo
-	repos := ParseJsonFileToCommits(jsonFile)
-
-	// Create a mock of Github REST API
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
@@ -82,8 +82,11 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Prepare the HTTP request
-			req, _ := http.NewRequest("GET", fmt.Sprintf("/users/github/%s/commits", tt.login), nil)
+			// ARRANGE - LOCAL
+			req, _ := http.NewRequest("GET", "", nil)
+
+			// Add {login} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
+			req = mocks.AppendPathParamToChiContext(req, "login", tt.login)
 
 			if tt.authorized {
 				req.Header.Add("GH-Authorization", ghAccessToken)
@@ -91,39 +94,21 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 
 			rr := httptest.NewRecorder()
 
-			// Add {owner} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
-			req = mocks.AppendPathParamToChiContext(req, "login", tt.login)
-
-			mock.ExpectQuery("^-- name: InsertGithubRepo :one.*").WithArgs(
-			// impl here
-			)
-
-			// Call the handler function
+			// ACT
 			apiCfg.HandlerGithubUserCommits(rr, req)
 
+			// ASSERT
 			if tt.shouldError {
 				assert.Equal(t, tt.expectedStatus, rr.Code)
 				return
 			}
 
-			// Check the status code
 			assert.Equal(t, tt.expectedStatus, rr.Code)
+			assert.Equal(t, repo, "actual")
 
-			// Check the response body
-			assert.Equal(t, repos, "actual")
-
-			// Check if there were any unexpected calls to the mock DB
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
 			}
 		})
 	}
-}
-
-func ParseJsonFileToCommits(jsonFile *os.File) []database.Commit {
-	byteValue, _ := io.ReadAll(jsonFile)
-	var commits []database.Commit
-	json.Unmarshal(byteValue, &commits)
-	jsonFile.Seek(0, 0)
-	return commits
 }
