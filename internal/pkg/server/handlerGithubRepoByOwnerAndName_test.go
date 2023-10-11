@@ -38,11 +38,9 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 	defer jsonFile.Close()
 
 	mux := http.NewServeMux()
-
 	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
 		io.Copy(w, jsonFile)
 	})
-
 	server := httptest.NewServer(mux)
 	defer server.Close()
 

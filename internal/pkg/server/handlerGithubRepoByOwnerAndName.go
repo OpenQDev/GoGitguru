@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"main/internal/database"
+	"main/internal/pkg/server/util"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi"
 )
@@ -48,22 +48,13 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 		return
 	}
 
-	layout := "2006-01-02T15:04:05Z" // ISO 8601 format
-	createdAt, err := time.Parse(layout, repo.CreatedAt)
+	parsedTimes, err := util.ParseTimestrings(repo.CreatedAt, repo.UpdatedAt, repo.PushedAt)
 	if err != nil {
-		RespondWithError(w, 500, "Failed to parse CreatedAt.")
+		RespondWithError(w, 500, err.Error())
 		return
 	}
-	updatedAt, err := time.Parse(layout, repo.UpdatedAt)
-	if err != nil {
-		RespondWithError(w, 500, "Failed to parse UpdatedAt.")
-		return
-	}
-	pushedAt, err := time.Parse(layout, repo.PushedAt)
-	if err != nil {
-		RespondWithError(w, 500, "Failed to parse PushedAt.")
-		return
-	}
+
+	createdAt, updatedAt, pushedAt := parsedTimes[0], parsedTimes[1], parsedTimes[2]
 
 	// Insert the repo into the database using sqlc generated methods
 	params := database.InsertGithubRepoParams{
