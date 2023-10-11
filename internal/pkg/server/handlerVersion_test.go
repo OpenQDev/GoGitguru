@@ -5,6 +5,7 @@ import (
 	"main/internal/pkg/server/mocks"
 	"main/internal/pkg/server/util"
 	"main/internal/pkg/setup"
+	"main/internal/pkg/testhelpers"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,21 +24,32 @@ func TestHandlerVersion(t *testing.T) {
 		DB: queries,
 	}
 
-	successResponse := HandlerVersionResponse{Version: "1.0.0"}
-
-	tests := []struct {
+	// ARRANGE - TESTS
+	type HandlerVersionTest struct {
 		name                 string
 		expectedStatusCode   int
 		expectedResponseBody HandlerVersionResponse
-	}{
-		{
-			name:                 "should return 200 and version 1.0.0",
-			expectedStatusCode:   200,
-			expectedResponseBody: successResponse,
-		},
+	}
+
+	// TEST 1
+	const SHOULD_RETURN_200_AND_CORRECT_VERSION = "should return 200 and version 1.0.0"
+	successResponse := HandlerVersionResponse{Version: "1.0.0"}
+
+	shouldReturn200 := HandlerVersionTest{
+		name:                 SHOULD_RETURN_200_AND_CORRECT_VERSION,
+		expectedStatusCode:   200,
+		expectedResponseBody: successResponse,
+	}
+
+	tests := []HandlerVersionTest{
+		shouldReturn200,
 	}
 
 	for _, tt := range tests {
+		testhelpers.CheckTestSkip(t, testhelpers.Targets(
+			testhelpers.RUN_ALL_TESTS,
+		), tt.name)
+
 		t.Run(tt.name, func(t *testing.T) {
 			// ARRANGE
 			req, _ := http.NewRequest("GET", "", nil)
