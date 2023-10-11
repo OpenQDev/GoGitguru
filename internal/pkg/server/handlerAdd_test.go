@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
@@ -39,7 +40,7 @@ func TestAddHandler(t *testing.T) {
 		AlreadyInQueue: []string{},
 	}
 
-	_ = HandlerAddResponse{
+	secondReturnBody := HandlerAddResponse{
 		Accepted:       []string{},
 		AlreadyInQueue: targetRepos,
 	}
@@ -74,7 +75,7 @@ func TestAddHandler(t *testing.T) {
 			// ARRANGE - LOCAL
 			requestBody, err := util.TypeToReader(tt.requestBody)
 			if err != nil {
-				logger.LogFatalRedAndExit("failed to marshal response to %T: %s", tt.requestBody, err)
+				t.Errorf("failed to marshal response to %T: %s", tt.requestBody, err)
 			}
 
 			req, _ := http.NewRequest("POST", "", requestBody)
@@ -94,7 +95,7 @@ func TestAddHandler(t *testing.T) {
 				var actualErrorResponse ErrorResponse
 				err = util.ReaderToType(rr.Result().Body, &actualErrorResponse)
 				if err != nil {
-					logger.LogFatalRedAndExit("failed to marshal response to %T: %s", actualErrorResponse, err)
+					t.Errorf("failed to marshal response to %T: %s", actualErrorResponse, err)
 				}
 
 				assert.Equal(t, tt.expectedStatus, rr.Result().StatusCode)
@@ -102,22 +103,54 @@ func TestAddHandler(t *testing.T) {
 				return
 			}
 
-			// ARRANGE - EXPECT
-			var actualResponse HandlerAddResponse
-			err = util.ReaderToType(rr.Result().Body, &actualResponse)
+			// EXPECT - SUCCESS
+			var actualSuccessResponse HandlerAddResponse
+			err = util.ReaderToType(rr.Result().Body, &actualSuccessResponse)
 			if err != nil {
-				logger.LogFatalRedAndExit("failed to marshal response to %T: %s", actualResponse, err)
+				t.Errorf("failed to marshal response to %T: %s", actualSuccessResponse, err)
 			}
-			defer rr.Result().Body.Close()
 
-			// ASSERT
-			assert.Equal(t, tt.expectedStatus, rr.Code)
-			assert.Equal(t, tt.expectedSuccessResponse, actualResponse)
-
-			// Check if there were any unexpected calls to the mock DB
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
 			}
+
+			assert.Equal(t, tt.expectedStatus, rr.Result().StatusCode)
+			assert.Equal(t, tt.expectedSuccessResponse, actualSuccessResponse)
+
+			// --- SECOND CALL --- //
+
+			// ARRANGE - LOCAL
+			requestBody, err = util.TypeToReader(tt.requestBody)
+			if err != nil {
+				logger.LogFatalRedAndExit("failed to marshal response to %T: %s", tt.requestBody, err)
+			}
+
+			req, _ = http.NewRequest("POST", "", requestBody)
+			rr = httptest.NewRecorder()
+
+			// ARRANGE - EXPECT
+			currentTime := time.Now()
+			repoURLMockRow1 := sqlmock.NewRows([]string{"url", "status", "created_at", "updated_at"}).AddRow("https://github.com/org/repo1", "pending", currentTime, currentTime)
+			repoURLMockRow2 := sqlmock.NewRows([]string{"url", "status", "created_at", "updated_at"}).AddRow("https://github.com/org/repo2", "pending", currentTime, currentTime)
+
+			mock.ExpectQuery("^-- name: GetRepoURL :one.*").WithArgs("https://github.com/org/repo1").WillReturnRows(repoURLMockRow1)
+			mock.ExpectQuery("^-- name: GetRepoURL :one.*").WithArgs("https://github.com/org/repo2").WillReturnRows(repoURLMockRow2)
+
+			// ACT
+			apiCfg.HandlerAdd(rr, req)
+
+			// EXPECT - SUCCESS
+			err = util.ReaderToType(rr.Result().Body, &actualSuccessResponse)
+			if err != nil {
+				t.Errorf("failed to marshal response to %T: %s", actualSuccessResponse, err)
+			}
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+
+			assert.Equal(t, tt.expectedStatus, rr.Result().StatusCode)
+			assert.Equal(t, secondReturnBody, actualSuccessResponse)
 		})
 	}
 }
