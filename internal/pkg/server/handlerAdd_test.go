@@ -56,7 +56,10 @@ func TestAddHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// ARRANGE - LOCAL
-			requestBody := util.TypeToReader(tt.requestBody)
+			requestBody, err := util.TypeToReader(tt.requestBody)
+			if err != nil {
+				logger.LogFatalRedAndExit("failed to marshal response to %T: %s", tt.requestBody, err)
+			}
 
 			req, _ := http.NewRequest("POST", "", requestBody)
 			rr := httptest.NewRecorder()
@@ -72,7 +75,11 @@ func TestAddHandler(t *testing.T) {
 
 			// ARRANGE - EXPECT
 			var actualResponse HandlerAddResponse
-			util.ReaderToType(rr.Result().Body, &actualResponse)
+			err = util.ReaderToType(rr.Result().Body, &actualResponse)
+			if err != nil {
+				logger.LogFatalRedAndExit("failed to marshal response to %T: %s", actualResponse, err)
+			}
+			defer rr.Result().Body.Close()
 
 			// ASSERT
 			assert.Equal(t, tt.expectedStatus, rr.Code)

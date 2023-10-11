@@ -46,9 +46,12 @@ func TestHandlerVersion(t *testing.T) {
 			// ACT
 			apiCfg.HandlerVersion(rr, req)
 
-			// ARRANGE
+			// ARRANGE - EXPECT
 			var actualResponse HandlerVersionResponse
-			util.ReaderToType(rr.Result().Body, &actualResponse)
+			err := util.ReaderToType(rr.Result().Body, &actualResponse)
+			if err != nil {
+				logger.LogFatalRedAndExit("failed to marshal response to %T: %s", actualResponse, err)
+			}
 			defer rr.Result().Body.Close()
 
 			// ASSERT

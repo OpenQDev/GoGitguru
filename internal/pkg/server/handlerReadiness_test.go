@@ -47,13 +47,16 @@ func TestHandlerReadiness(t *testing.T) {
 			apiCfg.HandlerReadiness(rr, req)
 
 			// ARRANGE - EXPECT
-			var actualReturnBody HandlerReadinessResponse
-			util.ReaderToType(rr.Result().Body, &actualReturnBody)
+			var actualResponse HandlerReadinessResponse
+			err := util.ReaderToType(rr.Result().Body, &actualResponse)
+			if err != nil {
+				logger.LogFatalRedAndExit("failed to marshal response to %T: %s", actualResponse, err)
+			}
 			defer rr.Result().Body.Close()
 
 			// ASSERT
 			assert.Equal(t, tt.expectedStatus, rr.Result().StatusCode)
-			assert.Equal(t, tt.expectedReturnBody, actualReturnBody)
+			assert.Equal(t, tt.expectedReturnBody, actualResponse)
 		})
 	}
 }
