@@ -5,6 +5,7 @@ import (
 	"io"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/server/mocks"
+	"main/internal/pkg/server/util"
 	"main/internal/pkg/setup"
 	"net/http"
 	"net/http/httptest"
@@ -23,16 +24,22 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 
 	mock, queries := mocks.GetMockDatabase()
 
-	// Read the JSON file
+	// ARRANGE - TEST DATA
+
+	// Open the JSON file
 	jsonFile, err := os.Open("./mocks/mockReposReturn.json")
 	if err != nil {
-		t.Errorf("Failed to open ./mocks/mockReposReturn.json: %s", err)
-		return
+		t.Errorf("error opening json file: %s", err)
 	}
-	defer jsonFile.Close()
 
-	// Parse the JSON file into a slice of RestRepo
-	repos := ParseJsonFileToRestRepos(jsonFile)
+	// Decode the JSON file to type []RestRepo
+	var repos []RestRepo
+	err = util.JsonFileToType(jsonFile, &repos)
+	if err != nil {
+		t.Errorf("Failed to read JSON file: %s", err)
+	}
+
+	defer jsonFile.Close()
 
 	// Create a mock of Github REST API
 	mux := http.NewServeMux()
@@ -162,12 +169,4 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 			}
 		})
 	}
-}
-
-func ParseJsonFileToRestRepos(jsonFile *os.File) []RestRepo {
-	byteValue, _ := io.ReadAll(jsonFile)
-	var repos []RestRepo
-	json.Unmarshal(byteValue, &repos)
-	jsonFile.Seek(0, 0)
-	return repos
 }
