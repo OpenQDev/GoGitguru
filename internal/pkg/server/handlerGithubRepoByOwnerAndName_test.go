@@ -58,47 +58,13 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 		GithubRestAPIBaseUrl: serverUrl,
 	}
 
-	type testType struct {
-		title          string
-		owner          string
-		name           string
-		expectedStatus int
-		authorized     bool
-		shouldError    bool
-	}
-
-	const SHOULD_RETURN_401_IF_NO_ACCESS_TOKEN = "SHOULD_RETURN_401_IF_NO_ACCESS_TOKEN"
-	t1 := testType{
-		title:          SHOULD_RETURN_401_IF_NO_ACCESS_TOKEN,
-		owner:          "DRM-Test-Organization",
-		name:           "DRM-Test-Repo",
-		expectedStatus: 401,
-		authorized:     false,
-		shouldError:    true,
-	}
-
-	const SHOULD_STORE_REPOS_FOR_OGRANIZATION = "SHOULD_STORE_REPOS_FOR_OGRANIZATION"
-	t2 := testType{
-		title:          SHOULD_STORE_REPOS_FOR_OGRANIZATION,
-		owner:          "DRM-Test-Organization",
-		name:           "DRM-Test-Repo",
-		expectedStatus: 200,
-		authorized:     true,
-		shouldError:    false,
-	}
-
-	tests := []testType{
-		t1,
-		t2,
-	}
-
-	targets := []string{
-		SHOULD_RETURN_401_IF_NO_ACCESS_TOKEN,
-	}
+	tests := HandlerGithubRepoByOwnerAndNameTestCases()
 
 	for _, tt := range tests {
 		t.Run(tt.title, func(t *testing.T) {
-			testhelpers.CheckTestSkip(t, targets, tt.title)
+			testhelpers.CheckTestSkip(t, testhelpers.Targets(
+				"SHOULD_GET_REPO_FOR_ORG_AND_NAME",
+			), tt.title)
 
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)

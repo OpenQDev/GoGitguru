@@ -13,7 +13,7 @@ type HandlerAddTest struct {
 }
 
 func validRepoUrls() HandlerAddTest {
-	const VALID_REPO_URLS = "Valid repo URLs"
+	const VALID_REPO_URLS = "VALID_REPO_URLS"
 	targetRepos := []string{"https://github.com/org/repo1", "https://github.com/org/repo2"}
 
 	twoReposRequest := HandlerAddRequest{
@@ -43,7 +43,7 @@ func validRepoUrls() HandlerAddTest {
 }
 
 func emptyRepoUrls() HandlerAddTest {
-	const EMPTY_REPO_URLS = "empty repo urls"
+	const EMPTY_REPO_URLS = "EMPTY_REPO_URLS"
 
 	return HandlerAddTest{
 		name:                    EMPTY_REPO_URLS,

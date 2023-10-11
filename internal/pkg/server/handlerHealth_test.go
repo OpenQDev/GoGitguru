@@ -25,24 +25,7 @@ func TestHandlerHealth(t *testing.T) {
 	}
 
 	// ARRANGE - TESTS
-	type HandlerReadinessTest struct {
-		name               string
-		expectedStatus     int
-		expectedReturnBody HandlerHealthResponse
-	}
-
-	const SHOULD_RETURN_200_AND_EMPTY_STRUCT = "should return 200 and empty struct"
-	successReturnBody := HandlerHealthResponse{}
-
-	successTest := HandlerReadinessTest{
-		name:               SHOULD_RETURN_200_AND_EMPTY_STRUCT,
-		expectedStatus:     200,
-		expectedReturnBody: successReturnBody,
-	}
-
-	tests := []HandlerReadinessTest{
-		successTest,
-	}
+	tests := HandlerHealthTestCases()
 
 	for _, tt := range tests {
 		testhelpers.CheckTestSkip(t, testhelpers.Targets(
