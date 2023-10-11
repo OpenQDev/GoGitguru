@@ -21,7 +21,7 @@ func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
 	}))
 
 	v1Router := chi.NewRouter()
-	v1Router.Get("/healthz", apiCfg.HandlerReadiness)
+	v1Router.Get("/healthz", apiCfg.HandlerHealth)
 	v1Router.Get("/version", apiCfg.HandlerVersion)
 
 	v1Router.Post("/add", apiCfg.HandlerAdd)

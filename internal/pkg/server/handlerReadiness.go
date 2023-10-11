@@ -4,8 +4,8 @@ import (
 	"net/http"
 )
 
-type HandlerReadinessResponse struct{}
+type HandlerHealthResponse struct{}
 
-func (apiCfg *ApiConfig) HandlerReadiness(w http.ResponseWriter, r *http.Request) {
-	RespondWithJSON(w, 200, HandlerReadinessResponse{})
+func (apiCfg *ApiConfig) HandlerHealth(w http.ResponseWriter, r *http.Request) {
+	RespondWithJSON(w, 200, HandlerHealthResponse{})
 }

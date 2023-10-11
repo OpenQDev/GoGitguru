@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHandlerReadiness(t *testing.T) {
+func TestHandlerHealth(t *testing.T) {
 	// ARRANGE - GLOBAL
 	_, _, _, debugMode, _, _, _, _, _, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
 	logger.SetDebugMode(debugMode)
@@ -23,12 +23,12 @@ func TestHandlerReadiness(t *testing.T) {
 		DB: queries,
 	}
 
-	successReturnBody := HandlerReadinessResponse{}
+	successReturnBody := HandlerHealthResponse{}
 
 	tests := []struct {
 		name               string
 		expectedStatus     int
-		expectedReturnBody HandlerReadinessResponse
+		expectedReturnBody HandlerHealthResponse
 	}{
 		{
 			name:               "should return 200 and empty struct",
@@ -44,10 +44,10 @@ func TestHandlerReadiness(t *testing.T) {
 			rr := httptest.NewRecorder()
 
 			// ACT
-			apiCfg.HandlerReadiness(rr, req)
+			apiCfg.HandlerHealth(rr, req)
 
 			// ARRANGE - EXPECT
-			var actualResponse HandlerReadinessResponse
+			var actualResponse HandlerHealthResponse
 			err := util.ReaderToType(rr.Result().Body, &actualResponse)
 			if err != nil {
 				logger.LogFatalRedAndExit("failed to marshal response to %T: %s", actualResponse, err)
