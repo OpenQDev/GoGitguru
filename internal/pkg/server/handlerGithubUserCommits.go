@@ -9,16 +9,17 @@ import (
 	"github.com/go-chi/chi"
 )
 
-type RequestBody struct {
+type HandlerGithubUserCommitsRequest struct {
 	RepoUrls []string `json:"repo_urls"`
 	Since    string   `json:"since"`
 	Until    string   `json:"until"`
 }
+type HandlerGithubUserCommitsResponse struct{}
 
 func (apiConfig *ApiConfig) HandlerGithubUserCommits(w http.ResponseWriter, r *http.Request) {
 	_ = chi.URLParam(r, "login")
 
-	var body RequestBody
+	var body HandlerGithubUserCommitsRequest
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

@@ -11,6 +11,9 @@ import (
 	"github.com/go-chi/chi"
 )
 
+type HandlerGithubUserByLoginRequest struct{}
+type HandlerGithubUserByLoginResponse struct{}
+
 func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *http.Request) {
 	githubAccessToken := r.Header.Get("GH-Authorization")
 

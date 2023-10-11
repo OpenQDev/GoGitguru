@@ -9,20 +9,23 @@ import (
 	"time"
 )
 
-func (apiConfig *ApiConfig) HandlerRepoCommits(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		RepoURL string `json:"repo_url"`
-		Since   string `json:"since"`
-		Until   string `json:"until"`
-	}
+type HandlerRepoCommitsRequest struct {
+	RepoURL string `json:"repo_url"`
+	Since   string `json:"since"`
+	Until   string `json:"until"`
+}
 
-	err := json.NewDecoder(r.Body).Decode(&input)
+type HandlerRepoCommitsResponse struct{}
+
+func (apiConfig *ApiConfig) HandlerRepoCommits(w http.ResponseWriter, r *http.Request) {
+	var handlerRepoCommitsRequest HandlerRepoCommitsRequest
+	err := json.NewDecoder(r.Body).Decode(&handlerRepoCommitsRequest)
 	if err != nil {
 		RespondWithError(w, 400, "Invalid request body.")
 		return
 	}
 
-	if input.RepoURL == "" {
+	if handlerRepoCommitsRequest.RepoURL == "" {
 		RespondWithError(w, 400, "Missing repo URL.")
 		return
 	}
@@ -30,8 +33,8 @@ func (apiConfig *ApiConfig) HandlerRepoCommits(w http.ResponseWriter, r *http.Re
 	layout := "2006-01-02T15:04:05Z" // ISO 8601 format
 	var since, until time.Time
 
-	if input.Since != "" {
-		since, err = time.Parse(layout, input.Since)
+	if handlerRepoCommitsRequest.Since != "" {
+		since, err = time.Parse(layout, handlerRepoCommitsRequest.Since)
 		if err != nil {
 			RespondWithError(w, 400, "Invalid 'since' format.")
 			return
@@ -40,8 +43,8 @@ func (apiConfig *ApiConfig) HandlerRepoCommits(w http.ResponseWriter, r *http.Re
 		since = time.Now().AddDate(0, 0, -30)
 	}
 
-	if input.Until != "" {
-		until, err = time.Parse(layout, input.Until)
+	if handlerRepoCommitsRequest.Until != "" {
+		until, err = time.Parse(layout, handlerRepoCommitsRequest.Until)
 		if err != nil {
 			RespondWithError(w, 400, "Invalid 'until' format.")
 			return
@@ -52,7 +55,7 @@ func (apiConfig *ApiConfig) HandlerRepoCommits(w http.ResponseWriter, r *http.Re
 
 	// Fetch commits from database
 	commits, err := apiConfig.DB.GetCommitsWithAuthorInfo(context.Background(), database.GetCommitsWithAuthorInfoParams{
-		RepoUrl:      sql.NullString{String: input.RepoURL, Valid: true},
+		RepoUrl:      sql.NullString{String: handlerRepoCommitsRequest.RepoURL, Valid: true},
 		AuthorDate:   sql.NullInt64{Int64: since.Unix(), Valid: true},
 		AuthorDate_2: sql.NullInt64{Int64: until.Unix(), Valid: true},
 	})

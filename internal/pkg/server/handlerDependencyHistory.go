@@ -11,16 +11,18 @@ import (
 	"strings"
 )
 
-type DependencyHistoryBody struct {
+type DependencyHistoryRequest struct {
 	RepoUrl            string   `json:"repo_url"`
 	FilePaths          []string `json:"files_paths"`
 	DependencySearched string   `json:"dependency_searched"`
 }
 
+type DependencyHistoryResponse struct{}
+
 func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http.Request) {
 	var dependencyHistory gitutil.DiffHistoryResult
 
-	var body DependencyHistoryBody
+	var body DependencyHistoryRequest
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		RespondWithError(w, 200, err.Error())
@@ -77,7 +79,7 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 	RespondWithJSON(w, 200, dependencyHistory)
 }
 
-func checkGitPathExists(body DependencyHistoryBody, repoDir string) error {
+func checkGitPathExists(body DependencyHistoryRequest, repoDir string) error {
 	gitGrepExists := strings.Join(body.FilePaths, "|")
 	gitGrepExists = strings.ReplaceAll(gitGrepExists, "*", "")
 
@@ -92,7 +94,7 @@ func checkGitPathExists(body DependencyHistoryBody, repoDir string) error {
 }
 
 // This formats the dependency_searched array with wildcards around it
-func formatDependenciesSearched(body DependencyHistoryBody) string {
+func formatDependenciesSearched(body DependencyHistoryRequest) string {
 	var filesPathsFormatted string
 	for _, path := range body.FilePaths {
 		filesPathsFormatted += "'**" + path + "**' "
