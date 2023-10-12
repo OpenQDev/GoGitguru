@@ -3,6 +3,7 @@ package gitutil
 import (
 	"fmt"
 	"main/internal/pkg/setup"
+	"main/internal/pkg/testhelpers"
 	"testing"
 )
 
@@ -12,6 +13,10 @@ func TestGithubGetCommitAuthors(t *testing.T) {
 	tests := GithubGetCommitAuthorsTestCases()
 
 	for _, tt := range tests {
+		testhelpers.CheckTestSkip(t, testhelpers.Targets(
+			testhelpers.RUN_ALL_TESTS,
+		), tt.name)
+
 		t.Run(tt.name, func(t *testing.T) {
 			var commitDetails string
 

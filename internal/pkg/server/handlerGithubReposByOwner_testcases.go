@@ -1,5 +1,7 @@
 package server
 
+import "net/http"
+
 type HandlerGithubReposByOwnerTestCase struct {
 	name           string
 	owner          string
@@ -13,7 +15,7 @@ func unauthorized() HandlerGithubReposByOwnerTestCase {
 	return HandlerGithubReposByOwnerTestCase{
 		name:           SHOULD_401,
 		owner:          "DRM-Test-Organization",
-		expectedStatus: 401,
+		expectedStatus: http.StatusUnauthorized,
 		authorized:     false,
 		shouldError:    true,
 	}
@@ -24,7 +26,7 @@ func sucess() HandlerGithubReposByOwnerTestCase {
 	return HandlerGithubReposByOwnerTestCase{
 		name:           SHOULD_STORE_ALL_REPOS_FOR_ORG,
 		owner:          "DRM-Test-Organization",
-		expectedStatus: 200,
+		expectedStatus: http.StatusOK,
 		authorized:     true,
 		shouldError:    false,
 	}

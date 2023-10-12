@@ -7,6 +7,7 @@ import (
 	"main/internal/pkg/server/mocks"
 	"main/internal/pkg/server/util"
 	"main/internal/pkg/setup"
+	"main/internal/pkg/testhelpers"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -56,32 +57,14 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 		GithubRestAPIBaseUrl: serverUrl,
 	}
 
-	// Define test cases
-	tests := []struct {
-		name           string
-		login          string
-		expectedStatus int
-		authorized     bool
-		shouldError    bool
-	}{
-		// {
-		// 	name:           "should return 401 if no access token",
-		// 	login:          "DRM-Test-Organization",
-		// 	expectedStatus: 401,
-		// 	authorized:     false,
-		// 	shouldError:    true,
-		// },
-		{
-			name:           "should store repos for organization",
-			login:          "IAmATestUserForDRM",
-			expectedStatus: 200,
-			authorized:     true,
-			shouldError:    false,
-		},
-	}
+	tests := HandlerGithubUserCommitsTestCases()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			testhelpers.CheckTestSkip(t, testhelpers.Targets(
+				testhelpers.RUN_ALL_TESTS,
+			), tt.name)
+
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 

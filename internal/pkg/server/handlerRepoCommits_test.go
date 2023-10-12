@@ -7,6 +7,7 @@ import (
 	"main/internal/pkg/server/mocks"
 	"main/internal/pkg/server/util"
 	"main/internal/pkg/setup"
+	"main/internal/pkg/testhelpers"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -57,30 +58,13 @@ func TestHandlerRepoCommits(t *testing.T) {
 	}
 
 	// Define test cases
-	tests := []struct {
-		name           string
-		login          string
-		expectedStatus int
-		authorized     bool
-		shouldError    bool
-	}{
-		// {
-		// 	name:           "should return 401 if no access token",
-		// 	login:          "DRM-Test-Organization",
-		// 	expectedStatus: 401,
-		// 	authorized:     false,
-		// 	shouldError:    true,
-		// },
-		{
-			name:           "should store repos for organization",
-			login:          "IAmATestUserForDRM",
-			expectedStatus: 200,
-			authorized:     true,
-			shouldError:    false,
-		},
-	}
+	tests := HandlerRepoCommitsTestCases()
 
 	for _, tt := range tests {
+		testhelpers.CheckTestSkip(t, testhelpers.Targets(
+			testhelpers.RUN_ALL_TESTS,
+		), tt.name)
+
 		t.Run(tt.name, func(t *testing.T) {
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"main/internal/database"
 	"main/internal/pkg/logger"
+	"main/internal/pkg/testhelpers"
 	"os"
 	"testing"
 
@@ -35,6 +36,10 @@ func TestStoreGitLogs(t *testing.T) {
 	tests := GitLogTestCases()
 
 	for _, tt := range tests {
+		testhelpers.CheckTestSkip(t, testhelpers.Targets(
+			testhelpers.RUN_ALL_TESTS,
+		), tt.name)
+
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.shouldError {
 				mock.ExpectExec("^-- name: BulkInsertCommits :exec.*").WillReturnError(errors.New("mock error"))

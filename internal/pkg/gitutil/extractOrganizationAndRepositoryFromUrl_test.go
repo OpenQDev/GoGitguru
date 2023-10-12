@@ -1,6 +1,7 @@
 package gitutil
 
 import (
+	"main/internal/pkg/testhelpers"
 	"testing"
 )
 
@@ -10,6 +11,10 @@ func TestExtractOrganizationAndRepositoryFromUrl(t *testing.T) {
 	tests := ExtractOrganizationAndRepositoryFromUrlTestCases()
 
 	for _, tt := range tests {
+		testhelpers.CheckTestSkip(t, testhelpers.Targets(
+			testhelpers.RUN_ALL_TESTS,
+		), tt.name)
+
 		t.Run(tt.name, func(t *testing.T) {
 			org, repo := ExtractOrganizationAndRepositoryFromUrl(tt.url)
 			if org != tt.org || repo != tt.repo {
