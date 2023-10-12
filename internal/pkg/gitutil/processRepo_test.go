@@ -3,6 +3,7 @@ package gitutil
 import (
 	"main/internal/database"
 	"main/internal/pkg/logger"
+	"main/internal/pkg/testhelpers"
 	"os"
 	"testing"
 
@@ -11,13 +12,12 @@ import (
 )
 
 func TestProcessRepo(t *testing.T) {
-	// Initialize a new instance of mock DB
+	// ARRANGE - GLOBAL
 	db, mock, err := sqlmock.New()
 	if err != nil {
-		logger.LogFatalRedAndExit("can't create mock DB: %s", err)
+		t.Errorf("can't create mock DB: %s", err)
 	}
 
-	// Initialize queries with the mocked DB collection.
 	queries := database.New(db)
 
 	tmpDir, err := os.MkdirTemp("", "prefixPath")
@@ -28,50 +28,17 @@ func TestProcessRepo(t *testing.T) {
 
 	prefixPath := tmpDir
 
-	// Define test cases
-	tests := []struct {
-		name         string
-		organization string
-		repo         string
-		repoUrl      string
-		gitLogs      []GitLog
-	}{
-		{
-			name:         "Valid git logs",
-			organization: "OpenQDev",
-			repo:         "OpenQ-DRM-TestRepo",
-			repoUrl:      "https://github.com/OpenQ-Dev/OpenQ-DRM-TestRepo",
-			gitLogs: []GitLog{
-				{
-					CommitHash:    "06a12f9c203112a149707ff73e4298749744c358",
-					AuthorName:    "FlacoJones",
-					AuthorEmail:   "andrew@openq.dev",
-					AuthorDate:    1696277247,
-					CommitDate:    1696277247,
-					CommitMessage: "updates README",
-					FilesChanged:  1,
-					Insertions:    1,
-					Deletions:     0,
-				},
-				{
-					CommitHash:    "9fae86bc8e89895b961d81bd7e9e4e897501c8bb",
-					AuthorName:    "FlacoJones",
-					AuthorEmail:   "andrew@openq.dev",
-					AuthorDate:    1696277205,
-					CommitDate:    1696277205,
-					CommitMessage: "initial commit",
-					FilesChanged:  0,
-					Insertions:    0,
-					Deletions:     0,
-				},
-			},
-		},
-		// Add more test cases as needed
-	}
+	// ARRANGE - TESTS
+	tests := ProcessRepoTestCases()
 
 	for _, tt := range tests {
+		testhelpers.CheckTestSkip(t, testhelpers.Targets(
+			testhelpers.RUN_ALL_TESTS,
+		), tt.name)
+
 		t.Run(tt.name, func(t *testing.T) {
-			// Clone repo to tmp dir. Will be deleted at end of test
+
+			// ARRANGE - LOCAL
 			CloneRepo(prefixPath, tt.organization, tt.repo)
 
 			// SET REPO STATUS TO storing_commits
