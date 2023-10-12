@@ -36,7 +36,6 @@ func IdentifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTup
 	for key, value := range result.Data.Repository {
 		commits[key] = value
 	}
-	fmt.Println(commits)
 
 	return &commits, nil
 }

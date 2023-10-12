@@ -9,7 +9,7 @@ import (
 )
 
 type HandlerGithubRepoByOwnerAndNameRequest struct{}
-type HandlerGithubRepoByOwnerAndNameResponse struct{}
+type HandlerGithubRepoByOwnerAndNameResponse = GithubRestRepo
 
 func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWriter, r *http.Request) {
 	githubAccessToken := r.Header.Get("GH-Authorization")
@@ -46,7 +46,7 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 	}
 
 	// Insert the repo into the database using sqlc generated methods
-	params := ConvertRestRepoToInsertParams(repo)
+	params := ConvertGithubRestRepoToInsertGithubRepoParams(repo)
 
 	_, err = apiConfig.DB.InsertGithubRepo(context.Background(), params)
 	if err != nil {

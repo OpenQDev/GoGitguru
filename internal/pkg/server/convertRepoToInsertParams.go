@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func ConvertRestRepoToInsertParams(repo GithubRestRepo) database.InsertGithubRepoParams {
+func ConvertGithubRestRepoToInsertGithubRepoParams(repo GithubRestRepo) database.InsertGithubRepoParams {
 	createdAt, _ := time.Parse(time.RFC3339, repo.CreatedAt)
 	updatedAt, _ := time.Parse(time.RFC3339, repo.UpdatedAt)
 	pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)

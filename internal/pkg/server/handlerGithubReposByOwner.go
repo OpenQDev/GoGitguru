@@ -11,7 +11,7 @@ import (
 )
 
 type HandlerGithubReposByOwnerRequest struct{}
-type HandlerGithubReposByOwnerResponse struct{}
+type HandlerGithubReposByOwnerResponse = []GithubRestRepo
 
 func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *http.Request) {
 	githubAccessToken := r.Header.Get("GH-Authorization")
@@ -44,9 +44,6 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 			return
 		}
 
-		// Create a new reader with the body bytes for the json decoder
-		resp = PrintResponseBody(resp)
-
 		var restReposResponse []GithubRestRepo
 		err = json.NewDecoder(resp.Body).Decode(&restReposResponse)
 		if err != nil {
@@ -64,7 +61,7 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 
 	for _, repo := range repos {
 
-		params := ConvertRestRepoToInsertParams(repo)
+		params := ConvertGithubRestRepoToInsertGithubRepoParams(repo)
 
 		_, err := apiConfig.DB.InsertGithubRepo(context.Background(), params)
 		if err != nil {
