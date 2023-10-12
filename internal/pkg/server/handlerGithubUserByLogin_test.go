@@ -22,7 +22,7 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 
 	_, queries := mocks.GetMockDatabase()
 
-	jsonFile, err := os.Open("./mocks/mockRepoReturn.json")
+	jsonFile, err := os.Open("./mocks/mockGithubRepoReturn.json")
 	if err != nil {
 		t.Errorf("error opening json file: %s", err)
 	}

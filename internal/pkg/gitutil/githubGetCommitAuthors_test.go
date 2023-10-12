@@ -9,21 +9,7 @@ import (
 func TestGithubGetCommitAuthors(t *testing.T) {
 	_, _, _, _, _, _, _, _, ghAccessToken, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
 
-	tests := []struct {
-		name    string
-		owner   string
-		repo    string
-		commits []string
-		wantErr bool
-	}{
-		{
-			name:    "TestGithubGetCommitAuthors with valid query",
-			owner:   "OpenQDev",
-			repo:    "OpenQ-Workflows",
-			commits: []string{"8799411585c826b577f632f1ef5c0415914267ed", "657bd8b7f7d83e8b842411cbf65666901d65431c"},
-			wantErr: false,
-		},
-	}
+	tests := GithubGetCommitAuthorsTestCases()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

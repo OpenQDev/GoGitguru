@@ -7,6 +7,7 @@ import (
 	"main/internal/pkg/server/mocks"
 	"main/internal/pkg/server/util"
 	"main/internal/pkg/setup"
+	"main/internal/pkg/testhelpers"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -27,7 +28,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 	// ARRANGE - TEST DATA
 
 	// Open the JSON file
-	jsonFile, err := os.Open("./mocks/mockReposReturn.json")
+	jsonFile, err := os.Open("./mocks/mockGithubReposReturn.json")
 	if err != nil {
 		t.Errorf("error opening json file: %s", err)
 	}
@@ -62,31 +63,14 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 		GithubRestAPIBaseUrl: serverUrl,
 	}
 
-	// Define test cases
-	tests := []struct {
-		name           string
-		owner          string
-		expectedStatus int
-		authorized     bool
-		shouldError    bool
-	}{
-		// {
-		// 	name:           "should return 401 if no access token",
-		// 	owner:          "DRM-Test-Organization",
-		// 	expectedStatus: 401,
-		// 	authorized:     false,
-		// 	shouldError:    true,
-		// },
-		{
-			name:           "should store repos for organization",
-			owner:          "DRM-Test-Organization",
-			expectedStatus: 200,
-			authorized:     true,
-			shouldError:    false,
-		},
-	}
+	// ARRANGE - TESTS
+	tests := HandlerGithubReposByOwnerTestCases()
 
 	for _, tt := range tests {
+		testhelpers.CheckTestSkip(t, testhelpers.Targets(
+			testhelpers.RUN_ALL_TESTS,
+		), tt.name)
+
 		t.Run(tt.name, func(t *testing.T) {
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
@@ -104,11 +88,11 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 			pushedAt, _ := time.Parse(time.RFC3339, repos[0].PushedAt)
 
 			rows := sqlmock.NewRows([]string{"internal_id", "github_rest_id", "github_graphql_id", "url", "name", "full_name", "private", "owner_login", "owner_avatar_url", "description", "homepage", "fork", "forks_count", "archived", "disabled", "license", "language", "stargazers_count", "watchers_count", "open_issues_count", "has_issues", "has_discussions", "has_projects", "created_at", "updated_at", "pushed_at", "visibility", "size", "default_branch"}).
-				AddRow(1, repos[0].ID, repos[0].NodeID, repos[0].URL, repos[0].Name, repos[0].FullName, repos[0].Private, repos[0].Owner.Login, repos[0].Owner.AvatarURL, repos[0].Description, "homepage", repos[0].Fork, repos[0].ForksCount, repos[0].Archived, repos[0].Disabled, "license", "language", repos[0].StargazersCount, repos[0].WatchersCount, repos[0].OpenIssuesCount, repos[0].HasIssues, repos[0].HasDiscussions, repos[0].HasProjects, createdAt, updatedAt, pushedAt, repos[0].Visibility, repos[0].Size, repos[0].DefaultBranch)
+				AddRow(1, repos[0].GithubRestID, repos[0].GithubGraphqlID, repos[0].URL, repos[0].Name, repos[0].FullName, repos[0].Private, repos[0].Owner.Login, repos[0].Owner.AvatarURL, repos[0].Description, "homepage", repos[0].Fork, repos[0].ForksCount, repos[0].Archived, repos[0].Disabled, "license", "language", repos[0].StargazersCount, repos[0].WatchersCount, repos[0].OpenIssuesCount, repos[0].HasIssues, repos[0].HasDiscussions, repos[0].HasProjects, createdAt, updatedAt, pushedAt, repos[0].Visibility, repos[0].Size, repos[0].DefaultBranch)
 
 			mock.ExpectQuery("^-- name: InsertGithubRepo :one.*").WithArgs(
-				repos[0].ID,              // 0 - GithubRestID
-				repos[0].NodeID,          // 1 - GithubGraphqlID
+				repos[0].GithubRestID,    // 0 - GithubRestID
+				repos[0].GithubGraphqlID, // 1 - GithubGraphqlID
 				repos[0].URL,             // 2 - Url
 				repos[0].Name,            // 3 - Name
 				repos[0].FullName,        // 4 - FullName

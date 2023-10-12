@@ -5,31 +5,9 @@ import (
 )
 
 func TestExtractOrganizationAndRepositoryFromUrl(t *testing.T) {
-	tests := []struct {
-		name string
-		url  string
-		org  string
-		repo string
-	}{
-		{
-			name: "Test with valid URL",
-			url:  "https://github.com/org/repo",
-			org:  "org",
-			repo: "repo",
-		},
-		{
-			name: "Test with URL without repo",
-			url:  "https://github.com/org/",
-			org:  "org",
-			repo: "",
-		},
-		{
-			name: "Test with URL without org and repo",
-			url:  "https://github.com/",
-			org:  "",
-			repo: "",
-		},
-	}
+	// ARRANGE - TESTS
+
+	tests := ExtractOrganizationAndRepositoryFromUrlTestCases()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
