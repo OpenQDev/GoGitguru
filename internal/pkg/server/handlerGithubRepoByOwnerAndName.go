@@ -42,7 +42,7 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 
 	defer resp.Body.Close()
 
-	var repo Repo
+	var repo GithubRestRepo
 	err = json.NewDecoder(resp.Body).Decode(&repo)
 	if err != nil {
 		RespondWithError(w, 500, "failed to decode response.")
@@ -81,7 +81,7 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 		ForksCount:      sql.NullInt32{Int32: int32(repo.ForksCount), Valid: true},
 		Archived:        sql.NullBool{Bool: repo.Archived, Valid: true},
 		Disabled:        sql.NullBool{Bool: repo.Disabled, Valid: true},
-		License:         sql.NullString{String: repo.License, Valid: true},
+		License:         sql.NullString{String: repo.License.Name, Valid: true},
 		Language:        sql.NullString{String: repo.Language, Valid: true},
 		StargazersCount: sql.NullInt32{Int32: int32(repo.StargazersCount), Valid: true},
 		WatchersCount:   sql.NullInt32{Int32: int32(repo.WatchersCount), Valid: true},

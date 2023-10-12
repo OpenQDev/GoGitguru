@@ -85,8 +85,8 @@ func ConvertRestRepoToInsertParams(repo GithubRestRepo) database.InsertGithubRep
 	pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)
 
 	return database.InsertGithubRepoParams{
-		GithubRestID:    int32(repo.ID),
-		GithubGraphqlID: repo.NodeID,
+		GithubRestID:    int32(repo.GithubRestID),
+		GithubGraphqlID: repo.GithubGraphqlID,
 		Url:             repo.URL,
 		Name:            repo.Name,
 		FullName:        repo.FullName,

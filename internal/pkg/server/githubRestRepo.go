@@ -1,12 +1,12 @@
 package server
 
 type GithubRestRepo struct {
-	ID       int    `json:"id"`
-	NodeID   string `json:"node_id"`
-	Name     string `json:"name"`
-	FullName string `json:"full_name"`
-	Private  bool   `json:"private"`
-	Owner    struct {
+	GithubRestID    int    `json:"id"`
+	GithubGraphqlID string `json:"node_id"`
+	Name            string `json:"name"`
+	FullName        string `json:"full_name"`
+	Private         bool   `json:"private"`
+	Owner           struct {
 		Login      string `json:"login"`
 		ID         int    `json:"id"`
 		NodeID     string `json:"node_id"`
