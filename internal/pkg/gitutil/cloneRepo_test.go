@@ -8,26 +8,7 @@ import (
 func TestCloneRepo(t *testing.T) {
 	prefixPath, _ := os.MkdirTemp("", "repos")
 
-	tests := []struct {
-		name         string
-		repo         string
-		organization string
-		wantErr      bool
-	}{
-		{
-			name:         "Valid repo and organization",
-			repo:         "OpenQ-Workflows",
-			organization: "OpenQDev",
-			wantErr:      false,
-		},
-		{
-			name:         "Invalid repo",
-			repo:         "invalid-repo",
-			organization: "valid-org",
-			wantErr:      true,
-		},
-		// Add more test cases as needed
-	}
+	tests := CloneRepoTestCases()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
