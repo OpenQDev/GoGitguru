@@ -27,7 +27,7 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 		t.Errorf("error opening json file: %s", err)
 	}
 
-	var repo RestRepo
+	var repo GithubRestRepo
 	err = util.JsonFileToType(jsonFile, &repo)
 	if err != nil {
 		t.Errorf("Failed to read JSON file: %s", err)
@@ -99,7 +99,7 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 			apiCfg.HandlerGithubReposByOwner(rr, req)
 
 			// ARRANGE - EXPECT
-			var actualRepoReturn RestRepo
+			var actualRepoReturn GithubRestRepo
 			err := json.NewDecoder(rr.Body).Decode(&actualRepoReturn)
 			if err != nil {
 				t.Errorf("Failed to decode rr.Body into []RestRepo: %s", err)

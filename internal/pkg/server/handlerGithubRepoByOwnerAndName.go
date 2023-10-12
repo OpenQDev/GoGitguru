@@ -29,14 +29,14 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", "https://api.github.com/repos/"+owner+"/"+name, nil)
 	if err != nil {
-		RespondWithError(w, 500, "Failed to create request.")
+		RespondWithError(w, 500, "failed to create request.")
 		return
 	}
 
 	req.Header.Add("Authorization", "token "+githubAccessToken)
 	resp, err := client.Do(req)
 	if err != nil {
-		RespondWithError(w, 500, "Failed to make request.")
+		RespondWithError(w, 500, "failed to make request.")
 		return
 	}
 
@@ -45,23 +45,23 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 	var repo Repo
 	err = json.NewDecoder(resp.Body).Decode(&repo)
 	if err != nil {
-		RespondWithError(w, 500, "Failed to decode response.")
+		RespondWithError(w, 500, "failed to decode response.")
 		return
 	}
 
 	createdAt, err := time.Parse(time.RFC3339, repo.CreatedAt)
 	if err != nil {
-		RespondWithError(w, 500, fmt.Sprintf("Failed to parse createdAt: %s", repo.CreatedAt))
+		RespondWithError(w, 500, fmt.Sprintf("failed to parse createdAt: %s", repo.CreatedAt))
 		return
 	}
 	updatedAt, err := time.Parse(time.RFC3339, repo.UpdatedAt)
 	if err != nil {
-		RespondWithError(w, 500, fmt.Sprintf("Failed to parse updatedAt: %s", repo.UpdatedAt))
+		RespondWithError(w, 500, fmt.Sprintf("failed to parse updatedAt: %s", repo.UpdatedAt))
 		return
 	}
 	pushedAt, err := time.Parse(time.RFC3339, repo.PushedAt)
 	if err != nil {
-		RespondWithError(w, 500, fmt.Sprintf("Failed to parse pushedAt: %s", repo.PushedAt))
+		RespondWithError(w, 500, fmt.Sprintf("failed to parse pushedAt: %s", repo.PushedAt))
 		return
 	}
 
@@ -99,7 +99,7 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 
 	_, err = apiConfig.DB.InsertGithubRepo(context.Background(), params)
 	if err != nil {
-		RespondWithError(w, 500, "Failed to insert repo into database.")
+		RespondWithError(w, 500, "failed to insert repo into database.")
 		return
 	}
 

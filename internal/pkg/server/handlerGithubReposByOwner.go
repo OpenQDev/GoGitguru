@@ -29,7 +29,7 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 
 	client := &http.Client{}
 	page := 1
-	var repos []RestRepo
+	var repos []GithubRestRepo
 	for {
 		requestUrl := fmt.Sprintf("%s/users/%s/repos?per_page=100&page=%d", apiConfig.GithubRestAPIBaseUrl, owner, page)
 		logger.LogGreenDebug("calling %s", requestUrl)
@@ -50,7 +50,7 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 		// Create a new reader with the body bytes for the json decoder
 		resp = PrintResponseBody(resp)
 
-		var restReposResponse []RestRepo
+		var restReposResponse []GithubRestRepo
 		err = json.NewDecoder(resp.Body).Decode(&restReposResponse)
 		if err != nil {
 			RespondWithError(w, 500, "Failed to decode response.")
@@ -79,7 +79,7 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 	RespondWithJSON(w, 200, repos)
 }
 
-func ConvertRestRepoToInsertParams(repo RestRepo) database.InsertGithubRepoParams {
+func ConvertRestRepoToInsertParams(repo GithubRestRepo) database.InsertGithubRepoParams {
 	createdAt, _ := time.Parse(time.RFC3339, repo.CreatedAt)
 	updatedAt, _ := time.Parse(time.RFC3339, repo.UpdatedAt)
 	pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)

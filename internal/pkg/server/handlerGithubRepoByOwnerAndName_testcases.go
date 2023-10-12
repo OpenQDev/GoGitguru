@@ -1,5 +1,7 @@
 package server
 
+import "net/http"
+
 type HandlerGithubRepoByOwnerAndNameTest struct {
 	title          string
 	owner          string
@@ -9,13 +11,16 @@ type HandlerGithubRepoByOwnerAndNameTest struct {
 	shouldError    bool
 }
 
+const drmTestOrg = "DRM-Test-Organization"
+const drmTestRepo = "DRM-Test-Repo"
+
 func shouldReturn401() HandlerGithubRepoByOwnerAndNameTest {
 	const SHOULD_RETURN_401_IF_NO_ACCESS_TOKEN = "SHOULD_RETURN_401_IF_NO_ACCESS_TOKEN"
 	return HandlerGithubRepoByOwnerAndNameTest{
 		title:          SHOULD_RETURN_401_IF_NO_ACCESS_TOKEN,
-		owner:          "DRM-Test-Organization",
-		name:           "DRM-Test-Repo",
-		expectedStatus: 401,
+		owner:          drmTestOrg,
+		name:           drmTestRepo,
+		expectedStatus: http.StatusUnauthorized,
 		authorized:     false,
 		shouldError:    true,
 	}
@@ -25,9 +30,9 @@ func shouldReturnRepoForOwnerAndName() HandlerGithubRepoByOwnerAndNameTest {
 	const SHOULD_GET_REPO_FOR_ORG_AND_NAME = "SHOULD_GET_REPO_FOR_ORG_AND_NAME"
 	return HandlerGithubRepoByOwnerAndNameTest{
 		title:          SHOULD_GET_REPO_FOR_ORG_AND_NAME,
-		owner:          "DRM-Test-Organization",
-		name:           "DRM-Test-Repo",
-		expectedStatus: 200,
+		owner:          drmTestOrg,
+		name:           drmTestRepo,
+		expectedStatus: http.StatusOK,
 		authorized:     true,
 		shouldError:    false,
 	}
