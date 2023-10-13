@@ -2,8 +2,8 @@ package server
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"main/internal/pkg/server/util"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -24,7 +24,6 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 	name := chi.URLParam(r, "name")
 
 	url := fmt.Sprintf("%s/repos/%s/%s", apiConfig.GithubRestAPIBaseUrl, owner, name)
-	fmt.Println("url in handler", url)
 
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
@@ -43,13 +42,8 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 	defer resp.Body.Close()
 
 	var repo GithubRestRepo
-	err = json.NewDecoder(resp.Body).Decode(&repo)
-	if err != nil {
-		RespondWithError(w, 500, "failed to decode response.")
-		return
-	}
+	util.ReaderToType(resp.Body, &repo)
 
-	// Insert the repo into the database using sqlc generated methods
 	params := ConvertGithubRestRepoToInsertGithubRepoParams(repo)
 
 	_, err = apiConfig.DB.InsertGithubRepo(context.Background(), params)

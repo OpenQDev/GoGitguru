@@ -1,8 +1,6 @@
 package server
 
 import (
-	"encoding/json"
-	"fmt"
 	"io"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/server/mocks"
@@ -66,9 +64,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 			), tt.title)
 
 			// ARRANGE - LOCAL
-			url := fmt.Sprintf("%s/repos/%s/%s", serverUrl, tt.owner, tt.name)
-			fmt.Println("urlurlurl", url)
-			req, _ := http.NewRequest("GET", url, nil)
+			req, _ := http.NewRequest("GET", "", nil)
 
 			// Add {owner} and {name} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
 			req = mocks.AppendPathParamToChiContext(req, "name", tt.name)
@@ -87,11 +83,14 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 			if tt.shouldError {
 				assert.Equal(t, tt.expectedStatus, rr.Code)
 				return
+			} else if rr.Code < 200 || rr.Code >= 300 {
+				t.Errorf("Unexpected HTTP status code: %d", rr.Code)
+				return
 			}
 
 			// ARRANGE - EXPECT
 			var actualRepoReturn GithubRestRepo
-			err := json.NewDecoder(rr.Body).Decode(&actualRepoReturn)
+			util.ReaderToType(rr.Result().Body, &actualRepoReturn)
 			if err != nil {
 				t.Errorf("Failed to decode rr.Body into []RestRepo: %s", err)
 				return
