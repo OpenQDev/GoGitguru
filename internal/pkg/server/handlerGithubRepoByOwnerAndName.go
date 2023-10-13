@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -22,8 +23,11 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 	owner := chi.URLParam(r, "owner")
 	name := chi.URLParam(r, "name")
 
+	url := fmt.Sprintf("%s/repos/%s/%s", apiConfig.GithubRestAPIBaseUrl, owner, name)
+	fmt.Println("url in handler", url)
+
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "https://api.github.com/repos/"+owner+"/"+name, nil)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		RespondWithError(w, 500, "failed to create request.")
 		return

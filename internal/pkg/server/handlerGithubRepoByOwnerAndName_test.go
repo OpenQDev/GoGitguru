@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/server/mocks"
@@ -38,7 +39,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 	defer jsonFile.Close()
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/repos/", func(w http.ResponseWriter, r *http.Request) {
 		io.Copy(w, jsonFile)
 	})
 	server := httptest.NewServer(mux)
@@ -65,10 +66,13 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 			), tt.title)
 
 			// ARRANGE - LOCAL
-			req, _ := http.NewRequest("GET", "", nil)
+			url := fmt.Sprintf("%s/repos/%s/%s", serverUrl, tt.owner, tt.name)
+			fmt.Println("urlurlurl", url)
+			req, _ := http.NewRequest("GET", url, nil)
+
 			// Add {owner} and {name} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
-			req = mocks.AppendPathParamToChiContext(req, "owner", tt.owner)
 			req = mocks.AppendPathParamToChiContext(req, "name", tt.name)
+			req = mocks.AppendPathParamToChiContext(req, "owner", tt.owner)
 
 			if tt.authorized {
 				req.Header.Add("GH-Authorization", ghAccessToken)
@@ -77,7 +81,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 			rr := httptest.NewRecorder()
 
 			// ACT
-			apiCfg.HandlerGithubReposByOwner(rr, req)
+			apiCfg.HandlerGithubRepoByOwnerAndName(rr, req)
 
 			// ASSERT - ERROR
 			if tt.shouldError {
