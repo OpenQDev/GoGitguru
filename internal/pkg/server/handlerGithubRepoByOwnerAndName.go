@@ -48,7 +48,7 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 
 	_, err = apiConfig.DB.InsertGithubRepo(context.Background(), params)
 	if err != nil {
-		RespondWithError(w, 500, "failed to insert repo into database.")
+		RespondWithError(w, 500, fmt.Sprintf("failed to insert repo into database: %s", err))
 		return
 	}
 

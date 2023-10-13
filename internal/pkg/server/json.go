@@ -16,7 +16,6 @@ func RespondWithError(w http.ResponseWriter, code int, msg string) {
 }
 
 func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	fmt.Println("payloadpayloadpayload", payload)
 	dat, err := json.Marshal(payload)
 
 	if err != nil {
