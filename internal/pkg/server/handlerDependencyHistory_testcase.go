@@ -1,7 +1,10 @@
 package server
 
 type HandlerDependencyHistoryTestCase struct {
-	name string
+	name           string
+	authorized     bool
+	shouldError    bool
+	expectedStatus int
 }
 
 func HandlerDependencyHistoryTestCases() []HandlerDependencyHistoryTestCase {

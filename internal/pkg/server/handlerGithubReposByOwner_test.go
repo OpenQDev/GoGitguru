@@ -42,20 +42,20 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 
 	defer jsonFile.Close()
 
-	mux := http.NewServeMux()
+	mockGithubMux := http.NewServeMux()
 
-	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
+	mockGithubMux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
 		io.Copy(w, jsonFile)
 	})
 
-	server := httptest.NewServer(mux)
-	defer server.Close()
+	mockGithubServer := httptest.NewServer(mockGithubMux)
+	defer mockGithubServer.Close()
 
 	var serverUrl string
 	if targetLiveGithub {
 		serverUrl = "https://api.github.com"
 	} else {
-		serverUrl = server.URL
+		serverUrl = mockGithubServer.URL
 	}
 
 	apiCfg := ApiConfig{

@@ -35,20 +35,20 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 	}
 	defer jsonFile.Close()
 
-	mux := http.NewServeMux()
+	mockGithubMux := http.NewServeMux()
 
-	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
+	mockGithubMux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
 		io.Copy(w, jsonFile)
 	})
 
-	server := httptest.NewServer(mux)
-	defer server.Close()
+	mockGithubServer := httptest.NewServer(mockGithubMux)
+	defer mockGithubServer.Close()
 
 	var serverUrl string
 	if targetLiveGithub {
 		serverUrl = "https://api.github.com"
 	} else {
-		serverUrl = server.URL
+		serverUrl = mockGithubServer.URL
 	}
 
 	apiCfg := ApiConfig{
@@ -59,7 +59,7 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 	tests := HandlerGithubUserByLoginTestCases()
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(tt.title, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
 				testhelpers.RUN_ALL_TESTS,
 			), tt.title)
@@ -67,8 +67,7 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 			// Add {owner} and {name} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
-			req = mocks.AppendPathParamToChiContext(req, "owner", tt.owner)
-			req = mocks.AppendPathParamToChiContext(req, "name", tt.name)
+			req = mocks.AppendPathParamToChiContext(req, "login", tt.login)
 
 			if tt.authorized {
 				req.Header.Add("GH-Authorization", ghAccessToken)
@@ -77,7 +76,7 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 			rr := httptest.NewRecorder()
 
 			// ACT
-			apiCfg.HandlerGithubReposByOwner(rr, req)
+			apiCfg.HandlerGithubUserByLogin(rr, req)
 
 			// ARRANGE - EXPECT
 			var actualRepoReturn GithubRestRepo
