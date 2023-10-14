@@ -1,3 +1,9 @@
+-- name: GetGithubRepo :one
+SELECT * FROM github_repos WHERE full_name = $1;
+
+-- name: CheckGithubRepoExists :one
+SELECT EXISTS(SELECT 1 FROM github_repos WHERE full_name = $1);
+
 -- name: InsertGithubRepo :one
 
 INSERT INTO github_repos (

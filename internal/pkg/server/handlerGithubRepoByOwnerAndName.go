@@ -23,6 +23,25 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 	owner := chi.URLParam(r, "owner")
 	name := chi.URLParam(r, "name")
 
+	fullName := fmt.Sprintf("%s/%s", owner, name)
+
+	// Check if the repo already exists in the database
+	repoExists, err := apiConfig.DB.CheckGithubRepoExists(context.Background(), fullName)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if repoExists {
+		repo, err := apiConfig.DB.GetGithubRepo(context.Background(), fullName)
+		if err != nil {
+			RespondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		RespondWithJSON(w, http.StatusOK, ConvertInsertGithubRepoParamsToGithubRestRepo(repo))
+		return
+	}
+
 	url := fmt.Sprintf("%s/repos/%s/%s", apiConfig.GithubRestAPIBaseUrl, owner, name)
 
 	client := &http.Client{}

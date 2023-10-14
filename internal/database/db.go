@@ -27,6 +27,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.bulkInsertCommitsStmt, err = db.PrepareContext(ctx, bulkInsertCommits); err != nil {
 		return nil, fmt.Errorf("error preparing query BulkInsertCommits: %w", err)
 	}
+	if q.checkGithubRepoExistsStmt, err = db.PrepareContext(ctx, checkGithubRepoExists); err != nil {
+		return nil, fmt.Errorf("error preparing query CheckGithubRepoExists: %w", err)
+	}
 	if q.getCommitStmt, err = db.PrepareContext(ctx, getCommit); err != nil {
 		return nil, fmt.Errorf("error preparing query GetCommit: %w", err)
 	}
@@ -35,6 +38,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getCommitsWithAuthorInfoStmt, err = db.PrepareContext(ctx, getCommitsWithAuthorInfo); err != nil {
 		return nil, fmt.Errorf("error preparing query GetCommitsWithAuthorInfo: %w", err)
+	}
+	if q.getGithubRepoStmt, err = db.PrepareContext(ctx, getGithubRepo); err != nil {
+		return nil, fmt.Errorf("error preparing query GetGithubRepo: %w", err)
 	}
 	if q.getGithubUserStmt, err = db.PrepareContext(ctx, getGithubUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGithubUser: %w", err)
@@ -66,6 +72,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.insertUserStmt, err = db.PrepareContext(ctx, insertUser); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertUser: %w", err)
 	}
+	if q.multiRowInsertCommitsStmt, err = db.PrepareContext(ctx, multiRowInsertCommits); err != nil {
+		return nil, fmt.Errorf("error preparing query MultiRowInsertCommits: %w", err)
+	}
 	if q.updateStatusStmt, err = db.PrepareContext(ctx, updateStatus); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateStatus: %w", err)
 	}
@@ -82,6 +91,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing bulkInsertCommitsStmt: %w", cerr)
 		}
 	}
+	if q.checkGithubRepoExistsStmt != nil {
+		if cerr := q.checkGithubRepoExistsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing checkGithubRepoExistsStmt: %w", cerr)
+		}
+	}
 	if q.getCommitStmt != nil {
 		if cerr := q.getCommitStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getCommitStmt: %w", cerr)
@@ -95,6 +109,11 @@ func (q *Queries) Close() error {
 	if q.getCommitsWithAuthorInfoStmt != nil {
 		if cerr := q.getCommitsWithAuthorInfoStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getCommitsWithAuthorInfoStmt: %w", cerr)
+		}
+	}
+	if q.getGithubRepoStmt != nil {
+		if cerr := q.getGithubRepoStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getGithubRepoStmt: %w", cerr)
 		}
 	}
 	if q.getGithubUserStmt != nil {
@@ -147,6 +166,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing insertUserStmt: %w", cerr)
 		}
 	}
+	if q.multiRowInsertCommitsStmt != nil {
+		if cerr := q.multiRowInsertCommitsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing multiRowInsertCommitsStmt: %w", cerr)
+		}
+	}
 	if q.updateStatusStmt != nil {
 		if cerr := q.updateStatusStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateStatusStmt: %w", cerr)
@@ -197,9 +221,11 @@ type Queries struct {
 	db                                    DBTX
 	tx                                    *sql.Tx
 	bulkInsertCommitsStmt                 *sql.Stmt
+	checkGithubRepoExistsStmt             *sql.Stmt
 	getCommitStmt                         *sql.Stmt
 	getCommitsStmt                        *sql.Stmt
 	getCommitsWithAuthorInfoStmt          *sql.Stmt
+	getGithubRepoStmt                     *sql.Stmt
 	getGithubUserStmt                     *sql.Stmt
 	getGroupOfEmailsStmt                  *sql.Stmt
 	getLatestUncheckedCommitPerAuthorStmt *sql.Stmt
@@ -210,6 +236,7 @@ type Queries struct {
 	insertRepoURLStmt                     *sql.Stmt
 	insertRestIdToEmailStmt               *sql.Stmt
 	insertUserStmt                        *sql.Stmt
+	multiRowInsertCommitsStmt             *sql.Stmt
 	updateStatusStmt                      *sql.Stmt
 	updateStatusAndUpdatedAtStmt          *sql.Stmt
 }
@@ -219,9 +246,11 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		db:                                    tx,
 		tx:                                    tx,
 		bulkInsertCommitsStmt:                 q.bulkInsertCommitsStmt,
+		checkGithubRepoExistsStmt:             q.checkGithubRepoExistsStmt,
 		getCommitStmt:                         q.getCommitStmt,
 		getCommitsStmt:                        q.getCommitsStmt,
 		getCommitsWithAuthorInfoStmt:          q.getCommitsWithAuthorInfoStmt,
+		getGithubRepoStmt:                     q.getGithubRepoStmt,
 		getGithubUserStmt:                     q.getGithubUserStmt,
 		getGroupOfEmailsStmt:                  q.getGroupOfEmailsStmt,
 		getLatestUncheckedCommitPerAuthorStmt: q.getLatestUncheckedCommitPerAuthorStmt,
@@ -232,6 +261,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		insertRepoURLStmt:                     q.insertRepoURLStmt,
 		insertRestIdToEmailStmt:               q.insertRestIdToEmailStmt,
 		insertUserStmt:                        q.insertUserStmt,
+		multiRowInsertCommitsStmt:             q.multiRowInsertCommitsStmt,
 		updateStatusStmt:                      q.updateStatusStmt,
 		updateStatusAndUpdatedAtStmt:          q.updateStatusAndUpdatedAtStmt,
 	}

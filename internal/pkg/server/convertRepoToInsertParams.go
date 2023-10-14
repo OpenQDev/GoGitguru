@@ -42,3 +42,49 @@ func ConvertGithubRestRepoToInsertGithubRepoParams(repo GithubRestRepo) database
 		DefaultBranch:   sql.NullString{String: repo.DefaultBranch, Valid: true},
 	}
 }
+func ConvertInsertGithubRepoParamsToGithubRestRepo(params database.GithubRepo) GithubRestRepo {
+	return GithubRestRepo{
+		GithubRestID:    int(params.GithubRestID),
+		GithubGraphqlID: params.GithubGraphqlID,
+		URL:             params.Url,
+		Name:            params.Name,
+		FullName:        params.FullName,
+		Private:         params.Private.Bool,
+		Owner: struct {
+			Login      string `json:"login"`
+			ID         int    `json:"id"`
+			NodeID     string `json:"node_id"`
+			AvatarURL  string `json:"avatar_url"`
+			GravatarID string `json:"gravatar_id"`
+			URL        string `json:"url"`
+		}{
+			Login:     params.OwnerLogin,
+			AvatarURL: params.OwnerAvatarUrl.String,
+		},
+		Description: params.Description.String,
+		Homepage:    params.Homepage.String,
+		Fork:        params.Fork.Bool,
+		ForksCount:  int(params.ForksCount.Int32),
+		Archived:    params.Archived.Bool,
+		Disabled:    params.Disabled.Bool,
+		License: struct {
+			Key  string `json:"key"`
+			Name string `json:"name"`
+		}{
+			Name: params.License.String,
+		},
+		Language:        params.Language.String,
+		StargazersCount: int(params.StargazersCount.Int32),
+		WatchersCount:   int(params.WatchersCount.Int32),
+		OpenIssuesCount: int(params.OpenIssuesCount.Int32),
+		HasIssues:       params.HasIssues.Bool,
+		HasDiscussions:  params.HasDiscussions.Bool,
+		HasProjects:     params.HasProjects.Bool,
+		CreatedAt:       params.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt:       params.UpdatedAt.Time.Format(time.RFC3339),
+		PushedAt:        params.PushedAt.Time.Format(time.RFC3339),
+		Visibility:      params.Visibility.String,
+		Size:            int(params.Size.Int32),
+		DefaultBranch:   params.DefaultBranch.String,
+	}
+}

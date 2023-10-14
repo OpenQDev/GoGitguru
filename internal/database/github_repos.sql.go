@@ -10,6 +10,58 @@ import (
 	"database/sql"
 )
 
+const checkGithubRepoExists = `-- name: CheckGithubRepoExists :one
+SELECT EXISTS(SELECT 1 FROM github_repos WHERE full_name = $1)
+`
+
+func (q *Queries) CheckGithubRepoExists(ctx context.Context, fullName string) (bool, error) {
+	row := q.queryRow(ctx, q.checkGithubRepoExistsStmt, checkGithubRepoExists, fullName)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const getGithubRepo = `-- name: GetGithubRepo :one
+SELECT internal_id, github_rest_id, github_graphql_id, url, name, full_name, private, owner_login, owner_avatar_url, description, homepage, fork, forks_count, archived, disabled, license, language, stargazers_count, watchers_count, open_issues_count, has_issues, has_discussions, has_projects, created_at, updated_at, pushed_at, visibility, size, default_branch FROM github_repos WHERE full_name = $1
+`
+
+func (q *Queries) GetGithubRepo(ctx context.Context, fullName string) (GithubRepo, error) {
+	row := q.queryRow(ctx, q.getGithubRepoStmt, getGithubRepo, fullName)
+	var i GithubRepo
+	err := row.Scan(
+		&i.InternalID,
+		&i.GithubRestID,
+		&i.GithubGraphqlID,
+		&i.Url,
+		&i.Name,
+		&i.FullName,
+		&i.Private,
+		&i.OwnerLogin,
+		&i.OwnerAvatarUrl,
+		&i.Description,
+		&i.Homepage,
+		&i.Fork,
+		&i.ForksCount,
+		&i.Archived,
+		&i.Disabled,
+		&i.License,
+		&i.Language,
+		&i.StargazersCount,
+		&i.WatchersCount,
+		&i.OpenIssuesCount,
+		&i.HasIssues,
+		&i.HasDiscussions,
+		&i.HasProjects,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.PushedAt,
+		&i.Visibility,
+		&i.Size,
+		&i.DefaultBranch,
+	)
+	return i, err
+}
+
 const insertGithubRepo = `-- name: InsertGithubRepo :one
 
 INSERT INTO github_repos (
