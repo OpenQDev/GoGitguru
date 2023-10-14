@@ -38,7 +38,7 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 			RespondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-		RespondWithJSON(w, http.StatusOK, ConvertInsertGithubRepoParamsToGithubRestRepo(repo))
+		RespondWithJSON(w, http.StatusOK, ConvertDatabaseGithubRepoToGithubRestRepo(repo))
 		return
 	}
 
@@ -65,11 +65,11 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 
 	params := ConvertGithubRestRepoToInsertGithubRepoParams(repo)
 
-	_, err = apiConfig.DB.InsertGithubRepo(context.Background(), params)
+	databaseRepo, err := apiConfig.DB.InsertGithubRepo(context.Background(), params)
 	if err != nil {
 		RespondWithError(w, 500, fmt.Sprintf("failed to insert repo into database: %s", err))
 		return
 	}
 
-	RespondWithJSON(w, 200, repo)
+	RespondWithJSON(w, 200, ConvertDatabaseGithubRepoToGithubRestRepo(databaseRepo))
 }

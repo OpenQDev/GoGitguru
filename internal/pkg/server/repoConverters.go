@@ -42,7 +42,8 @@ func ConvertGithubRestRepoToInsertGithubRepoParams(repo GithubRestRepo) database
 		DefaultBranch:   sql.NullString{String: repo.DefaultBranch, Valid: true},
 	}
 }
-func ConvertInsertGithubRepoParamsToGithubRestRepo(params database.GithubRepo) GithubRestRepo {
+
+func ConvertDatabaseGithubRepoToGithubRestRepo(params database.GithubRepo) GithubRestRepo {
 	return GithubRestRepo{
 		GithubRestID:    int(params.GithubRestID),
 		GithubGraphqlID: params.GithubGraphqlID,

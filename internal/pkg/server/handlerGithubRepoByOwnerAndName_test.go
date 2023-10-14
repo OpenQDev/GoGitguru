@@ -63,7 +63,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.title, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				"SHOULD_RETURN_REPO_IF_EXISTS_IN_DB",
+				testhelpers.RUN_ALL_TESTS,
 			), tt.title)
 
 			// ARRANGE - LOCAL
@@ -79,21 +79,29 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 
 			rr := httptest.NewRecorder()
 
-			createdAt, _ := time.Parse(time.RFC3339, repo.CreatedAt)
-			updatedAt, _ := time.Parse(time.RFC3339, repo.UpdatedAt)
-			pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)
-
-			rows := sqlmock.NewRows([]string{"internal_id", "github_rest_id", "github_graphql_id", "url", "name", "full_name", "private", "owner_login", "owner_avatar_url", "description", "homepage", "fork", "forks_count", "archived", "disabled", "license", "language", "stargazers_count", "watchers_count", "open_issues_count", "has_issues", "has_discussions", "has_projects", "created_at", "updated_at", "pushed_at", "visibility", "size", "default_branch"}).
-				AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, repo.FullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAt, updatedAt, pushedAt, repo.Visibility, repo.Size, repo.DefaultBranch)
-
 			fullName := fmt.Sprintf("%s/%s", tt.owner, tt.name)
 
 			if tt.title == "SHOULD_RETURN_REPO_IF_EXISTS_IN_DB" {
 				mock.ExpectQuery("-- name: CheckGithubRepoExists :one").WithArgs(fullName).WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(true))
-				mock.ExpectQuery("-- name: GetGithubRepo :one").WithArgs(fullName).WillReturnRows(sqlmock.NewRows([]string{"full_name"}).AddRow(fullName))
+
+				createdAt, _ := time.Parse(time.RFC3339, repo.CreatedAt)
+				updatedAt, _ := time.Parse(time.RFC3339, repo.UpdatedAt)
+				pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)
+
+				rows := sqlmock.NewRows([]string{"internal_id", "github_rest_id", "github_graphql_id", "url", "name", "full_name", "private", "owner_login", "owner_avatar_url", "description", "homepage", "fork", "forks_count", "archived", "disabled", "license", "language", "stargazers_count", "watchers_count", "open_issues_count", "has_issues", "has_discussions", "has_projects", "created_at", "updated_at", "pushed_at", "visibility", "size", "default_branch"}).
+					AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, repo.FullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAt, updatedAt, pushedAt, repo.Visibility, repo.Size, repo.DefaultBranch)
+
+				mock.ExpectQuery("-- name: GetGithubRepo :one").WithArgs(fullName).WillReturnRows(rows)
 			}
 
 			if tt.title == "SHOULD_GET_REPO_FOR_ORG_AND_NAME" {
+				createdAt, _ := time.Parse(time.RFC3339, repo.CreatedAt)
+				updatedAt, _ := time.Parse(time.RFC3339, repo.UpdatedAt)
+				pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)
+
+				rows := sqlmock.NewRows([]string{"internal_id", "github_rest_id", "github_graphql_id", "url", "name", "full_name", "private", "owner_login", "owner_avatar_url", "description", "homepage", "fork", "forks_count", "archived", "disabled", "license", "language", "stargazers_count", "watchers_count", "open_issues_count", "has_issues", "has_discussions", "has_projects", "created_at", "updated_at", "pushed_at", "visibility", "size", "default_branch"}).
+					AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, repo.FullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAt, updatedAt, pushedAt, repo.Visibility, repo.Size, repo.DefaultBranch)
+
 				mock.ExpectQuery("-- name: CheckGithubRepoExists :one").WithArgs(fullName).WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(false))
 				mock.ExpectQuery("^-- name: InsertGithubRepo :one.*").WithArgs(
 					repo.GithubRestID,    // 0 - GithubRestID
@@ -126,6 +134,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 					repo.DefaultBranch,   // 27 - DefaultBranch
 				).WillReturnRows(rows)
 			}
+
 			// ACT
 			apiCfg.HandlerGithubRepoByOwnerAndName(rr, req)
 
@@ -146,7 +155,11 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 				return
 			}
 
-			assert.Equal(t, repo, actualRepoReturn)
+			expectedRepo := repo
+			expectedRepo.Owner.ID = 0
+			expectedRepo.Owner.NodeID = ""
+			expectedRepo.Owner.URL = ""
+			assert.Equal(t, expectedRepo, actualRepoReturn)
 
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
