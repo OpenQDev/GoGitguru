@@ -148,6 +148,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 			}
 
 			// ARRANGE - EXPECT
+
 			var actualRepoReturn GithubRestRepo
 			util.ReaderToType(rr.Result().Body, &actualRepoReturn)
 			if err != nil {
