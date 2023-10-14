@@ -124,7 +124,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 				assert.Equal(t, tt.expectedStatus, rr.Code)
 				return
 			} else if rr.Code < 200 || rr.Code >= 300 {
-				t.Errorf("Unexpected HTTP status code: %d. Error: %s", rr.Code, err)
+				t.Errorf("Unexpected HTTP status code: %d. Response: %s", rr.Code, rr.Body.String())
 				return
 			}
 
@@ -157,7 +157,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 
 				rr = httptest.NewRecorder()
 
-				mock.ExpectQuery("^-- name: InsertGithubRepo :one.*").WithArgs(tt.name).WillReturnRows(sqlmock.NewRows([]string{"full_name"}).AddRow(tt.name))
+				mock.ExpectQuery("^-- name: InsertGithubRepo :one.*").WithArgs(tt.owner).WillReturnRows(sqlmock.NewRows([]string{"full_name"}).AddRow(tt.name))
 
 				// ACT
 				apiCfg.HandlerGithubRepoByOwnerAndName(rr, req)
