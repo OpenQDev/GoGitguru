@@ -16,7 +16,7 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 	githubAccessToken := r.Header.Get("GH-Authorization")
 
 	if githubAccessToken == "" {
-		RespondWithError(w, 400, "You must provide a GitHub access token.")
+		RespondWithError(w, http.StatusUnauthorized, "You must provide a GitHub access token.")
 		return
 	}
 

@@ -26,6 +26,18 @@ func shouldReturn401() HandlerGithubRepoByOwnerAndNameTest {
 	}
 }
 
+func shouldReturnRepoIfExistsInDb() HandlerGithubRepoByOwnerAndNameTest {
+	const SHOULD_RETURN_REPO_IF_EXISTS_IN_DB = "SHOULD_RETURN_REPO_IF_EXISTS_IN_DB"
+	return HandlerGithubRepoByOwnerAndNameTest{
+		title:          SHOULD_RETURN_REPO_IF_EXISTS_IN_DB,
+		owner:          drmTestOrg,
+		name:           drmTestRepo,
+		expectedStatus: http.StatusOK,
+		authorized:     true,
+		shouldError:    false,
+	}
+}
+
 func shouldReturnRepoForOwnerAndName() HandlerGithubRepoByOwnerAndNameTest {
 	const SHOULD_GET_REPO_FOR_ORG_AND_NAME = "SHOULD_GET_REPO_FOR_ORG_AND_NAME"
 	return HandlerGithubRepoByOwnerAndNameTest{
@@ -42,5 +54,6 @@ func HandlerGithubRepoByOwnerAndNameTestCases() []HandlerGithubRepoByOwnerAndNam
 	return []HandlerGithubRepoByOwnerAndNameTest{
 		shouldReturn401(),
 		shouldReturnRepoForOwnerAndName(),
+		shouldReturnRepoIfExistsInDb(),
 	}
 }
