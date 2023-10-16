@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"main/internal/database"
 	"net/http"
 	"time"
@@ -18,13 +19,12 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 	githubAccessToken := r.Header.Get("GH-Authorization")
 
 	if githubAccessToken == "" {
-		RespondWithError(w, 400, "You must provide a GitHub access token.")
+		RespondWithError(w, http.StatusUnauthorized, "You must provide a GitHub access token.")
 		return
 	}
 
 	login := chi.URLParam(r, "login")
 
-	// Fetch initialDbUser from database
 	initialDbUser, err := apiConfig.DB.GetGithubUser(context.Background(), login)
 
 	if err == nil {
@@ -35,14 +35,14 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 		req, err := http.NewRequest("GET", "https://api.github.com/users/"+login, nil)
 
 		if err != nil {
-			RespondWithError(w, 500, "Failed to create request.")
+			RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to create request: %s", err))
 			return
 		}
 
 		req.Header.Add("Authorization", "token "+githubAccessToken)
 		resp, err := client.Do(req)
 		if err != nil {
-			RespondWithError(w, 500, "Failed to make request.")
+			RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to make request: %s", err))
 			return
 		}
 
@@ -51,19 +51,19 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 		var user User
 		err = json.NewDecoder(resp.Body).Decode(&user)
 		if err != nil {
-			RespondWithError(w, 500, "Failed to decode response.")
+			RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to decode response.: %s", err))
 			return
 		}
 
 		layout := "2006-01-02T15:04:05Z" // ISO 8601 format
 		createdAt, err := time.Parse(layout, user.CreatedAt)
 		if err != nil {
-			RespondWithError(w, 500, "Failed to parse CreatedAt.")
+			RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to parse CreatedAt: %s", err))
 			return
 		}
 		updatedAt, err := time.Parse(layout, user.UpdatedAt)
 		if err != nil {
-			RespondWithError(w, 500, "Failed to parse UpdatedAt.")
+			RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to parse UpdatedAt: %s", err))
 			return
 		}
 
@@ -90,10 +90,10 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 
 		_, err = apiConfig.DB.InsertUser(context.Background(), params)
 		if err != nil {
-			RespondWithError(w, 500, "Failed to insert user into database.")
+			RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to insert user into database: %s", err))
 			return
 		}
 
-		RespondWithJSON(w, 200, user)
+		RespondWithJSON(w, http.StatusOK, user)
 	}
 }
