@@ -3,7 +3,7 @@ package sync
 import "main/internal/pkg/gitutil"
 
 type GenerateAuthorBatchGqlQueryTestCase struct {
-	name           string
+	title          string
 	organization   string
 	repo           string
 	authorList     []AuthorCommitTuple
@@ -11,8 +11,9 @@ type GenerateAuthorBatchGqlQueryTestCase struct {
 }
 
 func singleAuthor() GenerateAuthorBatchGqlQueryTestCase {
+	const SINGLE_AUTHOR = "SINGLE_AUTHOR"
 	return GenerateAuthorBatchGqlQueryTestCase{
-		name:         "Single author",
+		title:        SINGLE_AUTHOR,
 		organization: "testOrg",
 		repo:         "testRepo",
 		authorList:   []AuthorCommitTuple{{Author: "author1", CommitHash: "commit1"}},

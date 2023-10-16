@@ -9,6 +9,7 @@ type GenerateBatchAuthorsTestCase struct {
 
 func singleAuthorSingleRepo() GenerateBatchAuthorsTestCase {
 	const SINGLE_AUTHOR_ONE_REPO = "SINGLE_AUTHOR_ONE_REPO"
+
 	return GenerateBatchAuthorsTestCase{
 		name: SINGLE_AUTHOR_ONE_REPO,
 		input: map[string][]AuthorCommitTuple{

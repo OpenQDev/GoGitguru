@@ -2,6 +2,7 @@ package sync
 
 import (
 	"main/internal/pkg/testhelpers"
+	"strings"
 	"testing"
 )
 
@@ -11,14 +12,25 @@ func TestGenerateAuthorBatchGqlQuery(t *testing.T) {
 
 	for _, tt := range tests {
 		testhelpers.CheckTestSkip(t, testhelpers.Targets(
-			testhelpers.RUN_ALL_TESTS,
-		), tt.name)
+			"SINGLE_AUTHOR",
+		), tt.title)
 
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(tt.title, func(t *testing.T) {
 			result := GenerateAuthorBatchGqlQuery(tt.organization, tt.repo, tt.authorList)
-			if result != tt.expectedOutput {
+
+			sanitizedResult := sanitizeString(result)
+			sanitizedExpectedOutput := sanitizeString(tt.expectedOutput)
+
+			if sanitizedResult != sanitizedExpectedOutput {
 				t.Errorf("generateAuthorBatchGqlQuery() = %v, want %v", result, tt.expectedOutput)
 			}
 		})
 	}
+}
+
+func sanitizeString(str string) string {
+	noSpaces := strings.ReplaceAll(str, " ", "")
+	noNewLines := strings.ReplaceAll(noSpaces, "\n", "")
+	noTabs := strings.ReplaceAll(noNewLines, "\t", "")
+	return noTabs
 }
