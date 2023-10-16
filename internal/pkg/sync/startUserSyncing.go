@@ -45,15 +45,12 @@ func StartSyncingUser(
 
 	// Convert to database object to local type
 	newCommitAuthors := ConvertToUserSync(newCommitAuthorsRaw)
-	logger.LogGreenDebug("newCommitAuthors", newCommitAuthors)
 
 	// Create map of repoUrl -> []authors
 	repoUrlToAuthorsMap := GetRepoToAuthorsMap(newCommitAuthors)
-	logger.LogGreenDebug("repoUrlToAuthorsMap", repoUrlToAuthorsMap)
 
 	// Create batches of repos for GraphQL query
 	repoToAuthorBatches := GenerateBatchAuthors(repoUrlToAuthorsMap, 2)
-	logger.LogGreenDebug("repoToAuthorBatches", repoToAuthorBatches)
 
 	// Get info for each batch
 	for _, repoToAuthorBatch := range repoToAuthorBatches {
@@ -111,25 +108,9 @@ func StartSyncingUser(
 				logger.LogError("error parsing time: %s", err)
 			}
 
-			_, err = db.InsertUser(context.Background(), database.InsertUserParams{
-				GithubRestID:    int32(author.User.GithubRestID),
-				GithubGraphqlID: author.User.GithubGraphqlID,
-				Login:           author.User.Login,
-				Name:            sql.NullString{String: author.User.Name, Valid: true},
-				Email:           sql.NullString{String: author.User.Email, Valid: true},
-				AvatarUrl:       sql.NullString{String: author.User.AvatarURL, Valid: true},
-				Company:         sql.NullString{String: author.User.Company, Valid: true},
-				Location:        sql.NullString{String: author.User.Location, Valid: true},
-				Bio:             sql.NullString{String: author.User.Bio, Valid: true},
-				Blog:            sql.NullString{String: author.User.Blog, Valid: true},
-				Hireable:        sql.NullBool{Bool: author.User.Hireable, Valid: true},
-				TwitterUsername: sql.NullString{String: author.User.TwitterUsername, Valid: true},
-				Followers:       sql.NullInt32{Int32: int32(author.User.Followers.TotalCount), Valid: true},
-				Following:       sql.NullInt32{Int32: int32(author.User.Following.TotalCount), Valid: true},
-				Type:            "User",
-				CreatedAt:       sql.NullTime{Time: createdAt, Valid: true},
-				UpdatedAt:       sql.NullTime{Time: updatedAt, Valid: true},
-			})
+			authorParams := ConvertAuthorToInsertUserParams(author, createdAt, updatedAt)
+
+			_, err = db.InsertUser(context.Background(), authorParams)
 
 			if err != nil {
 				logger.LogError("error occured while inserting author: %s", err)
@@ -137,4 +118,27 @@ func StartSyncingUser(
 
 		}
 	}
+}
+
+func ConvertAuthorToInsertUserParams(author gitutil.Author, createdAt time.Time, updatedAt time.Time) database.InsertUserParams {
+	authorParams := database.InsertUserParams{
+		GithubRestID:    int32(author.User.GithubRestID),
+		GithubGraphqlID: author.User.GithubGraphqlID,
+		Login:           author.User.Login,
+		Name:            sql.NullString{String: author.User.Name, Valid: true},
+		Email:           sql.NullString{String: author.User.Email, Valid: true},
+		AvatarUrl:       sql.NullString{String: author.User.AvatarURL, Valid: true},
+		Company:         sql.NullString{String: author.User.Company, Valid: true},
+		Location:        sql.NullString{String: author.User.Location, Valid: true},
+		Bio:             sql.NullString{String: author.User.Bio, Valid: true},
+		Blog:            sql.NullString{String: author.User.Blog, Valid: true},
+		Hireable:        sql.NullBool{Bool: author.User.Hireable, Valid: true},
+		TwitterUsername: sql.NullString{String: author.User.TwitterUsername, Valid: true},
+		Followers:       sql.NullInt32{Int32: int32(author.User.Followers.TotalCount), Valid: true},
+		Following:       sql.NullInt32{Int32: int32(author.User.Following.TotalCount), Valid: true},
+		Type:            "User",
+		CreatedAt:       sql.NullTime{Time: createdAt, Valid: true},
+		UpdatedAt:       sql.NullTime{Time: updatedAt, Valid: true},
+	}
+	return authorParams
 }

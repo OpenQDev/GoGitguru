@@ -14,7 +14,7 @@ type ProcessRepoTestCase struct {
 const organization = "OpenQDev"
 const repo = "OpenQ-DRM-TestRepo"
 
-func test1() ProcessRepoTestCase {
+func validProcessRepoTest() ProcessRepoTestCase {
 	const VALID_GIT_LOGS = "VALID_GIT_LOGS"
 
 	goodProcessRepoTestCase := ProcessRepoTestCase{
@@ -95,7 +95,7 @@ func test1() ProcessRepoTestCase {
 
 func ProcessRepoTestCases() []ProcessRepoTestCase {
 	return []ProcessRepoTestCase{
-		test1(),
+		validProcessRepoTest(),
 	}
 
 }

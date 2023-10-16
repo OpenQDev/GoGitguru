@@ -2,6 +2,7 @@ package main
 
 import (
 	"main/internal/pkg/logger"
+	"main/internal/pkg/reposync"
 	"main/internal/pkg/server"
 	"main/internal/pkg/setup"
 	"main/internal/pkg/sync"
@@ -26,7 +27,7 @@ func main() {
 	logger.SetDebugMode(debugMode)
 
 	if syncMode {
-		sync.StartSyncingCommits(database, "repos", 10, time.Duration(syncIntervalMinutes)*time.Minute)
+		reposync.StartSyncingCommits(database, "repos", 10, time.Duration(syncIntervalMinutes)*time.Minute)
 	}
 
 	if syncUsersMode {
