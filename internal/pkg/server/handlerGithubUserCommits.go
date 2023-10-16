@@ -1,8 +1,9 @@
 package server
 
 import (
-	"encoding/json"
+	"fmt"
 	"main/internal/database"
+	"main/internal/pkg/server/util"
 	"net/http"
 	"time"
 
@@ -20,25 +21,25 @@ func (apiConfig *ApiConfig) HandlerGithubUserCommits(w http.ResponseWriter, r *h
 	_ = chi.URLParam(r, "login")
 
 	var body HandlerGithubUserCommitsRequest
-	err := json.NewDecoder(r.Body).Decode(&body)
+	err := util.ReaderToType(r.Body, &body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to read body of request: %s", err))
 		return
 	}
 
 	_, err = time.Parse(time.RFC3339, body.Since)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to parse time for since (%s): %s", body.Since, err))
 		return
 	}
 
 	_, err = time.Parse(time.RFC3339, body.Until)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to parse time for until (%s): %s", body.Until, err))
 		return
 	}
 
 	var commits []database.Commit
 
-	RespondWithJSON(w, 200, commits)
+	RespondWithJSON(w, http.StatusOK, commits)
 }

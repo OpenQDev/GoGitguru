@@ -62,8 +62,8 @@ func valid() HandlerGithubUserByLoginTestCase {
 				user.Followers,
 				user.Following,
 				user.Type,
-				user.CreatedAt,
-				user.UpdatedAt,
+				createdAt,
+				updatedAt,
 			).WillReturnRows(rows)
 		},
 	}

@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/server/mocks"
@@ -62,7 +63,7 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.title, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				"VALID",
+				testhelpers.RUN_ALL_TESTS,
 			), tt.title)
 
 			// ARRANGE - LOCAL
@@ -81,17 +82,23 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 			// ACT
 			apiCfg.HandlerGithubUserByLogin(rr, req)
 
-			// ARRANGE - EXPECT
-			var actualUserResponse User
-			err := json.NewDecoder(rr.Body).Decode(&actualUserResponse)
-			if err != nil {
-				t.Errorf("Failed to decode rr.Body into User: %s", err)
-				return
+			if rr.Code < 200 || rr.Code >= 300 {
+				fmt.Println(rr.Body.String())
 			}
 
 			// ASSERT
 			if tt.shouldError {
 				assert.Equal(t, tt.expectedStatus, rr.Code)
+				return
+			}
+
+			require.Equal(t, tt.expectedStatus, rr.Code)
+
+			// ARRANGE - EXPECT
+			var actualUserResponse User
+			err := json.NewDecoder(rr.Body).Decode(&actualUserResponse)
+			if err != nil {
+				t.Errorf("Failed to decode rr.Body into User: %s", err)
 				return
 			}
 
