@@ -1,17 +1,16 @@
-package gitutil
+package githubRest
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 )
 
-func GithubGraphQL(query string, ghAccessToken string) (map[string]interface{}, error) {
-	// Queries the GitHub GraphQL API.
+func GithubRestAPI(endpoint string, ghAccessToken string) (map[string]interface{}, error) {
+	// Queries the GitHub REST API.
 	// Parameters:
-	// - query (str): The GraphQL query to execute.
+	// - endpoint (str): The REST API endpoint to hit.
 	// - gh_access_token (str): The GitHub access token to use for authentication.
 	// Returns:
 	// - dict: The JSON response from the API.
@@ -19,13 +18,12 @@ func GithubGraphQL(query string, ghAccessToken string) (map[string]interface{}, 
 
 	headers := map[string]string{
 		"Authorization": fmt.Sprintf("Bearer %s", ghAccessToken),
-		"Content-Type":  "application/json",
+		"Accept":        "application/vnd.github.v3+json",
 	}
 
-	url := "https://api.github.com/graphql"
+	url := fmt.Sprintf("https://api.github.com/%s", endpoint)
 
-	payload := strings.NewReader(fmt.Sprintf(`{"query": "%s"}`, query))
-	req, _ := http.NewRequest("POST", url, payload)
+	req, _ := http.NewRequest("GET", url, nil)
 
 	for key, value := range headers {
 		req.Header.Add(key, value)
@@ -46,5 +44,5 @@ func GithubGraphQL(query string, ghAccessToken string) (map[string]interface{}, 
 
 	var jsonData map[string]interface{}
 	json.Unmarshal(body, &jsonData)
-	return jsonData["data"].(map[string]interface{}), nil
+	return jsonData, nil
 }

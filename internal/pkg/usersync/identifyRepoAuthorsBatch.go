@@ -2,18 +2,19 @@ package usersync
 
 import (
 	"fmt"
+	"main/internal/pkg/githubGraphQL"
 	"main/internal/pkg/gitutil"
 	"main/internal/pkg/logger"
 )
 
-func IdentifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTuple, ghAccessToken string) (*map[string]gitutil.Commit, error) {
+func IdentifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTuple, ghAccessToken string) (*map[string]githubGraphQL.Commit, error) {
 	logger.LogBlue("Identifying %d authors for repo %s", len(authorCommitList), repoUrl)
 
 	organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 
 	queryString := GenerateAuthorBatchGqlQuery(organization, repo, authorCommitList)
 
-	result, err := gitutil.GithubGetCommitAuthors(queryString, ghAccessToken)
+	result, err := githubGraphQL.GithubGetCommitAuthors(queryString, ghAccessToken)
 
 	logger.LogGreenDebug("GithubGetCommitAuthors response: %v", result)
 
@@ -32,7 +33,7 @@ func IdentifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTup
 		return nil, nil
 	}
 
-	commits := make(map[string]gitutil.Commit, 0)
+	commits := make(map[string]githubGraphQL.Commit, 0)
 	for key, value := range result.Data.Repository {
 		commits[key] = value
 	}

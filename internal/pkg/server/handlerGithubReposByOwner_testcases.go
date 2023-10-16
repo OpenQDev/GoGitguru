@@ -1,7 +1,7 @@
 package server
 
 import (
-	"main/internal/pkg/githubRestTypes"
+	"main/internal/pkg/githubRest"
 	"net/http"
 	"time"
 
@@ -14,7 +14,7 @@ type HandlerGithubReposByOwnerTestCase struct {
 	expectedStatus int
 	authorized     bool
 	shouldError    bool
-	setupMock      func(mock sqlmock.Sqlmock, repo githubRestTypes.GithubRestRepo)
+	setupMock      func(mock sqlmock.Sqlmock, repo githubRest.GithubRestRepo)
 }
 
 const owner = "DRM-Test-Organization"
@@ -27,7 +27,7 @@ func unauthorized() HandlerGithubReposByOwnerTestCase {
 		expectedStatus: http.StatusUnauthorized,
 		authorized:     false,
 		shouldError:    true,
-		setupMock:      func(mock sqlmock.Sqlmock, repo githubRestTypes.GithubRestRepo) {},
+		setupMock:      func(mock sqlmock.Sqlmock, repo githubRest.GithubRestRepo) {},
 	}
 }
 
@@ -39,7 +39,7 @@ func sucess() HandlerGithubReposByOwnerTestCase {
 		expectedStatus: http.StatusOK,
 		authorized:     true,
 		shouldError:    false,
-		setupMock: func(mock sqlmock.Sqlmock, repo githubRestTypes.GithubRestRepo) {
+		setupMock: func(mock sqlmock.Sqlmock, repo githubRest.GithubRestRepo) {
 			createdAt, _ := time.Parse(time.RFC3339, repo.CreatedAt)
 			updatedAt, _ := time.Parse(time.RFC3339, repo.UpdatedAt)
 			pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)

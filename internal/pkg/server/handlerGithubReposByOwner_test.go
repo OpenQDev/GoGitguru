@@ -2,7 +2,7 @@ package server
 
 import (
 	"io"
-	"main/internal/pkg/githubRestTypes"
+	"main/internal/pkg/githubRest"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/server/mocks"
 	"main/internal/pkg/server/util"
@@ -32,7 +32,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 	}
 
 	// Decode the JSON file to type []GithubRestRepo
-	var repos []githubRestTypes.GithubRestRepo
+	var repos []githubRest.GithubRestRepo
 	err = util.JsonFileToType(jsonFile, &repos)
 	if err != nil {
 		t.Errorf("Failed to read JSON file: %s", err)
@@ -86,7 +86,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 			apiCfg.HandlerGithubReposByOwner(rr, req)
 
 			// ARRANGE - EXPECT
-			var actualReposReturn []githubRestTypes.GithubRestRepo
+			var actualReposReturn []githubRest.GithubRestRepo
 			util.ReaderToType(rr.Body, &actualReposReturn)
 			if err != nil {
 				t.Errorf("Failed to decode rr.Body into []GithubRestRepo: %s", err)

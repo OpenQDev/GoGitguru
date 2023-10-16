@@ -1,4 +1,4 @@
-package githubRestTypes
+package githubRest
 
 type GithubRestRepo struct {
 	GithubRestID    int    `json:"id"`

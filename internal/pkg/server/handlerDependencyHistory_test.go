@@ -3,7 +3,7 @@ package server
 import (
 	"encoding/json"
 	"io"
-	"main/internal/pkg/githubRestTypes"
+	"main/internal/pkg/githubRest"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/server/mocks"
 	"main/internal/pkg/server/util"
@@ -29,7 +29,7 @@ func TestHandlerDependencyHistory(t *testing.T) {
 		t.Errorf("error opening json file: %s", err)
 	}
 
-	var repo githubRestTypes.GithubRestRepo
+	var repo githubRest.GithubRestRepo
 	err = util.JsonFileToType(jsonFile, &repo)
 	if err != nil {
 		t.Errorf("Failed to read JSON file: %s", err)
@@ -78,7 +78,7 @@ func TestHandlerDependencyHistory(t *testing.T) {
 			apiCfg.HandlerGithubUserByLogin(rr, req)
 
 			// ARRANGE - EXPECT
-			var actualRepoReturn githubRestTypes.GithubRestRepo
+			var actualRepoReturn githubRest.GithubRestRepo
 			err := json.NewDecoder(rr.Body).Decode(&actualRepoReturn)
 			if err != nil {
 				t.Errorf("Failed to decode rr.Body into []RestRepo: %s", err)

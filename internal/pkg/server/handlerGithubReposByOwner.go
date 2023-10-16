@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
-	"main/internal/pkg/githubRestTypes"
+	"main/internal/pkg/githubRest"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/server/util"
 	"net/http"
@@ -12,7 +12,7 @@ import (
 )
 
 type HandlerGithubReposByOwnerRequest struct{}
-type HandlerGithubReposByOwnerResponse = []githubRestTypes.GithubRestRepo
+type HandlerGithubReposByOwnerResponse = []githubRest.GithubRestRepo
 
 func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *http.Request) {
 	githubAccessToken := r.Header.Get("GH-Authorization")
@@ -27,7 +27,7 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 
 	client := &http.Client{}
 	page := 1
-	var repos []githubRestTypes.GithubRestRepo
+	var repos []githubRest.GithubRestRepo
 	for {
 		requestUrl := fmt.Sprintf("%s/users/%s/repos?per_page=100&page=%d", apiConfig.GithubRestAPIBaseUrl, owner, page)
 		logger.LogGreenDebug("calling %s", requestUrl)
@@ -45,7 +45,7 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 			return
 		}
 
-		var restReposResponse []githubRestTypes.GithubRestRepo
+		var restReposResponse []githubRest.GithubRestRepo
 		err = util.ReaderToType(resp.Body, &restReposResponse)
 		if err != nil {
 			RespondWithError(w, 500, fmt.Sprintf("Failed to decode response from %s to []GithubRestRepo: %s", requestUrl, err))

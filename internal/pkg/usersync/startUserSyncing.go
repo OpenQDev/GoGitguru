@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"main/internal/database"
-	"main/internal/pkg/gitutil"
+	"main/internal/pkg/githubGraphQL"
 	"main/internal/pkg/logger"
 	"time"
 )
@@ -63,7 +63,7 @@ func StartSyncingUser(
 			continue
 		}
 
-		commitValues := make([]gitutil.Commit, 0, len(*commits))
+		commitValues := make([]githubGraphQL.Commit, 0, len(*commits))
 
 		for _, value := range *commits {
 			commitValues = append(commitValues, value)
@@ -120,7 +120,7 @@ func StartSyncingUser(
 	}
 }
 
-func ConvertAuthorToInsertUserParams(author gitutil.Author, createdAt time.Time, updatedAt time.Time) database.InsertUserParams {
+func ConvertAuthorToInsertUserParams(author githubGraphQL.Author, createdAt time.Time, updatedAt time.Time) database.InsertUserParams {
 	authorParams := database.InsertUserParams{
 		GithubRestID:    int32(author.User.GithubRestID),
 		GithubGraphqlID: author.User.GithubGraphqlID,

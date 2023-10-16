@@ -2,7 +2,7 @@ package server
 
 import (
 	"fmt"
-	"main/internal/pkg/githubRestTypes"
+	"main/internal/pkg/githubRest"
 	"net/http"
 	"time"
 
@@ -16,7 +16,7 @@ type HandlerGithubRepoByOwnerAndNameTest struct {
 	expectedStatus int
 	authorized     bool
 	shouldError    bool
-	setupMock      func(mock sqlmock.Sqlmock, repo githubRestTypes.GithubRestRepo)
+	setupMock      func(mock sqlmock.Sqlmock, repo githubRest.GithubRestRepo)
 }
 
 const drmTestOrg = "DRM-Test-Organization"
@@ -31,7 +31,7 @@ func shouldReturn401() HandlerGithubRepoByOwnerAndNameTest {
 		expectedStatus: http.StatusUnauthorized,
 		authorized:     false,
 		shouldError:    true,
-		setupMock: func(mock sqlmock.Sqlmock, repo githubRestTypes.GithubRestRepo) {
+		setupMock: func(mock sqlmock.Sqlmock, repo githubRest.GithubRestRepo) {
 			fullName := fmt.Sprintf("%s/%s", drmTestOrg, drmTestRepo)
 			mock.ExpectQuery("-- name: CheckGithubRepoExists :one").WithArgs(fullName).WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(true))
 
@@ -56,7 +56,7 @@ func shouldReturnRepoIfExistsInDb() HandlerGithubRepoByOwnerAndNameTest {
 		expectedStatus: http.StatusOK,
 		authorized:     true,
 		shouldError:    false,
-		setupMock: func(mock sqlmock.Sqlmock, repo githubRestTypes.GithubRestRepo) {
+		setupMock: func(mock sqlmock.Sqlmock, repo githubRest.GithubRestRepo) {
 			fullName := fmt.Sprintf("%s/%s", drmTestOrg, drmTestRepo)
 
 			createdAt, _ := time.Parse(time.RFC3339, repo.CreatedAt)
@@ -110,7 +110,7 @@ func shouldReturnRepoForOwnerAndName() HandlerGithubRepoByOwnerAndNameTest {
 		expectedStatus: http.StatusOK,
 		authorized:     true,
 		shouldError:    false,
-		setupMock:      func(mock sqlmock.Sqlmock, repo githubRestTypes.GithubRestRepo) {},
+		setupMock:      func(mock sqlmock.Sqlmock, repo githubRest.GithubRestRepo) {},
 	}
 }
 
