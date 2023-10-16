@@ -54,7 +54,3 @@ type CommitAuthorsResponse struct {
 		Message string `json:"message"`
 	} `json:"errors"`
 }
-
-type GraphQLPayload struct {
-	Query string `json:"query"`
-}

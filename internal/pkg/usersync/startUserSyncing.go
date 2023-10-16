@@ -31,13 +31,13 @@ func StartSyncingUser(
 ) {
 	newCommitAuthorsRaw, err := db.GetLatestUncheckedCommitPerAuthor(context.Background())
 	if err != nil {
-		logger.LogError("errerrerr", err)
+		logger.LogError("error in GetLatestUncheckedCommitPerAuthor: %s", err)
 	}
 
 	logger.LogGreenDebug("new commit authors to check: %s", newCommitAuthorsRaw)
 
 	if len(newCommitAuthorsRaw) == 0 {
-		logger.LogBlue("No new authors to process.")
+		logger.LogBlue("no new authors to process.")
 		return
 	}
 

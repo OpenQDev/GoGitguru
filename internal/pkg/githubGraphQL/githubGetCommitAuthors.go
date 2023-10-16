@@ -9,14 +9,6 @@ import (
 )
 
 func GithubGetCommitAuthors(query string, ghAccessToken string) (CommitAuthorsResponse, error) {
-	// Queries the GitHub GraphQL API.
-	// Parameters:
-	// - query (str): The GraphQL query to execute.
-	// - gh_access_token (str): The GitHub access token to use for authentication.
-	// Returns:
-	// - dict: The JSON response from the API.
-	// - error: If the request failed.
-
 	headers := map[string]string{
 		"Authorization": fmt.Sprintf("token %s", ghAccessToken),
 		"Content-Type":  "application/json",
@@ -24,21 +16,9 @@ func GithubGetCommitAuthors(query string, ghAccessToken string) (CommitAuthorsRe
 
 	url := "https://api.github.com/graphql"
 
-	payloadObj := GraphQLPayload{
-		Query: query,
-	}
-
-	payloadBytes, err := json.Marshal(payloadObj)
+	req, err := createRequest(url, query, headers)
 	if err != nil {
 		return CommitAuthorsResponse{}, err
-	}
-
-	payload := bytes.NewReader(payloadBytes)
-
-	req, _ := http.NewRequest("POST", url, payload)
-
-	for key, value := range headers {
-		req.Header.Add(key, value)
 	}
 
 	res, err := http.DefaultClient.Do(req)
@@ -58,4 +38,24 @@ func GithubGetCommitAuthors(query string, ghAccessToken string) (CommitAuthorsRe
 	json.Unmarshal(body, &jsonData)
 
 	return jsonData, nil
+}
+
+func createRequest(url string, query string, headers map[string]string) (*http.Request, error) {
+	payloadObj := GraphQLPayload{Query: query}
+	payloadBytes, err := json.Marshal(payloadObj)
+	if err != nil {
+		return nil, err
+	}
+
+	payload := bytes.NewReader(payloadBytes)
+	req, err := http.NewRequest("POST", url, payload)
+	if err != nil {
+		return nil, err
+	}
+
+	for key, value := range headers {
+		req.Header.Add(key, value)
+	}
+
+	return req, nil
 }
