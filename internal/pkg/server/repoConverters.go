@@ -3,10 +3,11 @@ package server
 import (
 	"database/sql"
 	"main/internal/database"
+	"main/internal/pkg/githubRestTypes"
 	"time"
 )
 
-func ConvertGithubRestRepoToInsertGithubRepoParams(repo GithubRestRepo) database.InsertGithubRepoParams {
+func ConvertGithubRestRepoToInsertGithubRepoParams(repo githubRestTypes.GithubRestRepo) database.InsertGithubRepoParams {
 	createdAt, _ := time.Parse(time.RFC3339, repo.CreatedAt)
 	updatedAt, _ := time.Parse(time.RFC3339, repo.UpdatedAt)
 	pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)
@@ -43,8 +44,8 @@ func ConvertGithubRestRepoToInsertGithubRepoParams(repo GithubRestRepo) database
 	}
 }
 
-func ConvertDatabaseGithubRepoToGithubRestRepo(params database.GithubRepo) GithubRestRepo {
-	return GithubRestRepo{
+func ConvertDatabaseGithubRepoToGithubRestRepo(params database.GithubRepo) githubRestTypes.GithubRestRepo {
+	return githubRestTypes.GithubRestRepo{
 		GithubRestID:    int(params.GithubRestID),
 		GithubGraphqlID: params.GithubGraphqlID,
 		URL:             params.Url,

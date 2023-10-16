@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"main/internal/pkg/githubRestTypes"
 	"main/internal/pkg/server/util"
 	"net/http"
 
@@ -10,7 +11,7 @@ import (
 )
 
 type HandlerGithubRepoByOwnerAndNameRequest struct{}
-type HandlerGithubRepoByOwnerAndNameResponse = GithubRestRepo
+type HandlerGithubRepoByOwnerAndNameResponse = githubRestTypes.GithubRestRepo
 
 func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWriter, r *http.Request) {
 	githubAccessToken := r.Header.Get("GH-Authorization")
@@ -60,7 +61,7 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 
 	defer resp.Body.Close()
 
-	var repo GithubRestRepo
+	var repo githubRestTypes.GithubRestRepo
 	util.ReaderToType(resp.Body, &repo)
 
 	params := ConvertGithubRestRepoToInsertGithubRepoParams(repo)
