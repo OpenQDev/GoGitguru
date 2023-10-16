@@ -23,6 +23,9 @@ INSERT INTO github_users (
 )
 RETURNING *;
 
+-- name: CheckGithubUserExists :one
+SELECT EXISTS(SELECT 1 FROM github_users WHERE login = $1);
+
 -- name: GetGithubUser :one
 
 SELECT * FROM github_users WHERE login = $1;

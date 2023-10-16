@@ -1,11 +1,14 @@
 package gitutil
 
+import "github.com/DATA-DOG/go-sqlmock"
+
 type ProcessRepoTestCase struct {
 	name         string
 	organization string
 	repo         string
 	repoUrl      string
 	gitLogs      []GitLog
+	setupMock    func(mock sqlmock.Sqlmock, gitLogs []GitLog, repoUrl string)
 }
 
 const organization = "OpenQDev"
@@ -42,6 +45,48 @@ func test1() ProcessRepoTestCase {
 				Insertions:    0,
 				Deletions:     0,
 			},
+		},
+		setupMock: func(mock sqlmock.Sqlmock, gitLogs []GitLog, repoUrl string) {
+			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs("storing_commits", repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
+
+			commitHash := make([]string, 0)
+			author := make([]string, 0)
+			authorEmail := make([]string, 0)
+			authorDate := make([]int64, 0)
+			committerDate := make([]int64, 0)
+			message := make([]string, 0)
+			insertions := make([]int32, 0)
+			deletions := make([]int32, 0)
+			filesChanged := make([]int32, 0)
+			repoUrls := make([]string, 0)
+
+			for _, commit := range gitLogs {
+				commitHash = append(commitHash, commit.CommitHash)
+				author = append(author, commit.AuthorName)
+				authorEmail = append(authorEmail, commit.AuthorEmail)
+				authorDate = append(authorDate, commit.AuthorDate)
+				committerDate = append(committerDate, commit.CommitDate)
+				message = append(message, commit.CommitMessage)
+				insertions = append(insertions, int32(commit.Insertions))
+				deletions = append(deletions, int32(commit.Deletions))
+				filesChanged = append(filesChanged, int32(commit.FilesChanged))
+				repoUrls = append(repoUrls, repoUrl)
+			}
+
+			mock.ExpectExec("^-- name: BulkInsertCommits :exec.*").WithArgs(
+				commitHash,
+				author,
+				authorEmail,
+				authorDate,
+				committerDate,
+				message,
+				insertions,
+				deletions,
+				filesChanged,
+				repoUrls,
+			)
+
+			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs("synced", repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
 		},
 	}
 

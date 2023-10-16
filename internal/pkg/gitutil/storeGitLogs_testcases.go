@@ -1,11 +1,14 @@
 package gitutil
 
+import "github.com/DATA-DOG/go-sqlmock"
+
 type StoreGitLogsTestCase struct {
 	name        string
 	repoUrl     string
 	repo        string
 	gitLogs     []GitLog
 	shouldError bool
+	setupMock   func(mock sqlmock.Sqlmock, gitLogs []GitLog, repoUrl string)
 }
 
 func sucessfulGitLog() StoreGitLogsTestCase {
@@ -38,6 +41,48 @@ func sucessfulGitLog() StoreGitLogsTestCase {
 			},
 		},
 		shouldError: false,
+		setupMock: func(mock sqlmock.Sqlmock, gitLogs []GitLog, repoUrl string) {
+			numberOfCommits := len(gitLogs)
+			var (
+				commitHash    = make([]string, numberOfCommits)
+				author        = make([]string, numberOfCommits)
+				authorEmail   = make([]string, numberOfCommits)
+				authorDate    = make([]int64, numberOfCommits)
+				committerDate = make([]int64, numberOfCommits)
+				message       = make([]string, numberOfCommits)
+				insertions    = make([]int32, numberOfCommits)
+				deletions     = make([]int32, numberOfCommits)
+				filesChanged  = make([]int32, numberOfCommits)
+				repoUrls      = make([]string, numberOfCommits)
+			)
+
+			for i, commit := range gitLogs {
+				commitHash[i] = commit.CommitHash
+				author[i] = commit.AuthorName
+				authorEmail[i] = commit.AuthorEmail
+				authorDate[i] = commit.AuthorDate
+				committerDate[i] = commit.CommitDate
+				message[i] = commit.CommitMessage
+				insertions[i] = int32(commit.Insertions)
+				deletions[i] = int32(commit.Deletions)
+				filesChanged[i] = int32(commit.FilesChanged)
+				repoUrls[i] = repoUrl
+			}
+
+			// BULK INSERT COMMITS
+			mock.ExpectExec("^-- name: BulkInsertCommits :exec.*").WithArgs(
+				commitHash,
+				author,
+				authorEmail,
+				authorDate,
+				committerDate,
+				message,
+				insertions,
+				deletions,
+				filesChanged,
+				repoUrls,
+			)
+		},
 	}
 
 	return foo
