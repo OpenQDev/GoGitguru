@@ -4,7 +4,7 @@ type GenerateBatchAuthorsTestCase struct {
 	name           string
 	input          map[string][]AuthorCommitTuple
 	batchSize      int
-	expectedOutput [][]interface{}
+	expectedOutput BatchAuthors
 }
 
 func singleAuthorSingleRepo() GenerateBatchAuthorsTestCase {
@@ -20,7 +20,7 @@ func singleAuthorSingleRepo() GenerateBatchAuthorsTestCase {
 			},
 		},
 		batchSize: 2,
-		expectedOutput: [][]interface{}{
+		expectedOutput: BatchAuthors{
 			{"https://github.com/test/repo", []AuthorCommitTuple{
 				{"test@example.com", "commit1"},
 				{"test2@example.com", "commit2"},
@@ -49,7 +49,7 @@ func singleAuthorTwoRepos() GenerateBatchAuthorsTestCase {
 			},
 		},
 		batchSize: 2,
-		expectedOutput: [][]interface{}{
+		expectedOutput: BatchAuthors{
 			{"https://github.com/test/repo", []AuthorCommitTuple{
 				{"test@example.com", "commit1"},
 				{"test2@example.com", "commit2"},

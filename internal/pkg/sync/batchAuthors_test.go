@@ -12,7 +12,7 @@ func TestGenerateBatchAuthors(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				"SINGLE_AUTHOR_ONE_REPO",
+				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
 
 			result := GenerateBatchAuthors(tt.input, tt.batchSize)

@@ -5,7 +5,7 @@ type BatchAuthor struct {
 	Tuples  []AuthorCommitTuple
 }
 
-type BatchAuthors []BatchAuthor
+type BatchAuthors = []BatchAuthor
 
 func GenerateBatchAuthors(repoUrlToAuthorsMap map[string][]AuthorCommitTuple, batchSize int) BatchAuthors {
 	var result BatchAuthors

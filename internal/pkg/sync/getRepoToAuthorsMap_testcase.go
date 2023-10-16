@@ -1,15 +1,15 @@
 package sync
 
 type GetRepoToAuthorsMapTestCase struct {
-	name           string
+	title          string
 	input          []UserSync
 	expectedOutput map[string][]AuthorCommitTuple
 }
 
-func fooo() GetRepoToAuthorsMapTestCase {
-	const FOO = "FOO"
+func reposToAuthorMap() GetRepoToAuthorsMapTestCase {
+	const REPO_TO_AUTHOR_MAP = "REPO_TO_AUTHOR_MAP"
 	return GetRepoToAuthorsMapTestCase{
-		name: FOO,
+		title: REPO_TO_AUTHOR_MAP,
 		input: []UserSync{
 			{
 				CommitHash: "abc123",
@@ -41,20 +41,20 @@ func fooo() GetRepoToAuthorsMapTestCase {
 					URL     string
 					NotNull bool
 				}{
-					URL:     "https://github.com/example/other-repo",
+					URL:     "https://github.com/example/repo2",
 					NotNull: true,
 				},
 			},
 		},
 		expectedOutput: map[string][]AuthorCommitTuple{
-			"https://github.com/example/repo":  []AuthorCommitTuple{AuthorCommitTuple{Author: "test@example.com", CommitHash: "abc123"}},
-			"https://github.com/example/repo2": []AuthorCommitTuple{AuthorCommitTuple{Author: "otherperson@example.com", CommitHash: "otherCommitHash"}},
+			"https://github.com/example/repo":  {{Author: "test@example.com", CommitHash: "abc123"}},
+			"https://github.com/example/repo2": {{Author: "otherperson@example.com", CommitHash: "otherCommitHash"}},
 		},
 	}
 }
 
 func GetRepoToAuthorsMapTestCases() []GetRepoToAuthorsMapTestCase {
 	return []GetRepoToAuthorsMapTestCase{
-		fooo(),
+		reposToAuthorMap(),
 	}
 }
