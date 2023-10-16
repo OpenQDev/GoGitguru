@@ -5,7 +5,7 @@ import (
 	"main/internal/pkg/reposync"
 	"main/internal/pkg/server"
 	"main/internal/pkg/setup"
-	"main/internal/pkg/sync"
+	"main/internal/pkg/usersync"
 	"time"
 )
 
@@ -31,7 +31,7 @@ func main() {
 	}
 
 	if syncUsersMode {
-		sync.StartSyncingUser(database, "repos", 10, time.Duration(syncUsersIntervalMinutes)*time.Minute, ghAccessToken, 2)
+		usersync.StartSyncingUser(database, "repos", 10, time.Duration(syncUsersIntervalMinutes)*time.Minute, ghAccessToken, 2)
 	}
 
 	if startServer {
