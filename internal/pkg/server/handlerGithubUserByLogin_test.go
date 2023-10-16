@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHandlerGithubUserByLogin(t *testing.T) {
@@ -23,13 +24,13 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 
 	mock, queries := mocks.GetMockDatabase()
 
-	jsonFile, err := os.Open("./mocks/mockGithubRepoReturn.json")
+	jsonFile, err := os.Open("./mocks/mockGithubUserResponse.json")
 	if err != nil {
 		t.Errorf("error opening json file: %s", err)
 	}
 
-	var repo GithubRestRepo
-	err = util.JsonFileToType(jsonFile, &repo)
+	var user User
+	err = util.JsonFileToType(jsonFile, &user)
 	if err != nil {
 		t.Errorf("Failed to read JSON file: %s", err)
 	}
@@ -61,7 +62,7 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.title, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				testhelpers.RUN_ALL_TESTS,
+				"VALID",
 			), tt.title)
 
 			// ARRANGE - LOCAL
@@ -75,16 +76,16 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 
 			rr := httptest.NewRecorder()
 
-			tt.setupMock(mock)
+			tt.setupMock(mock, user)
 
 			// ACT
 			apiCfg.HandlerGithubUserByLogin(rr, req)
 
 			// ARRANGE - EXPECT
-			var actualRepoReturn GithubRestRepo
-			err := json.NewDecoder(rr.Body).Decode(&actualRepoReturn)
+			var actualUserResponse User
+			err := json.NewDecoder(rr.Body).Decode(&actualUserResponse)
 			if err != nil {
-				t.Errorf("Failed to decode rr.Body into []RestRepo: %s", err)
+				t.Errorf("Failed to decode rr.Body into User: %s", err)
 				return
 			}
 
@@ -94,7 +95,11 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 				return
 			}
 
-			assert.Equal(t, repo, actualRepoReturn)
+			require.Equal(t, user, actualUserResponse)
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
 		})
 	}
 }
