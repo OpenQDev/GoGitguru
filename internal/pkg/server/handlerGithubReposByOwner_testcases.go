@@ -16,11 +16,13 @@ type HandlerGithubReposByOwnerTestCase struct {
 	setupMock      func(mock sqlmock.Sqlmock, repo GithubRestRepo)
 }
 
+const owner = "DRM-Test-Organization"
+
 func unauthorized() HandlerGithubReposByOwnerTestCase {
 	const SHOULD_401 = "SHOULD_401"
 	return HandlerGithubReposByOwnerTestCase{
 		name:           SHOULD_401,
-		owner:          "DRM-Test-Organization",
+		owner:          owner,
 		expectedStatus: http.StatusUnauthorized,
 		authorized:     false,
 		shouldError:    true,
@@ -32,7 +34,7 @@ func sucess() HandlerGithubReposByOwnerTestCase {
 	const SHOULD_STORE_ALL_REPOS_FOR_ORG = "SHOULD_STORE_ALL_REPOS_FOR_ORG"
 	return HandlerGithubReposByOwnerTestCase{
 		name:           SHOULD_STORE_ALL_REPOS_FOR_ORG,
-		owner:          "DRM-Test-Organization",
+		owner:          owner,
 		expectedStatus: http.StatusOK,
 		authorized:     true,
 		shouldError:    false,
@@ -42,7 +44,7 @@ func sucess() HandlerGithubReposByOwnerTestCase {
 			pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)
 
 			rows := sqlmock.NewRows([]string{"internal_id", "github_rest_id", "github_graphql_id", "url", "name", "full_name", "private", "owner_login", "owner_avatar_url", "description", "homepage", "fork", "forks_count", "archived", "disabled", "license", "language", "stargazers_count", "watchers_count", "open_issues_count", "has_issues", "has_discussions", "has_projects", "created_at", "updated_at", "pushed_at", "visibility", "size", "default_branch"}).
-				AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, repo.FullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, "homepage", repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, "license", "language", repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAt, updatedAt, pushedAt, repo.Visibility, repo.Size, repo.DefaultBranch)
+				AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, repo.FullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAt, updatedAt, pushedAt, repo.Visibility, repo.Size, repo.DefaultBranch)
 
 			mock.ExpectQuery("^-- name: InsertGithubRepo :one.*").WithArgs(
 				repo.GithubRestID,    // 0 - GithubRestID
@@ -54,13 +56,13 @@ func sucess() HandlerGithubReposByOwnerTestCase {
 				repo.Owner.Login,     // 6 - OwnerLogin
 				repo.Owner.AvatarURL, // 7 - OwnerAvatarUrl
 				repo.Description,     // 8 - Description
-				"homepage",           // 9 - Homepage
+				repo.Homepage,        // 9 - Homepage
 				repo.Fork,            // 10 - Fork
 				repo.ForksCount,      // 11 - ForksCount
 				repo.Archived,        // 12 - Archived
 				repo.Disabled,        // 13 - Disabled
-				"license",            // 14 - License
-				"language",           // 15 - Language
+				repo.License.Name,    // 14 - License
+				repo.Language,        // 15 - Language
 				repo.StargazersCount, // 16 - StargazersCount
 				repo.WatchersCount,   // 17 - WatchersCount
 				repo.OpenIssuesCount, // 18 - OpenIssuesCount

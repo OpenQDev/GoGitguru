@@ -91,11 +91,10 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 			}
 
 			// ARRANGE - EXPECT
-
 			var actualRepoReturn GithubRestRepo
 			util.ReaderToType(rr.Result().Body, &actualRepoReturn)
 			if err != nil {
-				t.Errorf("Failed to decode rr.Body into []RestRepo: %s", err)
+				t.Errorf("Failed to decode rr.Body into []GithubRestRepo: %s", err)
 				return
 			}
 

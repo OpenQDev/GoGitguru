@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/json"
 	"io"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/server/mocks"
@@ -31,7 +30,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 		t.Errorf("error opening json file: %s", err)
 	}
 
-	// Decode the JSON file to type []RestRepo
+	// Decode the JSON file to type []GithubRestRepo
 	var repos []GithubRestRepo
 	err = util.JsonFileToType(jsonFile, &repos)
 	if err != nil {
@@ -65,11 +64,10 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 	tests := HandlerGithubReposByOwnerTestCases()
 
 	for _, tt := range tests {
-		testhelpers.CheckTestSkip(t, testhelpers.Targets(
-			testhelpers.RUN_ALL_TESTS,
-		), tt.name)
-
 		t.Run(tt.name, func(t *testing.T) {
+			testhelpers.CheckTestSkip(t, testhelpers.Targets(
+				testhelpers.RUN_ALL_TESTS,
+			), tt.name)
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 			// Add {owner} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
@@ -88,9 +86,9 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 
 			// ARRANGE - EXPECT
 			var actualReposReturn []GithubRestRepo
-			err := json.NewDecoder(rr.Body).Decode(&actualReposReturn)
+			util.ReaderToType(rr.Body, &actualReposReturn)
 			if err != nil {
-				t.Errorf("Failed to decode rr.Body into []RestRepo: %s", err)
+				t.Errorf("Failed to decode rr.Body into []GithubRestRepo: %s", err)
 				return
 			}
 

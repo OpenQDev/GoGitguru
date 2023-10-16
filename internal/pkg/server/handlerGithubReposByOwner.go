@@ -2,9 +2,9 @@ package server
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"main/internal/pkg/logger"
+	"main/internal/pkg/server/util"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -33,21 +33,21 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 
 		req, err := http.NewRequest("GET", requestUrl, nil)
 		if err != nil {
-			RespondWithError(w, 500, "Failed to create request.")
+			RespondWithError(w, 500, fmt.Sprintf("Failed to create request: %s", err))
 			return
 		}
 
 		req.Header.Add("Authorization", "token "+githubAccessToken)
 		resp, err := client.Do(req)
 		if err != nil {
-			RespondWithError(w, 500, "Failed to make request.")
+			RespondWithError(w, 500, fmt.Sprintf("Failed to make request %s: %s", requestUrl, err))
 			return
 		}
 
 		var restReposResponse []GithubRestRepo
-		err = json.NewDecoder(resp.Body).Decode(&restReposResponse)
+		err = util.ReaderToType(resp.Body, &restReposResponse)
 		if err != nil {
-			RespondWithError(w, 500, "Failed to decode response.")
+			RespondWithError(w, 500, fmt.Sprintf("Failed to decode response from %s to []GithubRestRepo: %s", requestUrl, err))
 			return
 		}
 
