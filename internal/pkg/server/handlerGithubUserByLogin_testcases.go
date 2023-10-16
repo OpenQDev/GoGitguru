@@ -1,6 +1,10 @@
 package server
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/DATA-DOG/go-sqlmock"
+)
 
 type HandlerGithubUserByLoginTestCase struct {
 	title          string
@@ -8,18 +12,20 @@ type HandlerGithubUserByLoginTestCase struct {
 	expectedStatus int
 	authorized     bool
 	shouldError    bool
+	setupMock      func(mock sqlmock.Sqlmock)
 }
 
-const owner = "FlacoJones"
+const userLogin = "FlacoJones"
 
 func should401() HandlerGithubUserByLoginTestCase {
 	const UNAUTHORIZED = "UNAUTHORIZED"
 	return HandlerGithubUserByLoginTestCase{
 		title:          UNAUTHORIZED,
-		login:          login,
+		login:          userLogin,
 		expectedStatus: http.StatusUnauthorized,
 		authorized:     false,
 		shouldError:    true,
+		setupMock:      func(mock sqlmock.Sqlmock) {},
 	}
 }
 
@@ -31,6 +37,7 @@ func valid() HandlerGithubUserByLoginTestCase {
 		expectedStatus: http.StatusOK,
 		authorized:     true,
 		shouldError:    false,
+		setupMock:      func(mock sqlmock.Sqlmock) {},
 	}
 }
 

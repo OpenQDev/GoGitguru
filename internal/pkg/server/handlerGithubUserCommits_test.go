@@ -77,6 +77,8 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 
 			rr := httptest.NewRecorder()
 
+			tt.setupMock(mock)
+
 			// ACT
 			apiCfg.HandlerGithubUserCommits(rr, req)
 

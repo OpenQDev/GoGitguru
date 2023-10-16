@@ -21,7 +21,7 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 	_, _, _, debugMode, _, _, _, _, ghAccessToken, targetLiveGithub := setup.ExtractAndVerifyEnvironment("../../../.env")
 	logger.SetDebugMode(debugMode)
 
-	_, queries := mocks.GetMockDatabase()
+	mock, queries := mocks.GetMockDatabase()
 
 	jsonFile, err := os.Open("./mocks/mockGithubRepoReturn.json")
 	if err != nil {
@@ -74,6 +74,8 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 			}
 
 			rr := httptest.NewRecorder()
+
+			tt.setupMock(mock)
 
 			// ACT
 			apiCfg.HandlerGithubUserByLogin(rr, req)

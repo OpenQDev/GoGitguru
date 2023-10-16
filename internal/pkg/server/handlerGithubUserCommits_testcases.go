@@ -1,6 +1,10 @@
 package server
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/DATA-DOG/go-sqlmock"
+)
 
 type HandlerGithubUserCommitsTestCase struct {
 	name           string
@@ -8,6 +12,7 @@ type HandlerGithubUserCommitsTestCase struct {
 	expectedStatus int
 	authorized     bool
 	shouldError    bool
+	setupMock      func(mock sqlmock.Sqlmock)
 }
 
 const login = "DRM-Test-Organization"
@@ -20,6 +25,7 @@ func notAuthorized() HandlerGithubUserCommitsTestCase {
 		expectedStatus: http.StatusBadRequest,
 		authorized:     false,
 		shouldError:    true,
+		setupMock:      func(mock sqlmock.Sqlmock) {},
 	}
 }
 
