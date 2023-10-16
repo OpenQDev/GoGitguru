@@ -19,7 +19,8 @@ func main() {
 		syncUsersMode,
 		syncUsersIntervalMinutes,
 		ghAccessToken,
-		_ := setup.ExtractAndVerifyEnvironment(".env")
+		_,
+		startServer := setup.ExtractAndVerifyEnvironment(".env")
 
 	database, apiCfg := server.PrepareServerSingleton(dbUrl)
 	logger.SetDebugMode(debugMode)
@@ -32,5 +33,7 @@ func main() {
 		sync.StartSyncingUser(database, "repos", 10, time.Duration(syncUsersIntervalMinutes)*time.Minute, ghAccessToken, 2)
 	}
 
-	server.StartServer(apiCfg, portString, originUrl)
+	if startServer {
+		server.StartServer(apiCfg, portString, originUrl)
+	}
 }

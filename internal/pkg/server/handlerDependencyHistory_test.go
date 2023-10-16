@@ -18,7 +18,7 @@ import (
 
 func TestHandlerDependencyHistory(t *testing.T) {
 	// ARRANGE - GLOBAL
-	_, _, _, debugMode, _, _, _, _, ghAccessToken, targetLiveGithub := setup.ExtractAndVerifyEnvironment("../../../.env")
+	_, _, _, debugMode, _, _, _, _, ghAccessToken, targetLiveGithub, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
 	logger.SetDebugMode(debugMode)
 
 	_, queries := mocks.GetMockDatabase()

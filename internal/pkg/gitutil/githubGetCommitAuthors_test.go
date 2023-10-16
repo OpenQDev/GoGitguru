@@ -8,7 +8,7 @@ import (
 )
 
 func TestGithubGetCommitAuthors(t *testing.T) {
-	_, _, _, _, _, _, _, _, ghAccessToken, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
+	_, _, _, _, _, _, _, _, ghAccessToken, _, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
 
 	tests := GithubGetCommitAuthorsTestCases()
 

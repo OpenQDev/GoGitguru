@@ -15,7 +15,7 @@ import (
 
 func TestHandlerHealth(t *testing.T) {
 	// ARRANGE - GLOBAL
-	_, _, _, debugMode, _, _, _, _, _, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
+	_, _, _, debugMode, _, _, _, _, _, _, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
 	logger.SetDebugMode(debugMode)
 
 	_, queries := mocks.GetMockDatabase()

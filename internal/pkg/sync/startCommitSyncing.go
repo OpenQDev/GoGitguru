@@ -15,11 +15,9 @@ func StartSyncingCommits(
 	prefixPath string,
 	concurrency int,
 	timeBetweenSyncs time.Duration) {
-	// Fetch all repository URLs
+
 	repoUrlObjects, err := db.GetRepoURLs(context.Background())
 
-	// Prepare an alphabetical, lowercased list of only repoUrls
-	// Log them with new lines
 	repoUrls := sortRepoUrls(repoUrlObjects)
 	logger.LogGreenDebug("beginning sync for the following repos:\n%v", strings.Join(repoUrls, "\n"))
 
