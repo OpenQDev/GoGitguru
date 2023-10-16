@@ -56,6 +56,114 @@ func (q *Queries) BulkInsertCommits(ctx context.Context, arg BulkInsertCommitsPa
 	return err
 }
 
+const getAllUserCommits = `-- name: GetAllUserCommits :many
+WITH commits AS (
+    SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url FROM commits WHERE c.author_date BETWEEN $1 AND $2
+)
+SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at FROM commits c
+INNER JOIN github_user_rest_id_author_emails gure
+ON c.author_email = gure.email
+INNER JOIN github_users gu
+ON gure.rest_id = gu.github_rest_id
+WHERE gu.login = $3
+ORDER BY c.author_date DESC
+`
+
+type GetAllUserCommitsParams struct {
+	AuthorDate   sql.NullInt64 `json:"author_date"`
+	AuthorDate_2 sql.NullInt64 `json:"author_date_2"`
+	Login        string        `json:"login"`
+}
+
+type GetAllUserCommitsRow struct {
+	CommitHash      string         `json:"commit_hash"`
+	Author          sql.NullString `json:"author"`
+	AuthorEmail     sql.NullString `json:"author_email"`
+	AuthorDate      sql.NullInt64  `json:"author_date"`
+	CommitterDate   sql.NullInt64  `json:"committer_date"`
+	Message         sql.NullString `json:"message"`
+	Insertions      sql.NullInt32  `json:"insertions"`
+	Deletions       sql.NullInt32  `json:"deletions"`
+	LinesChanged    sql.NullInt32  `json:"lines_changed"`
+	FilesChanged    sql.NullInt32  `json:"files_changed"`
+	RepoUrl         sql.NullString `json:"repo_url"`
+	RestID          int32          `json:"rest_id"`
+	Email           string         `json:"email"`
+	InternalID      int32          `json:"internal_id"`
+	GithubRestID    int32          `json:"github_rest_id"`
+	GithubGraphqlID string         `json:"github_graphql_id"`
+	Login           string         `json:"login"`
+	Name            sql.NullString `json:"name"`
+	Email_2         sql.NullString `json:"email_2"`
+	AvatarUrl       sql.NullString `json:"avatar_url"`
+	Company         sql.NullString `json:"company"`
+	Location        sql.NullString `json:"location"`
+	Bio             sql.NullString `json:"bio"`
+	Blog            sql.NullString `json:"blog"`
+	Hireable        sql.NullBool   `json:"hireable"`
+	TwitterUsername sql.NullString `json:"twitter_username"`
+	Followers       sql.NullInt32  `json:"followers"`
+	Following       sql.NullInt32  `json:"following"`
+	Type            string         `json:"type"`
+	CreatedAt       sql.NullTime   `json:"created_at"`
+	UpdatedAt       sql.NullTime   `json:"updated_at"`
+}
+
+func (q *Queries) GetAllUserCommits(ctx context.Context, arg GetAllUserCommitsParams) ([]GetAllUserCommitsRow, error) {
+	rows, err := q.query(ctx, q.getAllUserCommitsStmt, getAllUserCommits, arg.AuthorDate, arg.AuthorDate_2, arg.Login)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllUserCommitsRow
+	for rows.Next() {
+		var i GetAllUserCommitsRow
+		if err := rows.Scan(
+			&i.CommitHash,
+			&i.Author,
+			&i.AuthorEmail,
+			&i.AuthorDate,
+			&i.CommitterDate,
+			&i.Message,
+			&i.Insertions,
+			&i.Deletions,
+			&i.LinesChanged,
+			&i.FilesChanged,
+			&i.RepoUrl,
+			&i.RestID,
+			&i.Email,
+			&i.InternalID,
+			&i.GithubRestID,
+			&i.GithubGraphqlID,
+			&i.Login,
+			&i.Name,
+			&i.Email_2,
+			&i.AvatarUrl,
+			&i.Company,
+			&i.Location,
+			&i.Bio,
+			&i.Blog,
+			&i.Hireable,
+			&i.TwitterUsername,
+			&i.Followers,
+			&i.Following,
+			&i.Type,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCommit = `-- name: GetCommit :one
 SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url FROM commits WHERE commit_hash = $1
 `
@@ -262,6 +370,121 @@ func (q *Queries) GetLatestUncheckedCommitPerAuthor(ctx context.Context) ([]GetL
 	for rows.Next() {
 		var i GetLatestUncheckedCommitPerAuthorRow
 		if err := rows.Scan(&i.CommitHash, &i.AuthorEmail, &i.RepoUrl); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUserCommitsForRepos = `-- name: GetUserCommitsForRepos :many
+WITH commits AS (
+    SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url FROM commits WHERE c.author_date BETWEEN $1 AND $2
+)
+SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at FROM commits c
+INNER JOIN github_user_rest_id_author_emails gure
+ON c.author_email = gure.email
+INNER JOIN github_users gu
+ON gure.rest_id = gu.github_rest_id
+WHERE gu.login = $3
+AND c.repo_url = ANY($4)
+ORDER BY c.author_date DESC
+`
+
+type GetUserCommitsForReposParams struct {
+	AuthorDate   sql.NullInt64  `json:"author_date"`
+	AuthorDate_2 sql.NullInt64  `json:"author_date_2"`
+	Login        string         `json:"login"`
+	RepoUrl      sql.NullString `json:"repo_url"`
+}
+
+type GetUserCommitsForReposRow struct {
+	CommitHash      string         `json:"commit_hash"`
+	Author          sql.NullString `json:"author"`
+	AuthorEmail     sql.NullString `json:"author_email"`
+	AuthorDate      sql.NullInt64  `json:"author_date"`
+	CommitterDate   sql.NullInt64  `json:"committer_date"`
+	Message         sql.NullString `json:"message"`
+	Insertions      sql.NullInt32  `json:"insertions"`
+	Deletions       sql.NullInt32  `json:"deletions"`
+	LinesChanged    sql.NullInt32  `json:"lines_changed"`
+	FilesChanged    sql.NullInt32  `json:"files_changed"`
+	RepoUrl         sql.NullString `json:"repo_url"`
+	RestID          int32          `json:"rest_id"`
+	Email           string         `json:"email"`
+	InternalID      int32          `json:"internal_id"`
+	GithubRestID    int32          `json:"github_rest_id"`
+	GithubGraphqlID string         `json:"github_graphql_id"`
+	Login           string         `json:"login"`
+	Name            sql.NullString `json:"name"`
+	Email_2         sql.NullString `json:"email_2"`
+	AvatarUrl       sql.NullString `json:"avatar_url"`
+	Company         sql.NullString `json:"company"`
+	Location        sql.NullString `json:"location"`
+	Bio             sql.NullString `json:"bio"`
+	Blog            sql.NullString `json:"blog"`
+	Hireable        sql.NullBool   `json:"hireable"`
+	TwitterUsername sql.NullString `json:"twitter_username"`
+	Followers       sql.NullInt32  `json:"followers"`
+	Following       sql.NullInt32  `json:"following"`
+	Type            string         `json:"type"`
+	CreatedAt       sql.NullTime   `json:"created_at"`
+	UpdatedAt       sql.NullTime   `json:"updated_at"`
+}
+
+func (q *Queries) GetUserCommitsForRepos(ctx context.Context, arg GetUserCommitsForReposParams) ([]GetUserCommitsForReposRow, error) {
+	rows, err := q.query(ctx, q.getUserCommitsForReposStmt, getUserCommitsForRepos,
+		arg.AuthorDate,
+		arg.AuthorDate_2,
+		arg.Login,
+		arg.RepoUrl,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserCommitsForReposRow
+	for rows.Next() {
+		var i GetUserCommitsForReposRow
+		if err := rows.Scan(
+			&i.CommitHash,
+			&i.Author,
+			&i.AuthorEmail,
+			&i.AuthorDate,
+			&i.CommitterDate,
+			&i.Message,
+			&i.Insertions,
+			&i.Deletions,
+			&i.LinesChanged,
+			&i.FilesChanged,
+			&i.RepoUrl,
+			&i.RestID,
+			&i.Email,
+			&i.InternalID,
+			&i.GithubRestID,
+			&i.GithubGraphqlID,
+			&i.Login,
+			&i.Name,
+			&i.Email_2,
+			&i.AvatarUrl,
+			&i.Company,
+			&i.Location,
+			&i.Bio,
+			&i.Blog,
+			&i.Hireable,
+			&i.TwitterUsername,
+			&i.Followers,
+			&i.Following,
+			&i.Type,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

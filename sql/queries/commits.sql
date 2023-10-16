@@ -67,3 +67,28 @@ INSERT INTO commits (commit_hash, author, author_email, author_date, committer_d
   unnest($9::int[]),  
   unnest($10::varchar[])  
 );
+
+-- name: GetUserCommitsForRepos :many
+WITH commits AS (
+    SELECT * FROM commits WHERE c.author_date BETWEEN $1 AND $2
+)
+SELECT * FROM commits c
+INNER JOIN github_user_rest_id_author_emails gure
+ON c.author_email = gure.email
+INNER JOIN github_users gu
+ON gure.rest_id = gu.github_rest_id
+WHERE gu.login = $3
+AND c.repo_url = ANY($4)
+ORDER BY c.author_date DESC;
+
+-- name: GetAllUserCommits :many
+WITH commits AS (
+    SELECT * FROM commits WHERE c.author_date BETWEEN $1 AND $2
+)
+SELECT * FROM commits c
+INNER JOIN github_user_rest_id_author_emails gure
+ON c.author_email = gure.email
+INNER JOIN github_users gu
+ON gure.rest_id = gu.github_rest_id
+WHERE gu.login = $3
+ORDER BY c.author_date DESC;
