@@ -37,10 +37,27 @@ func StoreGitLogs(params GitLogParams) (int, error) {
 
 	fmt.Printf("%s has %d commits\n", params.repoUrl, numberOfCommits)
 
-	commitCount, err := PrepareCommitHistoryForBulkInsertion(numberOfCommits, log, params)
+	commitObjects, err := PrepareCommitHistoryForBulkInsertion(numberOfCommits, log, params)
 	if err != nil {
 		return 0, err
 	}
 
-	return commitCount, nil
+	err = BulkInsertCommits(
+		params.db,
+		commitObjects.CommitHash,
+		commitObjects.Author,
+		commitObjects.AuthorEmail,
+		commitObjects.AuthorDate,
+		commitObjects.CommitterDate,
+		commitObjects.Message,
+		commitObjects.Insertions,
+		commitObjects.Deletions,
+		commitObjects.FilesChanged,
+		commitObjects.RepoUrls,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("error storing commits for %s: %s", params.repoUrl, err)
+	}
+
+	return numberOfCommits, nil
 }

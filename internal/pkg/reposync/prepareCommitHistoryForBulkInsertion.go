@@ -1,7 +1,6 @@
 package reposync
 
 import (
-	"fmt"
 	"io"
 	"main/internal/pkg/logger"
 	"strings"
@@ -9,7 +8,20 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
-func PrepareCommitHistoryForBulkInsertion(numberOfCommits int, log object.CommitIter, params GitLogParams) (int, error) {
+type CommitObject struct {
+	CommitHash    []string
+	Author        []string
+	AuthorEmail   []string
+	AuthorDate    []int64
+	CommitterDate []int64
+	Message       []string
+	Insertions    []int32
+	Deletions     []int32
+	FilesChanged  []int32
+	RepoUrls      []string
+}
+
+func PrepareCommitHistoryForBulkInsertion(numberOfCommits int, log object.CommitIter, params GitLogParams) (CommitObject, error) {
 	var (
 		commitHash    = make([]string, numberOfCommits)
 		author        = make([]string, numberOfCommits)
@@ -30,7 +42,7 @@ func PrepareCommitHistoryForBulkInsertion(numberOfCommits int, log object.Commit
 			if err == io.EOF {
 				break
 			} else {
-				return 0, err
+				return CommitObject{}, err
 			}
 		}
 
@@ -62,21 +74,18 @@ func PrepareCommitHistoryForBulkInsertion(numberOfCommits int, log object.Commit
 		commitCount++
 	}
 
-	err := BulkInsertCommits(
-		params.db,
-		commitHash,
-		author,
-		authorEmail,
-		authorDate,
-		committerDate,
-		message,
-		insertions,
-		deletions,
-		filesChanged,
-		repoUrls,
-	)
-	if err != nil {
-		return 0, fmt.Errorf("error storing commits for %s: %s", params.repoUrl, err)
+	commitObject := CommitObject{
+		CommitHash:    commitHash,
+		Author:        author,
+		AuthorEmail:   authorEmail,
+		AuthorDate:    authorDate,
+		CommitterDate: committerDate,
+		Message:       message,
+		Insertions:    insertions,
+		Deletions:     deletions,
+		FilesChanged:  filesChanged,
+		RepoUrls:      repoUrls,
 	}
-	return commitCount, nil
+
+	return commitObject, nil
 }
