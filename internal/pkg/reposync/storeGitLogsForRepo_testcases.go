@@ -1,8 +1,11 @@
 package reposync
 
-import "github.com/DATA-DOG/go-sqlmock"
+import (
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/lib/pq"
+)
 
-type StoreGitLogsTestCase struct {
+type StoreGitLogsForRepoTestCase struct {
 	name        string
 	repoUrl     string
 	repo        string
@@ -11,8 +14,8 @@ type StoreGitLogsTestCase struct {
 	setupMock   func(mock sqlmock.Sqlmock, gitLogs []GitLog, repoUrl string)
 }
 
-func sucessfulGitLog() StoreGitLogsTestCase {
-	foo := StoreGitLogsTestCase{
+func sucessfulGitLog() StoreGitLogsForRepoTestCase {
+	foo := StoreGitLogsForRepoTestCase{
 		name:    "Valid git logs",
 		repoUrl: "https://github.com/OpenQDev/OpenQ-DRM-TestRepo",
 		repo:    "OpenQ-DRM-TestRepo",
@@ -71,25 +74,25 @@ func sucessfulGitLog() StoreGitLogsTestCase {
 
 			// BULK INSERT COMMITS
 			mock.ExpectExec("^-- name: BulkInsertCommits :exec.*").WithArgs(
-				commitHash,
-				author,
-				authorEmail,
-				authorDate,
-				committerDate,
-				message,
-				insertions,
-				deletions,
-				filesChanged,
-				repoUrls,
-			)
+				pq.Array(commitHash),
+				pq.Array(author),
+				pq.Array(authorEmail),
+				pq.Array(authorDate),
+				pq.Array(committerDate),
+				pq.Array(message),
+				pq.Array(insertions),
+				pq.Array(deletions),
+				pq.Array(filesChanged),
+				pq.Array(repoUrls),
+			).WillReturnResult(sqlmock.NewResult(1, 1))
 		},
 	}
 
 	return foo
 }
 
-func GitLogTestCases() []StoreGitLogsTestCase {
-	return []StoreGitLogsTestCase{
+func StoreGitLogsForRepoTestCases() []StoreGitLogsForRepoTestCase {
+	return []StoreGitLogsForRepoTestCase{
 		sucessfulGitLog(),
 	}
 }

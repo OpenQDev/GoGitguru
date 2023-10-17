@@ -38,6 +38,7 @@ func StoreGitLogsForRepo(params GitLogParams) (int, error) {
 	fmt.Printf("%s has %d commits\n", params.repoUrl, numberOfCommits)
 
 	commitObjects, err := PrepareCommitHistoryForBulkInsertion(numberOfCommits, log, params)
+
 	if err != nil {
 		return 0, err
 	}

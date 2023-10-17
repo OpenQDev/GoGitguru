@@ -2,26 +2,20 @@ package reposync
 
 import (
 	"main/internal/database"
-	"main/internal/pkg/gitutil"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/testhelpers"
-	"os"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestStoreGitLogs(t *testing.T) {
+func TestStoreGitLogsForRepo(t *testing.T) {
 	// ARRANGE - GLOBAL
-	tempDir, err := os.MkdirTemp("", "testing")
-	if err != nil {
-		t.Fatalf("Failed to create temp directory: %s", err)
-	}
-	defer os.RemoveAll(tempDir)
-
-	gitutil.CloneRepo(tempDir, "OpenQDev", "OpenQ-DRM-TestRepo")
+	prefixPath := "mock"
+	repo := "OpenQ-DRM-TestRepo"
 
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -31,7 +25,7 @@ func TestStoreGitLogs(t *testing.T) {
 	queries := database.New(db)
 
 	// ARRANGE - TESTS
-	tests := GitLogTestCases()
+	tests := StoreGitLogsForRepoTestCases()
 
 	for _, tt := range tests {
 		testhelpers.CheckTestSkip(t, testhelpers.Targets(
@@ -41,10 +35,12 @@ func TestStoreGitLogs(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setupMock(mock, tt.gitLogs, tt.repoUrl)
 
-			commit, err := StoreGitLogsForRepo(GitLogParams{tempDir, "OpenQ-DRM-TestRepo", tt.repoUrl, "", queries})
+			commitCount, err := StoreGitLogsForRepo(GitLogParams{prefixPath, repo, tt.repoUrl, "", queries})
 			if err != nil && tt.shouldError == false {
-				t.Errorf("there was an error storing this commit: %v - the error was: %s", commit, err)
+				t.Errorf("there was an error storing this commit: %v - the error was: %s", commitCount, err)
 			}
+
+			require.Equal(t, 2, commitCount)
 
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
