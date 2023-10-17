@@ -2,10 +2,7 @@ package reposync
 
 import (
 	"main/internal/database"
-	"main/internal/pkg/gitutil"
-	"main/internal/pkg/logger"
 	"main/internal/pkg/testhelpers"
-	"os"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -21,13 +18,7 @@ func TestProcessRepo(t *testing.T) {
 
 	queries := database.New(db)
 
-	tmpDir, err := os.MkdirTemp("", "prefixPath")
-	if err != nil {
-		logger.LogFatalRedAndExit("can't create temp dir: %s", err)
-	}
-	defer os.RemoveAll(tmpDir)
-
-	prefixPath := tmpDir
+	prefixPath := "mock"
 
 	// ARRANGE - TESTS
 	tests := ProcessRepoTestCases()
@@ -39,7 +30,6 @@ func TestProcessRepo(t *testing.T) {
 
 		t.Run(tt.name, func(t *testing.T) {
 			// ARRANGE - LOCAL
-			gitutil.CloneRepo(prefixPath, tt.organization, tt.repo)
 
 			tt.setupMock(mock, tt.gitLogs, tt.repoUrl)
 

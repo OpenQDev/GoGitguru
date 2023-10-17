@@ -1,6 +1,9 @@
 package reposync
 
-import "github.com/DATA-DOG/go-sqlmock"
+import (
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/lib/pq"
+)
 
 type ProcessRepoTestCase struct {
 	name         string
@@ -49,42 +52,47 @@ func validProcessRepoTest() ProcessRepoTestCase {
 		setupMock: func(mock sqlmock.Sqlmock, gitLogs []GitLog, repoUrl string) {
 			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs("storing_commits", repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
 
-			commitHash := make([]string, 0)
-			author := make([]string, 0)
-			authorEmail := make([]string, 0)
-			authorDate := make([]int64, 0)
-			committerDate := make([]int64, 0)
-			message := make([]string, 0)
-			insertions := make([]int32, 0)
-			deletions := make([]int32, 0)
-			filesChanged := make([]int32, 0)
-			repoUrls := make([]string, 0)
+			// Define test data
+			commitCount := 2
+			commitHash := make([]string, commitCount)
+			author := make([]string, commitCount)
+			authorEmail := make([]string, commitCount)
+			authorDate := make([]int64, commitCount)
+			committerDate := make([]int64, commitCount)
+			message := make([]string, commitCount)
+			insertions := make([]int32, commitCount)
+			deletions := make([]int32, commitCount)
+			filesChanged := make([]int32, commitCount)
+			repoUrls := make([]string, commitCount)
 
-			for _, commit := range gitLogs {
-				commitHash = append(commitHash, commit.CommitHash)
-				author = append(author, commit.AuthorName)
-				authorEmail = append(authorEmail, commit.AuthorEmail)
-				authorDate = append(authorDate, commit.AuthorDate)
-				committerDate = append(committerDate, commit.CommitDate)
-				message = append(message, commit.CommitMessage)
-				insertions = append(insertions, int32(commit.Insertions))
-				deletions = append(deletions, int32(commit.Deletions))
-				filesChanged = append(filesChanged, int32(commit.FilesChanged))
-				repoUrls = append(repoUrls, repoUrl)
+			// Fill the arrays
+			for i := 0; i < commitCount; i++ {
+				commitHash[i] = gitLogs[i].CommitHash
+				author[i] = gitLogs[i].AuthorName
+				authorEmail[i] = gitLogs[i].AuthorEmail
+				authorDate[i] = gitLogs[i].AuthorDate
+				committerDate[i] = gitLogs[i].CommitDate
+				message[i] = gitLogs[i].CommitMessage
+				insertions[i] = int32(gitLogs[i].Insertions)
+				deletions[i] = int32(gitLogs[i].Deletions)
+				filesChanged[i] = int32(gitLogs[i].FilesChanged)
+				repoUrls[i] = repoUrl
 			}
 
+			// Define expected SQL statement
+			// go-sqlmock CANNOT accept slices as arguments. Must convert to pq.Array first as is done in databse.BulkInsertCommits
 			mock.ExpectExec("^-- name: BulkInsertCommits :exec.*").WithArgs(
-				commitHash,
-				author,
-				authorEmail,
-				authorDate,
-				committerDate,
-				message,
-				insertions,
-				deletions,
-				filesChanged,
-				repoUrls,
-			)
+				pq.Array(commitHash),
+				pq.Array(author),
+				pq.Array(authorEmail),
+				pq.Array(authorDate),
+				pq.Array(committerDate),
+				pq.Array(message),
+				pq.Array(insertions),
+				pq.Array(deletions),
+				pq.Array(filesChanged),
+				pq.Array(repoUrls),
+			).WillReturnResult(sqlmock.NewResult(1, 1))
 
 			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs("synced", repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
 		},

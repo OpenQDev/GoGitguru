@@ -14,7 +14,7 @@ type GitLogParams struct {
 	db             *database.Queries
 }
 
-func StoreGitLogs(params GitLogParams) (int, error) {
+func StoreGitLogsForRepo(params GitLogParams) (int, error) {
 	startDate, err := ParseDate(params.fromCommitDate)
 	if err != nil {
 		return 0, err

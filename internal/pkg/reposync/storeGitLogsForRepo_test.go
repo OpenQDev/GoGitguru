@@ -41,7 +41,7 @@ func TestStoreGitLogs(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setupMock(mock, tt.gitLogs, tt.repoUrl)
 
-			commit, err := StoreGitLogs(GitLogParams{tempDir, "OpenQ-DRM-TestRepo", tt.repoUrl, "", queries})
+			commit, err := StoreGitLogsForRepo(GitLogParams{tempDir, "OpenQ-DRM-TestRepo", tt.repoUrl, "", queries})
 			if err != nil && tt.shouldError == false {
 				t.Errorf("there was an error storing this commit: %v - the error was: %s", commit, err)
 			}

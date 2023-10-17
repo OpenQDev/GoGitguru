@@ -9,6 +9,7 @@ import (
 )
 
 func TestPrepareCommitHistoryForBulkInsertion(t *testing.T) {
+	// ARRANGE - GLOBAL
 
 	repo := "OpenQ-DRM-TestRepo"
 	prefixPath := "mock"
