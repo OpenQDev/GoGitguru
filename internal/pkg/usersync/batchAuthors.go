@@ -7,10 +7,10 @@ type BatchAuthor struct {
 
 type BatchAuthors = []BatchAuthor
 
-func GenerateBatchAuthors(repoUrlToAuthorsMap map[string][]AuthorCommitTuple, batchSize int) BatchAuthors {
+func GenerateBatchAuthors(repoUrlToAuthorsMap RepoToAuthorCommitTuples, batchSize int) BatchAuthors {
 	var result BatchAuthors
 
-	for repoUrl, authors := range repoUrlToAuthorsMap {
+	for repoUrl, authors := range repoUrlToAuthorsMap.Repos {
 		for i := 0; i < len(authors); i += batchSize {
 			end := i + batchSize
 			if end > len(authors) {

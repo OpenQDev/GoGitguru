@@ -1,19 +1,30 @@
 package usersync
 
+type RepoToAuthorCommitTuples struct {
+	Repos map[string][]AuthorCommitTuple
+}
+
 type AuthorCommitTuple struct {
 	Author     string
 	CommitHash string
 }
 
 // Create a map with repoUrl as key and array of authors as value
-func GetRepoToAuthorsMap(newCommitAuthors []UserSync) map[string][]AuthorCommitTuple {
-	repoAuthorsMap := make(map[string][]AuthorCommitTuple)
+func GetRepoToAuthorsMap(repoAuthorCommits []UserSync) RepoToAuthorCommitTuples {
+	repoToAuthorCommitTuples := RepoToAuthorCommitTuples{}
 
-	for _, author := range newCommitAuthors {
-		if author.Repo.NotNull {
-			repoAuthorsMap[author.Repo.URL] = append(repoAuthorsMap[author.Repo.URL], AuthorCommitTuple{Author: author.Author.Email, CommitHash: author.CommitHash})
+	for _, repoAuthorCommit := range repoAuthorCommits {
+		if repoAuthorCommit.Repo.NotNull {
+			authorCommitTuple := AuthorCommitTuple{
+				Author:     repoAuthorCommit.Author.Email,
+				CommitHash: repoAuthorCommit.CommitHash,
+			}
+
+			repoToAuthorCommitTuples.Repos[repoAuthorCommit.Repo.URL] = append(
+				repoToAuthorCommitTuples.Repos[repoAuthorCommit.Repo.URL], authorCommitTuple,
+			)
 		}
 	}
 
-	return repoAuthorsMap
+	return repoToAuthorCommitTuples
 }

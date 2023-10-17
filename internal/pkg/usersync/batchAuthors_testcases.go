@@ -2,7 +2,7 @@ package usersync
 
 type GenerateBatchAuthorsTestCase struct {
 	name           string
-	input          map[string][]AuthorCommitTuple
+	input          RepoToAuthorCommitTuples
 	batchSize      int
 	expectedOutput BatchAuthors
 }
@@ -12,11 +12,13 @@ func singleAuthorSingleRepo() GenerateBatchAuthorsTestCase {
 
 	return GenerateBatchAuthorsTestCase{
 		name: SINGLE_AUTHOR_ONE_REPO,
-		input: map[string][]AuthorCommitTuple{
-			"https://github.com/test/repo": {
-				{"test@example.com", "commit1"},
-				{"test2@example.com", "commit2"},
-				{"test3@example.com", "commit3"},
+		input: RepoToAuthorCommitTuples{
+			Repos: map[string][]AuthorCommitTuple{
+				"https://github.com/test/repo": {
+					{"test@example.com", "commit1"},
+					{"test2@example.com", "commit2"},
+					{"test3@example.com", "commit3"},
+				},
 			},
 		},
 		batchSize: 2,
@@ -36,16 +38,18 @@ func singleAuthorTwoRepos() GenerateBatchAuthorsTestCase {
 	const SINGLE_AUTHOR_TWO_REPOS = "SINGLE_AUTHOR_TWO_REPOS"
 	return GenerateBatchAuthorsTestCase{
 		name: SINGLE_AUTHOR_TWO_REPOS,
-		input: map[string][]AuthorCommitTuple{
-			"https://github.com/test/repo": {
-				{"test@example.com", "commit1"},
-				{"test2@example.com", "commit2"},
-				{"test3@example.com", "commit3"},
-			},
-			"https://github.com/test/repo2": {
-				{"author123@example.com", "commit4"},
-				{"author12sdfdsf@example.com", "commit5"},
-				{"authosdfsdf@example.com", "commit6"},
+		input: RepoToAuthorCommitTuples{
+			Repos: map[string][]AuthorCommitTuple{
+				"https://github.com/test/repo": {
+					{"test@example.com", "commit1"},
+					{"test2@example.com", "commit2"},
+					{"test3@example.com", "commit3"},
+				},
+				"https://github.com/test/repo2": {
+					{"author123@example.com", "commit4"},
+					{"author12sdfdsf@example.com", "commit5"},
+					{"authosdfsdf@example.com", "commit6"},
+				},
 			},
 		},
 		batchSize: 2,

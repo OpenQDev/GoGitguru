@@ -3,7 +3,7 @@ package usersync
 type GetRepoToAuthorsMapTestCase struct {
 	title          string
 	input          []UserSync
-	expectedOutput map[string][]AuthorCommitTuple
+	expectedOutput RepoToAuthorCommitTuples
 }
 
 func reposToAuthorMap() GetRepoToAuthorsMapTestCase {
@@ -46,9 +46,11 @@ func reposToAuthorMap() GetRepoToAuthorsMapTestCase {
 				},
 			},
 		},
-		expectedOutput: map[string][]AuthorCommitTuple{
-			"https://github.com/example/repo":  {{Author: "test@example.com", CommitHash: "abc123"}},
-			"https://github.com/example/repo2": {{Author: "otherperson@example.com", CommitHash: "otherCommitHash"}},
+		expectedOutput: RepoToAuthorCommitTuples{
+			Repos: map[string][]AuthorCommitTuple{
+				"https://github.com/example/repo":  {{Author: "test@example.com", CommitHash: "abc123"}},
+				"https://github.com/example/repo2": {{Author: "otherperson@example.com", CommitHash: "otherCommitHash"}},
+			},
 		},
 	}
 }

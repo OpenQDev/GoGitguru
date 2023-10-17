@@ -29,22 +29,20 @@ func StartSyncingUser(
 	ghAccessToken string,
 	batchSize int,
 ) {
-	newCommitAuthorsRaw, err := db.GetLatestUncheckedCommitPerAuthor(context.Background())
+	newCommitAuthorsRaw, err := getNewCommitAuthors(db)
 	if err != nil {
-		logger.LogError("error in GetLatestUncheckedCommitPerAuthor: %s", err)
+		logger.LogFatalRedAndExit("error getting new commit authors to process: %s", err)
+		return
 	}
-
-	logger.LogGreenDebug("new commit authors to check: %s", newCommitAuthorsRaw)
-
-	if len(newCommitAuthorsRaw) == 0 {
-		logger.LogBlue("no new authors to process.")
+	if newCommitAuthorsRaw == nil {
+		logger.LogBlue("no new authors to sync")
 		return
 	}
 
 	logger.LogBlue("identifying %d new authors", len(newCommitAuthorsRaw))
 
 	// Convert to database object to local type
-	newCommitAuthors := ConvertToUserSync(newCommitAuthorsRaw)
+	newCommitAuthors := ConvertDatabaseObjectToUserSync(newCommitAuthorsRaw)
 
 	// Create map of repoUrl -> []authors
 	repoUrlToAuthorsMap := GetRepoToAuthorsMap(newCommitAuthors)
@@ -108,7 +106,7 @@ func StartSyncingUser(
 				logger.LogError("error parsing time: %s", err)
 			}
 
-			authorParams := ConvertAuthorToInsertUserParams(author, createdAt, updatedAt)
+			authorParams := convertAuthorToInsertUserParams(author, createdAt, updatedAt)
 
 			_, err = db.InsertUser(context.Background(), authorParams)
 
@@ -120,7 +118,21 @@ func StartSyncingUser(
 	}
 }
 
-func ConvertAuthorToInsertUserParams(author githubGraphQL.Author, createdAt time.Time, updatedAt time.Time) database.InsertUserParams {
+func getNewCommitAuthors(db *database.Queries) ([]database.GetLatestUncheckedCommitPerAuthorRow, error) {
+	newCommitAuthorsRaw, err := db.GetLatestUncheckedCommitPerAuthor(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	noNewCommitAuthors := len(newCommitAuthorsRaw) == 0
+	if noNewCommitAuthors {
+		return nil, nil
+	}
+
+	return newCommitAuthorsRaw, nil
+}
+
+func convertAuthorToInsertUserParams(author githubGraphQL.Author, createdAt time.Time, updatedAt time.Time) database.InsertUserParams {
 	authorParams := database.InsertUserParams{
 		GithubRestID:    int32(author.User.GithubRestID),
 		GithubGraphqlID: author.User.GithubGraphqlID,
