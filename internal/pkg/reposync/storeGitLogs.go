@@ -2,7 +2,6 @@ package reposync
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"main/internal/database"
@@ -14,72 +13,54 @@ import (
 	"time"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
-type GitLog struct {
-	CommitHash    string
-	AuthorName    string
-	AuthorEmail   string
-	AuthorDate    int64
-	CommitDate    int64
-	CommitMessage string
-	FilesChanged  int64
-	Insertions    int64
-	Deletions     int64
+const (
+	DateFormat       = "2006-01-02"
+	DefaultStartDate = "2020-01-01"
+)
+
+type GitLogParams struct {
+	prefixPath     string
+	repo           string
+	repoUrl        string
+	fromCommitDate string
+	db             *database.Queries
 }
 
-func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate string, db *database.Queries) (int, error) {
-	fullRepoPath := filepath.Join(prefixPath, repo)
-
-	defaultCommitStartDate := "2020-01-01"
-	if fromCommitDate == "" {
-		fromCommitDate = defaultCommitStartDate
-	}
-
-	// Parse the fromCommitDate string into a time.Time value
-	startDate, err := time.Parse("2006-01-02", fromCommitDate)
+func StoreGitLogs(params GitLogParams) (int, error) {
+	startDate, err := parseDate(params.fromCommitDate)
 	if err != nil {
 		return 0, err
 	}
 
-	r, err := git.PlainOpen(fullRepoPath)
-	if err != nil {
-		return 0, fmt.Errorf("not a git repository")
-	}
-
-	// Get the HEAD reference
-	ref, err := r.Head()
+	r, err := openGitRepo(params.prefixPath, params.repo)
 	if err != nil {
 		return 0, err
 	}
 
-	// Get the commit history from the start date
-	// Unfortunately go-git does NOT have a way to order from oldest to newest commit
-	log, err := r.Log(&git.LogOptions{From: ref.Hash(), Since: &startDate})
+	log, err := getCommitHistory(r, startDate)
 	if err != nil {
 		return 0, err
 	}
 
-	// Execute the command to get the number of commits
-	cmd := exec.Command("git", "-C", fullRepoPath, "rev-list", "--count", "HEAD")
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-	err = cmd.Run()
-
-	if err != nil {
-		fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
-		return 0, err
-	}
-
-	numberOfCommits, err := strconv.Atoi(strings.TrimSpace(out.String()))
+	numberOfCommits, err := getNumberOfCommits(params.prefixPath, params.repo)
 	if err != nil {
 		return 0, err
 	}
 
-	fmt.Printf("%s has %d commits\n", repoUrl, numberOfCommits)
+	fmt.Printf("%s has %d commits\n", params.repoUrl, numberOfCommits)
 
+	commitCount, err := processCommitHistory(numberOfCommits, log, params)
+	if err != nil {
+		return 0, err
+	}
+
+	return commitCount, nil
+}
+
+func processCommitHistory(numberOfCommits int, log object.CommitIter, params GitLogParams) (int, error) {
 	var (
 		commitHash    = make([]string, numberOfCommits)
 		author        = make([]string, numberOfCommits)
@@ -93,7 +74,6 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 		repoUrls      = make([]string, numberOfCommits)
 	)
 
-	// Iterate through the commit history
 	commitCount := 0
 	for {
 		commit, err := log.Next()
@@ -125,16 +105,16 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 		insertions[commitCount] = int32(totalInsertions)
 		deletions[commitCount] = int32(totalDeletions)
 		filesChanged[commitCount] = int32(totalFilesChanged)
-		repoUrls[commitCount] = repoUrl
+		repoUrls[commitCount] = params.repoUrl
 
 		if commitCount%100 == 0 {
-			logger.LogGreenDebug("process %d commits for %s", commitCount, repoUrl)
+			logger.LogGreenDebug("process %d commits for %s", commitCount, params.repoUrl)
 		}
 		commitCount++
 	}
 
-	err = BatchInsertCommits(
-		db,
+	err := BatchInsertCommits(
+		params.db,
 		commitHash,
 		author,
 		authorEmail,
@@ -147,40 +127,44 @@ func StoreGitLogs(prefixPath string, repo string, repoUrl string, fromCommitDate
 		repoUrls,
 	)
 	if err != nil {
-		return 0, fmt.Errorf("error storing commits for %s: %s", repoUrl, err)
+		return 0, fmt.Errorf("error storing commits for %s: %s", params.repoUrl, err)
 	}
-
 	return commitCount, nil
 }
 
-func BatchInsertCommits(
-	db *database.Queries,
-	commitHash []string,
-	author []string,
-	authorEmail []string,
-	authorDate []int64,
-	committerDate []int64,
-	message []string,
-	insertions []int32,
-	deletions []int32,
-	filesChanged []int32,
-	repoUrls []string,
-) error {
-	params := database.BulkInsertCommitsParams{
-		Column1:  commitHash,
-		Column2:  author,
-		Column3:  authorEmail,
-		Column4:  authorDate,
-		Column5:  committerDate,
-		Column6:  message,
-		Column7:  insertions,
-		Column8:  deletions,
-		Column9:  filesChanged,
-		Column10: repoUrls,
+func getNumberOfCommits(prefixPath string, repo string) (int, error) {
+	fullRepoPath := filepath.Join(prefixPath, repo)
+	cmd := exec.Command("git", "-C", fullRepoPath, "rev-list", "--count", "HEAD")
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
+	if err != nil {
+		fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
+		return 0, err
 	}
 
-	fmt.Printf("Parameters:\n%+v\n", params)
-	fmt.Printf("Parameters:\n%+v\n", params)
+	return strconv.Atoi(strings.TrimSpace(out.String()))
+}
 
-	return db.BulkInsertCommits(context.Background(), params)
+func getCommitHistory(r *git.Repository, startDate time.Time) (object.CommitIter, error) {
+	ref, err := r.Head()
+	if err != nil {
+		return nil, err
+	}
+	return r.Log(&git.LogOptions{From: ref.Hash(), Since: &startDate})
+}
+
+func openGitRepo(prefixPath string, repo string) (*git.Repository, error) {
+	fullRepoPath := filepath.Join(prefixPath, repo)
+	return git.PlainOpen(fullRepoPath)
+}
+
+func parseDate(dateStr string) (time.Time, error) {
+	if dateStr == "" {
+		dateStr = DefaultStartDate
+	}
+	return time.Parse(DateFormat, dateStr)
 }
