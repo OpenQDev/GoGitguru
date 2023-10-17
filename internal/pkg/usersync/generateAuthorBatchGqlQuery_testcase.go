@@ -1,6 +1,8 @@
 package usersync
 
-import "main/internal/pkg/gitutil"
+import (
+	"main/internal/pkg/githubGraphQL"
+)
 
 type GenerateAuthorBatchGqlQueryTestCase struct {
 	title          string
@@ -29,7 +31,7 @@ func singleAuthor() GenerateAuthorBatchGqlQueryTestCase {
 		}
 	}
 }
-` + gitutil.AUTHOR_GRAPHQL_FRAGMENT,
+` + githubGraphQL.AUTHOR_GRAPHQL_FRAGMENT,
 	}
 }
 

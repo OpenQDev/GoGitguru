@@ -1,4 +1,4 @@
-package gitutil
+package reposync
 
 import "github.com/DATA-DOG/go-sqlmock"
 

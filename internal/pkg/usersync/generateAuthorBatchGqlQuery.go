@@ -2,7 +2,7 @@ package usersync
 
 import (
 	"fmt"
-	"main/internal/pkg/gitutil"
+	"main/internal/pkg/githubGraphQL"
 )
 
 func GenerateAuthorBatchGqlQuery(organization string, repo string, authorList []AuthorCommitTuple) string {
@@ -28,7 +28,7 @@ func GenerateAuthorBatchGqlQuery(organization string, repo string, authorList []
 	}
 	`
 	// author_graphql_fragment is not defined in the original code, assuming it's a string
-	gqlQuery += gitutil.AUTHOR_GRAPHQL_FRAGMENT
+	gqlQuery += githubGraphQL.AUTHOR_GRAPHQL_FRAGMENT
 
 	return gqlQuery
 }

@@ -1,4 +1,4 @@
-package gitutil
+package reposync
 
 import (
 	"bytes"
@@ -179,6 +179,7 @@ func BatchInsertCommits(
 		Column10: repoUrls,
 	}
 
+	fmt.Printf("Parameters:\n%+v\n", params)
 	fmt.Printf("Parameters:\n%+v\n", params)
 
 	return db.BulkInsertCommits(context.Background(), params)

@@ -1,4 +1,4 @@
-package gitutil
+package reposync
 
 import (
 	"main/internal/pkg/logger"

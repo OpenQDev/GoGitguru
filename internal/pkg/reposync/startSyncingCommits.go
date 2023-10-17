@@ -5,7 +5,6 @@ import (
 	"main/internal/database"
 	"main/internal/pkg/gitutil"
 	"main/internal/pkg/logger"
-	"sort"
 	"strings"
 	"time"
 )
@@ -39,21 +38,9 @@ func StartSyncingCommits(
 		// no need to even check for "isGitRepo"
 		gitutil.CloneRepo(prefixPath, organization, repo)
 
-		err := gitutil.ProcessRepo(prefixPath, repo, repoUrl, db)
+		err := ProcessRepo(prefixPath, repo, repoUrl, db)
 		if err != nil {
 			logger.LogFatalRedAndExit("error while processing repository %s: %s", repoUrl, err)
 		}
 	}
-}
-
-func sortRepoUrls(repoUrlObjects []database.RepoUrl) []string {
-	repoUrls := make([]string, len(repoUrlObjects))
-
-	for i, repo := range repoUrlObjects {
-		// since sort.Strings uses case-sensitive lexicographic ordering, we must lowercase
-		repoUrls[i] = strings.ToLower(repo.Url)
-	}
-
-	sort.Strings(repoUrls)
-	return repoUrls
 }

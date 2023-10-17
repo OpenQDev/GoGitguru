@@ -1,4 +1,4 @@
-package gitutil
+package githubGraphQL
 
 type GithubGetCommitAuthorsTest struct {
 	name    string

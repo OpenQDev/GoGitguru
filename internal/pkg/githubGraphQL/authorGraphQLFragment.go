@@ -1,4 +1,4 @@
-package gitutil
+package githubGraphQL
 
 var AUTHOR_GRAPHQL_FRAGMENT string = `fragment commitDetails on Commit {
 	author {

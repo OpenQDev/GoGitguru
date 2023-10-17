@@ -1,4 +1,4 @@
-package gitutil
+package reposync
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 func ProcessRepo(prefixPath string, repo string, repoUrl string, db *database.Queries) error {
 	logger.LogGreenDebug("beginning to process %s", repoUrl)
 
-	// Set repo status to storing_commits
 	db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
 		Status: database.RepoStatusStoringCommits,
 		Url:    repoUrl,
@@ -17,7 +16,6 @@ func ProcessRepo(prefixPath string, repo string, repoUrl string, db *database.Qu
 
 	commitCount, err := StoreGitLogs(prefixPath, repo, repoUrl, "", db)
 	if err != nil {
-		// Set repo status to failed
 		db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
 			Status: database.RepoStatusFailed,
 			Url:    repoUrl,
@@ -25,7 +23,6 @@ func ProcessRepo(prefixPath string, repo string, repoUrl string, db *database.Qu
 		return err
 	}
 
-	// Set repo status to synced
 	db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
 		Status: database.RepoStatusSynced,
 		Url:    repoUrl,
