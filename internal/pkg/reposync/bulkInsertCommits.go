@@ -5,7 +5,7 @@ import (
 	"main/internal/database"
 )
 
-func BatchInsertCommits(
+func BulkInsertCommits(
 	db *database.Queries,
 	commitHash []string,
 	author []string,

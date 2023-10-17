@@ -1,6 +1,7 @@
 package reposync
 
 import (
+	"main/internal/pkg/gitutil"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/setup"
 	"os"
@@ -31,7 +32,7 @@ func BenchmarkProcessRepo(b *testing.B) {
 	b.ResetTimer()
 
 	// Clone repo to tmp dir. Will be deleted at end of test
-	CloneRepo(prefixPath, organization, repo)
+	gitutil.CloneRepo(prefixPath, organization, repo)
 
 	for i := 0; i < b.N; i++ {
 		err := ProcessRepo(prefixPath, repo, repoUrl, db)

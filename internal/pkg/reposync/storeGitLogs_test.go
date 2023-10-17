@@ -2,6 +2,7 @@ package reposync
 
 import (
 	"main/internal/database"
+	"main/internal/pkg/gitutil"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/testhelpers"
 	"os"
@@ -20,7 +21,7 @@ func TestStoreGitLogs(t *testing.T) {
 	}
 	defer os.RemoveAll(tempDir)
 
-	CloneRepo(tempDir, "OpenQDev", "OpenQ-DRM-TestRepo")
+	gitutil.CloneRepo(tempDir, "OpenQDev", "OpenQ-DRM-TestRepo")
 
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -40,7 +41,7 @@ func TestStoreGitLogs(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setupMock(mock, tt.gitLogs, tt.repoUrl)
 
-			commit, err := StoreGitLogs(tempDir, "OpenQ-DRM-TestRepo", tt.repoUrl, "", queries)
+			commit, err := StoreGitLogs(GitLogParams{tempDir, "OpenQ-DRM-TestRepo", tt.repoUrl, "", queries})
 			if err != nil && tt.shouldError == false {
 				t.Errorf("there was an error storing this commit: %v - the error was: %s", commit, err)
 			}

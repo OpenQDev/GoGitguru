@@ -2,6 +2,7 @@ package reposync
 
 import (
 	"main/internal/database"
+	"main/internal/pkg/gitutil"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/testhelpers"
 	"os"
@@ -38,7 +39,7 @@ func TestProcessRepo(t *testing.T) {
 
 		t.Run(tt.name, func(t *testing.T) {
 			// ARRANGE - LOCAL
-			CloneRepo(prefixPath, tt.organization, tt.repo)
+			gitutil.CloneRepo(prefixPath, tt.organization, tt.repo)
 
 			tt.setupMock(mock, tt.gitLogs, tt.repoUrl)
 
