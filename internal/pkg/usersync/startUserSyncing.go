@@ -49,6 +49,9 @@ func StartSyncingUser(
 		logger.LogGreenDebug("%s", repoToAuthorBatch.RepoURL)
 
 		githubGraphQLCommitAuthorsMap, err := identifyRepoAuthorsBatch(repoToAuthorBatch.RepoURL, repoToAuthorBatch.AuthorCommitTuples, ghAccessToken, apiCfg)
+		if err != nil {
+			logger.LogError("error occured while identifying authors: %s", err)
+		}
 
 		logger.LogGreenDebug("successfully fetched info for batch %s", repoToAuthorBatch.RepoURL)
 
@@ -61,10 +64,6 @@ func StartSyncingUser(
 
 		for _, commitAuthor := range githubGraphQLCommitAuthorsMap {
 			githubGraphQLCommitAuthors = append(githubGraphQLCommitAuthors, commitAuthor)
-		}
-
-		if err != nil {
-			logger.LogError("error occured while identifying authors: %s", err)
 		}
 
 		logger.LogGreenDebug("got the following info: %v", githubGraphQLCommitAuthorsMap)
