@@ -9,7 +9,9 @@ import (
 )
 
 func TestGithubGetCommitAuthors(t *testing.T) {
-	_, _, _, _, _, _, _, _, ghAccessToken, targetLiveGithub, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
+	env := setup.ExtractAndVerifyEnvironment("../../../.env")
+	ghAccessToken := env.GhAccessToken
+	targetLiveGithub := env.TargetLiveGithub
 
 	var serverUrl string
 	if targetLiveGithub {

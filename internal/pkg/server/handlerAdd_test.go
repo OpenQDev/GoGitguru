@@ -18,7 +18,8 @@ import (
 
 func TestAddHandler(t *testing.T) {
 	// ARRANGE - GLOBAL
-	_, _, _, debugMode, _, _, _, _, _, _, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
+	env := setup.ExtractAndVerifyEnvironment("../../../.env")
+	debugMode := env.Debug
 	logger.SetDebugMode(debugMode)
 
 	mock, queries := mocks.GetMockDatabase()

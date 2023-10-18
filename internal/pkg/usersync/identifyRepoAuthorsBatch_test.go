@@ -16,7 +16,10 @@ import (
 
 func TestIdentifyRepoAuthorsBatch(t *testing.T) {
 	// ARRANGE - GLOBAL
-	_, _, _, debugMode, _, _, _, _, _, targetLiveGithub, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
+	env := setup.ExtractAndVerifyEnvironment("../../../.env")
+	debugMode := env.Debug
+	targetLiveGithub := env.TargetLiveGithub
+
 	logger.SetDebugMode(debugMode)
 
 	// Open the JSON file

@@ -18,7 +18,11 @@ import (
 
 func TestHandlerRepoCommits(t *testing.T) {
 	// ARRANGE - GLOBAL
-	_, _, _, debugMode, _, _, _, _, ghAccessToken, targetLiveGithub, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
+	env := setup.ExtractAndVerifyEnvironment("../../../.env")
+	debugMode := env.Debug
+	ghAccessToken := env.GhAccessToken
+	targetLiveGithub := env.TargetLiveGithub
+
 	logger.SetDebugMode(debugMode)
 
 	mock, queries := mocks.GetMockDatabase()
