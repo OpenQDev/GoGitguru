@@ -8,72 +8,61 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func ExtractAndVerifyEnvironment(
-	pathToDotenv string,
-) (
-	portString string,
-	dbUrl string,
-	originUrl string,
-	debug bool,
-	sync bool,
-	syncIntervalMinutesInt int,
-	syncUsers bool,
-	syncUsersIntervalMinutesInt int,
-	ghAccessToken string,
-	targetLiveGithub bool,
-	startServer bool,
-) {
+type EnvConfig struct {
+	PortString                  string
+	DbUrl                       string
+	OriginUrl                   string
+	Debug                       bool
+	Sync                        bool
+	SyncIntervalMinutesInt      int
+	SyncUsers                   bool
+	SyncUsersIntervalMinutesInt int
+	GhAccessToken               string
+	TargetLiveGithub            bool
+	StartServer                 bool
+}
+
+func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
 	godotenv.Load(pathToDotenv)
-	portString = os.Getenv("PORT")
-	dbUrl = os.Getenv("DB_URL")
-	originUrl = os.Getenv("ORIGIN_URL")
-	debugMode := os.Getenv("DEBUG_MODE")
-	syncMode := os.Getenv("SYNC_COMMITS_MODE")
-	syncIntervalMinutes := os.Getenv("SYNC_COMMITS_INTERVAL_MINUTES")
-	syncUsersMode := os.Getenv("SYNC_USERS_MODE")
-	syncUsersIntervalMinutes := os.Getenv("SYNC_USERS_INTERVAL_MINUTES")
-	ghAccessToken = os.Getenv("GH_ACCESS_TOKEN")
-	targetLiveGithubRaw := os.Getenv("TARGET_LIVE_GITHUB")
-	startServerRaw := os.Getenv("START_SERVER")
 
-	if portString == "" || dbUrl == "" || originUrl == "" || debugMode == "" {
-		logger.LogFatalRedAndExit("PORT | DB_URL | ORIGIN_URL | DEBUG_MODE is not found in the environment")
+	return EnvConfig{
+		PortString:                  getEnvVar("PORT", "string").(string),
+		DbUrl:                       getEnvVar("DB_URL", "string").(string),
+		OriginUrl:                   getEnvVar("ORIGIN_URL", "string").(string),
+		Debug:                       getEnvVar("DEBUG_MODE", "bool").(bool),
+		Sync:                        getEnvVar("SYNC_COMMITS_MODE", "bool").(bool),
+		SyncIntervalMinutesInt:      getEnvVar("SYNC_COMMITS_INTERVAL_MINUTES", "int").(int),
+		SyncUsers:                   getEnvVar("SYNC_USERS_MODE", "bool").(bool),
+		SyncUsersIntervalMinutesInt: getEnvVar("SYNC_USERS_INTERVAL_MINUTES", "int").(int),
+		GhAccessToken:               getEnvVar("GH_ACCESS_TOKEN", "string").(string),
+		TargetLiveGithub:            getEnvVar("TARGET_LIVE_GITHUB", "bool").(bool),
+		StartServer:                 getEnvVar("START_SERVER", "bool").(bool),
+	}
+}
+
+func getEnvVar(name string, expectedType string) interface{} {
+	raw := os.Getenv(name)
+	if raw == "" {
+		logger.LogFatalRedAndExit(name + " is not found in the environment")
 	}
 
-	debug, err := strconv.ParseBool(debugMode)
-	if err != nil {
-		logger.LogFatalRedAndExit("DEBUG_MODE must be a boolean")
+	switch expectedType {
+	case "string":
+		return raw
+	case "bool":
+		val, err := strconv.ParseBool(raw)
+		if err != nil {
+			logger.LogFatalRedAndExit(name + " must be a boolean")
+		}
+		return val
+	case "int":
+		val, err := strconv.Atoi(raw)
+		if err != nil {
+			logger.LogFatalRedAndExit(name + " must be an integer")
+		}
+		return val
+	default:
+		logger.LogFatalRedAndExit("Unexpected type for " + name)
+		return nil
 	}
-
-	sync, err = strconv.ParseBool(syncMode)
-	if err != nil {
-		logger.LogFatalRedAndExit("SYNC_COMMITS_MODE must be a boolean")
-	}
-
-	syncIntervalMinutesInt, err = strconv.Atoi(syncIntervalMinutes)
-	if err != nil {
-		logger.LogFatalRedAndExit("SYNC_INTERVAL_MINUTES must be an integer")
-	}
-
-	syncUsers, err = strconv.ParseBool(syncUsersMode)
-	if err != nil {
-		logger.LogFatalRedAndExit("SYNC_USERS_MODE must be a boolean")
-	}
-
-	startServer, err = strconv.ParseBool(startServerRaw)
-	if err != nil {
-		logger.LogFatalRedAndExit("START_SERVER must be a boolean")
-	}
-
-	targetLiveGithub, err = strconv.ParseBool(targetLiveGithubRaw)
-	if err != nil {
-		logger.LogFatalRedAndExit("TARGET_LIVE_GITHUB must be a boolean")
-	}
-
-	syncUsersIntervalMinutesInt, err = strconv.Atoi(syncUsersIntervalMinutes)
-	if err != nil {
-		logger.LogFatalRedAndExit("SYNC_INTERVAL_MINUTES must be an integer")
-	}
-
-	return portString, dbUrl, originUrl, debug, sync, syncIntervalMinutesInt, syncUsers, syncUsersIntervalMinutesInt, ghAccessToken, targetLiveGithub, startServer
 }

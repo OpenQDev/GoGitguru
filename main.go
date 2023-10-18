@@ -11,31 +11,21 @@ import (
 
 func main() {
 
-	portString,
-		dbUrl,
-		originUrl,
-		debugMode,
-		repoSyncMode,
-		syncIntervalMinutes,
-		syncUsersMode,
-		syncUsersIntervalMinutes,
-		ghAccessToken,
-		_,
-		startServer := setup.ExtractAndVerifyEnvironment(".env")
+	envConfig := setup.ExtractAndVerifyEnvironment(".env")
 
-	database, apiCfg := server.PrepareServerSingleton(dbUrl)
-	logger.SetDebugMode(debugMode)
+	database, apiCfg := server.PrepareServerSingleton(envConfig.DbUrl)
+	logger.SetDebugMode(envConfig.Debug)
 
-	if repoSyncMode {
-		go reposync.StartSyncingCommits(database, "repos", 10, time.Duration(syncIntervalMinutes)*time.Minute)
+	if envConfig.Sync {
+		go reposync.StartSyncingCommits(database, "repos", 10, time.Duration(envConfig.SyncIntervalMinutesInt)*time.Minute)
 	}
 
-	if syncUsersMode {
+	if envConfig.SyncUsers {
 		time.Sleep(3 * time.Second)
-		go usersync.StartSyncingUser(database, "repos", 10, time.Duration(syncUsersIntervalMinutes)*time.Minute, ghAccessToken, 2, apiCfg)
+		go usersync.StartSyncingUser(database, "repos", 10, time.Duration(envConfig.SyncUsersIntervalMinutesInt)*time.Minute, envConfig.GhAccessToken, 2, apiCfg)
 	}
 
-	if startServer {
-		server.StartServer(apiCfg, portString, originUrl)
+	if envConfig.StartServer {
+		server.StartServer(apiCfg, envConfig.PortString, envConfig.OriginUrl)
 	}
 }
