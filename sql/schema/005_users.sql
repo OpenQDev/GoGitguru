@@ -26,3 +26,22 @@ CREATE TABLE github_users (
 -- +goose Down
 
 DROP TABLE github_users;
+
+
+				author.User.GithubRestID,
+				author.User.GithubGraphqlID,
+				author.User.Login,
+				author.User.Name,
+				author.User.Email,
+				author.User.AvatarURL,
+				author.User.Company,
+				author.User.Location,
+
+								author.User.GithubRestID,
+				author.User.GithubGraphqlID,
+				author.User.Login,
+				author.User.Name,
+				author.User.Email,
+				author.User.AvatarURL,
+				author.User.Company,
+				author.User.Location,
