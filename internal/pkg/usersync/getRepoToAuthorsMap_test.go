@@ -12,7 +12,7 @@ func TestGetRepoToAuthorsMap(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.title, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				"REPO_TO_AUTHOR_MAP",
+				testhelpers.RUN_ALL_TESTS,
 			), tt.title)
 
 			result := getRepoToAuthorsMap(tt.input)
