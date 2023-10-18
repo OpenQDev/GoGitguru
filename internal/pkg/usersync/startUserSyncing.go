@@ -1,7 +1,6 @@
 package usersync
 
 import (
-	"context"
 	"main/internal/database"
 	"main/internal/pkg/githubGraphQL"
 	"main/internal/pkg/logger"
@@ -49,62 +48,36 @@ func StartSyncingUser(
 	for _, repoToAuthorBatch := range repoToAuthorBatches {
 		logger.LogGreenDebug("%s", repoToAuthorBatch.RepoURL)
 
-		commits, err := identifyRepoAuthorsBatch(repoToAuthorBatch.RepoURL, repoToAuthorBatch.AuthorCommitTuples, ghAccessToken, apiCfg)
+		githubGraphQLCommitAuthorsMap, err := identifyRepoAuthorsBatch(repoToAuthorBatch.RepoURL, repoToAuthorBatch.AuthorCommitTuples, ghAccessToken, apiCfg)
 
-		if commits == nil {
+		logger.LogGreenDebug("successfully fetched info for batch %s", repoToAuthorBatch.RepoURL)
+
+		if githubGraphQLCommitAuthorsMap == nil {
 			logger.LogError("commits is nil")
 			continue
 		}
 
-		commitValues := make([]githubGraphQL.GithubGraphQLCommit, 0, len(commits))
+		githubGraphQLCommitAuthors := make([]githubGraphQL.GithubGraphQLCommit, 0, len(githubGraphQLCommitAuthorsMap))
 
-		for _, value := range commits {
-			commitValues = append(commitValues, value)
+		for _, commitAuthor := range githubGraphQLCommitAuthorsMap {
+			githubGraphQLCommitAuthors = append(githubGraphQLCommitAuthors, commitAuthor)
 		}
 
 		if err != nil {
 			logger.LogError("error occured while identifying authors: %s", err)
 		}
 
-		logger.LogGreenDebug("successfully fetched info for batch %s", repoToAuthorBatch.RepoURL)
+		logger.LogGreenDebug("got the following info: %v", githubGraphQLCommitAuthorsMap)
 
-		logger.LogGreenDebug("got the following info: %v", commits)
+		for _, commitAuthor := range githubGraphQLCommitAuthors {
+			author := commitAuthor.Author
 
-		for _, commit := range commitValues {
-			restId := commit.Author.User.GithubRestID
-			author := commit.Author
-
-			var params database.InsertRestIdToEmailParams
-			if restId == 0 {
-				params = database.InsertRestIdToEmailParams{
-					Email: author.Email,
-				}
-			} else {
-				params = database.InsertRestIdToEmailParams{
-					RestID: int32(restId),
-					Email:  author.Email,
-				}
-			}
-
-			_, err = db.InsertRestIdToEmail(context.Background(), params)
+			err := insertIntoRestIdToUser(author, db)
 			if err != nil {
 				logger.LogError("error occured while inserting RestID to Email: %s", err)
 			}
 
-			createdAt, err := time.Parse(time.RFC3339, author.User.CreatedAt)
-			if err != nil && !createdAt.IsZero() {
-				logger.LogError("error parsing time: %s", err)
-			}
-
-			updatedAt, err := time.Parse(time.RFC3339, author.User.UpdatedAt)
-			if err != nil && !createdAt.IsZero() {
-				logger.LogError("error parsing time: %s", err)
-			}
-
-			authorParams := convertAuthorToInsertUserParams(author, createdAt, updatedAt)
-
-			_, err = db.InsertUser(context.Background(), authorParams)
-
+			err = insertGithubUser(author, db)
 			if err != nil {
 				logger.LogError("error occured while inserting author: %s", err)
 			}
