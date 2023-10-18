@@ -13,7 +13,7 @@ type InsertIntoRestIdToUserTestCase struct {
 	setupMock   func(mock sqlmock.Sqlmock, repo githubGraphQL.GithubGraphQLAuthor)
 }
 
-func fooo() InsertGithubUserTestCase {
+func fooo() InsertIntoRestIdToUserTestCase {
 	const SHOULD_STORE_USER_TO_REPO_ID = "SHOULD_STORE_USER_TO_REPO_ID"
 	const email = "abc123@gmail.com"
 	const restId = 123
@@ -25,7 +25,7 @@ func fooo() InsertGithubUserTestCase {
 		User:  user,
 	}
 
-	return InsertGithubUserTestCase{
+	return InsertIntoRestIdToUserTestCase{
 		name:        SHOULD_STORE_USER_TO_REPO_ID,
 		author:      author,
 		shouldError: false,
@@ -36,8 +36,8 @@ func fooo() InsertGithubUserTestCase {
 	}
 }
 
-func InsertIntoRestIdToUserTestCases() []InsertGithubUserTestCase {
-	return []InsertGithubUserTestCase{
-		insertGithubUserTestCase1(),
+func InsertIntoRestIdToUserTestCases() []InsertIntoRestIdToUserTestCase {
+	return []InsertIntoRestIdToUserTestCase{
+		fooo(),
 	}
 }
