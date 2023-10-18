@@ -5,16 +5,17 @@ import (
 	"main/internal/pkg/githubGraphQL"
 	"main/internal/pkg/gitutil"
 	"main/internal/pkg/logger"
+	"main/internal/pkg/server"
 )
 
-func identifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTuple, ghAccessToken string) (*map[string]githubGraphQL.Commit, error) {
+func identifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTuple, ghAccessToken string, apiCfg server.ApiConfig) (*map[string]githubGraphQL.Commit, error) {
 	logger.LogBlue("Identifying %d authors for repo %s", len(authorCommitList), repoUrl)
 
 	organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 
 	queryString := generateAuthorBatchGqlQuery(organization, repo, authorCommitList)
 
-	result, err := githubGraphQL.GithubGetCommitAuthors(queryString, ghAccessToken)
+	result, err := githubGraphQL.GithubGetCommitAuthors(queryString, ghAccessToken, apiCfg)
 
 	logger.LogGreenDebug("GithubGetCommitAuthors response: %v", result)
 

@@ -4,16 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"main/internal/pkg/server"
 	"net/http"
 )
 
-func GithubGetCommitAuthors(query string, ghAccessToken string) (CommitAuthorsResponse, error) {
+func GithubGetCommitAuthors(query string, ghAccessToken string, apiCfg server.ApiConfig) (CommitAuthorsResponse, error) {
 	headers := map[string]string{
 		"Authorization": fmt.Sprintf("token %s", ghAccessToken),
 		"Content-Type":  "application/json",
 	}
 
-	url := "https://api.github.com/graphql"
+	url := apiCfg.GithubGraphQLBaseUrl
 
 	req, err := createGraphQLRequest(url, query, headers)
 	if err != nil {

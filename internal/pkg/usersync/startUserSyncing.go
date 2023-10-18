@@ -5,6 +5,7 @@ import (
 	"main/internal/database"
 	"main/internal/pkg/githubGraphQL"
 	"main/internal/pkg/logger"
+	"main/internal/pkg/server"
 	"time"
 )
 
@@ -21,6 +22,7 @@ func StartSyncingUser(
 	timeBetweenSyncs time.Duration,
 	ghAccessToken string,
 	batchSize int,
+	apiCfg server.ApiConfig,
 ) {
 	newCommitAuthorsRaw, err := getNewCommitAuthors(db)
 	if err != nil {
@@ -47,7 +49,7 @@ func StartSyncingUser(
 	for _, repoToAuthorBatch := range repoToAuthorBatches {
 		logger.LogGreenDebug("%s", repoToAuthorBatch.RepoURL)
 
-		commits, err := identifyRepoAuthorsBatch(repoToAuthorBatch.RepoURL, repoToAuthorBatch.AuthorCommitTuples, ghAccessToken)
+		commits, err := identifyRepoAuthorsBatch(repoToAuthorBatch.RepoURL, repoToAuthorBatch.AuthorCommitTuples, ghAccessToken, apiCfg)
 
 		if commits == nil {
 			logger.LogError("commits is nil")

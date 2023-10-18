@@ -2,13 +2,25 @@ package githubGraphQL
 
 import (
 	"fmt"
+	"main/internal/pkg/server"
 	"main/internal/pkg/setup"
 	"main/internal/pkg/testhelpers"
 	"testing"
 )
 
 func TestGithubGetCommitAuthors(t *testing.T) {
-	_, _, _, _, _, _, _, _, ghAccessToken, _, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
+	_, _, _, _, _, _, _, _, ghAccessToken, targetLiveGithub, _ := setup.ExtractAndVerifyEnvironment("../../../.env")
+
+	var serverUrl string
+	if targetLiveGithub {
+		serverUrl = "https://api.github.com/graphql"
+	} else {
+		serverUrl = "https://api.github.com/graphql"
+	}
+
+	apiCfg := server.ApiConfig{
+		GithubGraphQLBaseUrl: serverUrl,
+	}
 
 	tests := GithubGetCommitAuthorsTestCases()
 
@@ -39,7 +51,7 @@ func TestGithubGetCommitAuthors(t *testing.T) {
 			}
 			`, tt.owner, tt.repo, commitDetails) + AUTHOR_GRAPHQL_FRAGMENT
 
-			resp, err := GithubGetCommitAuthors(query, ghAccessToken)
+			resp, err := GithubGetCommitAuthors(query, ghAccessToken, apiCfg)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GithubGetCommitAuthors() error = %v, wantErr %v", err, tt.wantErr)

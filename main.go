@@ -32,7 +32,7 @@ func main() {
 
 	if syncUsersMode {
 		time.Sleep(3 * time.Second)
-		go usersync.StartSyncingUser(database, "repos", 10, time.Duration(syncUsersIntervalMinutes)*time.Minute, ghAccessToken, 2)
+		go usersync.StartSyncingUser(database, "repos", 10, time.Duration(syncUsersIntervalMinutes)*time.Minute, ghAccessToken, 2, apiCfg)
 	}
 
 	if startServer {

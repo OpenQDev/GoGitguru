@@ -6,6 +6,10 @@ import (
 	"net/http"
 )
 
+type GraphQLPayload struct {
+	Query string `json:"query"`
+}
+
 func createGraphQLRequest(url string, query string, headers map[string]string) (*http.Request, error) {
 	payloadObj := GraphQLPayload{Query: query}
 	payloadBytes, err := json.Marshal(payloadObj)
