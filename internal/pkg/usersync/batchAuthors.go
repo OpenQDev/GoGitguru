@@ -1,8 +1,8 @@
 package usersync
 
 type BatchAuthor struct {
-	RepoURL string
-	Tuples  []AuthorCommitTuple
+	RepoURL            string
+	AuthorCommitTuples []AuthorCommitTuple
 }
 
 type BatchAuthors = []BatchAuthor
@@ -19,8 +19,8 @@ func generateBatchAuthors(repoUrlToAuthorsMap RepoToAuthorCommitTuples, batchSiz
 
 			batch := authors[i:end]
 			batchAuthor := BatchAuthor{
-				RepoURL: repoUrl,
-				Tuples:  batch,
+				RepoURL:            repoUrl,
+				AuthorCommitTuples: batch,
 			}
 			result = append(result, batchAuthor)
 		}

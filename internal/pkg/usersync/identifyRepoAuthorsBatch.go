@@ -7,12 +7,12 @@ import (
 	"main/internal/pkg/logger"
 )
 
-func IdentifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTuple, ghAccessToken string) (*map[string]githubGraphQL.Commit, error) {
+func identifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTuple, ghAccessToken string) (*map[string]githubGraphQL.Commit, error) {
 	logger.LogBlue("Identifying %d authors for repo %s", len(authorCommitList), repoUrl)
 
 	organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 
-	queryString := GenerateAuthorBatchGqlQuery(organization, repo, authorCommitList)
+	queryString := generateAuthorBatchGqlQuery(organization, repo, authorCommitList)
 
 	result, err := githubGraphQL.GithubGetCommitAuthors(queryString, ghAccessToken)
 

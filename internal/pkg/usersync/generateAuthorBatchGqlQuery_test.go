@@ -16,7 +16,7 @@ func TestGenerateAuthorBatchGqlQuery(t *testing.T) {
 		), tt.title)
 
 		t.Run(tt.title, func(t *testing.T) {
-			result := GenerateAuthorBatchGqlQuery(tt.organization, tt.repo, tt.authorList)
+			result := generateAuthorBatchGqlQuery(tt.organization, tt.repo, tt.authorList)
 
 			sanitizedResult := sanitizeString(result)
 			sanitizedExpectedOutput := sanitizeString(tt.expectedOutput)

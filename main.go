@@ -15,7 +15,7 @@ func main() {
 		dbUrl,
 		originUrl,
 		debugMode,
-		syncMode,
+		repoSyncMode,
 		syncIntervalMinutes,
 		syncUsersMode,
 		syncUsersIntervalMinutes,
@@ -26,12 +26,13 @@ func main() {
 	database, apiCfg := server.PrepareServerSingleton(dbUrl)
 	logger.SetDebugMode(debugMode)
 
-	if syncMode {
-		reposync.StartSyncingCommits(database, "repos", 10, time.Duration(syncIntervalMinutes)*time.Minute)
+	if repoSyncMode {
+		go reposync.StartSyncingCommits(database, "repos", 10, time.Duration(syncIntervalMinutes)*time.Minute)
 	}
 
 	if syncUsersMode {
-		usersync.StartSyncingUser(database, "repos", 10, time.Duration(syncUsersIntervalMinutes)*time.Minute, ghAccessToken, 2)
+		time.Sleep(3 * time.Second)
+		go usersync.StartSyncingUser(database, "repos", 10, time.Duration(syncUsersIntervalMinutes)*time.Minute, ghAccessToken, 2)
 	}
 
 	if startServer {

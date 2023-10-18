@@ -5,7 +5,7 @@ import (
 	"main/internal/pkg/githubGraphQL"
 )
 
-func GenerateAuthorBatchGqlQuery(organization string, repo string, authorList []AuthorCommitTuple) string {
+func generateAuthorBatchGqlQuery(organization string, repo string, authorList []AuthorCommitTuple) string {
 	gqlQuery := fmt.Sprintf(`{
 		rateLimit {
 			limit

@@ -47,7 +47,7 @@ func StartSyncingUser(
 	for _, repoToAuthorBatch := range repoToAuthorBatches {
 		logger.LogGreenDebug("%s", repoToAuthorBatch.RepoURL)
 
-		commits, err := IdentifyRepoAuthorsBatch(repoToAuthorBatch.RepoURL, repoToAuthorBatch.Tuples, ghAccessToken)
+		commits, err := identifyRepoAuthorsBatch(repoToAuthorBatch.RepoURL, repoToAuthorBatch.AuthorCommitTuples, ghAccessToken)
 
 		if commits == nil {
 			logger.LogError("commits is nil")
