@@ -2,7 +2,6 @@ package usersync
 
 import (
 	"context"
-	"database/sql"
 	"main/internal/database"
 	"main/internal/pkg/githubGraphQL"
 	"main/internal/pkg/logger"
@@ -10,15 +9,9 @@ import (
 )
 
 type UserSync struct {
-	CommitHash string
-	Author     struct {
-		Email   string
-		NotNull bool
-	}
-	Repo struct {
-		URL     string
-		NotNull bool
-	}
+	CommitHash  string
+	AuthorEmail *string
+	RepoUrl     *string
 }
 
 func StartSyncingUser(
@@ -42,7 +35,7 @@ func StartSyncingUser(
 	logger.LogBlue("identifying %d new authors", len(newCommitAuthorsRaw))
 
 	// Convert to database object to local type
-	newCommitAuthors := ConvertDatabaseObjectToUserSync(newCommitAuthorsRaw)
+	newCommitAuthors := convertDatabaseObjectToUserSync(newCommitAuthorsRaw)
 
 	// Create map of repoUrl -> []authors
 	repoUrlToAuthorsMap := GetRepoToAuthorsMap(newCommitAuthors)
@@ -116,41 +109,4 @@ func StartSyncingUser(
 
 		}
 	}
-}
-
-func getNewCommitAuthors(db *database.Queries) ([]database.GetLatestUncheckedCommitPerAuthorRow, error) {
-	newCommitAuthorsRaw, err := db.GetLatestUncheckedCommitPerAuthor(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	noNewCommitAuthors := len(newCommitAuthorsRaw) == 0
-	if noNewCommitAuthors {
-		return nil, nil
-	}
-
-	return newCommitAuthorsRaw, nil
-}
-
-func convertAuthorToInsertUserParams(author githubGraphQL.Author, createdAt time.Time, updatedAt time.Time) database.InsertUserParams {
-	authorParams := database.InsertUserParams{
-		GithubRestID:    int32(author.User.GithubRestID),
-		GithubGraphqlID: author.User.GithubGraphqlID,
-		Login:           author.User.Login,
-		Name:            sql.NullString{String: author.User.Name, Valid: true},
-		Email:           sql.NullString{String: author.User.Email, Valid: true},
-		AvatarUrl:       sql.NullString{String: author.User.AvatarURL, Valid: true},
-		Company:         sql.NullString{String: author.User.Company, Valid: true},
-		Location:        sql.NullString{String: author.User.Location, Valid: true},
-		Bio:             sql.NullString{String: author.User.Bio, Valid: true},
-		Blog:            sql.NullString{String: author.User.Blog, Valid: true},
-		Hireable:        sql.NullBool{Bool: author.User.Hireable, Valid: true},
-		TwitterUsername: sql.NullString{String: author.User.TwitterUsername, Valid: true},
-		Followers:       sql.NullInt32{Int32: int32(author.User.Followers.TotalCount), Valid: true},
-		Following:       sql.NullInt32{Int32: int32(author.User.Following.TotalCount), Valid: true},
-		Type:            "User",
-		CreatedAt:       sql.NullTime{Time: createdAt, Valid: true},
-		UpdatedAt:       sql.NullTime{Time: updatedAt, Valid: true},
-	}
-	return authorParams
 }
