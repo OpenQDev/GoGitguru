@@ -1,6 +1,6 @@
 package githubGraphQL
 
-var AUTHOR_GRAPHQL_FRAGMENT string = `fragment commitDetails on Commit {
+const AUTHOR_GRAPHQL_FRAGMENT string = `fragment commitDetails on Commit {
 	author {
 			name
 			email

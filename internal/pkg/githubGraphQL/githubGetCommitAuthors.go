@@ -1,7 +1,6 @@
 package githubGraphQL
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -16,7 +15,7 @@ func GithubGetCommitAuthors(query string, ghAccessToken string) (CommitAuthorsRe
 
 	url := "https://api.github.com/graphql"
 
-	req, err := createRequest(url, query, headers)
+	req, err := createGraphQLRequest(url, query, headers)
 	if err != nil {
 		return CommitAuthorsResponse{}, err
 	}
@@ -38,24 +37,4 @@ func GithubGetCommitAuthors(query string, ghAccessToken string) (CommitAuthorsRe
 	json.Unmarshal(body, &jsonData)
 
 	return jsonData, nil
-}
-
-func createRequest(url string, query string, headers map[string]string) (*http.Request, error) {
-	payloadObj := GraphQLPayload{Query: query}
-	payloadBytes, err := json.Marshal(payloadObj)
-	if err != nil {
-		return nil, err
-	}
-
-	payload := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequest("POST", url, payload)
-	if err != nil {
-		return nil, err
-	}
-
-	for key, value := range headers {
-		req.Header.Add(key, value)
-	}
-
-	return req, nil
 }
