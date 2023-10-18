@@ -8,7 +8,7 @@ import (
 	"main/internal/pkg/server"
 )
 
-func identifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTuple, ghAccessToken string, apiCfg server.ApiConfig) (*map[string]githubGraphQL.Commit, error) {
+func identifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTuple, ghAccessToken string, apiCfg server.ApiConfig) (map[string]githubGraphQL.GithubGraphQLCommit, error) {
 	logger.LogBlue("Identifying %d authors for repo %s", len(authorCommitList), repoUrl)
 
 	organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
@@ -34,10 +34,10 @@ func identifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTup
 		return nil, nil
 	}
 
-	commits := make(map[string]githubGraphQL.Commit, 0)
+	commits := make(map[string]githubGraphQL.GithubGraphQLCommit, 0)
 	for key, value := range result.Data.Repository {
 		commits[key] = value
 	}
 
-	return &commits, nil
+	return commits, nil
 }

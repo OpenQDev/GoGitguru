@@ -56,9 +56,9 @@ func StartSyncingUser(
 			continue
 		}
 
-		commitValues := make([]githubGraphQL.Commit, 0, len(*commits))
+		commitValues := make([]githubGraphQL.GithubGraphQLCommit, 0, len(commits))
 
-		for _, value := range *commits {
+		for _, value := range commits {
 			commitValues = append(commitValues, value)
 		}
 

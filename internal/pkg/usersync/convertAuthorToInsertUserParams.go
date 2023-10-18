@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func convertAuthorToInsertUserParams(author githubGraphQL.Author, createdAt time.Time, updatedAt time.Time) database.InsertUserParams {
+func convertAuthorToInsertUserParams(author githubGraphQL.GithubGraphQLAuthor, createdAt time.Time, updatedAt time.Time) database.InsertUserParams {
 	authorParams := database.InsertUserParams{
 		GithubRestID:    int32(author.User.GithubRestID),
 		GithubGraphqlID: author.User.GithubGraphqlID,

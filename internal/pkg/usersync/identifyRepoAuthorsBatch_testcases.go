@@ -9,15 +9,15 @@ type IdentifyRepoAuthorsBatchTestCase struct {
 	repoUrl          string
 	authorCommitList []AuthorCommitTuple
 	authorized       bool
-	expectedOutput   *map[string]githubGraphQL.Commit
+	expectedOutput   map[string]githubGraphQL.GithubGraphQLCommit
 }
 
-const repoUrl = "OpenQ-Workflows"
+const repoUrl = "https://github.com/OpenQDev/OpenQ-Workflows"
 
 func identifyRepoAuthorsBatchTest1() IdentifyRepoAuthorsBatchTestCase {
 	const AUTHOR_BATCH = "AUTHOR_BATCH"
 
-	user := githubGraphQL.User{
+	user := githubGraphQL.GithubGraphQLUser{
 		GithubRestID:    93455288,
 		GithubGraphqlID: "U_kgDOBZIDuA",
 		Login:           "FlacoJones",
@@ -44,14 +44,15 @@ func identifyRepoAuthorsBatchTest1() IdentifyRepoAuthorsBatchTestCase {
 		UpdatedAt: "2023-10-10T15:52:33Z",
 	}
 
-	author := githubGraphQL.Author{
+	author := githubGraphQL.GithubGraphQLAuthor{
 		Name:  "FlacoJones",
 		Email: "andrew@openq.dev",
 		User:  user,
 	}
 
-	expectedOutput := make(map[string]githubGraphQL.Commit)
-	expectedOutput["commitHash"] = githubGraphQL.Commit{Author: author}
+	expectedOutput := make(map[string]githubGraphQL.GithubGraphQLCommit)
+	expectedOutput["commit_0"] = githubGraphQL.GithubGraphQLCommit{Author: author}
+	expectedOutput["commit_1"] = githubGraphQL.GithubGraphQLCommit{Author: author}
 
 	return IdentifyRepoAuthorsBatchTestCase{
 		title:   AUTHOR_BATCH,
@@ -63,7 +64,7 @@ func identifyRepoAuthorsBatchTest1() IdentifyRepoAuthorsBatchTestCase {
 			},
 		},
 		authorized:     true,
-		expectedOutput: &expectedOutput,
+		expectedOutput: expectedOutput,
 	}
 }
 

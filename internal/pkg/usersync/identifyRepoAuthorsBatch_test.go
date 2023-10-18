@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -29,7 +30,7 @@ func TestIdentifyRepoAuthorsBatch(t *testing.T) {
 	}
 
 	// Decode the JSON file to type RestRepo
-	var commitAuthorsResponse githubGraphQL.CommitAuthorsResponse
+	var commitAuthorsResponse githubGraphQL.GithubGraphQLCommitAuthorsResponse
 	err = util.JsonFileToType(jsonFile, &commitAuthorsResponse)
 	if err != nil {
 		t.Errorf("Failed to read JSON file: %s", err)
@@ -37,7 +38,7 @@ func TestIdentifyRepoAuthorsBatch(t *testing.T) {
 	defer jsonFile.Close()
 
 	mockGithubMux := http.NewServeMux()
-	mockGithubMux.HandleFunc("/graphql/", func(w http.ResponseWriter, r *http.Request) {
+	mockGithubMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		io.Copy(w, jsonFile)
 	})
 	mockGithubServer := httptest.NewServer(mockGithubMux)
@@ -63,7 +64,15 @@ func TestIdentifyRepoAuthorsBatch(t *testing.T) {
 			), tt.title)
 
 			// ACT
-			_, err = identifyRepoAuthorsBatch(tt.repoUrl, tt.authorCommitList, "", apiCfg)
+			resp, err := identifyRepoAuthorsBatch(tt.repoUrl, tt.authorCommitList, "", apiCfg)
+			if err != nil {
+				t.Fatalf("error in identifyRepoAuthorsBatch test: %s", err)
+			}
+
+			if !reflect.DeepEqual(resp, tt.expectedOutput) {
+				t.Errorf("Expected output does not match the response. Expected: %v, Got: %v", tt.expectedOutput, resp)
+			}
+
 		})
 	}
 }
