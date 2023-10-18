@@ -12,38 +12,14 @@ func reposToAuthorMap() GetRepoToAuthorsMapTestCase {
 		title: REPO_TO_AUTHOR_MAP,
 		input: []UserSync{
 			{
-				CommitHash: "abc123",
-				Author: struct {
-					Email   string
-					NotNull bool
-				}{
-					Email:   "test@example.com",
-					NotNull: true,
-				},
-				Repo: struct {
-					URL     string
-					NotNull bool
-				}{
-					URL:     "https://github.com/example/repo",
-					NotNull: true,
-				},
+				CommitHash:  "abc123",
+				AuthorEmail: "test@example.com",
+				RepoUrl:     "https://github.com/example/repo",
 			},
 			{
-				CommitHash: "otherCommitHash",
-				Author: struct {
-					Email   string
-					NotNull bool
-				}{
-					Email:   "otherperson@example.com",
-					NotNull: true,
-				},
-				Repo: struct {
-					URL     string
-					NotNull bool
-				}{
-					URL:     "https://github.com/example/repo2",
-					NotNull: true,
-				},
+				CommitHash:  "otherCommitHash",
+				AuthorEmail: "otherperson@example.com",
+				RepoUrl:     "https://github.com/example/repo2",
 			},
 		},
 		expectedOutput: RepoToAuthorCommitTuples{

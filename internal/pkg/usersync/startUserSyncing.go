@@ -10,8 +10,8 @@ import (
 
 type UserSync struct {
 	CommitHash  string
-	AuthorEmail *string
-	RepoUrl     *string
+	AuthorEmail string
+	RepoUrl     string
 }
 
 func StartSyncingUser(
@@ -38,10 +38,10 @@ func StartSyncingUser(
 	newCommitAuthors := convertDatabaseObjectToUserSync(newCommitAuthorsRaw)
 
 	// Create map of repoUrl -> []authors
-	repoUrlToAuthorsMap := GetRepoToAuthorsMap(newCommitAuthors)
+	repoUrlToAuthorsMap := getRepoToAuthorsMap(newCommitAuthors)
 
 	// Create batches of repos for GraphQL query
-	repoToAuthorBatches := GenerateBatchAuthors(repoUrlToAuthorsMap, 2)
+	repoToAuthorBatches := generateBatchAuthors(repoUrlToAuthorsMap, 2)
 
 	// Get info for each batch
 	for _, repoToAuthorBatch := range repoToAuthorBatches {

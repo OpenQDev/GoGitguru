@@ -15,7 +15,7 @@ func TestGetRepoToAuthorsMap(t *testing.T) {
 				"REPO_TO_AUTHOR_MAP",
 			), tt.title)
 
-			result := GetRepoToAuthorsMap(tt.input)
+			result := getRepoToAuthorsMap(tt.input)
 
 			if !reflect.DeepEqual(result, tt.expectedOutput) {
 				t.Errorf("getRepoToAuthorsMap() = %v, want %v", result, tt.expectedOutput)

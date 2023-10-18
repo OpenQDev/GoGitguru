@@ -41,38 +41,14 @@ func valid() ConvertToUserSyncTestCase {
 		},
 		expectedOutput: []UserSync{
 			{
-				CommitHash: "abc123",
-				Author: struct {
-					Email   string
-					NotNull bool
-				}{
-					Email:   "test@example.com",
-					NotNull: true,
-				},
-				Repo: struct {
-					URL     string
-					NotNull bool
-				}{
-					URL:     "https://github.com/test/repo",
-					NotNull: true,
-				},
+				CommitHash:  "abc123",
+				AuthorEmail: "test@example.com",
+				RepoUrl:     "https://github.com/test/repo",
 			},
 			{
-				CommitHash: "abc123",
-				Author: struct {
-					Email   string
-					NotNull bool
-				}{
-					Email:   "",
-					NotNull: false,
-				},
-				Repo: struct {
-					URL     string
-					NotNull bool
-				}{
-					URL:     "",
-					NotNull: false,
-				},
+				CommitHash:  "abc123",
+				AuthorEmail: "",
+				RepoUrl:     "",
 			},
 		},
 	}
