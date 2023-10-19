@@ -24,7 +24,7 @@ func TestStartUserSync(t *testing.T) {
 	logger.SetDebugMode(debugMode)
 
 	// Open the JSON file
-	jsonFile, err := os.Open("./mocks/mockGithubCommitAuthorsResponse.json")
+	jsonFile, err := os.Open("./mocks/mockGithubCommitAuthorsResponse_oneAuthor.json")
 	if err != nil {
 		t.Errorf("error opening json file: %s", err)
 	}

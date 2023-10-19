@@ -17,8 +17,8 @@ type StartUserSyncingTestCase struct {
 
 func startUserSyncingTest1() StartUserSyncingTestCase {
 	const SHOULD_STORE_USER = "SHOULD_STORE_USER"
-	const email = "abc123@gmail.com"
-	const restId = 123
+	const email = "andrew@openq.dev"
+	const restId = 93455288
 
 	user := githubGraphQL.GithubGraphQLUser{
 		GithubRestID:    93455288,
@@ -59,8 +59,8 @@ func startUserSyncingTest1() StartUserSyncingTestCase {
 		shouldError: false,
 		setupMock: func(mock sqlmock.Sqlmock, author githubGraphQL.GithubGraphQLAuthor) {
 			// EXPECT - GetLatestUncheckedCommitPerAuthor
-			rows := sqlmock.NewRows([]string{"author_email", "commit_hash", "repo_url"}).
-				AddRow("andrew@openq.dev", "abc123", "https://github.com/OpenQDev/OpenQ-Workflows")
+			rows := sqlmock.NewRows([]string{"commit_hash", "author_email", "repo_url"}).
+				AddRow("abc123", "andrew@openq.dev", "https://github.com/OpenQDev/OpenQ-Workflows")
 			mock.ExpectQuery("^-- name: GetLatestUncheckedCommitPerAuthor :many.*").WillReturnRows(rows)
 
 			// EXPECT - InsertRestIdToEmail

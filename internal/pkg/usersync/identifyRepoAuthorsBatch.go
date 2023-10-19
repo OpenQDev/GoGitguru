@@ -17,8 +17,6 @@ func identifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTup
 
 	result, err := githubGraphQL.GithubGetCommitAuthors(queryString, ghAccessToken, apiCfg)
 
-	logger.LogGreenDebug("GithubGetCommitAuthors response: %v", result)
-
 	if err != nil {
 		logger.LogError("error occured while fetching from GraphQL API: %s", err)
 	}

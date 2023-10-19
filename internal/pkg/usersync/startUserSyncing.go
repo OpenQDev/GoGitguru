@@ -45,6 +45,7 @@ func StartSyncingUser(
 	repoToAuthorBatches := generateBatchAuthors(repoUrlToAuthorsMap, 2)
 
 	// Get info for each batch
+
 	for _, repoToAuthorBatch := range repoToAuthorBatches {
 		logger.LogGreenDebug("%s", repoToAuthorBatch.RepoURL)
 
@@ -65,8 +66,6 @@ func StartSyncingUser(
 		for _, commitAuthor := range githubGraphQLCommitAuthorsMap {
 			githubGraphQLCommitAuthors = append(githubGraphQLCommitAuthors, commitAuthor)
 		}
-
-		logger.LogGreenDebug("got the following info: %v", githubGraphQLCommitAuthorsMap)
 
 		for _, commitAuthor := range githubGraphQLCommitAuthors {
 			author := commitAuthor.Author
