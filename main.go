@@ -21,7 +21,7 @@ func main() {
 	}
 
 	if env.SyncUsers {
-		time.Sleep(3 * time.Second)
+		time.Sleep(1 * time.Minute)
 		go usersync.StartSyncingUser(database, "repos", 10, time.Duration(env.SyncUsersIntervalMinutesInt)*time.Minute, env.GhAccessToken, 2, apiCfg)
 	}
 
