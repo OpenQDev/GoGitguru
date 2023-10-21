@@ -1,19 +1,19 @@
 package server
 
 import (
+	"bytes"
+	"encoding/json"
 	"io"
-	"main/internal/database"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/server/mocks"
-	"main/internal/pkg/server/util"
 	"main/internal/pkg/setup"
 	"main/internal/pkg/testhelpers"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHandlerRepoCommits(t *testing.T) {
@@ -21,44 +21,13 @@ func TestHandlerRepoCommits(t *testing.T) {
 	env := setup.ExtractAndVerifyEnvironment("../../../.env")
 	debugMode := env.Debug
 	ghAccessToken := env.GhAccessToken
-	targetLiveGithub := env.TargetLiveGithub
 
 	logger.SetDebugMode(debugMode)
 
 	mock, queries := mocks.GetMockDatabase()
 
-	jsonFile, err := os.Open("./mocks/mockUserCommitsReturn.json")
-	if err != nil {
-		t.Errorf("Failed to open ./mocks/mockUserCommitsReturn.json: %s", err)
-		return
-	}
-
-	var repo []database.Commit
-	err = util.JsonFileToType(jsonFile, &repo)
-	if err != nil {
-		t.Errorf("Failed to read JSON file: %s", err)
-	}
-	defer jsonFile.Close()
-
-	mockGithubMux := http.NewServeMux()
-
-	mockGithubMux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
-		io.Copy(w, jsonFile)
-	})
-
-	mockGithubServer := httptest.NewServer(mockGithubMux)
-	defer mockGithubServer.Close()
-
-	var serverUrl string
-	if targetLiveGithub {
-		serverUrl = "https://api.github.com"
-	} else {
-		serverUrl = mockGithubServer.URL
-	}
-
 	apiCfg := ApiConfig{
-		DB:                   queries,
-		GithubRestAPIBaseUrl: serverUrl,
+		DB: queries,
 	}
 
 	// Define test cases
@@ -82,8 +51,11 @@ func TestHandlerRepoCommits(t *testing.T) {
 
 			rr := httptest.NewRecorder()
 
+			bodyBytes, _ := json.Marshal(tt.requestBody)
+			req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
 			// ACT
-			apiCfg.HandlerGithubUserCommits(rr, req)
+			apiCfg.HandlerRepoCommits(rr, req)
 
 			// ASSERT
 			if tt.shouldError {
@@ -91,8 +63,7 @@ func TestHandlerRepoCommits(t *testing.T) {
 				return
 			}
 
-			assert.Equal(t, tt.expectedStatus, rr.Code)
-			assert.Equal(t, repo, "actual")
+			require.Equal(t, tt.expectedStatus, rr.Code, rr.Body)
 
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)

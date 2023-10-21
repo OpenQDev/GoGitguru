@@ -337,7 +337,6 @@ func (q *Queries) GetCommitsWithAuthorInfo(ctx context.Context, arg GetCommitsWi
 }
 
 const getLatestUncheckedCommitPerAuthor = `-- name: GetLatestUncheckedCommitPerAuthor :many
-
 WITH LatestUncheckedCommitPerAuthor AS (
     SELECT DISTINCT ON (author_email)
     commit_hash,

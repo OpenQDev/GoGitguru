@@ -38,7 +38,6 @@ INSERT INTO commits (commit_hash, author, author_email, author_date, committer_d
 );
 
 -- name: GetLatestUncheckedCommitPerAuthor :many
-
 WITH LatestUncheckedCommitPerAuthor AS (
     SELECT DISTINCT ON (author_email)
     commit_hash,
