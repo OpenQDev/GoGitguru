@@ -82,10 +82,10 @@ AND c.repo_url = ANY($4)
 ORDER BY c.author_date DESC;
 
 -- name: GetAllUserCommits :many
-WITH commits AS (
-    SELECT * FROM commits WHERE c.author_date BETWEEN $1 AND $2
+WITH commits_cte AS (
+    SELECT * FROM commits WHERE author_date BETWEEN $1 AND $2
 )
-SELECT * FROM commits c
+SELECT * FROM commits_cte c
 INNER JOIN github_user_rest_id_author_emails gure
 ON c.author_email = gure.email
 INNER JOIN github_users gu

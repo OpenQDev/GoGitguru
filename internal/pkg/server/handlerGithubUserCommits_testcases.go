@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -42,6 +43,7 @@ func notAuthorized() HandlerGithubUserCommitsTestCase {
 func getAllUserCommits() HandlerGithubUserCommitsTestCase {
 	const GET_ALL_USER_COMMITS = "GET_ALL_USER_COMMITS"
 	since := time.Now().AddDate(0, 0, -7).Format(time.RFC3339)
+	fmt.Println("since", since)
 	until := time.Now().AddDate(0, 0, 0).Format(time.RFC3339)
 
 	requestBody := HandlerGithubUserCommitsRequest{
