@@ -6,6 +6,7 @@ import (
 	"io"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/server/mocks"
+	"main/internal/pkg/server/util"
 	"main/internal/pkg/setup"
 	"main/internal/pkg/testhelpers"
 	"net/http"
@@ -35,7 +36,7 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				"GET_ALL_USER_COMMITS",
+				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
 
 			// ARRANGE - LOCAL
@@ -64,7 +65,16 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 				return
 			}
 
+			// ARRANGE - EXPECT
+			var actualRepoCommitsReturn []CommitWithAuthorInfo
+			err := util.ReaderToType(rr.Body, &actualRepoCommitsReturn)
+			if err != nil {
+				t.Errorf("Failed to decode rr.Body into []RestRepo: %s", err)
+				return
+			}
+
 			require.Equal(t, tt.expectedStatus, rr.Code, rr.Body)
+			require.Equal(t, tt.expectedReturnBody, actualRepoCommitsReturn)
 
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
