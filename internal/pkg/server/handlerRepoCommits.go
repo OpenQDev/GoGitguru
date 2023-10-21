@@ -44,11 +44,13 @@ func (apiConfig *ApiConfig) HandlerRepoCommits(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	commitsWithAuthorInfo, err := apiConfig.DB.GetCommitsWithAuthorInfo(context.Background(), database.GetCommitsWithAuthorInfoParams{
+	params := database.GetCommitsWithAuthorInfoParams{
 		RepoUrl:      sql.NullString{String: handlerRepoCommitsRequest.RepoURL, Valid: true},
 		AuthorDate:   sql.NullInt64{Int64: since.Unix(), Valid: true},
 		AuthorDate_2: sql.NullInt64{Int64: until.Unix(), Valid: true},
-	})
+	}
+
+	commitsWithAuthorInfo, err := apiConfig.DB.GetCommitsWithAuthorInfo(context.Background(), params)
 
 	if err != nil {
 		RespondWithError(w, 500, fmt.Sprintf("Failed to fetch commits: %s", err))

@@ -6,6 +6,7 @@ import (
 	"io"
 	"main/internal/pkg/logger"
 	"main/internal/pkg/server/mocks"
+	"main/internal/pkg/server/util"
 	"main/internal/pkg/setup"
 	"main/internal/pkg/testhelpers"
 	"net/http"
@@ -54,6 +55,8 @@ func TestHandlerRepoCommits(t *testing.T) {
 			bodyBytes, _ := json.Marshal(tt.requestBody)
 			req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
+			tt.setupMock(mock)
+
 			// ACT
 			apiCfg.HandlerRepoCommits(rr, req)
 
@@ -63,7 +66,16 @@ func TestHandlerRepoCommits(t *testing.T) {
 				return
 			}
 
+			// ARRANGE - EXPECT
+			var actualRepoCommitsReturn []CommitWithAuthorInfo
+			err := util.ReaderToType(rr.Body, &actualRepoCommitsReturn)
+			if err != nil {
+				t.Errorf("Failed to decode rr.Body into []RestRepo: %s", err)
+				return
+			}
+
 			require.Equal(t, tt.expectedStatus, rr.Code, rr.Body)
+			require.Equal(t, tt.expectedReturnBody, actualRepoCommitsReturn)
 
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)

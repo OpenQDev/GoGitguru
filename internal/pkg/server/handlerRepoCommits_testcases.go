@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"main/internal/pkg/server/util"
 	"net/http"
@@ -12,25 +11,27 @@ import (
 )
 
 type HandlerRepoCommitsTestCase struct {
-	name           string
-	login          string
-	expectedStatus int
-	requestBody    HandlerRepoCommitsRequest
-	authorized     bool
-	shouldError    bool
-	setupMock      func(mock sqlmock.Sqlmock)
+	name               string
+	login              string
+	expectedStatus     int
+	requestBody        HandlerRepoCommitsRequest
+	expectedReturnBody []CommitWithAuthorInfo
+	authorized         bool
+	shouldError        bool
+	setupMock          func(mock sqlmock.Sqlmock)
 }
 
 func foo() HandlerRepoCommitsTestCase {
 	const UNAUTHORIZED = "UNAUTHORIZED"
 	return HandlerRepoCommitsTestCase{
-		name:           UNAUTHORIZED,
-		login:          login,
-		expectedStatus: http.StatusBadRequest,
-		authorized:     false,
-		requestBody:    HandlerRepoCommitsRequest{},
-		shouldError:    true,
-		setupMock:      func(mock sqlmock.Sqlmock) {},
+		name:               UNAUTHORIZED,
+		login:              login,
+		expectedStatus:     http.StatusBadRequest,
+		authorized:         false,
+		requestBody:        HandlerRepoCommitsRequest{},
+		expectedReturnBody: []CommitWithAuthorInfo{},
+		shouldError:        true,
+		setupMock:          func(mock sqlmock.Sqlmock) {},
 	}
 }
 
@@ -38,7 +39,6 @@ func getAllRepoCommits() HandlerRepoCommitsTestCase {
 	const GET_ALL_REPO_COMMITS = "GET_ALL_REPO_COMMITS"
 
 	since := time.Now().AddDate(0, 0, -7).Format(time.RFC3339)
-	fmt.Println("since", since)
 	until := time.Now().AddDate(0, 0, 0).Format(time.RFC3339)
 
 	requestBody := HandlerRepoCommitsRequest{
@@ -55,13 +55,16 @@ func getAllRepoCommits() HandlerRepoCommitsTestCase {
 	defer jsonFile.Close()
 	util.JsonFileToArrayOfType(jsonFile, &twoCommitsResponse)
 
+	expectedReturnBody := twoCommitsResponse
+
 	return HandlerRepoCommitsTestCase{
-		name:           GET_ALL_REPO_COMMITS,
-		login:          login,
-		expectedStatus: http.StatusOK,
-		authorized:     true,
-		requestBody:    requestBody,
-		shouldError:    false,
+		name:               GET_ALL_REPO_COMMITS,
+		login:              login,
+		expectedStatus:     http.StatusOK,
+		authorized:         true,
+		requestBody:        requestBody,
+		expectedReturnBody: expectedReturnBody,
+		shouldError:        false,
 		setupMock: func(mock sqlmock.Sqlmock) {
 
 			sinceTime, _ := time.Parse(time.RFC3339, since)
