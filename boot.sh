@@ -5,6 +5,7 @@ docker stop gitguru-postgres >/dev/null 2>/dev/null
 docker rm gitguru-postgres >/dev/null 2>/dev/null
 
 POSTGRES_PORT=${1:-5432}
+APP=${2:-"reposync"}
 
 echo "Checking port $POSTGRES_PORT"
 if nc -z localhost $POSTGRES_PORT; then
@@ -33,4 +34,4 @@ psql -h "localhost" -U "postgres" -p $POSTGRES_PORT -f ./repos.sql
 
 # To install go air, a Go runtime with live reloads on code changes,
 # run the following command: go get -u github.com/cosmtrek/air
-go run ./reposync
+go run ./$APP
