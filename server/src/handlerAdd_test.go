@@ -2,15 +2,14 @@ package server
 
 import (
 	"errors"
-	"main/internal/pkg/server/mocks"
-	"main/internal/pkg/server/util"
-	"main/internal/pkg/setup"
-	"main/internal/pkg/testhelpers"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 	"util/logger"
+	"util/marshaller"
+	"util/setup"
+	"util/testhelpers"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
@@ -22,7 +21,7 @@ func TestAddHandler(t *testing.T) {
 	debugMode := env.Debug
 	logger.SetDebugMode(debugMode)
 
-	mock, queries := mocks.GetMockDatabase()
+	mock, queries := setup.GetMockDatabase()
 
 	apiCfg := ApiConfig{
 		DB: queries,
@@ -38,7 +37,7 @@ func TestAddHandler(t *testing.T) {
 			), tt.name)
 
 			// ARRANGE - LOCAL
-			requestBody, err := util.TypeToReader(tt.requestBody)
+			requestBody, err := marshaller.TypeToReader(tt.requestBody)
 			if err != nil {
 				t.Errorf("failed to marshal response to %T: %s", tt.requestBody, err)
 			}
@@ -58,7 +57,7 @@ func TestAddHandler(t *testing.T) {
 			// EXPECT - ERRORS
 			if tt.shouldError {
 				var actualErrorResponse ErrorResponse
-				err = util.ReaderToType(rr.Result().Body, &actualErrorResponse)
+				err = marshaller.ReaderToType(rr.Result().Body, &actualErrorResponse)
 				if err != nil {
 					t.Errorf("failed to marshal response to %T: %s", actualErrorResponse, err)
 				}
@@ -70,7 +69,7 @@ func TestAddHandler(t *testing.T) {
 
 			// EXPECT - SUCCESS
 			var actualSuccessResponse HandlerAddResponse
-			err = util.ReaderToType(rr.Result().Body, &actualSuccessResponse)
+			err = marshaller.ReaderToType(rr.Result().Body, &actualSuccessResponse)
 			if err != nil {
 				t.Errorf("failed to marshal response to %T: %s", actualSuccessResponse, err)
 			}
@@ -85,7 +84,7 @@ func TestAddHandler(t *testing.T) {
 			// --- SECOND CALL --- //
 
 			// ARRANGE - LOCAL
-			requestBody, err = util.TypeToReader(tt.requestBody)
+			requestBody, err = marshaller.TypeToReader(tt.requestBody)
 			if err != nil {
 				logger.LogFatalRedAndExit("failed to marshal response to %T: %s", tt.requestBody, err)
 			}
@@ -105,7 +104,7 @@ func TestAddHandler(t *testing.T) {
 			apiCfg.HandlerAdd(rr, req)
 
 			// EXPECT - SUCCESS
-			err = util.ReaderToType(rr.Result().Body, &actualSuccessResponse)
+			err = marshaller.ReaderToType(rr.Result().Body, &actualSuccessResponse)
 			if err != nil {
 				t.Errorf("failed to marshal response to %T: %s", actualSuccessResponse, err)
 			}

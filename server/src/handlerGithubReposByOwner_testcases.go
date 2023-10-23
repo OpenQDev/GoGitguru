@@ -1,9 +1,9 @@
 package server
 
 import (
-	"main/internal/pkg/githubRest"
 	"net/http"
 	"time"
+	"util/githubRest"
 
 	"github.com/DATA-DOG/go-sqlmock"
 )

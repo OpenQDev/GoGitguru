@@ -3,10 +3,10 @@ package server
 import (
 	"context"
 	"fmt"
-	"main/internal/pkg/githubRest"
-	"main/internal/pkg/server/util"
 	"net/http"
+	"util/githubRest"
 	"util/logger"
+	"util/marshaller"
 
 	"github.com/go-chi/chi"
 )
@@ -46,7 +46,7 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 		}
 
 		var restReposResponse []githubRest.GithubRestRepo
-		err = util.ReaderToType(resp.Body, &restReposResponse)
+		err = marshaller.ReaderToType(resp.Body, &restReposResponse)
 		if err != nil {
 			RespondWithError(w, 500, fmt.Sprintf("Failed to decode response from %s to []GithubRestRepo: %s", requestUrl, err))
 			return

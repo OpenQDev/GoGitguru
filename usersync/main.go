@@ -3,7 +3,7 @@ package main
 import (
 	server "server/src"
 	"time"
-	"usersync"
+	usersync "usersync/src"
 	"util/logger"
 	"util/setup"
 )

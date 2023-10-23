@@ -4,15 +4,15 @@ import (
 	"io"
 	"main/internal/pkg/githubGraphQL"
 	"main/internal/pkg/server"
-	"main/internal/pkg/server/util"
-	"main/internal/pkg/setup"
-	"main/internal/pkg/testhelpers"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"reflect"
 	"testing"
 	"util/logger"
+	"util/marshaller"
+	"util/setup"
+	"util/testhelpers"
 )
 
 func TestIdentifyRepoAuthorsBatch(t *testing.T) {
@@ -31,7 +31,7 @@ func TestIdentifyRepoAuthorsBatch(t *testing.T) {
 
 	// Decode the JSON file to type RestRepo
 	var commitAuthorsResponse githubGraphQL.GithubGraphQLCommitAuthorsResponse
-	err = util.JsonFileToType(jsonFile, &commitAuthorsResponse)
+	err = marshaller.JsonFileToType(jsonFile, &commitAuthorsResponse)
 	if err != nil {
 		t.Errorf("Failed to read JSON file: %s", err)
 	}

@@ -2,13 +2,13 @@ package server
 
 import (
 	"log"
-	"main/internal/pkg/server/util"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"util/gitutil"
 	"util/logger"
+	"util/marshaller"
 )
 
 type DependencyHistoryRequest struct {
@@ -23,7 +23,7 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 	var dependencyHistory gitutil.DiffHistoryResult
 
 	var body DependencyHistoryRequest
-	err := util.ReaderToType(r.Body, &body)
+	err := marshaller.ReaderToType(r.Body, &body)
 	if err != nil {
 		RespondWithError(w, 200, err.Error())
 		return

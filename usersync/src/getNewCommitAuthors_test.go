@@ -1,16 +1,16 @@
 package usersync
 
 import (
-	"main/internal/pkg/server/mocks"
-	"main/internal/pkg/testhelpers"
 	"testing"
+	"util/setup"
+	"util/testhelpers"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetNewCommitAuthors(t *testing.T) {
 	// ARRANGE - GLOBAL
-	mock, queries := mocks.GetMockDatabase()
+	mock, queries := setup.GetMockDatabase()
 
 	tests := GetNewCommitAuthorsTestCases()
 

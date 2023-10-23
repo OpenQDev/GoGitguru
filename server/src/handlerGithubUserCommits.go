@@ -5,9 +5,9 @@ import (
 	"database/database"
 	"database/sql"
 	"fmt"
-	"main/internal/pkg/server/util"
 	"net/http"
 	"time"
+	"util/marshaller"
 
 	"github.com/go-chi/chi"
 )
@@ -31,7 +31,7 @@ func (apiConfig *ApiConfig) HandlerGithubUserCommits(w http.ResponseWriter, r *h
 	login := chi.URLParam(r, "login")
 
 	var body HandlerGithubUserCommitsRequest
-	err := util.ReaderToType(r.Body, &body)
+	err := marshaller.ReaderToType(r.Body, &body)
 	if err != nil {
 		RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to read body of request: %s", err))
 		return

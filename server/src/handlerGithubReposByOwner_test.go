@@ -2,16 +2,15 @@ package server
 
 import (
 	"io"
-	"main/internal/pkg/githubRest"
-	"main/internal/pkg/server/mocks"
-	"main/internal/pkg/server/util"
-	"main/internal/pkg/setup"
-	"main/internal/pkg/testhelpers"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+	"util/githubRest"
 	"util/logger"
+	"util/marshaller"
+	"util/setup"
+	"util/testhelpers"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -25,7 +24,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 
 	logger.SetDebugMode(debugMode)
 
-	mock, queries := mocks.GetMockDatabase()
+	mock, queries := setup.GetMockDatabase()
 
 	// ARRANGE - TEST DATA
 
@@ -37,7 +36,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 
 	// Decode the JSON file to type []GithubRestRepo
 	var repos []githubRest.GithubRestRepo
-	err = util.JsonFileToType(jsonFile, &repos)
+	err = marshaller.JsonFileToType(jsonFile, &repos)
 	if err != nil {
 		t.Errorf("Failed to read JSON file: %s", err)
 	}
@@ -76,7 +75,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 			// Add {owner} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
-			req = mocks.AppendPathParamToChiContext(req, "owner", tt.owner)
+			req = AppendPathParamToChiContext(req, "owner", tt.owner)
 
 			if tt.authorized {
 				req.Header.Add("GH-Authorization", ghAccessToken)
@@ -91,7 +90,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 
 			// ARRANGE - EXPECT
 			var actualReposReturn []githubRest.GithubRestRepo
-			util.ReaderToType(rr.Body, &actualReposReturn)
+			marshaller.ReaderToType(rr.Body, &actualReposReturn)
 			if err != nil {
 				t.Errorf("Failed to decode rr.Body into []GithubRestRepo: %s", err)
 				return

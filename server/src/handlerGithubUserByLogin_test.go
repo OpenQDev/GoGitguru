@@ -4,15 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"main/internal/pkg/server/mocks"
-	"main/internal/pkg/server/util"
-	"main/internal/pkg/setup"
-	"main/internal/pkg/testhelpers"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 	"util/logger"
+	"util/marshaller"
+	"util/setup"
+	"util/testhelpers"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -27,7 +26,7 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 
 	logger.SetDebugMode(debugMode)
 
-	mock, queries := mocks.GetMockDatabase()
+	mock, queries := setup.GetMockDatabase()
 
 	jsonFile, err := os.Open("./mocks/mockGithubUserResponse.json")
 	if err != nil {
@@ -35,7 +34,7 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 	}
 
 	var user User
-	err = util.JsonFileToType(jsonFile, &user)
+	err = marshaller.JsonFileToType(jsonFile, &user)
 	if err != nil {
 		t.Errorf("Failed to read JSON file: %s", err)
 	}
@@ -73,7 +72,7 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 			// Add {owner} and {name} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
-			req = mocks.AppendPathParamToChiContext(req, "login", tt.login)
+			req = AppendPathParamToChiContext(req, "login", tt.login)
 
 			if tt.authorized {
 				req.Header.Add("GH-Authorization", ghAccessToken)

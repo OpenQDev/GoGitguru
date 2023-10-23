@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 	"fmt"
-	"main/internal/pkg/server/util"
 	"net/http"
+	"util/marshaller"
 
 	"github.com/go-chi/chi"
 )
@@ -56,7 +56,7 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 	defer resp.Body.Close()
 
 	var user User
-	err = util.ReaderToType(resp.Body, &user)
+	err = marshaller.ReaderToType(resp.Body, &user)
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to decode response.: %s", err))
 		return

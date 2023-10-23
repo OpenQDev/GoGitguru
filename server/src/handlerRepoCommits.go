@@ -5,9 +5,9 @@ import (
 	"database/database"
 	"database/sql"
 	"fmt"
-	"main/internal/pkg/server/util"
 	"net/http"
 	"time"
+	"util/marshaller"
 )
 
 type HandlerRepoCommitsRequest struct {
@@ -20,7 +20,7 @@ type HandlerRepoCommitsResponse struct{}
 
 func (apiConfig *ApiConfig) HandlerRepoCommits(w http.ResponseWriter, r *http.Request) {
 	var handlerRepoCommitsRequest HandlerRepoCommitsRequest
-	err := util.ReaderToType(r.Body, &handlerRepoCommitsRequest)
+	err := marshaller.ReaderToType(r.Body, &handlerRepoCommitsRequest)
 
 	if err != nil {
 		RespondWithError(w, 400, "Invalid request body.")

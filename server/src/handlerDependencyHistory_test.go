@@ -3,16 +3,15 @@ package server
 import (
 	"encoding/json"
 	"io"
-	"main/internal/pkg/githubRest"
-	"main/internal/pkg/server/mocks"
-	"main/internal/pkg/server/util"
-	"main/internal/pkg/setup"
-	"main/internal/pkg/testhelpers"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+	"util/githubRest"
 	"util/logger"
+	"util/marshaller"
+	"util/setup"
+	"util/testhelpers"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -26,7 +25,7 @@ func TestHandlerDependencyHistory(t *testing.T) {
 
 	logger.SetDebugMode(debugMode)
 
-	_, queries := mocks.GetMockDatabase()
+	_, queries := setup.GetMockDatabase()
 
 	jsonFile, err := os.Open("./mocks/mockGithubRepoReturn.json")
 	if err != nil {
@@ -34,7 +33,7 @@ func TestHandlerDependencyHistory(t *testing.T) {
 	}
 
 	var repo githubRest.GithubRestRepo
-	err = util.JsonFileToType(jsonFile, &repo)
+	err = marshaller.JsonFileToType(jsonFile, &repo)
 	if err != nil {
 		t.Errorf("Failed to read JSON file: %s", err)
 	}

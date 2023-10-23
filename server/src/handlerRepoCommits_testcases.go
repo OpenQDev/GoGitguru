@@ -2,10 +2,10 @@ package server
 
 import (
 	"log"
-	"main/internal/pkg/server/util"
 	"net/http"
 	"os"
 	"time"
+	"util/marshaller"
 
 	"github.com/DATA-DOG/go-sqlmock"
 )
@@ -53,7 +53,7 @@ func getAllRepoCommits() HandlerRepoCommitsTestCase {
 		log.Fatal(err)
 	}
 	defer jsonFile.Close()
-	util.JsonFileToArrayOfType(jsonFile, &twoCommitsResponse)
+	marshaller.JsonFileToArrayOfType(jsonFile, &twoCommitsResponse)
 
 	expectedReturnBody := twoCommitsResponse
 

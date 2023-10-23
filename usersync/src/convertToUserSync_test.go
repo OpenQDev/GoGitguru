@@ -1,9 +1,9 @@
 package usersync
 
 import (
-	"main/internal/pkg/testhelpers"
 	"reflect"
 	"testing"
+	"util/testhelpers"
 )
 
 func TestConvertToUserSync(t *testing.T) {

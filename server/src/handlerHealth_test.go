@@ -1,14 +1,13 @@
 package server
 
 import (
-	"main/internal/pkg/server/mocks"
-	"main/internal/pkg/server/util"
-	"main/internal/pkg/setup"
-	"main/internal/pkg/testhelpers"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"util/logger"
+	"util/marshaller"
+	"util/setup"
+	"util/testhelpers"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -20,7 +19,7 @@ func TestHandlerHealth(t *testing.T) {
 
 	logger.SetDebugMode(debugMode)
 
-	_, queries := mocks.GetMockDatabase()
+	_, queries := setup.GetMockDatabase()
 
 	apiCfg := ApiConfig{
 		DB: queries,
@@ -44,7 +43,7 @@ func TestHandlerHealth(t *testing.T) {
 
 			// ARRANGE - EXPECT
 			var actualResponse HandlerHealthResponse
-			err := util.ReaderToType(rr.Result().Body, &actualResponse)
+			err := marshaller.ReaderToType(rr.Result().Body, &actualResponse)
 			if err != nil {
 				logger.LogFatalRedAndExit("failed to marshal response to %T: %s", actualResponse, err)
 			}

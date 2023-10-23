@@ -1,9 +1,9 @@
 package usersync
 
 import (
-	"main/internal/pkg/testhelpers"
 	"strings"
 	"testing"
+	"util/testhelpers"
 )
 
 func TestGenerateAuthorBatchGqlQuery(t *testing.T) {

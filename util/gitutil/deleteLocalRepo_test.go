@@ -1,10 +1,10 @@
 package gitutil
 
 import (
-	"main/internal/pkg/testhelpers"
 	"os"
 	"path/filepath"
 	"testing"
+	"util/testhelpers"
 )
 
 func TestDeleteLocalRepo(t *testing.T) {

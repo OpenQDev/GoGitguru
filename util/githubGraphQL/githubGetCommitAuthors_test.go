@@ -3,9 +3,9 @@ package githubGraphQL
 import (
 	"fmt"
 	"main/internal/pkg/server"
-	"main/internal/pkg/setup"
-	"main/internal/pkg/testhelpers"
 	"testing"
+	"util/setup"
+	"util/testhelpers"
 )
 
 func TestGithubGetCommitAuthors(t *testing.T) {

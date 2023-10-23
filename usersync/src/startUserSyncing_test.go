@@ -3,14 +3,13 @@ package usersync
 import (
 	"io"
 	"main/internal/pkg/server"
-	"main/internal/pkg/server/mocks"
-	"main/internal/pkg/setup"
-	"main/internal/pkg/testhelpers"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 	"util/logger"
+	"util/setup"
+	"util/testhelpers"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -30,7 +29,7 @@ func TestStartUserSync(t *testing.T) {
 	}
 
 	// ARRANGE - GLOBAL
-	mock, queries := mocks.GetMockDatabase()
+	mock, queries := setup.GetMockDatabase()
 
 	mockGithubMux := http.NewServeMux()
 	mockGithubMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

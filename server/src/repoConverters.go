@@ -3,8 +3,8 @@ package server
 import (
 	"database/database"
 	"database/sql"
-	"main/internal/pkg/githubRest"
 	"time"
+	"util/githubRest"
 )
 
 func ConvertGithubRestRepoToInsertGithubRepoParams(repo githubRest.GithubRestRepo) database.InsertGithubRepoParams {

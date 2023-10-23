@@ -1,8 +1,8 @@
 package gitutil
 
 import (
-	"main/internal/pkg/testhelpers"
 	"testing"
+	"util/testhelpers"
 )
 
 func TestExtractOrganizationAndRepositoryFromUrl(t *testing.T) {

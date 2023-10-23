@@ -1,9 +1,9 @@
 package gitutil
 
 import (
-	"main/internal/pkg/testhelpers"
 	"os"
 	"testing"
+	"util/testhelpers"
 )
 
 func TestCloneRepo(t *testing.T) {

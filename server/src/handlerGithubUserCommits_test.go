@@ -4,14 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"main/internal/pkg/server/mocks"
-	"main/internal/pkg/server/util"
-	"main/internal/pkg/setup"
-	"main/internal/pkg/testhelpers"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"util/logger"
+	"util/marshaller"
+	"util/setup"
+	"util/testhelpers"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -25,7 +24,7 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 
 	logger.SetDebugMode(debugMode)
 
-	mock, queries := mocks.GetMockDatabase()
+	mock, queries := setup.GetMockDatabase()
 
 	apiCfg := ApiConfig{
 		DB: queries,
@@ -43,7 +42,7 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 			req, _ := http.NewRequest("GET", "", nil)
 
 			// Add {login} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
-			req = mocks.AppendPathParamToChiContext(req, "login", tt.login)
+			req = AppendPathParamToChiContext(req, "login", tt.login)
 
 			if tt.authorized {
 				req.Header.Add("GH-Authorization", ghAccessToken)
@@ -67,7 +66,7 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 
 			// ARRANGE - EXPECT
 			var actualRepoCommitsReturn []CommitWithAuthorInfo
-			err := util.ReaderToType(rr.Body, &actualRepoCommitsReturn)
+			err := marshaller.ReaderToType(rr.Body, &actualRepoCommitsReturn)
 			if err != nil {
 				t.Errorf("Failed to decode rr.Body into []RestRepo: %s", err)
 				return

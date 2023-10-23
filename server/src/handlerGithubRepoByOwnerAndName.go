@@ -3,9 +3,9 @@ package server
 import (
 	"context"
 	"fmt"
-	"main/internal/pkg/githubRest"
-	"main/internal/pkg/server/util"
 	"net/http"
+	"util/githubRest"
+	"util/marshaller"
 
 	"github.com/go-chi/chi"
 )
@@ -62,7 +62,7 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 	defer resp.Body.Close()
 
 	var repo githubRest.GithubRestRepo
-	util.ReaderToType(resp.Body, &repo)
+	marshaller.ReaderToType(resp.Body, &repo)
 
 	params := ConvertGithubRestRepoToInsertGithubRepoParams(repo)
 

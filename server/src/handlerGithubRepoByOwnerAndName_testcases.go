@@ -2,9 +2,9 @@ package server
 
 import (
 	"fmt"
-	"main/internal/pkg/githubRest"
 	"net/http"
 	"time"
+	"util/githubRest"
 
 	"github.com/DATA-DOG/go-sqlmock"
 )
