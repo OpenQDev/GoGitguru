@@ -5,6 +5,9 @@
 ```bash
 cp .env.sample .env
 ./boot.sh
+
+# With different port if 5432 is already in use (by existing local postgres)
+./boot.sh 5433
 ```
 
 ## Testing
