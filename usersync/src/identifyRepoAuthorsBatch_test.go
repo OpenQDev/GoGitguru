@@ -2,13 +2,13 @@ package usersync
 
 import (
 	"io"
-	"main/internal/pkg/githubGraphQL"
 	"main/internal/pkg/server"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"reflect"
 	"testing"
+	"util/githubGraphQL"
 	"util/logger"
 	"util/marshaller"
 	"util/setup"

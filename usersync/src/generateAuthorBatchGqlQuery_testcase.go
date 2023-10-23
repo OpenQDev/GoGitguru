@@ -1,7 +1,7 @@
 package usersync
 
 import (
-	"main/internal/pkg/githubGraphQL"
+	"util/githubGraphQL"
 )
 
 type GenerateAuthorBatchGqlQueryTestCase struct {

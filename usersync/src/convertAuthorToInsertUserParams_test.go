@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"main/internal/pkg/githubGraphQL"
+	"util/githubGraphQL"
 
 	"github.com/stretchr/testify/assert"
 )

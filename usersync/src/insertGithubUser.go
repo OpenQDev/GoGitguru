@@ -3,8 +3,8 @@ package usersync
 import (
 	"context"
 	"database/database"
-	"main/internal/pkg/githubGraphQL"
 	"time"
+	"util/githubGraphQL"
 	"util/logger"
 )
 

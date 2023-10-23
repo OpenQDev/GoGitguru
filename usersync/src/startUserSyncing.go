@@ -2,9 +2,8 @@ package usersync
 
 import (
 	"database/database"
-	"main/internal/pkg/githubGraphQL"
-	"main/internal/pkg/server"
 	"time"
+	"util/githubGraphQL"
 	"util/logger"
 )
 
@@ -21,7 +20,7 @@ func StartSyncingUser(
 	timeBetweenSyncs time.Duration,
 	ghAccessToken string,
 	batchSize int,
-	apiCfg server.ApiConfig,
+	githubGraphQLUrl string,
 ) {
 	newCommitAuthorsRaw, err := getNewCommitAuthors(db)
 	if err != nil {
@@ -49,7 +48,7 @@ func StartSyncingUser(
 	for _, repoToAuthorBatch := range repoToAuthorBatches {
 		logger.LogGreenDebug("%s", repoToAuthorBatch.RepoURL)
 
-		githubGraphQLCommitAuthorsMap, err := identifyRepoAuthorsBatch(repoToAuthorBatch.RepoURL, repoToAuthorBatch.AuthorCommitTuples, ghAccessToken, apiCfg)
+		githubGraphQLCommitAuthorsMap, err := identifyRepoAuthorsBatch(repoToAuthorBatch.RepoURL, repoToAuthorBatch.AuthorCommitTuples, ghAccessToken, githubGraphQLUrl)
 		if err != nil {
 			logger.LogError("error occured while identifying authors: %s", err)
 		}

@@ -1,7 +1,7 @@
 package usersync
 
 import (
-	"main/internal/pkg/githubGraphQL"
+	"util/githubGraphQL"
 
 	"github.com/DATA-DOG/go-sqlmock"
 )

@@ -2,20 +2,19 @@ package usersync
 
 import (
 	"fmt"
-	"main/internal/pkg/githubGraphQL"
-	"main/internal/pkg/gitutil"
-	"main/internal/pkg/server"
+	"util/githubGraphQL"
+	"util/gitutil"
 	"util/logger"
 )
 
-func identifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTuple, ghAccessToken string, apiCfg server.ApiConfig) (map[string]githubGraphQL.GithubGraphQLCommit, error) {
+func identifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTuple, ghAccessToken string, githubGraphQLBaseUrl string) (map[string]githubGraphQL.GithubGraphQLCommit, error) {
 	logger.LogBlue("Identifying %d authors for repo %s", len(authorCommitList), repoUrl)
 
 	organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 
 	queryString := generateAuthorBatchGqlQuery(organization, repo, authorCommitList)
 
-	result, err := githubGraphQL.GithubGetCommitAuthors(queryString, ghAccessToken, apiCfg)
+	result, err := githubGraphQL.GithubGetCommitAuthors(queryString, ghAccessToken, githubGraphQLBaseUrl)
 
 	if err != nil {
 		logger.LogError("error occured while fetching from GraphQL API: %s", err)

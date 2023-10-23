@@ -3,8 +3,8 @@ package usersync
 import (
 	"database/database"
 	"database/sql"
-	"main/internal/pkg/githubGraphQL"
 	"time"
+	"util/githubGraphQL"
 )
 
 func convertAuthorToInsertUserParams(author githubGraphQL.GithubGraphQLAuthor, createdAt time.Time, updatedAt time.Time) database.InsertUserParams {

@@ -8,10 +8,10 @@ POSTGRES_PORT=${1:-5432}
 
 echo "Checking port $POSTGRES_PORT"
 if nc -z localhost $POSTGRES_PORT; then
-  echo "Something is already running on port $POSTGRES_PORT."
-  echo "Please stop it or use a different port and try again."$'\n'
-  echo "Usage: ./boot.sh <port>"
-  exit 1
+	echo "Something is already running on port $POSTGRES_PORT."
+	echo "Please stop it or use a different port and try again."$'\n'
+	echo "Usage: ./boot.sh <port>"
+	exit 1
 fi
 
 echo "Starting new container: $(docker run --name gitguru-postgres -d -e POSTGRES_HOST_AUTH_METHOD=trust -p $POSTGRES_PORT:5432 postgres)"
@@ -33,4 +33,4 @@ psql -h "localhost" -U "postgres" -p $POSTGRES_PORT -f ./repos.sql
 
 # To install go air, a Go runtime with live reloads on code changes,
 # run the following command: go get -u github.com/cosmtrek/air
-go run .
+go run ./reposync
