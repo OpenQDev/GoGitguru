@@ -2,7 +2,8 @@ package setup
 
 import (
 	"database/database"
-	"util/logger"
+
+	"github.com/OpenQDev/GoGitguru/util/logger"
 
 	"github.com/DATA-DOG/go-sqlmock"
 )

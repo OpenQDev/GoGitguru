@@ -4,7 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"util/testhelpers"
+
+	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 )
 
 func TestDeleteLocalRepo(t *testing.T) {

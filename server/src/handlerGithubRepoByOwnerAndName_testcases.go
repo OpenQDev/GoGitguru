@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	"util/githubRest"
+
+	"github.com/OpenQDev/GoGitguru/util/githubRest"
 
 	"github.com/DATA-DOG/go-sqlmock"
 )

@@ -2,7 +2,8 @@ package usersync
 
 import (
 	"fmt"
-	"util/githubGraphQL"
+
+	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
 )
 
 func generateAuthorBatchGqlQuery(organization string, repo string, authorList []AuthorCommitTuple) string {

@@ -2,8 +2,9 @@ package main
 
 import (
 	server "server/src"
-	"util/logger"
-	"util/setup"
+
+	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/setup"
 )
 
 func main() {

@@ -2,8 +2,9 @@ package server
 
 import (
 	"database/database"
-	"util/logger"
-	"util/setup"
+
+	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/setup"
 )
 
 func PrepareServerSingleton(dbUrl string) (*database.Queries, ApiConfig) {

@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"util/githubRest"
-	"util/marshaller"
+
+	"github.com/OpenQDev/GoGitguru/util/githubRest"
+	"github.com/OpenQDev/GoGitguru/util/marshaller"
 
 	"github.com/go-chi/chi"
 )

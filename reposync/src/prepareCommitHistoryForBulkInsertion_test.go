@@ -3,7 +3,8 @@ package reposync
 import (
 	"testing"
 	"time"
-	"util/gitutil"
+
+	"github.com/OpenQDev/GoGitguru/util/gitutil"
 
 	"github.com/stretchr/testify/assert"
 )

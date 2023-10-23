@@ -2,7 +2,8 @@ package gitutil
 
 import (
 	"testing"
-	"util/testhelpers"
+
+	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 )
 
 func TestExtractOrganizationAndRepositoryFromUrl(t *testing.T) {

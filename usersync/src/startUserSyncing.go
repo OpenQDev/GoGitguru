@@ -3,8 +3,9 @@ package usersync
 import (
 	"database/database"
 	"time"
-	"util/githubGraphQL"
-	"util/logger"
+
+	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
+	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
 type UserSync struct {

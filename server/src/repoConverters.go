@@ -4,7 +4,8 @@ import (
 	"database/database"
 	"database/sql"
 	"time"
-	"util/githubRest"
+
+	"github.com/OpenQDev/GoGitguru/util/githubRest"
 )
 
 func ConvertGithubRestRepoToInsertGithubRepoParams(repo githubRest.GithubRestRepo) database.InsertGithubRepoParams {

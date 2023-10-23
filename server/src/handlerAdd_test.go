@@ -6,10 +6,11 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
-	"util/logger"
-	"util/marshaller"
-	"util/setup"
-	"util/testhelpers"
+
+	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/marshaller"
+	"github.com/OpenQDev/GoGitguru/util/setup"
+	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"

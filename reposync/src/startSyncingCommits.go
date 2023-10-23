@@ -5,8 +5,9 @@ import (
 	"database/database"
 	"strings"
 	"time"
-	"util/gitutil"
-	"util/logger"
+
+	"github.com/OpenQDev/GoGitguru/util/gitutil"
+	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
 func StartSyncingCommits(

@@ -6,9 +6,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"util/gitutil"
-	"util/logger"
-	"util/marshaller"
+
+	"github.com/OpenQDev/GoGitguru/util/gitutil"
+	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/marshaller"
 )
 
 type DependencyHistoryRequest struct {

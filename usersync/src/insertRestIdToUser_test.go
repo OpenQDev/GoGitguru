@@ -2,8 +2,9 @@ package usersync
 
 import (
 	"testing"
-	"util/setup"
-	"util/testhelpers"
+
+	"github.com/OpenQDev/GoGitguru/util/setup"
+	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -3,7 +3,8 @@ package usersync
 import (
 	"strings"
 	"testing"
-	"util/testhelpers"
+
+	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 )
 
 func TestGenerateAuthorBatchGqlQuery(t *testing.T) {

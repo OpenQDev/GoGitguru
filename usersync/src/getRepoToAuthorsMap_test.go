@@ -3,7 +3,8 @@ package usersync
 import (
 	"reflect"
 	"testing"
-	"util/testhelpers"
+
+	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 )
 
 func TestGetRepoToAuthorsMap(t *testing.T) {

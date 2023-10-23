@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"util/logger"
+
+	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
 type ErrorResponse struct {

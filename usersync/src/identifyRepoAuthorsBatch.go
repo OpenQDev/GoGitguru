@@ -2,9 +2,10 @@ package usersync
 
 import (
 	"fmt"
-	"util/githubGraphQL"
-	"util/gitutil"
-	"util/logger"
+
+	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
+	"github.com/OpenQDev/GoGitguru/util/gitutil"
+	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
 func identifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTuple, ghAccessToken string, githubGraphQLBaseUrl string) (map[string]githubGraphQL.GithubGraphQLCommit, error) {

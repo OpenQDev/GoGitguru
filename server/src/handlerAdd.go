@@ -7,7 +7,8 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"util/logger"
+
+	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
 type HandlerAddRequest struct {

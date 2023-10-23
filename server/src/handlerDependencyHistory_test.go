@@ -7,11 +7,12 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
-	"util/githubRest"
-	"util/logger"
-	"util/marshaller"
-	"util/setup"
-	"util/testhelpers"
+
+	"github.com/OpenQDev/GoGitguru/util/githubRest"
+	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/marshaller"
+	"github.com/OpenQDev/GoGitguru/util/setup"
+	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 
 	"github.com/stretchr/testify/assert"
 )

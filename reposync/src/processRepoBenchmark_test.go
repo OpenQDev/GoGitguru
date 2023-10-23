@@ -3,9 +3,10 @@ package reposync
 import (
 	"os"
 	"testing"
-	"util/gitutil"
-	"util/logger"
-	"util/setup"
+
+	"github.com/OpenQDev/GoGitguru/util/gitutil"
+	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/setup"
 )
 
 func BenchmarkProcessRepo(b *testing.B) {

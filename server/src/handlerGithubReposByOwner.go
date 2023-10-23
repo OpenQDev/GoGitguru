@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"util/githubRest"
-	"util/logger"
-	"util/marshaller"
+
+	"github.com/OpenQDev/GoGitguru/util/githubRest"
+	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/marshaller"
 
 	"github.com/go-chi/chi"
 )

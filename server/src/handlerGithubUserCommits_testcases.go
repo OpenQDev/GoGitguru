@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"os"
 	"time"
-	"util/marshaller"
+
+	"github.com/OpenQDev/GoGitguru/util/marshaller"
 
 	"github.com/DATA-DOG/go-sqlmock"
 )

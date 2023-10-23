@@ -3,8 +3,8 @@ package setup
 import (
 	"os"
 	"strconv"
-	"util/logger"
 
+	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/joho/godotenv"
 )
 

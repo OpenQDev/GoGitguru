@@ -3,7 +3,8 @@ package reposync
 import (
 	"io"
 	"strings"
-	"util/logger"
+
+	"github.com/OpenQDev/GoGitguru/util/logger"
 
 	"github.com/go-git/go-git/v5/plumbing/object"
 )

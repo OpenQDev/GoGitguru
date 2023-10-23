@@ -1,7 +1,7 @@
 package usersync
 
 import (
-	"util/githubGraphQL"
+	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
 )
 
 type GenerateAuthorBatchGqlQueryTestCase struct {

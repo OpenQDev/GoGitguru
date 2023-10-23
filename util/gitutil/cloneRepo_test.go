@@ -3,7 +3,8 @@ package gitutil
 import (
 	"os"
 	"testing"
-	"util/testhelpers"
+
+	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 )
 
 func TestCloneRepo(t *testing.T) {

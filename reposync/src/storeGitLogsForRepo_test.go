@@ -3,8 +3,9 @@ package reposync
 import (
 	"database/database"
 	"testing"
-	"util/logger"
-	"util/testhelpers"
+
+	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	_ "github.com/lib/pq"

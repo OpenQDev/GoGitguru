@@ -3,7 +3,8 @@ package usersync
 import (
 	"context"
 	"database/database"
-	"util/githubGraphQL"
+
+	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
 )
 
 func insertIntoRestIdToUser(author githubGraphQL.GithubGraphQLAuthor, db *database.Queries) error {

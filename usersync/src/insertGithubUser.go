@@ -4,8 +4,9 @@ import (
 	"context"
 	"database/database"
 	"time"
-	"util/githubGraphQL"
-	"util/logger"
+
+	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
+	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
 func insertGithubUser(author githubGraphQL.GithubGraphQLAuthor, db *database.Queries) error {

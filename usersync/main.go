@@ -3,8 +3,9 @@ package main
 import (
 	"time"
 	usersync "usersync/src"
-	"util/logger"
-	"util/setup"
+
+	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/setup"
 )
 
 func main() {

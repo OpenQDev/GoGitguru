@@ -3,7 +3,8 @@ package reposync
 import (
 	"database/database"
 	"fmt"
-	"util/gitutil"
+
+	"github.com/OpenQDev/GoGitguru/util/gitutil"
 )
 
 type GitLogParams struct {

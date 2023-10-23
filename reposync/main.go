@@ -3,8 +3,9 @@ package main
 import (
 	reposync "reposync/src"
 	"time"
-	"util/logger"
-	"util/setup"
+
+	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/setup"
 )
 
 func main() {

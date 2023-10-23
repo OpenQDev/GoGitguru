@@ -8,10 +8,11 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
-	"util/logger"
-	"util/marshaller"
-	"util/setup"
-	"util/testhelpers"
+
+	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/marshaller"
+	"github.com/OpenQDev/GoGitguru/util/setup"
+	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

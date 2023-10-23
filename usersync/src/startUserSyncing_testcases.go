@@ -2,8 +2,9 @@ package usersync
 
 import (
 	"time"
-	"util/githubGraphQL"
-	"util/logger"
+
+	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
+	"github.com/OpenQDev/GoGitguru/util/logger"
 
 	"github.com/DATA-DOG/go-sqlmock"
 )

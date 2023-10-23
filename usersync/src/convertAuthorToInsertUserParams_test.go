@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"util/githubGraphQL"
+	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
 
 	"github.com/stretchr/testify/assert"
 )

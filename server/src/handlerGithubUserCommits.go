@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	"util/marshaller"
+
+	"github.com/OpenQDev/GoGitguru/util/marshaller"
 
 	"github.com/go-chi/chi"
 )

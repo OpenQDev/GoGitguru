@@ -3,7 +3,8 @@ package reposync
 import (
 	"context"
 	"database/database"
-	"util/logger"
+
+	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
 func ProcessRepo(prefixPath string, organization string, repo string, repoUrl string, db *database.Queries) error {

@@ -8,11 +8,12 @@ import (
 	"os"
 	"reflect"
 	"testing"
-	"util/githubGraphQL"
-	"util/logger"
-	"util/marshaller"
-	"util/setup"
-	"util/testhelpers"
+
+	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
+	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/marshaller"
+	"github.com/OpenQDev/GoGitguru/util/setup"
+	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 )
 
 func TestIdentifyRepoAuthorsBatch(t *testing.T) {

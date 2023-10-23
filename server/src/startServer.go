@@ -2,7 +2,8 @@ package server
 
 import (
 	"net/http"
-	"util/logger"
+
+	"github.com/OpenQDev/GoGitguru/util/logger"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"

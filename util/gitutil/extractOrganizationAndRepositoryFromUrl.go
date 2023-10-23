@@ -3,7 +3,8 @@ package gitutil
 import (
 	"net/url"
 	"strings"
-	"util/logger"
+
+	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
 func ExtractOrganizationAndRepositoryFromUrl(repoUrl string) (string, string) {
