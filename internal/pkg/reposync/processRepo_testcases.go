@@ -14,8 +14,8 @@ type ProcessRepoTestCase struct {
 	setupMock    func(mock sqlmock.Sqlmock, gitLogs []GitLog, repoUrl string)
 }
 
-const organization = "OpenQDev"
-const repo = "OpenQ-DRM-TestRepo"
+const organization = "openqdev"
+const repo = "openq-drm-testrepo"
 
 func validProcessRepoTest() ProcessRepoTestCase {
 	const VALID_GIT_LOGS = "VALID_GIT_LOGS"

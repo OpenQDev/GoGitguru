@@ -34,7 +34,7 @@ func TestProcessRepo(t *testing.T) {
 			tt.setupMock(mock, tt.gitLogs, tt.repoUrl)
 
 			// ACT
-			ProcessRepo(prefixPath, tt.repo, tt.repoUrl, queries)
+			ProcessRepo(prefixPath, tt.organization, tt.repo, tt.repoUrl, queries)
 			if err != nil {
 				t.Errorf("there was an error processing repo: %s", err)
 			}

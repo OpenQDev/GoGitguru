@@ -2,13 +2,11 @@ package reposync
 
 import (
 	"context"
-	"fmt"
 	"main/internal/database"
 	"main/internal/pkg/logger"
 )
 
 func ProcessRepo(prefixPath string, organization string, repo string, repoUrl string, db *database.Queries) error {
-	fmt.Println("prefixPath", prefixPath)
 	logger.LogGreenDebug("beginning to process %s", repoUrl)
 
 	db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{

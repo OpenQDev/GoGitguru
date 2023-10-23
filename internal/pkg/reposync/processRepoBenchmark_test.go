@@ -36,7 +36,7 @@ func BenchmarkProcessRepo(b *testing.B) {
 	gitutil.CloneRepo(prefixPath, organization, repo)
 
 	for i := 0; i < b.N; i++ {
-		err := ProcessRepo(prefixPath, repo, repoUrl, db)
+		err := ProcessRepo(prefixPath, organization, repo, repoUrl, db)
 		if err != nil {
 			b.Fatal(err)
 		}

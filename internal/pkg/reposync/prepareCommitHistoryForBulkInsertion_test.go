@@ -11,10 +11,11 @@ import (
 func TestPrepareCommitHistoryForBulkInsertion(t *testing.T) {
 	// ARRANGE - GLOBAL
 
-	repo := "OpenQ-DRM-TestRepo"
+	organization := "openqdev"
+	repo := "openq-drm-testrepo"
 	prefixPath := "mock"
 
-	r, err := gitutil.OpenGitRepo(prefixPath, repo)
+	r, err := gitutil.OpenGitRepo(prefixPath, organization, repo)
 	if err != nil {
 		t.Fatalf("failed to open git repo: %s", err)
 	}

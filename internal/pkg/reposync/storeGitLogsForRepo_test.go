@@ -35,7 +35,7 @@ func TestStoreGitLogsForRepo(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setupMock(mock, tt.gitLogs, tt.repoUrl)
 
-			commitCount, err := StoreGitLogsForRepo(GitLogParams{prefixPath, repo, tt.repoUrl, "", queries})
+			commitCount, err := StoreGitLogsForRepo(GitLogParams{prefixPath, organization, repo, tt.repoUrl, "", queries})
 			if err != nil && tt.shouldError == false {
 				t.Errorf("there was an error storing this commit: %v - the error was: %s", commitCount, err)
 			}
