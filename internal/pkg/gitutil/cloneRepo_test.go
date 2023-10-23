@@ -24,7 +24,7 @@ func TestCloneRepo(t *testing.T) {
 				t.Errorf("CloneRepo() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			// Defer deletion of the repo after each test
-			defer DeleteLocalRepo(prefixPath, tt.repo)
+			defer DeleteLocalRepo(prefixPath, tt.organization, tt.repo)
 		})
 	}
 }

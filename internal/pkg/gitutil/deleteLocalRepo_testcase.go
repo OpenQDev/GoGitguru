@@ -1,14 +1,16 @@
 package gitutil
 
 type DeleteLocalRepoTest struct {
-	name string
-	repo string
+	name         string
+	organization string
+	repo         string
 }
 
 func successfulDelete() DeleteLocalRepoTest {
 	return DeleteLocalRepoTest{
-		name: "Successful delete",
-		repo: "testRepo",
+		name:         "Successful delete",
+		organization: "testOrganization",
+		repo:         "testRepo",
 	}
 }
 

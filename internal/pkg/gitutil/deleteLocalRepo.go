@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 )
 
-func DeleteLocalRepo(prefixPath string, repo string) error {
-	path := filepath.Join(prefixPath, repo)
+func DeleteLocalRepo(prefixPath string, organization string, repo string) error {
+	path := filepath.Join(prefixPath, organization, repo)
 
 	err := os.RemoveAll(path)
 
