@@ -5,6 +5,6 @@ sql:
     engine: "postgresql"
     gen:
       go:
-        out: "internal/database"
+        out: "database/database"
         emit_json_tags: true
         emit_prepared_queries: true

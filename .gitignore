@@ -3,3 +3,4 @@ repos/
 coverage.out
 tmp/
 main
+**/repos/
