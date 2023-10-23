@@ -1,13 +1,10 @@
 go 1.21.1
 
-use ./util
-
-use ./database
-
-use ./reposync
-
-use ./usersync
-
-use ./server
-
-use .
+use (
+	./util
+	./database
+	./reposync
+	./usersync
+	./server
+	.
+)
