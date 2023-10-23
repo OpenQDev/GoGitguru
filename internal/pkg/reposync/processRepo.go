@@ -2,11 +2,13 @@ package reposync
 
 import (
 	"context"
+	"fmt"
 	"main/internal/database"
 	"main/internal/pkg/logger"
 )
 
-func ProcessRepo(prefixPath string, repo string, repoUrl string, db *database.Queries) error {
+func ProcessRepo(prefixPath string, organization string, repo string, repoUrl string, db *database.Queries) error {
+	fmt.Println("prefixPath", prefixPath)
 	logger.LogGreenDebug("beginning to process %s", repoUrl)
 
 	db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
@@ -14,7 +16,7 @@ func ProcessRepo(prefixPath string, repo string, repoUrl string, db *database.Qu
 		Url:    repoUrl,
 	})
 
-	commitCount, err := StoreGitLogsForRepo(GitLogParams{prefixPath, repo, repoUrl, "", db})
+	commitCount, err := StoreGitLogsForRepo(GitLogParams{prefixPath, organization, repo, repoUrl, "", db})
 	if err != nil {
 		db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
 			Status: database.RepoStatusFailed,

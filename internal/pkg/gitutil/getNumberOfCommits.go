@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-func GetNumberOfCommits(prefixPath string, repo string) (int, error) {
-	fullRepoPath := filepath.Join(prefixPath, repo)
+func GetNumberOfCommits(prefixPath string, organization string, repo string) (int, error) {
+	fullRepoPath := filepath.Join(prefixPath, organization, repo)
 	cmd := exec.Command("git", "-C", fullRepoPath, "rev-list", "--count", "HEAD")
 	var out bytes.Buffer
 	var stderr bytes.Buffer

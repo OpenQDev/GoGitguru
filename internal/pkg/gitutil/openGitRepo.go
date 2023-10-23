@@ -6,7 +6,7 @@ import (
 	"github.com/go-git/go-git/v5"
 )
 
-func OpenGitRepo(prefixPath string, repo string) (*git.Repository, error) {
-	fullRepoPath := filepath.Join(prefixPath, repo)
+func OpenGitRepo(prefixPath string, organization string, repo string) (*git.Repository, error) {
+	fullRepoPath := filepath.Join(prefixPath, organization, repo)
 	return git.PlainOpen(fullRepoPath)
 }

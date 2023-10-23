@@ -8,6 +8,7 @@ import (
 
 type GitLogParams struct {
 	prefixPath     string
+	organization   string
 	repo           string
 	repoUrl        string
 	fromCommitDate string
@@ -20,7 +21,7 @@ func StoreGitLogsForRepo(params GitLogParams) (int, error) {
 		return 0, err
 	}
 
-	r, err := gitutil.OpenGitRepo(params.prefixPath, params.repo)
+	r, err := gitutil.OpenGitRepo(params.prefixPath, params.organization, params.repo)
 	if err != nil {
 		return 0, err
 	}
@@ -30,7 +31,7 @@ func StoreGitLogsForRepo(params GitLogParams) (int, error) {
 		return 0, err
 	}
 
-	numberOfCommits, err := gitutil.GetNumberOfCommits(params.prefixPath, params.repo)
+	numberOfCommits, err := gitutil.GetNumberOfCommits(params.prefixPath, params.organization, params.repo)
 	if err != nil {
 		return 0, err
 	}
