@@ -1,10 +1,10 @@
 package server
 
 import (
-	"encoding/json"
 	"log"
 	"main/internal/pkg/gitutil"
 	"main/internal/pkg/logger"
+	"main/internal/pkg/server/util"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -23,7 +23,7 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 	var dependencyHistory gitutil.DiffHistoryResult
 
 	var body DependencyHistoryRequest
-	err := json.NewDecoder(r.Body).Decode(&body)
+	err := util.ReaderToType(r.Body, &body)
 	if err != nil {
 		RespondWithError(w, 200, err.Error())
 		return
@@ -35,9 +35,9 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 		return
 	}
 
-	_, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(body.RepoUrl)
+	organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(body.RepoUrl)
 
-	repoDir := filepath.Join("/Users/alo/OpenQ-Fullstack/GoGitguru/repos", repo)
+	repoDir := filepath.Join(apiCfg.PrefixPath, organization, repo)
 
 	if _, err := os.Stat(repoDir); os.IsNotExist(err) {
 		RespondWithError(w, 404, "Repository directory does not exist.")

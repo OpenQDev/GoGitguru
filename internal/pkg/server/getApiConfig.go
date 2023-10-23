@@ -9,6 +9,7 @@ func GetApiConfig(database *database.Queries) (ApiConfig, error) {
 		DB:                   database,
 		GithubRestAPIBaseUrl: "https://api.github.com",
 		GithubGraphQLBaseUrl: "https://api.github.com/graphql",
+		PrefixPath:           "repos",
 	}
 
 	return apiCfg, nil
