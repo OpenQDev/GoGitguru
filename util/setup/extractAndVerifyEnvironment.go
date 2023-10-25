@@ -13,30 +13,26 @@ type EnvConfig struct {
 	DbUrl                       string
 	OriginUrl                   string
 	Debug                       bool
-	Sync                        bool
 	SyncIntervalMinutesInt      int
-	SyncUsers                   bool
 	SyncUsersIntervalMinutesInt int
 	GhAccessToken               string
 	TargetLiveGithub            bool
-	StartServer                 bool
 }
 
 func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
-	godotenv.Load(pathToDotenv)
+	if os.Getenv("APP_ENV") != "production" {
+		godotenv.Load(pathToDotenv)
+	}
 
 	return EnvConfig{
 		PortString:                  getEnvVar("PORT", "string").(string),
 		DbUrl:                       getEnvVar("DB_URL", "string").(string),
 		OriginUrl:                   getEnvVar("ORIGIN_URL", "string").(string),
 		Debug:                       getEnvVar("DEBUG_MODE", "bool").(bool),
-		Sync:                        getEnvVar("SYNC_COMMITS_MODE", "bool").(bool),
 		SyncIntervalMinutesInt:      getEnvVar("SYNC_COMMITS_INTERVAL_MINUTES", "int").(int),
-		SyncUsers:                   getEnvVar("SYNC_USERS_MODE", "bool").(bool),
 		SyncUsersIntervalMinutesInt: getEnvVar("SYNC_USERS_INTERVAL_MINUTES", "int").(int),
 		GhAccessToken:               getEnvVar("GH_ACCESS_TOKEN", "string").(string),
 		TargetLiveGithub:            getEnvVar("TARGET_LIVE_GITHUB", "bool").(bool),
-		StartServer:                 getEnvVar("START_SERVER", "bool").(bool),
 	}
 }
 

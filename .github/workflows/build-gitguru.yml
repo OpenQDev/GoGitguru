@@ -36,13 +36,3 @@ jobs:
           file: ./Dockerfile.gitguru
           push: true
           tags: openq/gitguru:${{ inputs.environment }}-${{ inputs.version }}
-
-  tagHelm:
-    needs: build
-    uses: OpenQDev/OpenQ-Workflows/.github/workflows/tag.yml@main
-    with:
-      APP: gitguru
-      VERSION: ${{ inputs.environment }}-${{ inputs.version }}
-      ENVIRONMENT: ${{ inputs.environment }}
-    secrets:
-      PAT: ${{ secrets.PAT }}
