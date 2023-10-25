@@ -47,6 +47,14 @@ func TestStatusHandler(t *testing.T) {
 			// ACT
 			apiCfg.HandlerStatus(rr, req)
 
+			// ASSERT
+			if tt.shouldError {
+				require.Equal(t, tt.expectedStatus, rr.Code)
+				expectedError := `{"error":"repo_urls cannot be empty"}`
+				require.JSONEq(t, expectedError, rr.Body.String())
+				return
+			}
+
 			// ARRANGE - EXPECT
 			var actualHandlerStatusResponse []HandlerStatusResponse
 			err = marshaller.ReaderToType(rr.Body, &actualHandlerStatusResponse)

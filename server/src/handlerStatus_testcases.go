@@ -16,6 +16,26 @@ type HandlerStatusTest struct {
 	setupMock          func(mock sqlmock.Sqlmock, repos []string)
 }
 
+func noRepoUrls() HandlerStatusTest {
+	const NO_REPO_URLS = "NO_REPO_URLS"
+	targetRepos := []string{}
+
+	noRequestsBody := HandlerAddRequest{
+		RepoUrls: targetRepos,
+	}
+
+	noRepoUrls := HandlerStatusTest{
+		name:               NO_REPO_URLS,
+		expectedStatus:     http.StatusBadRequest,
+		requestBody:        noRequestsBody,
+		expectedReturnBody: []HandlerStatusResponse{},
+		shouldError:        true,
+		setupMock:          func(mock sqlmock.Sqlmock, repos []string) {},
+	}
+
+	return noRepoUrls
+}
+
 func statusValidRepoUrls() HandlerStatusTest {
 	const VALID_REPO_URLS = "VALID_REPO_URLS"
 	repo1Url := "https://github.com/org/repo1"
@@ -105,5 +125,6 @@ func HandlerStatusTestCases() []HandlerStatusTest {
 	return []HandlerStatusTest{
 		statusValidRepoUrls(),
 		missingRepoUrl(),
+		noRepoUrls(),
 	}
 }

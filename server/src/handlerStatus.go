@@ -30,6 +30,11 @@ func (apiCfg *ApiConfig) HandlerStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(body.RepoUrls) == 0 {
+		RespondWithError(w, http.StatusBadRequest, "repo_urls cannot be empty")
+		return
+	}
+
 	repoStatuses, err := apiCfg.DB.GetReposStatus(r.Context(), body.RepoUrls)
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error in GetReposStatus: %s", err))
