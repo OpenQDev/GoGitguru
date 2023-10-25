@@ -3,13 +3,11 @@ package server
 import "net/http"
 
 type HandlerStatusTest struct {
-	name                          string
-	expectedStatus                int
-	requestBody                   HandlerAddRequest
-	expectedSuccessResponse       HandlerAddResponse
-	secondExpectedSuccessResponse HandlerAddResponse
-	expectedErrorResponse         ErrorResponse
-	shouldError                   bool
+	name                    string
+	expectedStatus          int
+	requestBody             HandlerAddRequest
+	expectedSuccessResponse HandlerStatusResponse
+	shouldError             bool
 }
 
 func statusValidRepoUrls() HandlerStatusTest {
@@ -20,23 +18,14 @@ func statusValidRepoUrls() HandlerStatusTest {
 		RepoUrls: targetRepos,
 	}
 
-	successReturnBody := HandlerAddResponse{
-		Accepted:       targetRepos,
-		AlreadyInQueue: []string{},
-	}
-
-	secondReturnBody := HandlerAddResponse{
-		Accepted:       []string{},
-		AlreadyInQueue: targetRepos,
-	}
+	successReturnBody := HandlerStatusResponse{}
 
 	validRepoUrls := HandlerStatusTest{
-		name:                          VALID_REPO_URLS,
-		expectedStatus:                http.StatusAccepted,
-		requestBody:                   twoReposRequest,
-		expectedSuccessResponse:       successReturnBody,
-		secondExpectedSuccessResponse: secondReturnBody,
-		shouldError:                   false,
+		name:                    VALID_REPO_URLS,
+		expectedStatus:          http.StatusAccepted,
+		requestBody:             twoReposRequest,
+		expectedSuccessResponse: successReturnBody,
+		shouldError:             false,
 	}
 
 	return validRepoUrls
