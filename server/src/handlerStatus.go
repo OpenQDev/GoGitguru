@@ -21,7 +21,7 @@ func (apiCfg *ApiConfig) HandlerStatus(w http.ResponseWriter, r *http.Request) {
 
 	response := HandlerStatusRequest{}
 
-	var body HandlerGithubUserCommitsRequest
+	var body HandlerStatusRequest
 	err := marshaller.ReaderToType(r.Body, &body)
 	if err != nil {
 		RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to read body of request: %s", err))
