@@ -57,14 +57,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getLatestUncheckedCommitPerAuthorStmt, err = db.PrepareContext(ctx, getLatestUncheckedCommitPerAuthor); err != nil {
 		return nil, fmt.Errorf("error preparing query GetLatestUncheckedCommitPerAuthor: %w", err)
 	}
-	if q.getPendingAuthorsStmt, err = db.PrepareContext(ctx, getPendingAuthors); err != nil {
-		return nil, fmt.Errorf("error preparing query GetPendingAuthors: %w", err)
-	}
 	if q.getRepoURLStmt, err = db.PrepareContext(ctx, getRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRepoURL: %w", err)
 	}
 	if q.getRepoURLsStmt, err = db.PrepareContext(ctx, getRepoURLs); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRepoURLs: %w", err)
+	}
+	if q.getReposStatusStmt, err = db.PrepareContext(ctx, getReposStatus); err != nil {
+		return nil, fmt.Errorf("error preparing query GetReposStatus: %w", err)
 	}
 	if q.getUserCommitsForReposStmt, err = db.PrepareContext(ctx, getUserCommitsForRepos); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUserCommitsForRepos: %w", err)
@@ -153,11 +153,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getLatestUncheckedCommitPerAuthorStmt: %w", cerr)
 		}
 	}
-	if q.getPendingAuthorsStmt != nil {
-		if cerr := q.getPendingAuthorsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getPendingAuthorsStmt: %w", cerr)
-		}
-	}
 	if q.getRepoURLStmt != nil {
 		if cerr := q.getRepoURLStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getRepoURLStmt: %w", cerr)
@@ -166,6 +161,11 @@ func (q *Queries) Close() error {
 	if q.getRepoURLsStmt != nil {
 		if cerr := q.getRepoURLsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getRepoURLsStmt: %w", cerr)
+		}
+	}
+	if q.getReposStatusStmt != nil {
+		if cerr := q.getReposStatusStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getReposStatusStmt: %w", cerr)
 		}
 	}
 	if q.getUserCommitsForReposStmt != nil {
@@ -263,9 +263,9 @@ type Queries struct {
 	getGithubUserStmt                     *sql.Stmt
 	getGroupOfEmailsStmt                  *sql.Stmt
 	getLatestUncheckedCommitPerAuthorStmt *sql.Stmt
-	getPendingAuthorsStmt                 *sql.Stmt
 	getRepoURLStmt                        *sql.Stmt
 	getRepoURLsStmt                       *sql.Stmt
+	getReposStatusStmt                    *sql.Stmt
 	getUserCommitsForReposStmt            *sql.Stmt
 	insertCommitStmt                      *sql.Stmt
 	insertGithubRepoStmt                  *sql.Stmt
@@ -292,9 +292,9 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getGithubUserStmt:                     q.getGithubUserStmt,
 		getGroupOfEmailsStmt:                  q.getGroupOfEmailsStmt,
 		getLatestUncheckedCommitPerAuthorStmt: q.getLatestUncheckedCommitPerAuthorStmt,
-		getPendingAuthorsStmt:                 q.getPendingAuthorsStmt,
 		getRepoURLStmt:                        q.getRepoURLStmt,
 		getRepoURLsStmt:                       q.getRepoURLsStmt,
+		getReposStatusStmt:                    q.getReposStatusStmt,
 		getUserCommitsForReposStmt:            q.getUserCommitsForReposStmt,
 		insertCommitStmt:                      q.insertCommitStmt,
 		insertGithubRepoStmt:                  q.insertGithubRepoStmt,

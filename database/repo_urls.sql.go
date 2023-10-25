@@ -7,50 +7,9 @@ package database
 
 import (
 	"context"
+
+	"github.com/lib/pq"
 )
-
-const getPendingAuthors = `-- name: GetPendingAuthors :many
-SELECT
-    url,
-    status,
-    (SELECT COUNT(DISTINCT(author_email))
-     FROM commits
-     WHERE author_email NOT IN (SELECT email FROM github_user_rest_id_author_emails)
-     AND repo_url = url
-    ) AS pending_authors
-FROM repo_urls
-WHERE url = ANY($1)
-ORDER BY status, updated_at DESC
-`
-
-type GetPendingAuthorsRow struct {
-	Url            string     `json:"url"`
-	Status         RepoStatus `json:"status"`
-	PendingAuthors int64      `json:"pending_authors"`
-}
-
-func (q *Queries) GetPendingAuthors(ctx context.Context, url string) ([]GetPendingAuthorsRow, error) {
-	rows, err := q.query(ctx, q.getPendingAuthorsStmt, getPendingAuthors, url)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetPendingAuthorsRow
-	for rows.Next() {
-		var i GetPendingAuthorsRow
-		if err := rows.Scan(&i.Url, &i.Status, &i.PendingAuthors); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
 
 const getRepoURL = `-- name: GetRepoURL :one
 SELECT url, status, created_at, updated_at FROM repo_urls WHERE url = $1
@@ -87,6 +46,49 @@ func (q *Queries) GetRepoURLs(ctx context.Context) ([]RepoUrl, error) {
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getReposStatus = `-- name: GetReposStatus :many
+SELECT
+    url,
+    status,
+    (SELECT COUNT(DISTINCT(author_email))
+     FROM commits
+     WHERE author_email NOT IN (SELECT email FROM github_user_rest_id_author_emails)
+     AND repo_url = url
+    ) AS pending_authors
+FROM repo_urls
+WHERE url = ANY($1::text[])
+ORDER BY status, updated_at DESC
+`
+
+type GetReposStatusRow struct {
+	Url            string     `json:"url"`
+	Status         RepoStatus `json:"status"`
+	PendingAuthors int64      `json:"pending_authors"`
+}
+
+func (q *Queries) GetReposStatus(ctx context.Context, dollar_1 []string) ([]GetReposStatusRow, error) {
+	rows, err := q.query(ctx, q.getReposStatusStmt, getReposStatus, pq.Array(dollar_1))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetReposStatusRow
+	for rows.Next() {
+		var i GetReposStatusRow
+		if err := rows.Scan(&i.Url, &i.Status, &i.PendingAuthors); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

@@ -15,7 +15,7 @@ UPDATE repo_urls SET status = $1 WHERE url = $2 AND status != 'failed';
 -- name: UpdateStatusAndUpdatedAt :exec
 UPDATE repo_urls SET status = $1, updated_at = NOW() WHERE url = $2 AND status != 'failed';
 
--- name: GetRepoStatus :many
+-- name: GetReposStatus :many
 SELECT
     url,
     status,
@@ -25,5 +25,5 @@ SELECT
      AND repo_url = url
     ) AS pending_authors
 FROM repo_urls
-WHERE url = ANY($1)
+WHERE url = ANY($1::text[])
 ORDER BY status, updated_at DESC;

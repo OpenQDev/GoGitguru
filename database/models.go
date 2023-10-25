@@ -21,6 +21,7 @@ const (
 	RepoStatusSynced          RepoStatus = "synced"
 	RepoStatusStoringCommits  RepoStatus = "storing_commits"
 	RepoStatusFailed          RepoStatus = "failed"
+	RepoStatusNotListed       RepoStatus = "not_listed"
 )
 
 func (e *RepoStatus) Scan(src interface{}) error {
