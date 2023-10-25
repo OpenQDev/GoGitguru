@@ -57,6 +57,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getLatestUncheckedCommitPerAuthorStmt, err = db.PrepareContext(ctx, getLatestUncheckedCommitPerAuthor); err != nil {
 		return nil, fmt.Errorf("error preparing query GetLatestUncheckedCommitPerAuthor: %w", err)
 	}
+	if q.getPendingAuthorsStmt, err = db.PrepareContext(ctx, getPendingAuthors); err != nil {
+		return nil, fmt.Errorf("error preparing query GetPendingAuthors: %w", err)
+	}
 	if q.getRepoURLStmt, err = db.PrepareContext(ctx, getRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRepoURL: %w", err)
 	}
@@ -148,6 +151,11 @@ func (q *Queries) Close() error {
 	if q.getLatestUncheckedCommitPerAuthorStmt != nil {
 		if cerr := q.getLatestUncheckedCommitPerAuthorStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getLatestUncheckedCommitPerAuthorStmt: %w", cerr)
+		}
+	}
+	if q.getPendingAuthorsStmt != nil {
+		if cerr := q.getPendingAuthorsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getPendingAuthorsStmt: %w", cerr)
 		}
 	}
 	if q.getRepoURLStmt != nil {
@@ -255,6 +263,7 @@ type Queries struct {
 	getGithubUserStmt                     *sql.Stmt
 	getGroupOfEmailsStmt                  *sql.Stmt
 	getLatestUncheckedCommitPerAuthorStmt *sql.Stmt
+	getPendingAuthorsStmt                 *sql.Stmt
 	getRepoURLStmt                        *sql.Stmt
 	getRepoURLsStmt                       *sql.Stmt
 	getUserCommitsForReposStmt            *sql.Stmt
@@ -283,6 +292,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getGithubUserStmt:                     q.getGithubUserStmt,
 		getGroupOfEmailsStmt:                  q.getGroupOfEmailsStmt,
 		getLatestUncheckedCommitPerAuthorStmt: q.getLatestUncheckedCommitPerAuthorStmt,
+		getPendingAuthorsStmt:                 q.getPendingAuthorsStmt,
 		getRepoURLStmt:                        q.getRepoURLStmt,
 		getRepoURLsStmt:                       q.getRepoURLsStmt,
 		getUserCommitsForReposStmt:            q.getUserCommitsForReposStmt,
