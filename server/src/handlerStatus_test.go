@@ -9,8 +9,7 @@ import (
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
 	"github.com/OpenQDev/GoGitguru/util/setup"
 	"github.com/OpenQDev/GoGitguru/util/testhelpers"
-
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestStatusHandler(t *testing.T) {
@@ -19,7 +18,7 @@ func TestStatusHandler(t *testing.T) {
 	debugMode := env.Debug
 	logger.SetDebugMode(debugMode)
 
-	_, queries := setup.GetMockDatabase()
+	mock, queries := setup.GetMockDatabase()
 
 	apiCfg := ApiConfig{
 		DB: queries,
@@ -43,11 +42,25 @@ func TestStatusHandler(t *testing.T) {
 			req, _ := http.NewRequest("POST", "", requestBody)
 			rr := httptest.NewRecorder()
 
+			tt.setupMock(mock, tt.requestBody.RepoUrls)
+
 			// ACT
 			apiCfg.HandlerStatus(rr, req)
 
-			// EXPECT
-			assert.Equal(t, tt.expectedStatus, rr.Result().StatusCode)
+			// ARRANGE - EXPECT
+			var actualHandlerStatusResponse []HandlerStatusResponse
+			err = marshaller.ReaderToType(rr.Body, &actualHandlerStatusResponse)
+			if err != nil {
+				t.Errorf("Failed to decode rr.Body into HandlerStatusResponse: %s", err)
+				return
+			}
+
+			require.Equal(t, tt.expectedStatus, rr.Code, rr.Body)
+			require.Equal(t, tt.expectedReturnBody, actualHandlerStatusResponse)
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
 		})
 	}
 }

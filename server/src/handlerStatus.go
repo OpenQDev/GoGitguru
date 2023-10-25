@@ -19,7 +19,7 @@ type HandlerStatusResponse struct {
 
 func (apiCfg *ApiConfig) HandlerStatus(w http.ResponseWriter, r *http.Request) {
 
-	response := HandlerStatusRequest{}
+	response := []HandlerStatusResponse{}
 
 	var body HandlerStatusRequest
 	err := marshaller.ReaderToType(r.Body, &body)
@@ -28,7 +28,19 @@ func (apiCfg *ApiConfig) HandlerStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("body", body)
+	repoStatuses, err := apiCfg.DB.GetReposStatus(r.Context(), body.RepoUrls)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error in GetReposStatus: %s", err))
+		return
+	}
+
+	for _, repoStatus := range repoStatuses {
+		response = append(response, HandlerStatusResponse{
+			Url:            repoStatus.Url,
+			Status:         string(repoStatus.Status),
+			PendingAuthors: int(repoStatus.PendingAuthors),
+		})
+	}
 
 	RespondWithJSON(w, 202, response)
 }
