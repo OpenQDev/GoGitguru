@@ -2,11 +2,12 @@ package server
 
 import (
 	"context"
-	"database/database"
 	"database/sql"
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/OpenQDev/GoGitguru/database"
 
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
 )

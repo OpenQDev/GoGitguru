@@ -1,8 +1,9 @@
 package setup
 
 import (
-	"database/database"
 	"database/sql"
+
+	"github.com/OpenQDev/GoGitguru/database"
 
 	_ "github.com/lib/pq"
 )

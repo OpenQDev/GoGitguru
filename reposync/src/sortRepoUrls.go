@@ -1,9 +1,10 @@
 package reposync
 
 import (
-	"database/database"
 	"sort"
 	"strings"
+
+	"github.com/OpenQDev/GoGitguru/database"
 )
 
 func sortRepoUrls(repoUrlObjects []database.RepoUrl) []string {

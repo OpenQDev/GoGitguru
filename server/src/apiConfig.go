@@ -1,6 +1,6 @@
 package server
 
-import "database/database"
+import "github.com/OpenQDev/GoGitguru/database"
 
 type ApiConfig struct {
 	DB                   *database.Queries

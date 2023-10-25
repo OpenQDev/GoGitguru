@@ -1,7 +1,7 @@
 package server
 
 import (
-	"database/database"
+	"github.com/OpenQDev/GoGitguru/database"
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/setup"

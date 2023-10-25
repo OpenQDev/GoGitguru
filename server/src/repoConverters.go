@@ -1,9 +1,10 @@
 package server
 
 import (
-	"database/database"
 	"database/sql"
 	"time"
+
+	"github.com/OpenQDev/GoGitguru/database"
 
 	"github.com/OpenQDev/GoGitguru/util/githubRest"
 )

@@ -1,8 +1,9 @@
 package usersync
 
 import (
-	"database/database"
 	"time"
+
+	"github.com/OpenQDev/GoGitguru/database"
 
 	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
 	"github.com/OpenQDev/GoGitguru/util/logger"

@@ -1,8 +1,9 @@
 package reposync
 
 import (
-	"database/database"
 	"testing"
+
+	"github.com/OpenQDev/GoGitguru/database"
 )
 
 func TestSortRepoUrls(t *testing.T) {

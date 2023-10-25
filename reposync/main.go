@@ -1,9 +1,9 @@
 package main
 
 import (
-	reposync "reposync/src"
 	"time"
 
+	reposync "github.com/OpenQDev/GoGitguru/reposync/src"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/setup"
 )

@@ -2,8 +2,8 @@ package main
 
 import (
 	"time"
-	usersync "usersync/src"
 
+	usersync "github.com/OpenQDev/GoGitguru/usersync/src"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/setup"
 )

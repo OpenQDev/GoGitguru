@@ -1,4 +1,4 @@
-module usersync
+module github.com/OpenQDev/GoGitguru/usersync
 
 go 1.21.1
 

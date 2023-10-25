@@ -1,9 +1,10 @@
 package reposync
 
 import (
-	"database/database"
 	"fmt"
 	"testing"
+
+	"github.com/OpenQDev/GoGitguru/database"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/lib/pq"

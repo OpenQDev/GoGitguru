@@ -2,7 +2,8 @@ package usersync
 
 import (
 	"context"
-	"database/database"
+
+	"github.com/OpenQDev/GoGitguru/database"
 )
 
 func getNewCommitAuthors(db *database.Queries) ([]database.GetLatestUncheckedCommitPerAuthorRow, error) {

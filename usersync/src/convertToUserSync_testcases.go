@@ -1,8 +1,9 @@
 package usersync
 
 import (
-	"database/database"
 	"database/sql"
+
+	"github.com/OpenQDev/GoGitguru/database"
 )
 
 type ConvertToUserSyncTestCase struct {

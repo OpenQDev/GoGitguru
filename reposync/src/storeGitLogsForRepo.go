@@ -1,8 +1,9 @@
 package reposync
 
 import (
-	"database/database"
 	"fmt"
+
+	"github.com/OpenQDev/GoGitguru/database"
 
 	"github.com/OpenQDev/GoGitguru/util/gitutil"
 )

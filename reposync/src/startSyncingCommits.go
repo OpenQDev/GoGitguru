@@ -2,9 +2,10 @@ package reposync
 
 import (
 	"context"
-	"database/database"
 	"strings"
 	"time"
+
+	"github.com/OpenQDev/GoGitguru/database"
 
 	"github.com/OpenQDev/GoGitguru/util/gitutil"
 	"github.com/OpenQDev/GoGitguru/util/logger"

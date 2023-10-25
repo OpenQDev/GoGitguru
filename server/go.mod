@@ -1,4 +1,4 @@
-module server
+module github.com/OpenQDev/GoGitguru/server
 
 go 1.21.1
 

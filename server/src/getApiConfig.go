@@ -1,7 +1,7 @@
 package server
 
 import (
-	"database/database"
+	"github.com/OpenQDev/GoGitguru/database"
 )
 
 func GetApiConfig(database *database.Queries) (ApiConfig, error) {

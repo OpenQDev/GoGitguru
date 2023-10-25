@@ -1,4 +1,4 @@
-module reposync
+module github.com/OpenQDev/GoGitguru/reposync
 
 go 1.21.1
 
