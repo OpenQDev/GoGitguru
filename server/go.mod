@@ -4,8 +4,8 @@ go 1.21.1
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/OpenQDev/GoGitguru/database v0.0.0-20231025184844-aa9b2acb1065
-	github.com/OpenQDev/GoGitguru/util v0.0.0-20231025184844-aa9b2acb1065
+	github.com/OpenQDev/GoGitguru/database v1.0.0
+	github.com/OpenQDev/GoGitguru/util v1.0.0
 	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/cors v1.2.1
 	github.com/lib/pq v1.10.9
