@@ -59,8 +59,51 @@ func statusValidRepoUrls() HandlerStatusTest {
 	return validRepoUrls
 }
 
+func missingRepoUrl() HandlerStatusTest {
+	const MISSING_REPO_URL = "MISSING_REPO_URL"
+	repo1Url := "https://github.com/org/repo1"
+	missingRepoUrl := "https://github.com/org/iDontExist"
+	targetRepos := []string{repo1Url, missingRepoUrl}
+
+	twoReposRequest := HandlerAddRequest{
+		RepoUrls: targetRepos,
+	}
+
+	successReturnBody := []HandlerStatusResponse{
+		{
+			Url:            repo1Url,
+			Status:         "pending",
+			PendingAuthors: 1,
+		},
+		{
+			Url:            missingRepoUrl,
+			Status:         "not_listed",
+			PendingAuthors: 0,
+		},
+	}
+
+	rows := sqlmock.NewRows([]string{"url", "status", "pending_authors"})
+	rows.AddRow(repo1Url, "pending", 1)
+
+	oneMissingRepoUrl := HandlerStatusTest{
+		name:               MISSING_REPO_URL,
+		expectedStatus:     http.StatusAccepted,
+		requestBody:        twoReposRequest,
+		expectedReturnBody: successReturnBody,
+		shouldError:        false,
+		setupMock: func(mock sqlmock.Sqlmock, repos []string) {
+			mock.ExpectQuery("^-- name: GetReposStatus :many.*").
+				WithArgs(pq.Array(targetRepos)).
+				WillReturnRows(rows)
+		},
+	}
+
+	return oneMissingRepoUrl
+}
+
 func HandlerStatusTestCases() []HandlerStatusTest {
 	return []HandlerStatusTest{
 		statusValidRepoUrls(),
+		missingRepoUrl(),
 	}
 }
