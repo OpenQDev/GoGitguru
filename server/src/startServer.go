@@ -36,6 +36,8 @@ func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
 
 	v1Router.Post("/dependency-history", apiCfg.HandlerDependencyHistory)
 
+	v1Router.Post("/status", apiCfg.HandlerStatus)
+
 	router.Mount("/", v1Router)
 
 	srv := &http.Server{

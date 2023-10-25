@@ -1,8 +1,7 @@
 package main
 
 import (
-	server "server/src"
-
+	server "github.com/OpenQDev/GoGitguru/server/src"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/setup"
 )
