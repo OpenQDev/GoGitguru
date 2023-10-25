@@ -15,5 +15,8 @@ func main() {
 
 	logger.SetDebugMode(env.Debug)
 
-	reposync.StartSyncingCommits(database, "repos", 10, time.Duration(env.SyncIntervalMinutesInt)*time.Minute)
+	for {
+		reposync.StartSyncingCommits(database, "repos", 10, time.Duration(env.SyncIntervalMinutesInt)*time.Minute)
+		time.Sleep(time.Minute)
+	}
 }

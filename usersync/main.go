@@ -15,5 +15,8 @@ func main() {
 
 	logger.SetDebugMode(env.Debug)
 
-	go usersync.StartSyncingUser(database, "repos", 10, time.Duration(env.SyncUsersIntervalMinutesInt)*time.Minute, env.GhAccessToken, 2, "https://github.com/graphql")
+	for {
+		usersync.StartSyncingUser(database, "repos", 10, time.Duration(env.SyncUsersIntervalMinutesInt)*time.Minute, env.GhAccessToken, 2, "https://github.com/graphql")
+		time.Sleep(time.Minute)
+	}
 }
