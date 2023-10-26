@@ -7,11 +7,14 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
-func GetNumberOfCommits(prefixPath string, organization string, repo string) (int, error) {
+func GetNumberOfCommits(prefixPath string, organization string, repo string, startDate time.Time) (int, error) {
 	fullRepoPath := filepath.Join(prefixPath, organization, repo)
-	cmd := exec.Command("git", "-C", fullRepoPath, "rev-list", "--count", "HEAD")
+
+	cmd := exec.Command("git", "-C", fullRepoPath, "rev-list", "--count", "--since", startDate.String(), "HEAD")
+
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out

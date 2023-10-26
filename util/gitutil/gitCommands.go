@@ -20,13 +20,6 @@ func GitPullCommand(pullDestination string) *exec.Cmd {
 }
 
 /*
-git -C repos/OpenQ-Workflows rev-list --all --count
-*/
-func GitCommitCount(repoDir string) *exec.Cmd {
-	return exec.Command("git", "-C", repoDir, "rev-list", "--all", "--count")
-}
-
-/*
 git log -p --raw --unified=0 -i -S'github.com/lib/pq v1.10.9' go.mod
 git log -p --raw --unified=0 -i -S'<dependency-name>' <path-to-dependency-file>
 */

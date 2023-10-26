@@ -33,7 +33,7 @@ func StoreGitLogsForRepo(params GitLogParams) (int, error) {
 		return 0, err
 	}
 
-	numberOfCommits, err := gitutil.GetNumberOfCommits(params.prefixPath, params.organization, params.repo)
+	numberOfCommits, err := gitutil.GetNumberOfCommits(params.prefixPath, params.organization, params.repo, startDate)
 	if err != nil {
 		return 0, err
 	}
