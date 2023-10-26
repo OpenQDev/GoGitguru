@@ -1,24 +1,28 @@
 package reposync
 
 import (
+	"time"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/lib/pq"
 )
 
 type StoreGitLogsForRepoTestCase struct {
-	name        string
-	repoUrl     string
-	repo        string
-	gitLogs     []GitLog
-	shouldError bool
-	setupMock   func(mock sqlmock.Sqlmock, gitLogs []GitLog, repoUrl string)
+	name           string
+	repoUrl        string
+	repo           string
+	fromCommitDate time.Time
+	gitLogs        []GitLog
+	shouldError    bool
+	setupMock      func(mock sqlmock.Sqlmock, gitLogs []GitLog, repoUrl string)
 }
 
 func sucessfulGitLog() StoreGitLogsForRepoTestCase {
 	foo := StoreGitLogsForRepoTestCase{
-		name:    "Valid git logs",
-		repoUrl: "https://github.com/OpenQDev/OpenQ-DRM-TestRepo",
-		repo:    "OpenQ-DRM-TestRepo",
+		name:           "Valid git logs",
+		repoUrl:        "https://github.com/OpenQDev/OpenQ-DRM-TestRepo",
+		repo:           "OpenQ-DRM-TestRepo",
+		fromCommitDate: time.Unix(1696277204, 0),
 		gitLogs: []GitLog{
 			{
 				CommitHash:    "06a12f9c203112a149707ff73e4298749744c358",
