@@ -13,6 +13,13 @@ func GitCloneCommand(cloneString string, cloneDestination string) *exec.Cmd {
 }
 
 /*
+git pull
+*/
+func GitPullCommand(pullDestination string) *exec.Cmd {
+	return exec.Command("git", "-C", pullDestination, "pull")
+}
+
+/*
 git -C repos/OpenQ-Workflows rev-list --all --count
 */
 func GitCommitCount(repoDir string) *exec.Cmd {

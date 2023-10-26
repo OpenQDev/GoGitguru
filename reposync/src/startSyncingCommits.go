@@ -23,10 +23,6 @@ func StartSyncingCommits(
 		logger.LogFatalRedAndExit("error getting repo urls: %s ", err)
 	}
 
-	if err != nil {
-		logger.LogFatalRedAndExit("Failed to insert repo url: %s", err)
-	}
-
 	for _, repoUrl := range repoUrls {
 		organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 		logger.LogGreenDebug("processing %s/%s...", organization, repo)
