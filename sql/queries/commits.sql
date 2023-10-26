@@ -95,6 +95,6 @@ ORDER BY c.author_date DESC;
 -- name: GetLatestCommitterDate :one
 SELECT committer_date + 1 AS next_committer_date
 FROM commits
-WHERE repo_url = $1
+WHERE repo_url = CAST($1 AS VARCHAR)
 ORDER BY committer_date DESC
 LIMIT 1;

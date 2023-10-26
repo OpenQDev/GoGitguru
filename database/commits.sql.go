@@ -339,13 +339,13 @@ func (q *Queries) GetCommitsWithAuthorInfo(ctx context.Context, arg GetCommitsWi
 const getLatestCommitterDate = `-- name: GetLatestCommitterDate :one
 SELECT committer_date + 1 AS next_committer_date
 FROM commits
-WHERE repo_url = $1
+WHERE repo_url = CAST($1 AS VARCHAR)
 ORDER BY committer_date DESC
 LIMIT 1
 `
 
-func (q *Queries) GetLatestCommitterDate(ctx context.Context, repoUrl sql.NullString) (int32, error) {
-	row := q.queryRow(ctx, q.getLatestCommitterDateStmt, getLatestCommitterDate, repoUrl)
+func (q *Queries) GetLatestCommitterDate(ctx context.Context, dollar_1 string) (int32, error) {
+	row := q.queryRow(ctx, q.getLatestCommitterDateStmt, getLatestCommitterDate, dollar_1)
 	var next_committer_date int32
 	err := row.Scan(&next_committer_date)
 	return next_committer_date, err

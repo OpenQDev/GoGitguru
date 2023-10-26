@@ -2,13 +2,14 @@ package reposync
 
 import (
 	"context"
+	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
-func ProcessRepo(prefixPath string, organization string, repo string, repoUrl string, db *database.Queries) error {
+func ProcessRepo(prefixPath string, organization string, repo string, repoUrl string, startDate time.Time, db *database.Queries) error {
 	logger.LogGreenDebug("beginning to process %s", repoUrl)
 
 	db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
@@ -16,7 +17,7 @@ func ProcessRepo(prefixPath string, organization string, repo string, repoUrl st
 		Url:    repoUrl,
 	})
 
-	commitCount, err := StoreGitLogsForRepo(GitLogParams{prefixPath, organization, repo, repoUrl, "", db})
+	commitCount, err := StoreGitLogsForRepo(GitLogParams{prefixPath, organization, repo, repoUrl, startDate, db})
 	if err != nil {
 		db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
 			Status: database.RepoStatusFailed,

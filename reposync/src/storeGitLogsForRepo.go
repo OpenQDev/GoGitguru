@@ -2,6 +2,7 @@ package reposync
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
 
@@ -13,32 +14,27 @@ type GitLogParams struct {
 	organization   string
 	repo           string
 	repoUrl        string
-	fromCommitDate string
+	fromCommitDate time.Time
 	db             *database.Queries
 }
 
 func StoreGitLogsForRepo(params GitLogParams) (int, error) {
-	startDate, err := ParseDate(params.fromCommitDate)
-	if err != nil {
-		return 0, err
-	}
-
 	r, err := gitutil.OpenGitRepo(params.prefixPath, params.organization, params.repo)
 	if err != nil {
 		return 0, err
 	}
 
-	log, err := gitutil.GetCommitHistory(r, startDate)
+	log, err := gitutil.GetCommitHistory(r, params.fromCommitDate)
 	if err != nil {
 		return 0, err
 	}
 
-	numberOfCommits, err := gitutil.GetNumberOfCommits(params.prefixPath, params.organization, params.repo, startDate)
+	numberOfCommits, err := gitutil.GetNumberOfCommits(params.prefixPath, params.organization, params.repo, params.fromCommitDate)
 	if err != nil {
 		return 0, err
 	}
 
-	fmt.Printf("%s has %d commits\n", params.repoUrl, numberOfCommits)
+	fmt.Printf("%s has %d commits to sync\n", params.repoUrl, numberOfCommits)
 
 	commitObjects, err := PrepareCommitHistoryForBulkInsertion(numberOfCommits, log, params)
 

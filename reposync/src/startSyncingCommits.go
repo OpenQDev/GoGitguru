@@ -2,6 +2,7 @@ package reposync
 
 import (
 	"context"
+	"strconv"
 	"strings"
 
 	"github.com/OpenQDev/GoGitguru/database"
@@ -27,8 +28,6 @@ func StartSyncingCommits(
 		organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 		logger.LogGreenDebug("processing %s/%s...", organization, repo)
 
-		defer gitutil.DeleteLocalRepo(prefixPath, organization, repo)
-
 		// Check if the repo is present in the repos directory
 		if gitutil.IsGitRepository(prefixPath, organization, repo) {
 			// If it is, pull the latest changes
@@ -42,7 +41,18 @@ func StartSyncingCommits(
 			logger.LogBlue("repository %s cloned!", repoUrl)
 		}
 
-		err := ProcessRepo(prefixPath, organization, repo, repoUrl, db)
+		latestCommitterDate, err := db.GetLatestCommitterDate(context.Background(), repoUrl)
+		if err != nil {
+			logger.LogFatalRedAndExit("error getting latest committer date: %s ", err)
+		}
+
+		latestCommitterDateString := strconv.FormatInt(int64(latestCommitterDate), 10)
+		startDate, err := ParseDate(latestCommitterDateString)
+		if err != nil {
+			logger.LogFatalRedAndExit("failed to parse latest commiter date %s to string", latestCommitterDate)
+		}
+
+		err = ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db)
 		if err != nil {
 			logger.LogFatalRedAndExit("error while processing repository %s: %s", repoUrl, err)
 		}
