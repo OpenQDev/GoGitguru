@@ -91,3 +91,10 @@ INNER JOIN github_users gu
 ON gure.rest_id = gu.github_rest_id
 WHERE gu.login = $3
 ORDER BY c.author_date DESC;
+
+-- name: GetLatestCommitterDate :one
+SELECT committer_date + 1 AS next_committer_date
+FROM commits
+WHERE repo_url = $1
+ORDER BY committer_date DESC
+LIMIT 1;

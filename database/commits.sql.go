@@ -336,6 +336,21 @@ func (q *Queries) GetCommitsWithAuthorInfo(ctx context.Context, arg GetCommitsWi
 	return items, nil
 }
 
+const getLatestCommitterDate = `-- name: GetLatestCommitterDate :one
+SELECT committer_date + 1 AS next_committer_date
+FROM commits
+WHERE repo_url = $1
+ORDER BY committer_date DESC
+LIMIT 1
+`
+
+func (q *Queries) GetLatestCommitterDate(ctx context.Context, repoUrl sql.NullString) (int32, error) {
+	row := q.queryRow(ctx, q.getLatestCommitterDateStmt, getLatestCommitterDate, repoUrl)
+	var next_committer_date int32
+	err := row.Scan(&next_committer_date)
+	return next_committer_date, err
+}
+
 const getLatestUncheckedCommitPerAuthor = `-- name: GetLatestUncheckedCommitPerAuthor :many
 WITH LatestUncheckedCommitPerAuthor AS (
     SELECT DISTINCT ON (author_email)

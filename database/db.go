@@ -54,6 +54,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getGroupOfEmailsStmt, err = db.PrepareContext(ctx, getGroupOfEmails); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGroupOfEmails: %w", err)
 	}
+	if q.getLatestCommitterDateStmt, err = db.PrepareContext(ctx, getLatestCommitterDate); err != nil {
+		return nil, fmt.Errorf("error preparing query GetLatestCommitterDate: %w", err)
+	}
 	if q.getLatestUncheckedCommitPerAuthorStmt, err = db.PrepareContext(ctx, getLatestUncheckedCommitPerAuthor); err != nil {
 		return nil, fmt.Errorf("error preparing query GetLatestUncheckedCommitPerAuthor: %w", err)
 	}
@@ -146,6 +149,11 @@ func (q *Queries) Close() error {
 	if q.getGroupOfEmailsStmt != nil {
 		if cerr := q.getGroupOfEmailsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getGroupOfEmailsStmt: %w", cerr)
+		}
+	}
+	if q.getLatestCommitterDateStmt != nil {
+		if cerr := q.getLatestCommitterDateStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getLatestCommitterDateStmt: %w", cerr)
 		}
 	}
 	if q.getLatestUncheckedCommitPerAuthorStmt != nil {
@@ -262,6 +270,7 @@ type Queries struct {
 	getGithubRepoStmt                     *sql.Stmt
 	getGithubUserStmt                     *sql.Stmt
 	getGroupOfEmailsStmt                  *sql.Stmt
+	getLatestCommitterDateStmt            *sql.Stmt
 	getLatestUncheckedCommitPerAuthorStmt *sql.Stmt
 	getRepoURLStmt                        *sql.Stmt
 	getRepoURLsStmt                       *sql.Stmt
@@ -291,6 +300,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getGithubRepoStmt:                     q.getGithubRepoStmt,
 		getGithubUserStmt:                     q.getGithubUserStmt,
 		getGroupOfEmailsStmt:                  q.getGroupOfEmailsStmt,
+		getLatestCommitterDateStmt:            q.getLatestCommitterDateStmt,
 		getLatestUncheckedCommitPerAuthorStmt: q.getLatestUncheckedCommitPerAuthorStmt,
 		getRepoURLStmt:                        q.getRepoURLStmt,
 		getRepoURLsStmt:                       q.getRepoURLsStmt,
