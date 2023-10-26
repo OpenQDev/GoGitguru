@@ -16,7 +16,9 @@ func main() {
 	logger.SetDebugMode(env.Debug)
 
 	for {
+		logger.LogBlue("beginning user syncing...")
 		usersync.StartSyncingUser(database, "repos", 10, time.Duration(env.SyncUsersIntervalMinutesInt)*time.Minute, env.GhAccessToken, 2, "https://github.com/graphql")
+		logger.LogBlue("user sync completed!")
 		time.Sleep(time.Minute)
 	}
 }
