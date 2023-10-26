@@ -1,8 +1,6 @@
 package usersync
 
 import (
-	"time"
-
 	"github.com/OpenQDev/GoGitguru/database"
 
 	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
@@ -18,8 +16,6 @@ type UserSync struct {
 func StartSyncingUser(
 	db *database.Queries,
 	prefixPath string,
-	concurrency int,
-	timeBetweenSyncs time.Duration,
 	ghAccessToken string,
 	batchSize int,
 	githubGraphQLUrl string,

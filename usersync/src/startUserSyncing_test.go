@@ -2,7 +2,6 @@ package usersync
 
 import (
 	"io"
-	"main/internal/pkg/server"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -17,14 +16,14 @@ import (
 
 func TestStartUserSync(t *testing.T) {
 	// ARRANGE - GLOBAL
-	env := setup.ExtractAndVerifyEnvironment("../../../.env")
+	env := setup.ExtractAndVerifyEnvironment("../.env")
 	debugMode := env.Debug
 	targetLiveGithub := env.TargetLiveGithub
 
 	logger.SetDebugMode(debugMode)
 
 	// Open the JSON file
-	jsonFile, err := os.Open("./mocks/mockGithubCommitAuthorsResponse_oneAuthor.json")
+	jsonFile, err := os.Open("../mocks/mockGithubCommitAuthorsResponse_oneAuthor.json")
 	if err != nil {
 		t.Errorf("error opening json file: %s", err)
 	}
@@ -46,11 +45,6 @@ func TestStartUserSync(t *testing.T) {
 		serverUrl = mockGithubServer.URL
 	}
 
-	apiCfg := server.ApiConfig{
-		DB:                   queries,
-		GithubGraphQLBaseUrl: serverUrl,
-	}
-
 	testcases := StartUserSyncingTestCases()
 
 	for _, tt := range testcases {
@@ -65,11 +59,9 @@ func TestStartUserSync(t *testing.T) {
 			StartSyncingUser(
 				queries,
 				"mock",
-				0,
-				10,
 				"",
 				2,
-				apiCfg)
+				serverUrl)
 
 			// ASSERT
 			if tt.shouldError {

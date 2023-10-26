@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	reposync "github.com/OpenQDev/GoGitguru/reposync/src"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/setup"
@@ -15,10 +13,7 @@ func main() {
 
 	logger.SetDebugMode(env.Debug)
 
-	for {
-		logger.LogBlue("beginning repo syncing...")
-		reposync.StartSyncingCommits(database, "repos", 10, time.Duration(env.SyncIntervalMinutesInt)*time.Minute)
-		time.Sleep(time.Minute)
-		logger.LogBlue("repo sync completed!")
-	}
+	logger.LogBlue("beginning repo syncing...")
+	reposync.StartSyncingCommits(database, "repos")
+	logger.LogBlue("repo sync completed!")
 }

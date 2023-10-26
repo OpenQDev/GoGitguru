@@ -3,7 +3,6 @@ package reposync
 import (
 	"context"
 	"strings"
-	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
 
@@ -13,9 +12,7 @@ import (
 
 func StartSyncingCommits(
 	db *database.Queries,
-	prefixPath string,
-	concurrency int,
-	timeBetweenSyncs time.Duration) {
+	prefixPath string) {
 
 	repoUrlObjects, err := db.GetRepoURLs(context.Background())
 

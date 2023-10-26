@@ -1,8 +1,8 @@
 package usersync
 
 import (
+	"fmt"
 	"io"
-	"main/internal/pkg/server"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -18,14 +18,14 @@ import (
 
 func TestIdentifyRepoAuthorsBatch(t *testing.T) {
 	// ARRANGE - GLOBAL
-	env := setup.ExtractAndVerifyEnvironment("../../../.env")
+	env := setup.ExtractAndVerifyEnvironment("../.env")
 	debugMode := env.Debug
 	targetLiveGithub := env.TargetLiveGithub
 
 	logger.SetDebugMode(debugMode)
 
 	// Open the JSON file
-	jsonFile, err := os.Open("./mocks/mockGithubCommitAuthorsResponse.json")
+	jsonFile, err := os.Open("../mocks/mockGithubCommitAuthorsResponse.json")
 	if err != nil {
 		t.Errorf("error opening json file: %s", err)
 	}
@@ -50,10 +50,7 @@ func TestIdentifyRepoAuthorsBatch(t *testing.T) {
 		serverUrl = "https://api.github.com/graphql"
 	} else {
 		serverUrl = mockGithubServer.URL
-	}
-
-	apiCfg := server.ApiConfig{
-		GithubGraphQLBaseUrl: serverUrl,
+		fmt.Println("serverUrl", serverUrl)
 	}
 
 	tests := IdentifyRepoAuthorsBatchTestCases()
@@ -65,7 +62,7 @@ func TestIdentifyRepoAuthorsBatch(t *testing.T) {
 			), tt.title)
 
 			// ACT
-			resp, err := identifyRepoAuthorsBatch(tt.repoUrl, tt.authorCommitList, "", apiCfg)
+			resp, err := identifyRepoAuthorsBatch(tt.repoUrl, tt.authorCommitList, "", serverUrl)
 			if err != nil {
 				t.Fatalf("error in identifyRepoAuthorsBatch test: %s", err)
 			}
