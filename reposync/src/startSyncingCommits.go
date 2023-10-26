@@ -46,6 +46,8 @@ func StartSyncingCommits(
 
 		if err != nil {
 			if strings.Contains(err.Error(), "sql: no rows in result set") {
+				latestCommitterDate = 1577836800 // Unix time for Jan 1, 2020
+			} else {
 				logger.LogFatalRedAndExit("error getting latest committer date: %s ", err)
 			}
 		}
