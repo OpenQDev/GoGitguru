@@ -15,7 +15,7 @@ if nc -z localhost $POSTGRES_PORT; then
 	exit 1
 fi
 
-echo "Starting new container: $(docker run --name gitguru-postgres -d -e POSTGRES_HOST_AUTH_METHOD=trust -p $POSTGRES_PORT:5432 postgres)"
+echo "Starting new container: $(docker run --name gitguru-postgres -d -e POSTGRES_HOST_AUTH_METHOD=trust -p $POSTGRES_PORT:5432 -v ./data:/var/lib/postgresql/data postgres)"
 
 # Wait for PostgreSQL to become accessible
 until PGPASSWORD= psql -h "localhost" -U "postgres" -p $POSTGRES_PORT -c '\q' 2>/dev/null; do

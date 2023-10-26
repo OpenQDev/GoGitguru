@@ -26,6 +26,11 @@ func ProcessRepo(prefixPath string, organization string, repo string, repoUrl st
 		return err
 	}
 
+	if commitCount == 0 {
+		logger.LogBlue("no new commits in repo %s", repoUrl)
+		return nil
+	}
+
 	db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
 		Status: database.RepoStatusSynced,
 		Url:    repoUrl,

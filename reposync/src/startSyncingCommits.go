@@ -2,8 +2,8 @@ package reposync
 
 import (
 	"context"
-	"strconv"
 	"strings"
+	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
 
@@ -41,16 +41,16 @@ func StartSyncingCommits(
 			logger.LogBlue("repository %s cloned!", repoUrl)
 		}
 
+		// there are cases where the repository may exist in local, but hasn't been synced
 		latestCommitterDate, err := db.GetLatestCommitterDate(context.Background(), repoUrl)
+
 		if err != nil {
-			logger.LogFatalRedAndExit("error getting latest committer date: %s ", err)
+			if strings.Contains(err.Error(), "sql: no rows in result set") {
+				logger.LogFatalRedAndExit("error getting latest committer date: %s ", err)
+			}
 		}
 
-		latestCommitterDateString := strconv.FormatInt(int64(latestCommitterDate), 10)
-		startDate, err := ParseDate(latestCommitterDateString)
-		if err != nil {
-			logger.LogFatalRedAndExit("failed to parse latest commiter date %s to string", latestCommitterDate)
-		}
+		startDate := time.Unix(int64(latestCommitterDate), 0)
 
 		err = ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db)
 		if err != nil {

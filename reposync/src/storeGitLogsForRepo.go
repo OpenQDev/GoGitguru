@@ -36,6 +36,10 @@ func StoreGitLogsForRepo(params GitLogParams) (int, error) {
 
 	fmt.Printf("%s has %d commits to sync\n", params.repoUrl, numberOfCommits)
 
+	if numberOfCommits == 0 {
+		return 0, nil
+	}
+
 	commitObjects, err := PrepareCommitHistoryForBulkInsertion(numberOfCommits, log, params)
 
 	if err != nil {

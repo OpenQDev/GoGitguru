@@ -8,7 +8,7 @@ func ParseDate(dateStr string) (time.Time, error) {
 		DefaultStartDate = "2020-01-01"
 	)
 
-	if dateStr == "" {
+	if dateStr == "" || dateStr == "0" {
 		dateStr = DefaultStartDate
 	}
 	return time.Parse(DateFormat, dateStr)
