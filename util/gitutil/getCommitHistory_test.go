@@ -22,7 +22,7 @@ func TestGetCommitHistory(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				"INVALID",
+				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
 			// ACT
 			commitIter, err := GetCommitHistory(r, tt.startDate)
@@ -34,17 +34,20 @@ func TestGetCommitHistory(t *testing.T) {
 			commitCount := 0
 			for {
 				commit, err := commitIter.Next()
+
 				if err != nil {
 					if err == io.EOF {
 						break
 					} else {
-						return CommitObject{}, err
+						t.Fatalf("fatal error occurred in commit iterator: %s", err)
 					}
 				}
 
+				assert.True(t, commit.Committer.When.After(tt.startDate))
+
 				commitCount++
 			}
-
+			assert.Equal(t, tt.expectedCommitCount, commitCount)
 		})
 	}
 }
