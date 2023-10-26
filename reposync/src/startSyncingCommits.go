@@ -30,16 +30,16 @@ func StartSyncingCommits(
 		defer gitutil.DeleteLocalRepo(prefixPath, organization, repo)
 
 		// Check if the repo is present in the repos directory
-		if !gitutil.IsGitRepo(prefixPath, organization, repo) {
-			// If not, clone it
-			logger.LogBlue("repository %s does not exist. cloning...", repoUrl)
-			gitutil.CloneRepo(prefixPath, organization, repo)
-			logger.LogBlue("repository %s cloned!", repoUrl)
-		} else {
+		if gitutil.IsGitRepository(prefixPath, organization, repo) {
 			// If it is, pull the latest changes
 			logger.LogBlue("repository %s exists. pulling...", repoUrl)
 			gitutil.PullRepo(prefixPath, organization, repo)
 			logger.LogBlue("repository %s pulled!", repoUrl)
+		} else {
+			// If not, clone it
+			logger.LogBlue("repository %s does not exist. cloning...", repoUrl)
+			gitutil.CloneRepo(prefixPath, organization, repo)
+			logger.LogBlue("repository %s cloned!", repoUrl)
 		}
 
 		err := ProcessRepo(prefixPath, organization, repo, repoUrl, db)
