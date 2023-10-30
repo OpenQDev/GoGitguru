@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/lib/pq"
 )
 
@@ -54,7 +55,7 @@ func validProcessRepoTest() ProcessRepoTestCase {
 			},
 		},
 		setupMock: func(mock sqlmock.Sqlmock, gitLogs []GitLog, repoUrl string) {
-			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs("storing_commits", repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs(database.RepoStatusStoringCommits, repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
 
 			// Define test data
 			commitCount := 2
@@ -98,7 +99,7 @@ func validProcessRepoTest() ProcessRepoTestCase {
 				pq.Array(repoUrls),
 			).WillReturnResult(sqlmock.NewResult(1, 1))
 
-			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs("synced", repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs(database.RepoStatusSynced, repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
 		},
 	}
 
