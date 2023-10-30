@@ -25,14 +25,12 @@ func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
 	}
 
 	return EnvConfig{
-		PortString:                  getEnvVar("PORT", "string").(string),
-		DbUrl:                       getEnvVar("DB_URL", "string").(string),
-		OriginUrl:                   getEnvVar("ORIGIN_URL", "string").(string),
-		Debug:                       getEnvVar("DEBUG_MODE", "bool").(bool),
-		SyncIntervalMinutesInt:      getEnvVar("SYNC_COMMITS_INTERVAL_MINUTES", "int").(int),
-		SyncUsersIntervalMinutesInt: getEnvVar("SYNC_USERS_INTERVAL_MINUTES", "int").(int),
-		GhAccessToken:               getEnvVar("GH_ACCESS_TOKEN", "string").(string),
-		TargetLiveGithub:            getEnvVar("TARGET_LIVE_GITHUB", "bool").(bool),
+		PortString:       getEnvVar("PORT", "string").(string),
+		DbUrl:            getEnvVar("DB_URL", "string").(string),
+		OriginUrl:        getEnvVar("ORIGIN_URL", "string").(string),
+		Debug:            getEnvVar("DEBUG_MODE", "bool").(bool),
+		GhAccessToken:    getEnvVar("GH_ACCESS_TOKEN", "string").(string),
+		TargetLiveGithub: getEnvVar("TARGET_LIVE_GITHUB", "bool").(bool),
 	}
 }
 
