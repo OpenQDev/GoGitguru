@@ -1,0 +1,56 @@
+name: (TAG) Build + Push RepoSync # git add . && git commit -m "test" && git tag -f reposync-development-1.0.55 && git push -f origin gitguru-development-1.0.55
+
+on:
+  push:
+    tags:
+      - "reposync-*-*.*.*"
+
+jobs:
+  extract_info:
+    name: Extract info from git tag
+    outputs:
+      ENVIRONMENT: ${{ steps.extract_tag.outputs.environment }}
+      VERSION: ${{ steps.extract_tag.outputs.version }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract tag info
+        id: extract_tag
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/} 
+          echo "tag_name=${TAG_NAME}" >> "$GITHUB_ENV"
+          echo "tag_name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+          echo ${TAG_NAME} # reposync-staging-1.0.0
+
+          APP_ENVIRONMENT=${TAG_NAME%-*} 
+          echo "app_environment=${APP_ENVIRONMENT}" >> "$GITHUB_ENV"
+          echo "app_environment=${APP_ENVIRONMENT}" >> "$GITHUB_OUTPUT"
+          echo ${APP_ENVIRONMENT} # reposync-staging
+
+          APP=${APP_ENVIRONMENT%-*} 
+          echo "app=${APP}" >> "$GITHUB_ENV"
+          echo "app=${APP}" >> "$GITHUB_OUTPUT"
+          echo ${APP} # reposync
+
+          ENVIRONMENT=${APP_ENVIRONMENT#*-} 
+          echo "environment=${ENVIRONMENT}" >> "$GITHUB_ENV"
+          echo "environment=${ENVIRONMENT}" >> "$GITHUB_OUTPUT"
+          echo ${ENVIRONMENT} # staging
+
+          IMAGE_TAG=${TAG_NAME#*-}
+          echo "image_tag=${IMAGE_TAG}" >> "$GITHUB_ENV"
+          echo "image_tag=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+          echo ${IMAGE_TAG} # staging-1.0.0
+
+          VERSION=${IMAGE_TAG#*-}
+          echo "version=${VERSION}" >> "$GITHUB_ENV"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo ${VERSION} # 1.0.0
+
+  build_release_reposync:
+    name: Build and Release GitGuru
+    needs: extract_info
+    uses: ./.github/workflows/build-reposync.yml
+    with:
+      environment: ${{ needs.extract_info.outputs.ENVIRONMENT }}
+      version: ${{ needs.extract_info.outputs.VERSION }}
+    secrets: inherit
