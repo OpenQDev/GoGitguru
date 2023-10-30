@@ -1,5 +1,5 @@
 -- +goose Up
-CREATE TYPE repo_status AS ENUM ('pending', 'queued', 'syncing_repo', 'synced', 'storing_commits', 'failed', 'not_listed');
+CREATE TYPE repo_status AS ENUM ('pending', 'syncing_repo', 'synced', 'failed', 'not_listed');
 
 CREATE TABLE repo_urls (
     url VARCHAR(150) PRIMARY KEY,

@@ -55,7 +55,7 @@ func validProcessRepoTest() ProcessRepoTestCase {
 			},
 		},
 		setupMock: func(mock sqlmock.Sqlmock, gitLogs []GitLog, repoUrl string) {
-			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs(database.RepoStatusStoringCommits, repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs(database.RepoStatusSyncingRepo, repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
 
 			// Define test data
 			commitCount := 2

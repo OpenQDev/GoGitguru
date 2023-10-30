@@ -14,13 +14,11 @@ import (
 type RepoStatus string
 
 const (
-	RepoStatusPending        RepoStatus = "pending"
-	RepoStatusQueued         RepoStatus = "queued"
-	RepoStatusSyncingRepo    RepoStatus = "syncing_repo"
-	RepoStatusSynced         RepoStatus = "synced"
-	RepoStatusStoringCommits RepoStatus = "storing_commits"
-	RepoStatusFailed         RepoStatus = "failed"
-	RepoStatusNotListed      RepoStatus = "not_listed"
+	RepoStatusPending     RepoStatus = "pending"
+	RepoStatusSyncingRepo RepoStatus = "syncing_repo"
+	RepoStatusSynced      RepoStatus = "synced"
+	RepoStatusFailed      RepoStatus = "failed"
+	RepoStatusNotListed   RepoStatus = "not_listed"
 )
 
 func (e *RepoStatus) Scan(src interface{}) error {

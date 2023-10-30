@@ -13,7 +13,7 @@ func ProcessRepo(prefixPath string, organization string, repo string, repoUrl st
 	logger.LogGreenDebug("beginning to process %s", repoUrl)
 
 	db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
-		Status: database.RepoStatusStoringCommits,
+		Status: database.RepoStatusSyncingRepo,
 		Url:    repoUrl,
 	})
 
