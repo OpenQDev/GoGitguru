@@ -10,10 +10,10 @@ VALUES ($1, NOW(), NOW())
 RETURNING *;
 
 -- name: UpdateStatus :exec
-UPDATE repo_urls SET status = $1 WHERE url = $2 AND status != 'failed';
+UPDATE repo_urls SET status = $1::repo_status WHERE url = $2 AND status != 'failed'::repo_status;
 
 -- name: UpdateStatusAndUpdatedAt :exec
-UPDATE repo_urls SET status = $1, updated_at = NOW() WHERE url = $2 AND status != 'failed';
+UPDATE repo_urls SET status = $1, updated_at = NOW() WHERE url = $2 AND status != 'failed'::repo_status;
 
 -- name: GetReposStatus :many
 SELECT

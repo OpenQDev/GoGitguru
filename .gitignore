@@ -6,7 +6,7 @@ main
 **/repos/
 data/
 
-# ignore binaries
+# ignore binaries at any dir level
 **/server/*
 **/reposync/*
 **/usersync*
