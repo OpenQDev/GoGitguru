@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
 	"github.com/OpenQDev/GoGitguru/util/setup"
@@ -95,8 +96,8 @@ func TestAddHandler(t *testing.T) {
 
 			// ARRANGE - EXPECT
 			currentTime := time.Now()
-			repoURLMockRow1 := sqlmock.NewRows([]string{"url", "status", "created_at", "updated_at"}).AddRow("https://github.com/org/repo1", "pending", currentTime, currentTime)
-			repoURLMockRow2 := sqlmock.NewRows([]string{"url", "status", "created_at", "updated_at"}).AddRow("https://github.com/org/repo2", "pending", currentTime, currentTime)
+			repoURLMockRow1 := sqlmock.NewRows([]string{"url", "status", "created_at", "updated_at"}).AddRow("https://github.com/org/repo1", database.RepoStatusPending, currentTime, currentTime)
+			repoURLMockRow2 := sqlmock.NewRows([]string{"url", "status", "created_at", "updated_at"}).AddRow("https://github.com/org/repo2", database.RepoStatusPending, currentTime, currentTime)
 
 			mock.ExpectQuery("^-- name: GetRepoURL :one.*").WithArgs("https://github.com/org/repo1").WillReturnRows(repoURLMockRow1)
 			mock.ExpectQuery("^-- name: GetRepoURL :one.*").WithArgs("https://github.com/org/repo2").WillReturnRows(repoURLMockRow2)

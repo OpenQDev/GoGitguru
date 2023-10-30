@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/lib/pq"
 )
 
@@ -49,19 +50,19 @@ func statusValidRepoUrls() HandlerStatusTest {
 	successReturnBody := []HandlerStatusResponse{
 		{
 			Url:            "https://github.com/org/repo1",
-			Status:         "pending",
+			Status:         database.RepoStatusPending,
 			PendingAuthors: 1,
 		},
 		{
 			Url:            "https://github.com/org/repo2",
-			Status:         "pending",
+			Status:         database.RepoStatusPending,
 			PendingAuthors: 2,
 		},
 	}
 
 	rows := sqlmock.NewRows([]string{"url", "status", "pending_authors"})
-	rows.AddRow(repo1Url, "pending", 1)
-	rows.AddRow(repo2Url, "pending", 2)
+	rows.AddRow(repo1Url, database.RepoStatusPending, 1)
+	rows.AddRow(repo2Url, database.RepoStatusPending, 2)
 
 	validRepoUrls := HandlerStatusTest{
 		name:               VALID_REPO_URLS,
@@ -92,7 +93,7 @@ func missingRepoUrl() HandlerStatusTest {
 	successReturnBody := []HandlerStatusResponse{
 		{
 			Url:            repo1Url,
-			Status:         "pending",
+			Status:         database.RepoStatusPending,
 			PendingAuthors: 1,
 		},
 		{
@@ -103,7 +104,7 @@ func missingRepoUrl() HandlerStatusTest {
 	}
 
 	rows := sqlmock.NewRows([]string{"url", "status", "pending_authors"})
-	rows.AddRow(repo1Url, "pending", 1)
+	rows.AddRow(repo1Url, database.RepoStatusPending, 1)
 
 	oneMissingRepoUrl := HandlerStatusTest{
 		name:               MISSING_REPO_URL,

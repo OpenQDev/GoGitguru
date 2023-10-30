@@ -14,9 +14,9 @@ type HandlerStatusRequest struct {
 }
 
 type HandlerStatusResponse struct {
-	Url            string `json:"url"`
-	Status         string `json:"status"`
-	PendingAuthors int    `json:"pending_authors"`
+	Url            string              `json:"url"`
+	Status         database.RepoStatus `json:"status"`
+	PendingAuthors int                 `json:"pending_authors"`
 }
 
 func (apiCfg *ApiConfig) HandlerStatus(w http.ResponseWriter, r *http.Request) {
@@ -45,13 +45,13 @@ func (apiCfg *ApiConfig) HandlerStatus(w http.ResponseWriter, r *http.Request) {
 		if slices.Contains(body.RepoUrls, repoStatus.Url) {
 			response = append(response, HandlerStatusResponse{
 				Url:            repoStatus.Url,
-				Status:         string(repoStatus.Status),
+				Status:         repoStatus.Status,
 				PendingAuthors: int(repoStatus.PendingAuthors),
 			})
 		} else {
 			response = append(response, HandlerStatusResponse{
 				Url:            repoStatus.Url,
-				Status:         string(database.RepoStatusNotListed),
+				Status:         repoStatus.Status,
 				PendingAuthors: int(repoStatus.PendingAuthors),
 			})
 		}
@@ -67,7 +67,7 @@ func (apiCfg *ApiConfig) HandlerStatus(w http.ResponseWriter, r *http.Request) {
 		if _, ok := repoUrls[url]; !ok {
 			response = append(response, HandlerStatusResponse{
 				Url:            url,
-				Status:         string(database.RepoStatusNotListed),
+				Status:         database.RepoStatusNotListed,
 				PendingAuthors: 0,
 			})
 		}

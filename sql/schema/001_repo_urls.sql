@@ -1,7 +1,9 @@
 -- +goose Up
+CREATE TYPE repo_status AS ENUM ('pending', 'queued', 'syncing_repo', 'synced', 'storing_commits', 'failed', 'not_listed');
+
 CREATE TABLE repo_urls (
     url VARCHAR(150) PRIMARY KEY,
-    status VARCHAR(30) NOT NULL DEFAULT 'pending',
+    status repo_status NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NULL
 );
