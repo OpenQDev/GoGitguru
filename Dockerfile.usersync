@@ -8,6 +8,6 @@ WORKDIR /app/usersync
 
 RUN go mod download
 
-RUN go build -o usersync .
+RUN go build -o main .
 
-CMD ["./usersync"]
+CMD ["./main"]

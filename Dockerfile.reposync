@@ -8,6 +8,6 @@ WORKDIR /app/reposync
 
 RUN go mod download
 
-RUN go build -o reposync .
+RUN go build -o main .
 
-CMD ["./reposync"]
+CMD ["./main"]

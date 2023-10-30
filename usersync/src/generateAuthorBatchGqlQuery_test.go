@@ -1,6 +1,7 @@
 package usersync
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -18,6 +19,7 @@ func TestGenerateAuthorBatchGqlQuery(t *testing.T) {
 
 		t.Run(tt.title, func(t *testing.T) {
 			result := generateAuthorBatchGqlQuery(tt.organization, tt.repo, tt.authorList)
+			fmt.Println(result)
 
 			sanitizedResult := sanitizeString(result)
 			sanitizedExpectedOutput := sanitizeString(tt.expectedOutput)

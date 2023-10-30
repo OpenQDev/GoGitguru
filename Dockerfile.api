@@ -8,6 +8,6 @@ WORKDIR /app/server
 
 RUN go mod download
 
-RUN go build -o server .
+RUN go build -o main .
 
-CMD ["./server"]
+CMD ["./main"]

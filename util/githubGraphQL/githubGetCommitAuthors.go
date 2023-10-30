@@ -14,6 +14,7 @@ func GithubGetCommitAuthors(query string, ghAccessToken string, githubGraphQLBas
 	}
 
 	url := githubGraphQLBaseUrl
+	fmt.Println(url)
 
 	req, err := createGraphQLRequest(url, query, headers)
 	if err != nil {

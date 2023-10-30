@@ -7,6 +7,4 @@ main
 data/
 
 # ignore binaries
-reposync
-usersync
-server
+main
