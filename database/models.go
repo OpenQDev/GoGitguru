@@ -15,6 +15,7 @@ type RepoStatus string
 
 const (
 	RepoStatusPending     RepoStatus = "pending"
+	RepoStatusQueued      RepoStatus = "queued"
 	RepoStatusSyncingRepo RepoStatus = "syncing_repo"
 	RepoStatusSynced      RepoStatus = "synced"
 	RepoStatusFailed      RepoStatus = "failed"

@@ -4,7 +4,7 @@ go 1.21.1
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/OpenQDev/GoGitguru/database v1.0.4
+	github.com/OpenQDev/GoGitguru/database v1.0.0
 	github.com/OpenQDev/GoGitguru/util v1.0.0
 	github.com/stretchr/testify v1.8.4
 )
