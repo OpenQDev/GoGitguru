@@ -22,21 +22,9 @@ type DiffHistoryResult struct {
 	DatesRemoved   []time.Time
 }
 
-func splitWithDelimiters(text string, pattern *regexp.Regexp) []string {
-	matches := pattern.FindAllStringIndex(text, -1)
-	parts := make([]string, 0, len(matches)*2+1)
-	start := 0
-	for _, match := range matches {
-		parts = append(parts, text[start:match[0]], text[match[0]:match[1]])
-		start = match[1]
-	}
-	parts = append(parts, text[start:])
-	return parts
-}
-
-func DiffHistoryObject(logOutput string, dependencySearched string, dependencyTodayOutput string) DiffHistoryResult {
+func DiffHistoryObject(dependencyHistoryLogs string, dependencySearched string, dependencyTodayOutput string) DiffHistoryResult {
 	patternCommit := regexp.MustCompile(`commit [a-f0-9]{40}`)
-	commits := splitWithDelimiters(logOutput, patternCommit)[1:]
+	commits := SplitWithDelimiters(dependencyHistoryLogs, patternCommit)[1:]
 
 	patternAdded := regexp.MustCompile(`(?m)^\+\s.*` + regexp.QuoteMeta(dependencySearched) + `.*$`)
 	patternRemoved := regexp.MustCompile(`(?m)^-\s.*` + regexp.QuoteMeta(dependencySearched) + `.*$`)
