@@ -6,4 +6,7 @@ main
 **/repos/
 data/
 
+# ignore binaries
 reposync
+usersync
+server
