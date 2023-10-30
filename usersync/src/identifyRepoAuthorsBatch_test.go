@@ -9,7 +9,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
 	"github.com/OpenQDev/GoGitguru/util/setup"
@@ -31,7 +30,7 @@ func TestIdentifyRepoAuthorsBatch(t *testing.T) {
 	}
 
 	// Decode the JSON file to type RestRepo
-	var commitAuthorsResponse githubGraphQL.GithubGraphQLCommitAuthorsResponse
+	var commitAuthorsResponse GithubGraphQLCommitAuthorsResponse
 	err = marshaller.JsonFileToType(jsonFile, &commitAuthorsResponse)
 	if err != nil {
 		t.Errorf("Failed to read JSON file: %s", err)
