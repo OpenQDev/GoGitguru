@@ -35,7 +35,7 @@ jobs:
           context: .
           file: ./Dockerfile.api
           push: true
-          tags: openq/gitguru:${{ inputs.environment }}-${{ inputs.version }}
+          tags: openq/gitguru-api:${{ inputs.environment }}-${{ inputs.version }}
 
   tagHelm:
     needs: build
