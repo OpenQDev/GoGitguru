@@ -21,7 +21,7 @@ func TestDependencyFileExists(t *testing.T) {
 		depFilesReturned []string
 		wantErr          bool
 	}{
-		{"Valid", dependencyFileExists, []string{"package.json"}, false},
+		{"Valid", dependencyFileExists, []string{"package.json", "utils/package.json"}, false},
 		{"Invalid", dependencyFileNotExists, []string{}, true},
 	}
 
@@ -32,7 +32,6 @@ func TestDependencyFileExists(t *testing.T) {
 			), tt.name)
 
 			depFilesReturned, err := GitDependencyFiles(repoDir, tt.dependencyFile)
-			fmt.Println("depFilesReturned", depFilesReturned)
 
 			if (err != nil) != tt.wantErr {
 				fmt.Println("in here")
