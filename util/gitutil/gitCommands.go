@@ -32,7 +32,7 @@ func GitDepFileHistory(repoDir string, dependencyName string, dependencyFilePath
 git -C . ls-files | grep -E 'go.mod'
 git -C <repoDir> ls-files | grep -E '<gitGrepExists>'
 */
-func GitPathExists(repoDir string, gitGrepExists string) *exec.Cmd {
+func LogDependencyFiles(repoDir string, gitGrepExists string) *exec.Cmd {
 	cmd := fmt.Sprintf("git -C %s ls-files | grep -E '%s'", repoDir, gitGrepExists)
 	return exec.Command("/bin/sh", "-c", cmd)
 }
