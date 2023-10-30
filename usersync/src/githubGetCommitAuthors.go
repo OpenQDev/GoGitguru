@@ -1,4 +1,4 @@
-package githubGraphQL
+package usersync
 
 import (
 	"encoding/json"

@@ -5,10 +5,9 @@ import (
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
-	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
 )
 
-func convertAuthorToInsertUserParams(author githubGraphQL.GithubGraphQLAuthor, createdAt time.Time, updatedAt time.Time) database.InsertUserParams {
+func convertAuthorToInsertUserParams(author GithubGraphQLAuthor, createdAt time.Time, updatedAt time.Time) database.InsertUserParams {
 	authorParams := database.InsertUserParams{
 		GithubRestID:    int32(author.User.GithubRestID),
 		GithubGraphqlID: author.User.GithubGraphqlID,

@@ -3,7 +3,6 @@ package usersync
 import (
 	"time"
 
-	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -11,9 +10,9 @@ import (
 
 type StartUserSyncingTestCase struct {
 	name        string
-	author      githubGraphQL.GithubGraphQLAuthor
+	author      GithubGraphQLAuthor
 	shouldError bool
-	setupMock   func(mock sqlmock.Sqlmock, repo githubGraphQL.GithubGraphQLAuthor)
+	setupMock   func(mock sqlmock.Sqlmock, repo GithubGraphQLAuthor)
 }
 
 func startUserSyncingTest1() StartUserSyncingTestCase {
@@ -21,7 +20,7 @@ func startUserSyncingTest1() StartUserSyncingTestCase {
 	const email = "andrew@openq.dev"
 	const restId = 93455288
 
-	user := githubGraphQL.GithubGraphQLUser{
+	user := GithubGraphQLUser{
 		GithubRestID:    93455288,
 		GithubGraphqlID: "U_kgDOBZIDuA",
 		Login:           "FlacoJones",
@@ -48,7 +47,7 @@ func startUserSyncingTest1() StartUserSyncingTestCase {
 		UpdatedAt: "2023-10-10T15:52:33Z",
 	}
 
-	author := githubGraphQL.GithubGraphQLAuthor{
+	author := GithubGraphQLAuthor{
 		Name:  "FlacoJones",
 		Email: "andrew@openq.dev",
 		User:  user,
@@ -58,7 +57,7 @@ func startUserSyncingTest1() StartUserSyncingTestCase {
 		name:        SHOULD_STORE_USER,
 		author:      author,
 		shouldError: false,
-		setupMock: func(mock sqlmock.Sqlmock, author githubGraphQL.GithubGraphQLAuthor) {
+		setupMock: func(mock sqlmock.Sqlmock, author GithubGraphQLAuthor) {
 			// EXPECT - GetLatestUncheckedCommitPerAuthor
 			rows := sqlmock.NewRows([]string{"commit_hash", "author_email", "repo_url"}).
 				AddRow("abc123", "andrew@openq.dev", "https://github.com/OpenQDev/OpenQ-Workflows")

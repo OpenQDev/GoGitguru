@@ -6,11 +6,10 @@ import (
 
 	"github.com/OpenQDev/GoGitguru/database"
 
-	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
-func insertGithubUser(author githubGraphQL.GithubGraphQLAuthor, db *database.Queries) error {
+func insertGithubUser(author GithubGraphQLAuthor, db *database.Queries) error {
 	createdAt, err := time.Parse(time.RFC3339, author.User.CreatedAt)
 	if err != nil && !createdAt.IsZero() {
 		logger.LogError("error parsing time: %s", err)

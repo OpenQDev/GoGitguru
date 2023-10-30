@@ -1,4 +1,4 @@
-package githubGraphQL
+package usersync
 
 type GithubGetCommitAuthorsTest struct {
 	name    string

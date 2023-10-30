@@ -4,11 +4,9 @@ import (
 	"context"
 
 	"github.com/OpenQDev/GoGitguru/database"
-
-	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
 )
 
-func insertIntoRestIdToUser(author githubGraphQL.GithubGraphQLAuthor, db *database.Queries) error {
+func insertIntoRestIdToUser(author GithubGraphQLAuthor, db *database.Queries) error {
 	restId := author.User.GithubRestID
 
 	var params database.InsertRestIdToEmailParams

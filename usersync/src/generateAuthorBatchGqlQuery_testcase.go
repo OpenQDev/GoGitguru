@@ -1,9 +1,5 @@
 package usersync
 
-import (
-	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
-)
-
 type GenerateAuthorBatchGqlQueryTestCase struct {
 	title          string
 	organization   string
@@ -31,7 +27,7 @@ func singleAuthor() GenerateAuthorBatchGqlQueryTestCase {
 		}
 	}
 }
-` + githubGraphQL.AUTHOR_GRAPHQL_FRAGMENT,
+` + AUTHOR_GRAPHQL_FRAGMENT,
 	}
 }
 

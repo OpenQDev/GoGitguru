@@ -1,15 +1,11 @@
 package usersync
 
-import (
-	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
-)
-
 type IdentifyRepoAuthorsBatchTestCase struct {
 	title            string
 	repoUrl          string
 	authorCommitList []AuthorCommitTuple
 	authorized       bool
-	expectedOutput   map[string]githubGraphQL.GithubGraphQLCommit
+	expectedOutput   map[string]GithubGraphQLCommit
 }
 
 const repoUrl = "https://github.com/OpenQDev/OpenQ-Workflows"
@@ -17,7 +13,7 @@ const repoUrl = "https://github.com/OpenQDev/OpenQ-Workflows"
 func identifyRepoAuthorsBatchTest1() IdentifyRepoAuthorsBatchTestCase {
 	const AUTHOR_BATCH = "AUTHOR_BATCH"
 
-	user := githubGraphQL.GithubGraphQLUser{
+	user := GithubGraphQLUser{
 		GithubRestID:    93455288,
 		GithubGraphqlID: "U_kgDOBZIDuA",
 		Login:           "FlacoJones",
@@ -44,15 +40,15 @@ func identifyRepoAuthorsBatchTest1() IdentifyRepoAuthorsBatchTestCase {
 		UpdatedAt: "2023-10-10T15:52:33Z",
 	}
 
-	author := githubGraphQL.GithubGraphQLAuthor{
+	author := GithubGraphQLAuthor{
 		Name:  "FlacoJones",
 		Email: "andrew@openq.dev",
 		User:  user,
 	}
 
-	expectedOutput := make(map[string]githubGraphQL.GithubGraphQLCommit)
-	expectedOutput["commit_0"] = githubGraphQL.GithubGraphQLCommit{Author: author}
-	expectedOutput["commit_1"] = githubGraphQL.GithubGraphQLCommit{Author: author}
+	expectedOutput := make(map[string]GithubGraphQLCommit)
+	expectedOutput["commit_0"] = GithubGraphQLCommit{Author: author}
+	expectedOutput["commit_1"] = GithubGraphQLCommit{Author: author}
 
 	return IdentifyRepoAuthorsBatchTestCase{
 		title:   AUTHOR_BATCH,

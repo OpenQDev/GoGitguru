@@ -1,4 +1,4 @@
-package githubGraphQL
+package usersync
 
 const AUTHOR_GRAPHQL_FRAGMENT string = `fragment commitDetails on Commit {
 	author {

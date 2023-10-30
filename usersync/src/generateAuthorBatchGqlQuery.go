@@ -2,8 +2,6 @@ package usersync
 
 import (
 	"fmt"
-
-	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
 )
 
 func generateAuthorBatchGqlQuery(organization string, repo string, authorList []AuthorCommitTuple) string {
@@ -29,7 +27,7 @@ func generateAuthorBatchGqlQuery(organization string, repo string, authorList []
 	}
 	`
 	// author_graphql_fragment is not defined in the original code, assuming it's a string
-	gqlQuery += githubGraphQL.AUTHOR_GRAPHQL_FRAGMENT
+	gqlQuery += AUTHOR_GRAPHQL_FRAGMENT
 
 	return gqlQuery
 }

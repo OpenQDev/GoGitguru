@@ -4,14 +4,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
-
 	"github.com/stretchr/testify/assert"
 )
 
 func TestConvertAuthorToInsertUserParams(t *testing.T) {
 	// ARRANGE
-	user := githubGraphQL.GithubGraphQLUser{
+	user := GithubGraphQLUser{
 		GithubRestID:    93455288,
 		GithubGraphqlID: "U_kgDOBZIDuA",
 		Login:           "FlacoJones",
@@ -38,7 +36,7 @@ func TestConvertAuthorToInsertUserParams(t *testing.T) {
 		UpdatedAt: "2023-10-10T15:52:33Z",
 	}
 
-	author := githubGraphQL.GithubGraphQLAuthor{
+	author := GithubGraphQLAuthor{
 		Name:  "FlacoJones",
 		Email: "andrew@openq.dev",
 		User:  user,

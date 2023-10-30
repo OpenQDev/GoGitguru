@@ -3,7 +3,6 @@ package usersync
 import (
 	"github.com/OpenQDev/GoGitguru/database"
 
-	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
@@ -58,7 +57,7 @@ func StartSyncingUser(
 			continue
 		}
 
-		githubGraphQLCommitAuthors := make([]githubGraphQL.GithubGraphQLCommit, 0, len(githubGraphQLCommitAuthorsMap))
+		githubGraphQLCommitAuthors := make([]GithubGraphQLCommit, 0, len(githubGraphQLCommitAuthorsMap))
 
 		for _, commitAuthor := range githubGraphQLCommitAuthorsMap {
 			githubGraphQLCommitAuthors = append(githubGraphQLCommitAuthors, commitAuthor)

@@ -3,7 +3,6 @@ package usersync
 import (
 	"time"
 
-	"github.com/OpenQDev/GoGitguru/util/githubGraphQL"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -11,15 +10,15 @@ import (
 
 type InsertGithubUserTestCase struct {
 	name        string
-	author      githubGraphQL.GithubGraphQLAuthor
+	author      GithubGraphQLAuthor
 	shouldError bool
-	setupMock   func(mock sqlmock.Sqlmock, repo githubGraphQL.GithubGraphQLAuthor)
+	setupMock   func(mock sqlmock.Sqlmock, repo GithubGraphQLAuthor)
 }
 
 func insertGithubUserTestCase1() InsertGithubUserTestCase {
 	const SHOULD_STORE_GH_USER = "SHOULD_STORE_GH_USER"
 
-	user := githubGraphQL.GithubGraphQLUser{
+	user := GithubGraphQLUser{
 		GithubRestID:    93455288,
 		GithubGraphqlID: "U_kgDOBZIDuA",
 		Login:           "FlacoJones",
@@ -46,7 +45,7 @@ func insertGithubUserTestCase1() InsertGithubUserTestCase {
 		UpdatedAt: "2023-10-10T15:52:33Z",
 	}
 
-	author := githubGraphQL.GithubGraphQLAuthor{
+	author := GithubGraphQLAuthor{
 		Name:  "FlacoJones",
 		Email: "abc123@gmail.com",
 		User:  user,
@@ -56,7 +55,7 @@ func insertGithubUserTestCase1() InsertGithubUserTestCase {
 		name:        SHOULD_STORE_GH_USER,
 		author:      author,
 		shouldError: false,
-		setupMock: func(mock sqlmock.Sqlmock, author githubGraphQL.GithubGraphQLAuthor) {
+		setupMock: func(mock sqlmock.Sqlmock, author GithubGraphQLAuthor) {
 			createdAt, err := time.Parse(time.RFC3339, author.User.CreatedAt)
 			if err != nil && !createdAt.IsZero() {
 				logger.LogError("error parsing time: %s", err)

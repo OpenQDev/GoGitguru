@@ -1,4 +1,4 @@
-package githubGraphQL
+package usersync
 
 type GithubGraphQLUser struct {
 	GithubRestID    int    `json:"github_rest_id"`
