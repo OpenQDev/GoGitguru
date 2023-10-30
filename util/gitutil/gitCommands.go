@@ -20,20 +20,21 @@ func GitPullCommand(pullDestination string) *exec.Cmd {
 }
 
 /*
-git log -p --raw --unified=0 -i -S'github.com/lib/pq v1.10.9' go.mod
-git log -p --raw --unified=0 -i -S'<dependency-name>' <path-to-dependency-file>
-*/
-func GitDepFileHistory(repoDir string, dependencyName string, dependencyFilePath string) *exec.Cmd {
-	cmd := fmt.Sprintf("git log -p --raw --unified=0 -i -S'%s' %s", dependencyName, dependencyFilePath)
-	return exec.Command("/bin/sh", "-c", cmd)
-}
-
-/*
 git -C . ls-files | grep -E 'go.mod'
 git -C <repoDir> ls-files | grep -E '<gitGrepExists>'
 */
 func LogDependencyFiles(repoDir string, gitGrepExists string) *exec.Cmd {
 	cmd := fmt.Sprintf("git -C %s ls-files | grep -E '%s'", repoDir, gitGrepExists)
+	return exec.Command("/bin/sh", "-c", cmd)
+}
+
+/*
+git -C ./mock/openqdev/openq-coinapi log -p --raw --unified=0 -i -S'github.com/lib/pq v1.10.9' go.mod
+git log -p --raw --unified=0 -i -S'<dependency-name>' <path-to-dependency-file>
+git -C ./mock/openqdev/openq-coinapi log -p --raw --unified=0 -i -S'axios' **package.json** **utils/package.json**
+*/
+func GitDepFileHistory(repoDir string, dependencyName string, dependencyFilePath string) *exec.Cmd {
+	cmd := fmt.Sprintf("git -C %s log -p --raw --unified=0 -i -S'%s' %s", repoDir, dependencyName, dependencyFilePath)
 	return exec.Command("/bin/sh", "-c", cmd)
 }
 
