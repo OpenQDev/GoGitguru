@@ -1,14 +1,14 @@
-name: Build GitGuru API Image
+name: Build UserSync Image
 
 on:
   workflow_call:
     inputs:
       version:
-        description: "The version to tag the gitguru api image - e.g. 1.2.32"
+        description: "The version to tag the usersync image - e.g. 1.2.32"
         required: true
         type: string
       environment:
-        description: "The environment to deploy gitguru api - e.g. development, staging, production"
+        description: "The environment to deploy usersync - e.g. development, staging, production"
         required: true
         type: string
 
@@ -33,6 +33,16 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./Dockerfile.api
+          file: ./Dockerfile.usersync
           push: true
-          tags: openq/gitguru:${{ inputs.environment }}-${{ inputs.version }}
+          tags: openq/gitguru-users:${{ inputs.environment }}-${{ inputs.version }}
+
+  tagHelm:
+    needs: build
+    uses: OpenQDev/OpenQ-Workflows/.github/workflows/tag.yml@main
+    with:
+      APP: gitguru_users
+      VERSION: ${{ inputs.environment }}-${{ inputs.version }}
+      ENVIRONMENT: ${{ inputs.environment }}
+    secrets:
+      PAT: ${{ secrets.PAT }}

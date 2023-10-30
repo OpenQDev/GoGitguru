@@ -1,9 +1,9 @@
-name: (TAG) Build + Push RepoSync # git add . && git commit -m "test" && git tag -f reposync-development-1.0.55 && git push -f origin gitguru-development-1.0.55
+name: (TAG) Build + Push UserSync # git add . && git commit -m "test" && git tag -f usersync-development-1.0.55 && git push -f origin usersync-development-1.0.55
 
 on:
   push:
     tags:
-      - "reposync-*-*.*.*"
+      - "usersync-*-*.*.*"
 
 jobs:
   extract_info:
@@ -47,9 +47,9 @@ jobs:
           echo ${VERSION} # 1.0.0
 
   build_release_reposync:
-    name: Build and Release RepoSync
+    name: Build and Release UserSync
     needs: extract_info
-    uses: ./.github/workflows/build-reposync.yml
+    uses: ./.github/workflows/build-usersync.yml
     with:
       environment: ${{ needs.extract_info.outputs.ENVIRONMENT }}
       version: ${{ needs.extract_info.outputs.VERSION }}
