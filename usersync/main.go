@@ -13,6 +13,6 @@ func main() {
 
 	logger.SetDebugMode(env.Debug)
 
-	usersync.StartSyncingUser(database, "repos", env.GhAccessToken, 2, "https://github.com/graphql")
+	usersync.StartSyncingUser(database, "repos", env.GhAccessToken, 2, "https://api.github.com/graphql")
 	logger.LogBlue("user sync completed!")
 }
