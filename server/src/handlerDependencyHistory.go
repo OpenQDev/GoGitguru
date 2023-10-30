@@ -81,16 +81,6 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 }
 
 func checkGitPathExists(body DependencyHistoryRequest, repoDir string) error {
-	gitGrepExists := strings.Join(body.FilePaths, "|")
-	gitGrepExists = strings.ReplaceAll(gitGrepExists, "*", "")
-
-	cmd := gitutil.GitPathExists(repoDir, gitGrepExists)
-
-	_, err := cmd.Output()
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
