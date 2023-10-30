@@ -9,11 +9,8 @@ INSERT INTO repo_urls (url, created_at, updated_at)
 VALUES ($1, NOW(), NOW())
 RETURNING *;
 
--- name: UpdateStatus :exec
-UPDATE repo_urls SET status = $1::repo_status WHERE url = $2 AND status != 'failed'::repo_status;
-
 -- name: UpdateStatusAndUpdatedAt :exec
-UPDATE repo_urls SET status = $1, updated_at = NOW() WHERE url = $2 AND status != 'failed'::repo_status;
+UPDATE repo_urls SET status = $1, updated_at = NOW() WHERE url = $2;
 
 -- name: GetReposStatus :many
 SELECT

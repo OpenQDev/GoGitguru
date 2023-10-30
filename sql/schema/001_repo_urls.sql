@@ -3,7 +3,7 @@ CREATE TYPE repo_status AS ENUM ('pending', 'queued', 'syncing_repo', 'synced', 
 
 CREATE TABLE repo_urls (
     url VARCHAR(150) PRIMARY KEY,
-    status repo_status NOT NULL DEFAULT 'pending',
+    status repo_status NOT NULL DEFAULT 'pending'::repo_status,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NULL
 );

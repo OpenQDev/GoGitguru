@@ -90,9 +90,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.multiRowInsertCommitsStmt, err = db.PrepareContext(ctx, multiRowInsertCommits); err != nil {
 		return nil, fmt.Errorf("error preparing query MultiRowInsertCommits: %w", err)
 	}
-	if q.updateStatusStmt, err = db.PrepareContext(ctx, updateStatus); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateStatus: %w", err)
-	}
 	if q.updateStatusAndUpdatedAtStmt, err = db.PrepareContext(ctx, updateStatusAndUpdatedAt); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateStatusAndUpdatedAt: %w", err)
 	}
@@ -211,11 +208,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing multiRowInsertCommitsStmt: %w", cerr)
 		}
 	}
-	if q.updateStatusStmt != nil {
-		if cerr := q.updateStatusStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateStatusStmt: %w", cerr)
-		}
-	}
 	if q.updateStatusAndUpdatedAtStmt != nil {
 		if cerr := q.updateStatusAndUpdatedAtStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateStatusAndUpdatedAtStmt: %w", cerr)
@@ -282,7 +274,6 @@ type Queries struct {
 	insertRestIdToEmailStmt               *sql.Stmt
 	insertUserStmt                        *sql.Stmt
 	multiRowInsertCommitsStmt             *sql.Stmt
-	updateStatusStmt                      *sql.Stmt
 	updateStatusAndUpdatedAtStmt          *sql.Stmt
 }
 
@@ -312,7 +303,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		insertRestIdToEmailStmt:               q.insertRestIdToEmailStmt,
 		insertUserStmt:                        q.insertUserStmt,
 		multiRowInsertCommitsStmt:             q.multiRowInsertCommitsStmt,
-		updateStatusStmt:                      q.updateStatusStmt,
 		updateStatusAndUpdatedAtStmt:          q.updateStatusAndUpdatedAtStmt,
 	}
 }
