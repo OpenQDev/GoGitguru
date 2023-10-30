@@ -31,17 +31,21 @@ func LogDependencyFiles(repoDir string, gitGrepExists string) *exec.Cmd {
 /*
 git -C ./mock/openqdev/openq-coinapi log -p --raw --unified=0 -i -S'github.com/lib/pq v1.10.9' go.mod
 git log -p --raw --unified=0 -i -S'<dependency-name>' <path-to-dependency-file>
-git -C ./mock/openqdev/openq-coinapi log -p --raw --unified=0 -i -S'axios' **package.json** **utils/package.json**
+git -C ./mock/openqdev/openq-coinapi log -p --raw --unified=0 -i -S'axios' '**package.json**' '**utils/package.json**'
 */
-func GitDepFileHistory(repoDir string, dependencyName string, dependencyFilePath string) *exec.Cmd {
-	cmd := fmt.Sprintf("git -C %s log -p --raw --unified=0 -i -S'%s' %s", repoDir, dependencyName, dependencyFilePath)
+func GitDepFileHistory(repoDir string, dependencyName string, dependencyFilePaths string) *exec.Cmd {
+	cmd := fmt.Sprintf("git -C %s log -p --raw --unified=0 -i -S'%s' %s", repoDir, dependencyName, dependencyFilePaths)
 	return exec.Command("/bin/sh", "-c", cmd)
 }
 
 /*
 git -C {repo_dir} grep -rli '{dependency_searched}' -- {files_paths_formatted}
-git -C . grep -rli 'github.com/go-chi/cors' -- **go.mod**
+git -C ./mock/openqdev/openq-coinapi grep -rli 'axios' -- '**package.json**' '**utils/package.json**'
 */
+func GitDepFileToday(repoDir string, dependencyName string, dependencyFilePaths string) *exec.Cmd {
+	cmd := fmt.Sprintf("git -C %s grep -rli '%s' -- %s", repoDir, dependencyName, dependencyFilePaths)
+	return exec.Command("/bin/sh", "-c", cmd)
+}
 
 /*
 if filepaths don't exists -> errors

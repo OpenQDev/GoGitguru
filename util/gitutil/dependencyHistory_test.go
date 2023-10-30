@@ -26,7 +26,7 @@ func TestGitDependencyHistory(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				"Valid",
+				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
 
 			out, err := GitDependencyHistory(repoDir, tt.dependencySearched, tt.depFilePaths)

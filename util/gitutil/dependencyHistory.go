@@ -16,7 +16,6 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 	fmt.Println("depFilePathsFormatted", depFilePathsFormatted)
 
 	cmd := GitDepFileHistory(repoDir, dependencySearched, depFilePathsFormatted)
-	fmt.Println("cmd", cmd)
 
 	out, err := cmd.CombinedOutput()
 	if err != nil {
