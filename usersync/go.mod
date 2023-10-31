@@ -9,6 +9,11 @@ require (
 	github.com/stretchr/testify v1.8.4
 )
 
+replace (
+	github.com/OpenQDev/GoGitguru/database => ../database
+	github.com/OpenQDev/GoGitguru/util => ../util
+)
+
 require (
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect

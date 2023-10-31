@@ -5,10 +5,6 @@ github.com/DATA-DOG/go-sqlmock v1.5.0/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q
 github.com/Microsoft/go-winio v0.5.2/go.mod h1:WpS1mjBmmwHBEWmogvA2mj8546UReBk4v8QkMxJ6pZY=
 github.com/Microsoft/go-winio v0.6.1 h1:9/kr64B9VUZrLm5YYwbGtUJnMgqWVOdUAXu6Migciow=
 github.com/Microsoft/go-winio v0.6.1/go.mod h1:LRdKpFKfdobln8UmuiYcKPot9D2v6svN5+sAH+4kjUM=
-github.com/OpenQDev/GoGitguru/database v1.0.0 h1:osWuStpGsqrNKOeOuq/zXjNOk3qx3FV7C51PV4OJLR0=
-github.com/OpenQDev/GoGitguru/database v1.0.0/go.mod h1:fY03S5G6r5qIRo5TpWXRrku8go7m3WunEB2K5PXZLKg=
-github.com/OpenQDev/GoGitguru/util v1.0.0 h1:mHEJyhFWu9hnKtzpdlJJHsI4HsB8jUSH6FISwhVmcBU=
-github.com/OpenQDev/GoGitguru/util v1.0.0/go.mod h1:dl0gX7/yStLCzwWb2jx8/s4og1iig0wgJmFaF0vZklE=
 github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371 h1:kkhsdkhsCvIsutKu5zLMgWtgh9YxGCNAw8Ad8hjwfYg=
 github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371/go.mod h1:EjAoLdwvbIOoOQr3ihjnSoLZRtE8azugULFRteWMNc0=
 github.com/acomagu/bufpipe v1.0.4 h1:e3H4WUzM3npvo5uv95QuJM3cQspFNtFBzvJ2oNjKIDQ=
