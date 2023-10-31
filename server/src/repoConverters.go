@@ -47,6 +47,41 @@ func ConvertGithubRestRepoToInsertGithubRepoParams(repo githubRest.GithubRestRep
 	}
 }
 
+func ConvertGithubRestRepoToGitguruRepo(repo githubRest.GithubRestRepo) GitguruRepo {
+	createdAt, _ := time.Parse(time.RFC3339, repo.CreatedAt)
+	updatedAt, _ := time.Parse(time.RFC3339, repo.UpdatedAt)
+	pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)
+	return GitguruRepo{
+		GithubRestID:    int32(repo.GithubRestID),
+		GithubGraphqlID: repo.GithubGraphqlID,
+		Name:            repo.Name,
+		FullName:        repo.FullName,
+		Private:         repo.Private,
+		OwnerLogin:      repo.Owner.Login,
+		OwnerAvatarUrl:  repo.Owner.AvatarURL,
+		Description:     repo.Description,
+		Homepage:        repo.Homepage,
+		Fork:            repo.Fork,
+		ForksCount:      int32(repo.ForksCount),
+		Archived:        repo.Archived,
+		Disabled:        repo.Disabled,
+		License:         repo.License.Name,
+		Language:        repo.Language,
+		StargazersCount: int32(repo.StargazersCount),
+		WatchersCount:   int32(repo.WatchersCount),
+		OpenIssuesCount: int32(repo.OpenIssuesCount),
+		HasIssues:       repo.HasIssues,
+		HasDiscussions:  repo.HasDiscussions,
+		HasProjects:     repo.HasProjects,
+		CreatedAt:       createdAt,
+		UpdatedAt:       updatedAt,
+		PushedAt:        pushedAt,
+		Visibility:      repo.Visibility,
+		Size:            int32(repo.Size),
+		DefaultBranch:   repo.DefaultBranch,
+	}
+}
+
 func ConvertDatabaseGithubRepoToGithubRestRepo(params database.GithubRepo) githubRest.GithubRestRepo {
 	return githubRest.GithubRestRepo{
 		GithubRestID:    int(params.GithubRestID),
@@ -90,6 +125,42 @@ func ConvertDatabaseGithubRepoToGithubRestRepo(params database.GithubRepo) githu
 		PushedAt:        params.PushedAt.Time.Format(time.RFC3339),
 		Visibility:      params.Visibility.String,
 		Size:            int(params.Size.Int32),
+		DefaultBranch:   params.DefaultBranch.String,
+	}
+}
+
+func ConvertGithubDatabaseRepoToGitguruRepo(params database.GithubRepo) GitguruRepo {
+	createdAt, _ := time.Parse(time.RFC3339, params.CreatedAt.Time.String())
+	updatedAt, _ := time.Parse(time.RFC3339, params.UpdatedAt.Time.String())
+	pushedAt, _ := time.Parse(time.RFC3339, params.PushedAt.Time.String())
+
+	return GitguruRepo{
+		GithubRestID:    int32(params.GithubRestID),
+		GithubGraphqlID: params.GithubGraphqlID,
+		Name:            params.Name,
+		FullName:        params.FullName,
+		Private:         params.Private.Bool,
+		OwnerLogin:      params.OwnerLogin,
+		OwnerAvatarUrl:  params.OwnerAvatarUrl.String,
+		Description:     params.Description.String,
+		Homepage:        params.Homepage.String,
+		Fork:            params.Fork.Bool,
+		ForksCount:      int32(params.ForksCount.Int32),
+		Archived:        params.Archived.Bool,
+		Disabled:        params.Disabled.Bool,
+		License:         params.License.String,
+		Language:        params.Language.String,
+		StargazersCount: int32(params.StargazersCount.Int32),
+		WatchersCount:   int32(params.WatchersCount.Int32),
+		OpenIssuesCount: int32(params.OpenIssuesCount.Int32),
+		HasIssues:       params.HasIssues.Bool,
+		HasDiscussions:  params.HasDiscussions.Bool,
+		HasProjects:     params.HasProjects.Bool,
+		CreatedAt:       createdAt,
+		UpdatedAt:       updatedAt,
+		PushedAt:        pushedAt,
+		Visibility:      params.Visibility.String,
+		Size:            int32(params.Size.Int32),
 		DefaultBranch:   params.DefaultBranch.String,
 	}
 }
