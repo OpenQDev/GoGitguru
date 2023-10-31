@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/OpenQDev/GoGitguru/util/gitutil"
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
@@ -16,8 +15,8 @@ type DependencyHistoryRequest struct {
 }
 
 type DependencyHistoryResponse struct {
-	DatesAdded   []time.Time `json:"dates_added"`
-	DatesRemoved []time.Time `json:"dates_removed"`
+	DatesAdded   []int64 `json:"dates_added"`
+	DatesRemoved []int64 `json:"dates_removed"`
 }
 
 func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http.Request) {

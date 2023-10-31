@@ -1,28 +1,28 @@
 package gitutil
 
 import (
-	"reflect"
 	"testing"
-	"time"
 
 	"github.com/OpenQDev/GoGitguru/util/testhelpers"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGitDependencyHistory(t *testing.T) {
 	// ARRANGE - GLOBAL
-	repoDir := "./mock/openqdev/openq-coinapi"
-	dependencySearched := "redis"
+	repoDir := "./mock/openqdev/dephistory-test-repo"
+	dependencySearched := "chai"
 	depFilePaths := []string{"package.json"}
-	expectedDatesAddedReturn := []time.Time{time.Date(2020, time.January, 1, 0, 0, 0, 0, time.UTC)}
-	expectedDatesRemovedReturn := []time.Time{time.Date(2020, time.January, 1, 0, 0, 0, 0, time.UTC)}
+
+	expectedDatesAddedReturn := []int64{1698773760}
+	expectedDatesRemovedReturn := []int64{1698773724}
 
 	// ARRANGE - TESTS
 	tests := []struct {
 		name                       string
 		dependencySearched         string
 		depFilePaths               []string
-		expectedDatesAddedReturn   []time.Time
-		expectedDatesRemovedReturn []time.Time
+		expectedDatesAddedReturn   []int64
+		expectedDatesRemovedReturn []int64
 		wantErr                    bool
 	}{
 		{"Valid", dependencySearched, depFilePaths, expectedDatesAddedReturn, expectedDatesRemovedReturn, false},
@@ -41,12 +41,12 @@ func TestGitDependencyHistory(t *testing.T) {
 				return
 			}
 
-			if !reflect.DeepEqual(datesAdded, tt.expectedDatesAddedReturn) {
-				t.Errorf("GitDependencyHistory() datesAdded = %v, want %v", datesAdded, tt.expectedDatesAddedReturn)
+			if !assert.ElementsMatch(t, datesAdded, tt.expectedDatesAddedReturn) {
+				t.Errorf("DependencyFileExists() = %v, want %v", datesAdded, tt.expectedDatesAddedReturn)
 			}
 
-			if !reflect.DeepEqual(datesRemoved, tt.expectedDatesRemovedReturn) {
-				t.Errorf("GitDependencyHistory() datesRemoved = %v, want %v", datesRemoved, tt.expectedDatesRemovedReturn)
+			if !assert.ElementsMatch(t, datesRemoved, tt.expectedDatesRemovedReturn) {
+				t.Errorf("DependencyFileExists() = %v, want %v", datesRemoved, tt.expectedDatesRemovedReturn)
 			}
 		})
 	}
