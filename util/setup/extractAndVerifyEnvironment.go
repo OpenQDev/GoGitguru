@@ -9,14 +9,12 @@ import (
 )
 
 type EnvConfig struct {
-	PortString                  string
-	DbUrl                       string
-	OriginUrl                   string
-	Debug                       bool
-	SyncIntervalMinutesInt      int
-	SyncUsersIntervalMinutesInt int
-	GhAccessToken               string
-	TargetLiveGithub            bool
+	PortString       string
+	DbUrl            string
+	OriginUrl        string
+	Debug            bool
+	GhAccessToken    string
+	TargetLiveGithub bool
 }
 
 func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {

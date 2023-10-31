@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/OpenQDev/GoGitguru/util/gitutil"
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
@@ -15,8 +16,8 @@ type DependencyHistoryRequest struct {
 }
 
 type DependencyHistoryResponse struct {
-	DatesAdded   []string `json:"dates_added"`
-	DatesRemoved []string `json:"dates_removed"`
+	DatesAdded   []time.Time `json:"dates_added"`
+	DatesRemoved []time.Time `json:"dates_removed"`
 }
 
 func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http.Request) {
@@ -33,13 +34,16 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 
 	repoDir := fmt.Sprintf("./repos/%s/%s", organization, repo)
 
-	commits, err := gitutil.GitDependencyHistory(repoDir, body.DependencySearched, body.FilePaths)
+	datesAddedCommits, datesRemovedCommits, err := gitutil.GitDependencyHistory(repoDir, body.DependencySearched, body.FilePaths)
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error getting dependency history: %s", err))
 		return
 	}
 
-	fmt.Println(commits)
+	dependencyHistoryResponse = DependencyHistoryResponse{
+		DatesAdded:   datesAddedCommits,
+		DatesRemoved: datesRemovedCommits,
+	}
 
 	RespondWithJSON(w, 200, dependencyHistoryResponse)
 }

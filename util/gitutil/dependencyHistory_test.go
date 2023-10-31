@@ -28,7 +28,7 @@ func TestGitDependencyHistory(t *testing.T) {
 				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
 
-			_, err := GitDependencyHistory(repoDir, tt.dependencySearched, tt.depFilePaths)
+			_, _, err := GitDependencyHistory(repoDir, tt.dependencySearched, tt.depFilePaths)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GitDependencyHistory() error = %v, wantErr %v", err, tt.wantErr)
