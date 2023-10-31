@@ -7,4 +7,5 @@ type ApiConfig struct {
 	GithubRestAPIBaseUrl string
 	GithubGraphQLBaseUrl string
 	PrefixPath           string
+	DBURL                string
 }
