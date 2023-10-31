@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/OpenQDev/GoGitguru/util/githubRest"
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
@@ -25,7 +26,7 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 	owner := chi.URLParam(r, "owner")
 	name := chi.URLParam(r, "name")
 
-	fullName := fmt.Sprintf("%s/%s", owner, name)
+	fullName := fmt.Sprintf("%s/%s", strings.ToLower(owner), strings.ToLower(name))
 
 	// Check if the repo already exists in the database
 	repoExists, err := apiConfig.DB.CheckGithubRepoExists(context.Background(), fullName)
@@ -68,7 +69,7 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 	params := ConvertGithubRestRepoToInsertGithubRepoParams(repo)
 
 	databaseRepo, err := apiConfig.DB.InsertGithubRepo(context.Background(), params)
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
 		RespondWithError(w, 500, fmt.Sprintf("failed to insert repo into database: %s", err))
 		return
 	}

@@ -2,6 +2,7 @@ package server
 
 import (
 	"database/sql"
+	"strings"
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
@@ -19,7 +20,7 @@ func ConvertGithubRestRepoToInsertGithubRepoParams(repo githubRest.GithubRestRep
 		GithubGraphqlID: repo.GithubGraphqlID,
 		Url:             repo.URL,
 		Name:            repo.Name,
-		FullName:        repo.FullName,
+		FullName:        strings.ToLower(repo.FullName),
 		Private:         sql.NullBool{Bool: repo.Private, Valid: true},
 		OwnerLogin:      repo.Owner.Login,
 		OwnerAvatarUrl:  sql.NullString{String: repo.Owner.AvatarURL, Valid: true},
