@@ -7,14 +7,6 @@ docker rm gitguru-postgres >/dev/null 2>/dev/null
 POSTGRES_PORT=5432
 APP=${1:-"reposync"}
 
-echo "Checking port $POSTGRES_PORT"
-if nc -z localhost $POSTGRES_PORT; then
-	echo "Something is already running on port $POSTGRES_PORT."
-	echo "Please stop it or use a different port and try again."$'\n'
-	echo "Usage: ./boot.sh"
-	exit 1
-fi
-
 echo "Starting new container: $(docker run --name gitguru-postgres -d -e POSTGRES_HOST_AUTH_METHOD=trust -p $POSTGRES_PORT:5432 -v ./data:/var/lib/postgresql/data postgres)"
 
 # Wait for PostgreSQL to become accessible
