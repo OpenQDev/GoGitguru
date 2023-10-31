@@ -65,7 +65,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.title, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				testhelpers.RUN_ALL_TESTS,
+				"SHOULD_RETURN_REPO_IF_EXISTS_IN_DB",
 			), tt.title)
 
 			// ARRANGE - LOCAL
@@ -96,7 +96,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 			}
 
 			// ARRANGE - EXPECT
-			var actualRepoReturn githubRest.GithubRestRepo
+			var actualRepoReturn GitguruRepo
 			marshaller.ReaderToType(rr.Result().Body, &actualRepoReturn)
 			if err != nil {
 				t.Errorf("Failed to decode rr.Body into GithubRestRepo: %s", err)

@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/util/githubRest"
@@ -20,8 +21,8 @@ type HandlerGithubRepoByOwnerAndNameTest struct {
 	setupMock      func(mock sqlmock.Sqlmock, repo githubRest.GithubRestRepo)
 }
 
-const drmTestOrg = "DRM-Test-Organization"
-const drmTestRepo = "DRM-Test-Repo"
+const drmTestOrg = "drm-test-organization"
+const drmTestRepo = "drm-test-repo"
 
 func shouldReturn401() HandlerGithubRepoByOwnerAndNameTest {
 	const SHOULD_RETURN_401_IF_NO_ACCESS_TOKEN = "SHOULD_RETURN_401_IF_NO_ACCESS_TOKEN"
@@ -68,12 +69,13 @@ func shouldReturnRepoIfExistsInDb() HandlerGithubRepoByOwnerAndNameTest {
 				AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, repo.FullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAt, updatedAt, pushedAt, repo.Visibility, repo.Size, repo.DefaultBranch)
 
 			mock.ExpectQuery("-- name: CheckGithubRepoExists :one").WithArgs(fullName).WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(false))
+			lowerCaseFullName := strings.ToLower(repo.FullName)
 			mock.ExpectQuery("^-- name: InsertGithubRepo :one.*").WithArgs(
 				repo.GithubRestID,    // 0 - GithubRestID
 				repo.GithubGraphqlID, // 1 - GithubGraphqlID
 				repo.URL,             // 2 - Url
 				repo.Name,            // 3 - Name
-				repo.FullName,        // 4 - FullName
+				lowerCaseFullName,    // 4 - FullName
 				repo.Private,         // 5 - Private
 				repo.Owner.Login,     // 6 - OwnerLogin
 				repo.Owner.AvatarURL, // 7 - OwnerAvatarUrl
