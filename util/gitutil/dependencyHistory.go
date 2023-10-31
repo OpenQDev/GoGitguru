@@ -11,7 +11,10 @@ import (
 )
 
 func GitDependencyHistory(repoDir string, dependencySearched string, depFilePaths []string) ([]time.Time, []time.Time, error) {
-	r, _ := git.PlainOpen(repoDir)
+	r, err := git.PlainOpen(repoDir)
+	if err != nil {
+		return nil, nil, err
+	}
 	ref, _ := r.Head()
 	commits, _ := r.Log(&git.LogOptions{From: ref.Hash()})
 
