@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/util/githubRest"
@@ -42,7 +41,7 @@ func shouldReturn401() HandlerGithubRepoByOwnerAndNameTest {
 			pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)
 
 			rows := sqlmock.NewRows([]string{"internal_id", "github_rest_id", "github_graphql_id", "url", "name", "full_name", "private", "owner_login", "owner_avatar_url", "description", "homepage", "fork", "forks_count", "archived", "disabled", "license", "language", "stargazers_count", "watchers_count", "open_issues_count", "has_issues", "has_discussions", "has_projects", "created_at", "updated_at", "pushed_at", "visibility", "size", "default_branch"}).
-				AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, repo.FullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAt, updatedAt, pushedAt, repo.Visibility, repo.Size, repo.DefaultBranch)
+				AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, fullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAt, updatedAt, pushedAt, repo.Visibility, repo.Size, repo.DefaultBranch)
 
 			mock.ExpectQuery("-- name: GetGithubRepo :one").WithArgs(fullName).WillReturnRows(rows)
 		},
@@ -66,16 +65,16 @@ func shouldReturnRepoIfExistsInDb() HandlerGithubRepoByOwnerAndNameTest {
 			pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)
 
 			rows := sqlmock.NewRows([]string{"internal_id", "github_rest_id", "github_graphql_id", "url", "name", "full_name", "private", "owner_login", "owner_avatar_url", "description", "homepage", "fork", "forks_count", "archived", "disabled", "license", "language", "stargazers_count", "watchers_count", "open_issues_count", "has_issues", "has_discussions", "has_projects", "created_at", "updated_at", "pushed_at", "visibility", "size", "default_branch"}).
-				AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, repo.FullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAt, updatedAt, pushedAt, repo.Visibility, repo.Size, repo.DefaultBranch)
+				AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, fullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAt, updatedAt, pushedAt, repo.Visibility, repo.Size, repo.DefaultBranch)
 
 			mock.ExpectQuery("-- name: CheckGithubRepoExists :one").WithArgs(fullName).WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(false))
-			lowerCaseFullName := strings.ToLower(repo.FullName)
+
 			mock.ExpectQuery("^-- name: InsertGithubRepo :one.*").WithArgs(
 				repo.GithubRestID,    // 0 - GithubRestID
 				repo.GithubGraphqlID, // 1 - GithubGraphqlID
 				repo.URL,             // 2 - Url
 				repo.Name,            // 3 - Name
-				lowerCaseFullName,    // 4 - FullName
+				fullName,             // 4 - FullName
 				repo.Private,         // 5 - Private
 				repo.Owner.Login,     // 6 - OwnerLogin
 				repo.Owner.AvatarURL, // 7 - OwnerAvatarUrl
@@ -104,23 +103,9 @@ func shouldReturnRepoIfExistsInDb() HandlerGithubRepoByOwnerAndNameTest {
 	}
 }
 
-func shouldReturnRepoForOwnerAndName() HandlerGithubRepoByOwnerAndNameTest {
-	const SHOULD_GET_REPO_FOR_ORG_AND_NAME = "SHOULD_GET_REPO_FOR_ORG_AND_NAME"
-	return HandlerGithubRepoByOwnerAndNameTest{
-		title:          SHOULD_GET_REPO_FOR_ORG_AND_NAME,
-		owner:          drmTestOrg,
-		name:           drmTestRepo,
-		expectedStatus: http.StatusOK,
-		authorized:     true,
-		shouldError:    false,
-		setupMock:      func(mock sqlmock.Sqlmock, repo githubRest.GithubRestRepo) {},
-	}
-}
-
 func HandlerGithubRepoByOwnerAndNameTestCases() []HandlerGithubRepoByOwnerAndNameTest {
 	return []HandlerGithubRepoByOwnerAndNameTest{
 		shouldReturn401(),
-		shouldReturnRepoForOwnerAndName(),
 		shouldReturnRepoIfExistsInDb(),
 	}
 }

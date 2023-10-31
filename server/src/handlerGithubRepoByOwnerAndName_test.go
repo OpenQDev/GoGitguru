@@ -40,6 +40,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 		t.Errorf("Failed to read JSON file: %s", err)
 	}
 	defer jsonFile.Close()
+	expectedGitguruRepo := ConvertGithubRestRepoToGitguruRepo(repo)
 
 	mockGithubMux := http.NewServeMux()
 	mockGithubMux.HandleFunc("/repos/", func(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +66,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.title, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				"SHOULD_RETURN_REPO_IF_EXISTS_IN_DB",
+				testhelpers.RUN_ALL_TESTS,
 			), tt.title)
 
 			// ARRANGE - LOCAL
@@ -103,11 +104,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 				return
 			}
 
-			expectedRepo := repo
-			expectedRepo.Owner.ID = 0
-			expectedRepo.Owner.NodeID = ""
-			expectedRepo.Owner.URL = ""
-			assert.Equal(t, expectedRepo, actualRepoReturn)
+			assert.Equal(t, expectedGitguruRepo, actualRepoReturn)
 
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
