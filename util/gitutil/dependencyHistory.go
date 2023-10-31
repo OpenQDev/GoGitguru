@@ -2,6 +2,7 @@ package gitutil
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -28,14 +29,23 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 					fmt.Println("true")
 					fmt.Println(c.Committer.When)
 					datesAddedCommits = append(datesAddedCommits, c.Committer.When)
+					break
 				} else {
 					fmt.Println("false")
 					fmt.Println(c.Committer.When)
 					datesRemovedCommits = append(datesRemovedCommits, c.Committer.When)
+					break
 				}
 			}
 		}
 		return nil
+	})
+
+	sort.Slice(datesAddedCommits, func(i, j int) bool {
+		return datesAddedCommits[i].Before(datesAddedCommits[j])
+	})
+	sort.Slice(datesRemovedCommits, func(i, j int) bool {
+		return datesRemovedCommits[i].Before(datesRemovedCommits[j])
 	})
 
 	return datesAddedCommits, datesRemovedCommits, nil
