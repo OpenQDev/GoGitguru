@@ -26,7 +26,7 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 	var body DependencyHistoryRequest
 	err := marshaller.ReaderToType(r.Body, &body)
 	if err != nil {
-		RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to read body of request: %s", err))
+		RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to read body of request in dependency-history: %s", err))
 		return
 	}
 
