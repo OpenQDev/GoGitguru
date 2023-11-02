@@ -2,7 +2,6 @@ package server
 
 import (
 	"database/sql"
-	"fmt"
 	"strings"
 	"time"
 
@@ -89,12 +88,11 @@ func RestRepoToGitguruRepo(repo githubRest.GithubRestRepo) GitguruRepo {
 	pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)
 	pushedAtUnix := pushedAt.Unix()
 
-	fmt.Println("repo.PushedAt", repo.PushedAt)
 	return GitguruRepo{
 		GithubRestID:    int32(repo.GithubRestID),
 		GithubGraphqlID: repo.GithubGraphqlID,
 		Name:            repo.Name,
-		FullName:        repo.FullName,
+		FullName:        strings.ToLower(repo.FullName),
 		Private:         repo.Private,
 		OwnerLogin:      repo.Owner.Login,
 		OwnerAvatarUrl:  repo.Owner.AvatarURL,

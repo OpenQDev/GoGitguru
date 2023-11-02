@@ -37,11 +37,14 @@ func shouldReturn401() HandlerGithubRepoByOwnerAndNameTest {
 			mock.ExpectQuery("-- name: CheckGithubRepoExists :one").WithArgs(fullName).WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(true))
 
 			createdAt, _ := time.Parse(time.RFC3339, repo.CreatedAt)
+			createdAtUnix := createdAt.Unix()
 			updatedAt, _ := time.Parse(time.RFC3339, repo.UpdatedAt)
+			updatedAtUnix := updatedAt.Unix()
 			pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)
+			pushedAtUnix := pushedAt.Unix()
 
 			rows := sqlmock.NewRows([]string{"internal_id", "github_rest_id", "github_graphql_id", "url", "name", "full_name", "private", "owner_login", "owner_avatar_url", "description", "homepage", "fork", "forks_count", "archived", "disabled", "license", "language", "stargazers_count", "watchers_count", "open_issues_count", "has_issues", "has_discussions", "has_projects", "created_at", "updated_at", "pushed_at", "visibility", "size", "default_branch"}).
-				AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, fullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAt, updatedAt, pushedAt, repo.Visibility, repo.Size, repo.DefaultBranch)
+				AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, fullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAtUnix, updatedAtUnix, pushedAtUnix, repo.Visibility, repo.Size, repo.DefaultBranch)
 
 			mock.ExpectQuery("-- name: GetGithubRepo :one").WithArgs(fullName).WillReturnRows(rows)
 		},
@@ -61,11 +64,14 @@ func shouldStoreRepoIfNotInDb() HandlerGithubRepoByOwnerAndNameTest {
 			fullName := fmt.Sprintf("%s/%s", drmTestOrg, drmTestRepo)
 
 			createdAt, _ := time.Parse(time.RFC3339, repo.CreatedAt)
+			createdAtUnix := createdAt.Unix()
 			updatedAt, _ := time.Parse(time.RFC3339, repo.UpdatedAt)
+			updatedAtUnix := updatedAt.Unix()
 			pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)
+			pushedAtUnix := pushedAt.Unix()
 
 			rows := sqlmock.NewRows([]string{"internal_id", "github_rest_id", "github_graphql_id", "url", "name", "full_name", "private", "owner_login", "owner_avatar_url", "description", "homepage", "fork", "forks_count", "archived", "disabled", "license", "language", "stargazers_count", "watchers_count", "open_issues_count", "has_issues", "has_discussions", "has_projects", "created_at", "updated_at", "pushed_at", "visibility", "size", "default_branch"}).
-				AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, fullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAt, updatedAt, pushedAt, repo.Visibility, repo.Size, repo.DefaultBranch)
+				AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, fullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAtUnix, updatedAtUnix, pushedAtUnix, repo.Visibility, repo.Size, repo.DefaultBranch)
 
 			mock.ExpectQuery("-- name: CheckGithubRepoExists :one").WithArgs(fullName).WillReturnRows(sqlmock.NewRows([]string{"not_exists"}).AddRow(false))
 
@@ -92,9 +98,9 @@ func shouldStoreRepoIfNotInDb() HandlerGithubRepoByOwnerAndNameTest {
 				repo.HasIssues,       // 19 - HasIssues
 				repo.HasDiscussions,  // 20 - HasDiscussions
 				repo.HasProjects,     // 21 - HasProjects
-				createdAt,            // 22 - CreatedAt
-				updatedAt,            // 23 - UpdatedAt
-				pushedAt,             // 24 - PushedAt
+				createdAtUnix,        // 22 - CreatedAt
+				updatedAtUnix,        // 23 - UpdatedAt
+				pushedAtUnix,         // 24 - PushedAt
 				repo.Visibility,      // 25 - Visibility
 				repo.Size,            // 26 - Size
 				repo.DefaultBranch,   // 27 - DefaultBranch
@@ -116,11 +122,14 @@ func shouldReturnRepoIfExistsInDb() HandlerGithubRepoByOwnerAndNameTest {
 			fullName := fmt.Sprintf("%s/%s", drmTestOrg, drmTestRepo)
 
 			createdAt, _ := time.Parse(time.RFC3339, repo.CreatedAt)
+			createdAtUnix := createdAt.Unix()
 			updatedAt, _ := time.Parse(time.RFC3339, repo.UpdatedAt)
+			updatedAtUnix := updatedAt.Unix()
 			pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)
+			pushedAtUnix := pushedAt.Unix()
 
 			rows := sqlmock.NewRows([]string{"internal_id", "github_rest_id", "github_graphql_id", "url", "name", "full_name", "private", "owner_login", "owner_avatar_url", "description", "homepage", "fork", "forks_count", "archived", "disabled", "license", "language", "stargazers_count", "watchers_count", "open_issues_count", "has_issues", "has_discussions", "has_projects", "created_at", "updated_at", "pushed_at", "visibility", "size", "default_branch"}).
-				AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, fullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAt, updatedAt, pushedAt, repo.Visibility, repo.Size, repo.DefaultBranch)
+				AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, fullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAtUnix, updatedAtUnix, pushedAtUnix, repo.Visibility, repo.Size, repo.DefaultBranch)
 
 			mock.ExpectQuery("-- name: CheckGithubRepoExists :one").WithArgs(fullName).WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(true))
 			mock.ExpectQuery("-- name: GetGithubRepo :one").WithArgs(fullName).WillReturnRows(rows)

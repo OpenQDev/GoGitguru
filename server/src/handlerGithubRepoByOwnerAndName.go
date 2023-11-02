@@ -36,7 +36,6 @@ func (apiConfig *ApiConfig) HandlerGithubRepoByOwnerAndName(w http.ResponseWrite
 	}
 
 	if repoExists {
-		fmt.Println("repoExists", repoExists)
 		repo, err := apiConfig.DB.GetGithubRepo(context.Background(), fullName)
 		if err != nil {
 			RespondWithError(w, http.StatusInternalServerError, err.Error())
