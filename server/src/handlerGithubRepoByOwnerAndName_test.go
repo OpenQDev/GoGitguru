@@ -68,7 +68,6 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
 				testhelpers.RUN_ALL_TESTS,
 			), tt.title)
-
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 

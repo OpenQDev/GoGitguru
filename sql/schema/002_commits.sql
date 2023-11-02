@@ -14,7 +14,3 @@ CREATE TABLE commits (
     repo_url VARCHAR(150) REFERENCES repo_urls(url),
     UNIQUE(commit_hash, repo_url)
 );
-
--- +goose Down
-
-DROP TABLE commits;

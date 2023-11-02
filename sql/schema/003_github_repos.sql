@@ -33,7 +33,3 @@ CREATE TABLE github_repos (
     UNIQUE(github_rest_id),
     UNIQUE(github_graphql_id)
 );
-
--- +goose Down
-
-DROP TABLE github_repos;

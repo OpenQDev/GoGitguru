@@ -5,7 +5,3 @@ CREATE TABLE github_user_rest_id_author_emails (
     email VARCHAR(255) UNIQUE NOT NULL,
     PRIMARY KEY (rest_id, email)
 );
-
--- +goose Down
-
-DROP TABLE github_user_rest_id_author_emails;

@@ -7,6 +7,3 @@ CREATE TABLE repo_urls (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NULL
 );
-
--- +goose Down
-DROP TABLE repo_urls;
