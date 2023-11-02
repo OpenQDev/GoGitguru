@@ -95,9 +95,9 @@ type GithubRepo struct {
 	HasIssues       sql.NullBool   `json:"has_issues"`
 	HasDiscussions  sql.NullBool   `json:"has_discussions"`
 	HasProjects     sql.NullBool   `json:"has_projects"`
-	CreatedAt       sql.NullTime   `json:"created_at"`
-	UpdatedAt       sql.NullTime   `json:"updated_at"`
-	PushedAt        sql.NullTime   `json:"pushed_at"`
+	CreatedAt       sql.NullInt32  `json:"created_at"`
+	UpdatedAt       sql.NullInt32  `json:"updated_at"`
+	PushedAt        sql.NullInt32  `json:"pushed_at"`
 	Visibility      sql.NullString `json:"visibility"`
 	Size            sql.NullInt32  `json:"size"`
 	DefaultBranch   sql.NullString `json:"default_branch"`
