@@ -1,13 +1,19 @@
+# Start from the base golang image
 FROM golang:1.21.1
 
+# Set the Current Working Directory inside the container
 WORKDIR /app
 
+# Copy everything from the current directory to the PWD(Present Working Directory) inside the container
 COPY . .
 
+RUN go install github.com/cosmtrek/air@latest
+
+# Set the Current Working Directory inside the container to reposync directory
 WORKDIR /app/usersync
 
+# Download all the dependencies
 RUN go mod download
 
-RUN go build -o main .
-
-CMD ["./main"]
+# This command starts our application using air's live reload
+CMD ["air"]
