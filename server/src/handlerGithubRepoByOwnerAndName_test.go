@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -40,7 +41,8 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 		t.Errorf("Failed to read JSON file: %s", err)
 	}
 	defer jsonFile.Close()
-	expectedGitguruRepo := ConvertGithubRestRepoToGitguruRepo(repo)
+	expectedGitguruRepo := RestRepoToGitguruRepo(repo)
+	fmt.Println("expectedGitguruRepo", expectedGitguruRepo)
 
 	mockGithubMux := http.NewServeMux()
 	mockGithubMux.HandleFunc("/repos/", func(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +68,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.title, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				testhelpers.RUN_ALL_TESTS,
+				"SHOULD_RETURN_REPO_IF_EXISTS_IN_DB",
 			), tt.title)
 
 			// ARRANGE - LOCAL
@@ -103,6 +105,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 				t.Errorf("Failed to decode rr.Body into GithubRestRepo: %s", err)
 				return
 			}
+			fmt.Println("actualRepoReturn", actualRepoReturn.PushedAt)
 
 			assert.Equal(t, expectedGitguruRepo, actualRepoReturn)
 

@@ -63,7 +63,7 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 
 	for _, repo := range repos {
 
-		params := ConvertGithubRestRepoToInsertGithubRepoParams(repo)
+		params := RestRepoToDatabaseParams(repo)
 
 		_, err := apiConfig.DB.InsertGithubRepo(context.Background(), params)
 		if err != nil {

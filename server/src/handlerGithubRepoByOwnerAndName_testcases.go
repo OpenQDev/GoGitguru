@@ -48,10 +48,10 @@ func shouldReturn401() HandlerGithubRepoByOwnerAndNameTest {
 	}
 }
 
-func shouldReturnRepoIfExistsInDb() HandlerGithubRepoByOwnerAndNameTest {
-	const SHOULD_RETURN_REPO_IF_EXISTS_IN_DB = "SHOULD_RETURN_REPO_IF_EXISTS_IN_DB"
+func shouldStoreRepoIfNotInDb() HandlerGithubRepoByOwnerAndNameTest {
+	const SHOULD_STORE_REPO_IF_NOT_IN_DB = "SHOULD_STORE_REPO_IF_NOT_IN_DB"
 	return HandlerGithubRepoByOwnerAndNameTest{
-		title:          SHOULD_RETURN_REPO_IF_EXISTS_IN_DB,
+		title:          SHOULD_STORE_REPO_IF_NOT_IN_DB,
 		owner:          drmTestOrg,
 		name:           drmTestRepo,
 		expectedStatus: http.StatusOK,
@@ -67,7 +67,7 @@ func shouldReturnRepoIfExistsInDb() HandlerGithubRepoByOwnerAndNameTest {
 			rows := sqlmock.NewRows([]string{"internal_id", "github_rest_id", "github_graphql_id", "url", "name", "full_name", "private", "owner_login", "owner_avatar_url", "description", "homepage", "fork", "forks_count", "archived", "disabled", "license", "language", "stargazers_count", "watchers_count", "open_issues_count", "has_issues", "has_discussions", "has_projects", "created_at", "updated_at", "pushed_at", "visibility", "size", "default_branch"}).
 				AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, fullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAt, updatedAt, pushedAt, repo.Visibility, repo.Size, repo.DefaultBranch)
 
-			mock.ExpectQuery("-- name: CheckGithubRepoExists :one").WithArgs(fullName).WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(false))
+			mock.ExpectQuery("-- name: CheckGithubRepoExists :one").WithArgs(fullName).WillReturnRows(sqlmock.NewRows([]string{"not_exists"}).AddRow(false))
 
 			mock.ExpectQuery("^-- name: InsertGithubRepo :one.*").WithArgs(
 				repo.GithubRestID,    // 0 - GithubRestID
@@ -103,9 +103,35 @@ func shouldReturnRepoIfExistsInDb() HandlerGithubRepoByOwnerAndNameTest {
 	}
 }
 
+func shouldReturnRepoIfExistsInDb() HandlerGithubRepoByOwnerAndNameTest {
+	const SHOULD_RETURN_REPO_IF_EXISTS_IN_DB = "SHOULD_RETURN_REPO_IF_EXISTS_IN_DB"
+	return HandlerGithubRepoByOwnerAndNameTest{
+		title:          SHOULD_RETURN_REPO_IF_EXISTS_IN_DB,
+		owner:          drmTestOrg,
+		name:           drmTestRepo,
+		expectedStatus: http.StatusOK,
+		authorized:     true,
+		shouldError:    false,
+		setupMock: func(mock sqlmock.Sqlmock, repo githubRest.GithubRestRepo) {
+			fullName := fmt.Sprintf("%s/%s", drmTestOrg, drmTestRepo)
+
+			createdAt, _ := time.Parse(time.RFC3339, repo.CreatedAt)
+			updatedAt, _ := time.Parse(time.RFC3339, repo.UpdatedAt)
+			pushedAt, _ := time.Parse(time.RFC3339, repo.PushedAt)
+
+			rows := sqlmock.NewRows([]string{"internal_id", "github_rest_id", "github_graphql_id", "url", "name", "full_name", "private", "owner_login", "owner_avatar_url", "description", "homepage", "fork", "forks_count", "archived", "disabled", "license", "language", "stargazers_count", "watchers_count", "open_issues_count", "has_issues", "has_discussions", "has_projects", "created_at", "updated_at", "pushed_at", "visibility", "size", "default_branch"}).
+				AddRow(1, repo.GithubRestID, repo.GithubGraphqlID, repo.URL, repo.Name, fullName, repo.Private, repo.Owner.Login, repo.Owner.AvatarURL, repo.Description, repo.Homepage, repo.Fork, repo.ForksCount, repo.Archived, repo.Disabled, repo.License.Name, repo.Language, repo.StargazersCount, repo.WatchersCount, repo.OpenIssuesCount, repo.HasIssues, repo.HasDiscussions, repo.HasProjects, createdAt, updatedAt, pushedAt, repo.Visibility, repo.Size, repo.DefaultBranch)
+
+			mock.ExpectQuery("-- name: CheckGithubRepoExists :one").WithArgs(fullName).WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(true))
+			mock.ExpectQuery("-- name: GetGithubRepo :one").WithArgs(fullName).WillReturnRows(rows)
+		},
+	}
+}
+
 func HandlerGithubRepoByOwnerAndNameTestCases() []HandlerGithubRepoByOwnerAndNameTest {
 	return []HandlerGithubRepoByOwnerAndNameTest{
 		shouldReturn401(),
+		shouldStoreRepoIfNotInDb(),
 		shouldReturnRepoIfExistsInDb(),
 	}
 }
