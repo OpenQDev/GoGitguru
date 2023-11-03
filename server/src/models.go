@@ -2,8 +2,8 @@ package server
 
 type User struct {
 	InternalID      int    `json:"internal_id"`
-	GithubRestID    int    `json:"id"`
-	GithubGraphqlID string `json:"node_id"`
+	GithubRestID    int    `json:"github_rest_id"`
+	GithubGraphqlID string `json:"github_graphql_id"`
 	Login           string `json:"login"`
 	Name            string `json:"name"`
 	Email           string `json:"email"`
