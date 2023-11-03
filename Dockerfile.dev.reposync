@@ -15,5 +15,7 @@ WORKDIR /app/reposync
 # Download all the dependencies
 RUN go mod download
 
+RUN chmod 777 ./tmp
+
 # This command starts our application using air's live reload
 CMD ["air"]
