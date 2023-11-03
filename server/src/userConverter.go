@@ -34,7 +34,7 @@ func ConvertServerUserToInsertUserParams(user User) database.InsertUserParams {
 
 func ConvertDatabaseInsertUserParamsToServerUser(params database.GithubUser) User {
 	return User{
-		InternalID:      int(params.GithubRestID),
+		InternalID:      int(params.InternalID),
 		GithubRestID:    int(params.GithubRestID),
 		GithubGraphqlID: params.GithubGraphqlID,
 		Login:           params.Login,

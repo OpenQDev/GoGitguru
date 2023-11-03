@@ -35,7 +35,7 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 			RespondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-		RespondWithJSON(w, http.StatusOK, ConvertDatabaseInsertUserParamsToServerUser(user))
+		RespondWithJSON(w, http.StatusOK, ConvertToReturnUser(ConvertDatabaseInsertUserParamsToServerUser(user)))
 		return
 	}
 
@@ -71,5 +71,27 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 		return
 	}
 
-	RespondWithJSON(w, http.StatusOK, user)
+	RespondWithJSON(w, http.StatusOK, ConvertToReturnUser(user))
+}
+func ConvertToReturnUser(user User) ReturnUser {
+	return ReturnUser{
+		InternalID:      user.InternalID,
+		GithubRestID:    user.GithubRestID,
+		GithubGraphqlID: user.GithubGraphqlID,
+		Login:           user.Login,
+		Name:            user.Name,
+		Email:           user.Email,
+		AvatarURL:       user.AvatarURL,
+		Company:         user.Company,
+		Location:        user.Location,
+		Bio:             user.Bio,
+		Blog:            user.Blog,
+		Hireable:        user.Hireable,
+		TwitterUsername: user.TwitterUsername,
+		Followers:       user.Followers,
+		Following:       user.Following,
+		Type:            user.Type,
+		CreatedAt:       user.CreatedAt,
+		UpdatedAt:       user.UpdatedAt,
+	}
 }
