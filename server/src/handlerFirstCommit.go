@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
@@ -12,10 +13,6 @@ import (
 type HandlerFirstCommitRequest struct {
 	RepoUrl string `json:"repo_url"`
 	Login   string `json:"login"`
-}
-
-type HandlerFirstCommitResponse struct {
-	Commit CommitWithAuthorInfo `json:"commit"`
 }
 
 func (apiCfg *ApiConfig) HandlerFirstCommit(w http.ResponseWriter, r *http.Request) {
@@ -27,13 +24,20 @@ func (apiCfg *ApiConfig) HandlerFirstCommit(w http.ResponseWriter, r *http.Reque
 	}
 
 	params := database.GetFirstCommitParams{
-		Column1: body.RepoUrl,
-		Column2: body.Login,
+		Column1: strings.ToLower(body.RepoUrl),
+		Column2: strings.ToLower(body.Login),
 	}
 
+	fmt.Println("params", params)
+
 	commit, err := apiCfg.DB.GetFirstCommit(context.Background(), params)
+	fmt.Println("commit", commit)
 	if err != nil {
-		RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to read body of request: %s", err))
+		if strings.Contains(err.Error(), "sql: no rows in result set") {
+			RespondWithJSON(w, 200, nil)
+		} else {
+			RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to read body of request: %s", err))
+		}
 		return
 	}
 
