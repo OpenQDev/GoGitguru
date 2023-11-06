@@ -1,7 +1,7 @@
 package server
 
 import (
-	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 	"strings"
@@ -15,6 +15,10 @@ type HandlerFirstCommitRequest struct {
 	Login   string `json:"login"`
 }
 
+type HandlerFirstCommitResponse struct {
+	AuthorDate int `json:"author_date"`
+}
+
 func (apiCfg *ApiConfig) HandlerFirstCommit(w http.ResponseWriter, r *http.Request) {
 	var body HandlerFirstCommitRequest
 	err := marshaller.ReaderToType(r.Body, &body)
@@ -24,14 +28,11 @@ func (apiCfg *ApiConfig) HandlerFirstCommit(w http.ResponseWriter, r *http.Reque
 	}
 
 	params := database.GetFirstCommitParams{
-		Column1: strings.ToLower(body.RepoUrl),
-		Column2: strings.ToLower(body.Login),
+		Login:   body.Login,
+		RepoUrl: sql.NullString{String: body.RepoUrl, Valid: true},
 	}
 
-	fmt.Println("params", params)
-
-	commit, err := apiCfg.DB.GetFirstCommit(context.Background(), params)
-	fmt.Println("commit", commit)
+	commit, err := apiCfg.DB.GetFirstCommit(r.Context(), params)
 	if err != nil {
 		if strings.Contains(err.Error(), "sql: no rows in result set") {
 			RespondWithJSON(w, 200, nil)
@@ -41,5 +42,7 @@ func (apiCfg *ApiConfig) HandlerFirstCommit(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	RespondWithJSON(w, 200, commit)
+	response := HandlerFirstCommitResponse{AuthorDate: int(commit.AuthorDate.Int64)}
+
+	RespondWithJSON(w, 200, response)
 }

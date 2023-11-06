@@ -342,15 +342,15 @@ INNER JOIN github_user_rest_id_author_emails gure
 ON c.author_email = gure.email
 INNER JOIN github_users gu
 ON gure.rest_id = gu.github_rest_id
-WHERE c.repo_url = CAST($1 AS VARCHAR)
-AND gu.login = CAST($2 AS VARCHAR)
+WHERE c.repo_url = $1
+AND gu.login ILIKE $2
 ORDER BY c.author_date ASC
 LIMIT 1
 `
 
 type GetFirstCommitParams struct {
-	Column1 string `json:"column_1"`
-	Column2 string `json:"column_2"`
+	RepoUrl sql.NullString `json:"repo_url"`
+	Login   string         `json:"login"`
 }
 
 type GetFirstCommitRow struct {
@@ -388,7 +388,7 @@ type GetFirstCommitRow struct {
 }
 
 func (q *Queries) GetFirstCommit(ctx context.Context, arg GetFirstCommitParams) (GetFirstCommitRow, error) {
-	row := q.queryRow(ctx, q.getFirstCommitStmt, getFirstCommit, arg.Column1, arg.Column2)
+	row := q.queryRow(ctx, q.getFirstCommitStmt, getFirstCommit, arg.RepoUrl, arg.Login)
 	var i GetFirstCommitRow
 	err := row.Scan(
 		&i.CommitHash,

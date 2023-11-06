@@ -53,6 +53,6 @@ go test -bench=BenchmarkProcessRepo
 
 `docker run -e POSTGRES_HOST_AUTH_METHOD=trust -p 5432:5432 postgres`
 
-`psql "postgres://postgres:@localhost:5432/postgres?sslmode=disable"`
+`psql "postgres://postgres:@localhost:5432/gitguru?sslmode=disable"`
 
 `cd sql/schema && goose postgres "postgres://postgres:@localhost:5432/postgres?sslmode=disable" up && cd ~/Gitguru`
