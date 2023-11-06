@@ -45,6 +45,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getCommitsWithAuthorInfoStmt, err = db.PrepareContext(ctx, getCommitsWithAuthorInfo); err != nil {
 		return nil, fmt.Errorf("error preparing query GetCommitsWithAuthorInfo: %w", err)
 	}
+	if q.getFirstCommitStmt, err = db.PrepareContext(ctx, getFirstCommit); err != nil {
+		return nil, fmt.Errorf("error preparing query GetFirstCommit: %w", err)
+	}
 	if q.getGithubRepoStmt, err = db.PrepareContext(ctx, getGithubRepo); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGithubRepo: %w", err)
 	}
@@ -131,6 +134,11 @@ func (q *Queries) Close() error {
 	if q.getCommitsWithAuthorInfoStmt != nil {
 		if cerr := q.getCommitsWithAuthorInfoStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getCommitsWithAuthorInfoStmt: %w", cerr)
+		}
+	}
+	if q.getFirstCommitStmt != nil {
+		if cerr := q.getFirstCommitStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getFirstCommitStmt: %w", cerr)
 		}
 	}
 	if q.getGithubRepoStmt != nil {
@@ -259,6 +267,7 @@ type Queries struct {
 	getCommitStmt                         *sql.Stmt
 	getCommitsStmt                        *sql.Stmt
 	getCommitsWithAuthorInfoStmt          *sql.Stmt
+	getFirstCommitStmt                    *sql.Stmt
 	getGithubRepoStmt                     *sql.Stmt
 	getGithubUserStmt                     *sql.Stmt
 	getGroupOfEmailsStmt                  *sql.Stmt
@@ -288,6 +297,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getCommitStmt:                         q.getCommitStmt,
 		getCommitsStmt:                        q.getCommitsStmt,
 		getCommitsWithAuthorInfoStmt:          q.getCommitsWithAuthorInfoStmt,
+		getFirstCommitStmt:                    q.getFirstCommitStmt,
 		getGithubRepoStmt:                     q.getGithubRepoStmt,
 		getGithubUserStmt:                     q.getGithubUserStmt,
 		getGroupOfEmailsStmt:                  q.getGroupOfEmailsStmt,

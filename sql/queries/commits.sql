@@ -98,3 +98,14 @@ FROM commits
 WHERE repo_url = CAST($1 AS VARCHAR)
 ORDER BY committer_date DESC
 LIMIT 1;
+
+-- name: GetFirstCommit :one
+SELECT * FROM commits c
+INNER JOIN github_user_rest_id_author_emails gure
+ON c.author_email = gure.email
+INNER JOIN github_users gu
+ON gure.rest_id = gu.github_rest_id
+WHERE c.repo_url = CAST($1 AS VARCHAR)
+AND gu.login = CAST($2 AS VARCHAR)
+ORDER BY c.author_date ASC
+LIMIT 1;

@@ -38,7 +38,9 @@ func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
 
 	v1Router.Post("/status", apiCfg.HandlerStatus)
 
-	v1Router.Get("/get-next-repo-url", apiCfg.HandlerGetNextRepoUrl)
+	v1Router.Get("/get-next-repo-url", apiCfg.HandlerFirstCommit)
+
+	v1Router.Get("/first-commit", apiCfg.HandlerGetNextRepoUrl)
 
 	router.Mount("/", v1Router)
 
