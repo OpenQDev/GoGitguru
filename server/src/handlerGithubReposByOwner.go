@@ -62,6 +62,7 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 		page++
 	}
 
+	responseRepos := []GitguruRepo{}
 	for _, repo := range repos {
 		logger.LogBlue("inserting repo %s", repo.Name)
 
@@ -72,7 +73,9 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 			RespondWithError(w, 500, fmt.Sprintf("failed to insert repo into database: %s", err))
 			return
 		}
+
+		responseRepos = append(responseRepos, RestRepoToGitguruRepo(repo))
 	}
 
-	RespondWithJSON(w, 200, repos)
+	RespondWithJSON(w, 200, responseRepos)
 }
