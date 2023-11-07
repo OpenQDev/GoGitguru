@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"path/filepath"
 
 	"github.com/OpenQDev/GoGitguru/util/gitutil"
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
@@ -29,9 +30,15 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 		return
 	}
 
+	prefixPath := "./repos"
 	organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(body.RepoUrl)
 
-	repoDir := fmt.Sprintf("./repos/%s/%s", organization, repo)
+	repoDir := filepath.Join(prefixPath, organization, repo)
+
+	if !gitutil.IsGitRepository(prefixPath, organization, repo) {
+		RespondWithError(w, http.StatusNotFound, fmt.Sprintf("directory %s is not a git repository", repoDir))
+		return
+	}
 
 	// "package.json" -> ["util/package.json", "app/package.json"]
 	allFilePaths, err := gitutil.GitDependencyFiles(repoDir, body.FilePaths[0])
