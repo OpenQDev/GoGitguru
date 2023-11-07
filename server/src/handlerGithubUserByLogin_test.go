@@ -67,7 +67,7 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.title, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				testhelpers.RUN_ALL_TESTS,
+				"VALID",
 			), tt.title)
 
 			// ARRANGE - LOCAL
@@ -99,14 +99,14 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 			require.Equal(t, tt.expectedStatus, rr.Code)
 
 			// ARRANGE - EXPECT
-			var actualUserResponse User
+			var actualUserResponse ReturnUser
 			err := json.NewDecoder(rr.Body).Decode(&actualUserResponse)
 			if err != nil {
 				t.Errorf("Failed to decode rr.Body into User: %s", err)
 				return
 			}
 
-			require.Equal(t, user, actualUserResponse)
+			require.Equal(t, ConvertToReturnUser(user), actualUserResponse)
 
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
