@@ -90,7 +90,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 			apiCfg.HandlerGithubReposByOwner(rr, req)
 
 			// ARRANGE - EXPECT
-			var actualReposReturn []githubRest.GithubRestRepo
+			var actualReposReturn []GitguruRepo
 			marshaller.ReaderToType(rr.Body, &actualReposReturn)
 			if err != nil {
 				t.Errorf("Failed to decode rr.Body into []GithubRestRepo: %s", err)
@@ -105,7 +105,13 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 
 			assert.Equal(t, tt.expectedStatus, rr.Code)
 
-			assert.Equal(t, repos, actualReposReturn)
+			convertedRepos := []GitguruRepo{}
+			for _, repo := range repos {
+				convertedRepos = append(convertedRepos, RestRepoToGitguruRepo(repo))
+			}
+			actualReposReturn = convertedRepos
+
+			assert.Equal(t, convertedRepos, actualReposReturn)
 
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
