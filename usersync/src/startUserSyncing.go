@@ -1,6 +1,8 @@
 package usersync
 
 import (
+	"context"
+
 	"github.com/OpenQDev/GoGitguru/database"
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
@@ -71,9 +73,17 @@ func StartSyncingUser(
 				logger.LogError("error occured while inserting RestID to Email: %s", err)
 			}
 
-			err = insertGithubUser(author, db)
-			if err != nil {
-				logger.LogError("error occured while inserting author: %s", err)
+			exists, err := db.CheckGithubUserExists(context.Background(), author.User.Login)
+
+			if err != nil && !exists {
+				err = insertGithubUser(author, db)
+				if err != nil {
+					logger.LogError("error occured while inserting author: %s", err)
+				}
+			}
+
+			if exists {
+				continue
 			}
 
 		}
