@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/OpenQDev/GoGitguru/util/gitutil"
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
@@ -16,8 +18,8 @@ type DependencyHistoryRequest struct {
 }
 
 type DependencyHistoryResponse struct {
-	DatesAdded   []int64 `json:"dates_added"`
-	DatesRemoved []int64 `json:"dates_removed"`
+	DatesAdded   []string `json:"dates_added"`
+	DatesRemoved []string `json:"dates_removed"`
 }
 
 func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http.Request) {
@@ -32,6 +34,9 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 
 	prefixPath := "./repos"
 	organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(body.RepoUrl)
+
+	organization = strings.ToLower(organization)
+	repo = strings.ToLower(repo)
 
 	repoDir := filepath.Join(prefixPath, organization, repo)
 
@@ -53,9 +58,20 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 		return
 	}
 
+	// Convert Unix time to ISO strings
+	datesAddedISO := make([]string, len(datesAddedCommits))
+	for i, v := range datesAddedCommits {
+		datesAddedISO[i] = time.Unix(v, 0).Format(time.RFC3339)
+	}
+
+	datesRemovedISO := make([]string, len(datesRemovedCommits))
+	for i, v := range datesRemovedCommits {
+		datesRemovedISO[i] = time.Unix(v, 0).Format(time.RFC3339)
+	}
+
 	dependencyHistoryResponse = DependencyHistoryResponse{
-		DatesAdded:   datesAddedCommits,
-		DatesRemoved: datesRemovedCommits,
+		DatesAdded:   datesAddedISO,
+		DatesRemoved: datesRemovedISO,
 	}
 
 	RespondWithJSON(w, 200, dependencyHistoryResponse)

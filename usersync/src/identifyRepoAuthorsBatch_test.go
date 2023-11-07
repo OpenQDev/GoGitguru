@@ -1,7 +1,6 @@
 package usersync
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -49,7 +48,6 @@ func TestIdentifyRepoAuthorsBatch(t *testing.T) {
 		serverUrl = "https://api.github.com/graphql"
 	} else {
 		serverUrl = mockGithubServer.URL
-		fmt.Println("serverUrl", serverUrl)
 	}
 
 	tests := IdentifyRepoAuthorsBatchTestCases()
