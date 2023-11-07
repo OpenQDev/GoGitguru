@@ -21,23 +21,6 @@ INSERT INTO github_users (
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
 )
-ON CONFLICT (login) DO UPDATE SET
-    github_rest_id = EXCLUDED.github_rest_id,
-    github_graphql_id = EXCLUDED.github_graphql_id,
-    name = EXCLUDED.name,
-    email = EXCLUDED.email,
-    avatar_url = EXCLUDED.avatar_url,
-    company = EXCLUDED.company,
-    location = EXCLUDED.location,
-    bio = EXCLUDED.bio,
-    blog = EXCLUDED.blog,
-    hireable = EXCLUDED.hireable,
-    twitter_username = EXCLUDED.twitter_username,
-    followers = EXCLUDED.followers,
-    following = EXCLUDED.following,
-    type = EXCLUDED.type,
-    created_at = EXCLUDED.created_at,
-    updated_at = EXCLUDED.updated_at
 RETURNING *;
 
 -- name: CheckGithubUserExists :one
