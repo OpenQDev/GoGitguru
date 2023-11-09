@@ -2,6 +2,7 @@ package gitutil
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 
@@ -18,16 +19,27 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 	ref, _ := r.Head()
 	commits, _ := r.Log(&git.LogOptions{From: ref.Hash()})
 
+	commitList := make([]*object.Commit, 0)
+	err = commits.ForEach(func(c *object.Commit) error {
+		commitList = append(commitList, c)
+		return nil
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	slices.Reverse(commitList)
+
 	datesPresentCommits := []int64{}
 	datesRemovedCommits := []int64{}
 
-	commits.ForEach(func(c *object.Commit) error {
+	for _, c := range commitList {
 		fmt.Println(c.Message)
 		for _, depFilePath := range depFilePaths {
 			if file, err := c.File(depFilePath); err == nil {
 				contents, err := file.Contents()
 				if err != nil {
-					return err
+					return nil, nil, err
 				}
 				if strings.Contains(contents, dependencySearched) {
 					logger.LogBlue("appening %s to dates present", c.Message)
@@ -42,8 +54,7 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 				}
 			}
 		}
-		return nil
-	})
+	}
 
 	sort.Slice(datesPresentCommits, func(i, j int) bool { return datesPresentCommits[i] < datesPresentCommits[j] })
 	sort.Slice(datesRemovedCommits, func(i, j int) bool { return datesRemovedCommits[i] < datesRemovedCommits[j] })
