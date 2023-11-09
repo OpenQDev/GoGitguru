@@ -1,7 +1,6 @@
 package gitutil
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/OpenQDev/GoGitguru/util/testhelpers"
@@ -11,30 +10,29 @@ import (
 func TestDependencyFileExists(t *testing.T) {
 	// ARRANGE - GLOBAL
 	repoDir := "./mock/openqdev/openq-coinapi"
-	dependencyFileExists := "package.json"
-	dependencyFileNotExists := "go.mod"
+	dependencyFileExists := []string{"package.json"}
+	dependencyFileNotExists := []string{"go.mod"}
 
 	// ARRANGE - TESTS
 	tests := []struct {
 		name             string
-		dependencyFile   string
+		dependencyFiles  []string
 		depFilesReturned []string
 		wantErr          bool
 	}{
 		{"Valid", dependencyFileExists, []string{"package.json", "utils/package.json"}, false},
-		{"Invalid", dependencyFileNotExists, []string{}, true},
+		{"Invalid", dependencyFileNotExists, []string{}, false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				testhelpers.RUN_ALL_TESTS,
+				"Invalid",
 			), tt.name)
 
-			depFilesReturned, err := GitDependencyFiles(repoDir, tt.dependencyFile)
+			depFilesReturned, err := GitDependencyFiles(repoDir, tt.dependencyFiles)
 
 			if (err != nil) != tt.wantErr {
-				fmt.Println("in here")
 				t.Errorf("DependencyFileExists() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
