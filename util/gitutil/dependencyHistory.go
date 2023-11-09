@@ -30,7 +30,9 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 					datesPresentCommits = append(datesPresentCommits, c.Committer.When.Unix())
 					break
 				} else {
-					datesRemovedCommits = append(datesRemovedCommits, c.Committer.When.Unix())
+					if len(datesPresentCommits) == 0 {
+						datesRemovedCommits = append(datesRemovedCommits, c.Committer.When.Unix())
+					}
 					break
 				}
 			}

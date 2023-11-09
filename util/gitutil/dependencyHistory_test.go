@@ -14,7 +14,7 @@ func TestGitDependencyHistory(t *testing.T) {
 	depFilePaths := []string{"package.json"}
 
 	expectedDatesAddedReturn := []int64{1698773760}
-	expectedDatesRemovedReturn := []int64{1698773724}
+	expectedDatesRemovedReturn := []int64{}
 
 	// ARRANGE - TESTS
 	tests := []struct {
