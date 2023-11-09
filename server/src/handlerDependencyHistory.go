@@ -46,7 +46,7 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 	}
 
 	// "package.json" -> ["util/package.json", "app/package.json"]
-	allFilePaths, err := gitutil.GitDependencyFiles(repoDir, body.FilePaths[0])
+	allFilePaths, err := gitutil.GitDependencyFiles(repoDir, body.FilePaths)
 	if err != nil {
 		RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to determine if file paths exist dependency-history: %s", err))
 		return
