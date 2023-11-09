@@ -1,9 +1,7 @@
 package gitutil
 
 import (
-	"fmt"
 	"slices"
-	"sort"
 	"strings"
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
@@ -34,7 +32,6 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 	datesRemovedCommits := []int64{}
 
 	for _, c := range commitList {
-		fmt.Println(c.Message)
 		for _, depFilePath := range depFilePaths {
 			if file, err := c.File(depFilePath); err == nil {
 				contents, err := file.Contents()
@@ -55,9 +52,6 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 			}
 		}
 	}
-
-	sort.Slice(datesPresentCommits, func(i, j int) bool { return datesPresentCommits[i] < datesPresentCommits[j] })
-	sort.Slice(datesRemovedCommits, func(i, j int) bool { return datesRemovedCommits[i] < datesRemovedCommits[j] })
 
 	return datesPresentCommits, datesRemovedCommits, nil
 }
