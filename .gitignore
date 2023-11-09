@@ -5,7 +5,3 @@ tmp/
 main
 **/repos/
 data/
-
-# ignore binaries at any dir level
-**/reposync/*
-**/usersync*
