@@ -51,15 +51,16 @@ func (apiConfig *ApiConfig) HandlerGithubUserCommits(w http.ResponseWriter, r *h
 		return
 	}
 
-	var commits []database.GetAllUserCommitsRow
+	var commits []database.GetUserCommitsForReposRow
 
-	params := database.GetAllUserCommitsParams{
+	params := database.GetUserCommitsForReposParams{
 		AuthorDate:   sql.NullInt64{Int64: since.Unix(), Valid: true},
 		AuthorDate_2: sql.NullInt64{Int64: until.Unix(), Valid: true},
 		Login:        login,
+		Column4:      body.RepoUrls,
 	}
 
-	commits, err = apiConfig.DB.GetAllUserCommits(context.Background(), params)
+	commits, err = apiConfig.DB.GetUserCommitsForRepos(context.Background(), params)
 
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("failed to fetch commits from database: %s", err))
@@ -69,7 +70,7 @@ func (apiConfig *ApiConfig) HandlerGithubUserCommits(w http.ResponseWriter, r *h
 	RespondWithJSON(w, http.StatusOK, ConvertGetAllUserCommitsRowToAuthorsToCommitWithAuthorInfo(commits))
 }
 
-func ConvertGetAllUserCommitsRowToAuthorsToCommitWithAuthorInfo(rows []database.GetAllUserCommitsRow) []CommitWithAuthorInfo {
+func ConvertGetAllUserCommitsRowToAuthorsToCommitWithAuthorInfo(rows []database.GetUserCommitsForReposRow) []CommitWithAuthorInfo {
 	var commits []CommitWithAuthorInfo
 	for _, row := range rows {
 		commit := CommitWithAuthorInfo{

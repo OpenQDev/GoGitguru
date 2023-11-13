@@ -488,24 +488,24 @@ func (q *Queries) GetLatestUncheckedCommitPerAuthor(ctx context.Context) ([]GetL
 }
 
 const getUserCommitsForRepos = `-- name: GetUserCommitsForRepos :many
-WITH commits AS (
-    SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url FROM commits WHERE c.author_date BETWEEN $1 AND $2
+WITH commits_cte AS (
+    SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url FROM commits WHERE author_date BETWEEN $1 AND $2
 )
-SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at FROM commits c
+SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at FROM commits_cte c
 INNER JOIN github_user_rest_id_author_emails gure
 ON c.author_email = gure.email
 INNER JOIN github_users gu
 ON gure.rest_id = gu.github_rest_id
 WHERE gu.login = $3
-AND c.repo_url = ANY($4)
+AND c.repo_url = ANY($4::VARCHAR[])
 ORDER BY c.author_date DESC
 `
 
 type GetUserCommitsForReposParams struct {
-	AuthorDate   sql.NullInt64  `json:"author_date"`
-	AuthorDate_2 sql.NullInt64  `json:"author_date_2"`
-	Login        string         `json:"login"`
-	RepoUrl      sql.NullString `json:"repo_url"`
+	AuthorDate   sql.NullInt64 `json:"author_date"`
+	AuthorDate_2 sql.NullInt64 `json:"author_date_2"`
+	Login        string        `json:"login"`
+	Column4      []string      `json:"column_4"`
 }
 
 type GetUserCommitsForReposRow struct {
@@ -547,7 +547,7 @@ func (q *Queries) GetUserCommitsForRepos(ctx context.Context, arg GetUserCommits
 		arg.AuthorDate,
 		arg.AuthorDate_2,
 		arg.Login,
-		arg.RepoUrl,
+		pq.Array(arg.Column4),
 	)
 	if err != nil {
 		return nil, err
