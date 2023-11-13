@@ -2,7 +2,6 @@ package usersync
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/OpenQDev/GoGitguru/database"
 
