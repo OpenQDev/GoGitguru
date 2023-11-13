@@ -49,7 +49,6 @@ func TestGithubGetCommitAuthors(t *testing.T) {
 			}
 			`, tt.owner, tt.repo, commitDetails) + AUTHOR_GRAPHQL_FRAGMENT
 
-			fmt.Println(ghAccessToken)
 			resp, err := GithubGetCommitAuthors(query, ghAccessToken, serverUrl)
 
 			if (err != nil) != tt.wantErr {

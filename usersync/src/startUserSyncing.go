@@ -2,6 +2,7 @@ package usersync
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OpenQDev/GoGitguru/database"
 
@@ -22,6 +23,7 @@ func StartSyncingUser(
 	githubGraphQLUrl string,
 ) {
 	newCommitAuthorsRaw, err := getNewCommitAuthors(db)
+
 	if err != nil {
 		logger.LogFatalRedAndExit("error getting new commit authors to process: %s", err)
 		return
@@ -43,7 +45,6 @@ func StartSyncingUser(
 	repoToAuthorBatches := generateBatchAuthors(repoUrlToAuthorsMap, 2)
 
 	// Get info for each batch
-
 	for _, repoToAuthorBatch := range repoToAuthorBatches {
 		logger.LogGreenDebug("%s", repoToAuthorBatch.RepoURL)
 
@@ -53,6 +54,7 @@ func StartSyncingUser(
 		}
 
 		logger.LogGreenDebug("successfully fetched info for batch %s", repoToAuthorBatch.RepoURL)
+		logger.LogBlue("githubGraphQLCommitAuthorsMap", githubGraphQLCommitAuthorsMap)
 
 		if githubGraphQLCommitAuthorsMap == nil {
 			logger.LogError("commits is nil")
@@ -74,8 +76,12 @@ func StartSyncingUser(
 			}
 
 			exists, err := db.CheckGithubUserExists(context.Background(), author.User.Login)
+			if err != nil {
+				logger.LogError("error checking if github user exists: %s", err)
+			}
 
-			if err != nil && !exists {
+			if !exists {
+				logger.LogBlue("inserting github user %s", author.Name)
 				err = insertGithubUser(author, db)
 				if err != nil {
 					logger.LogError("error occured while inserting author: %s", err)

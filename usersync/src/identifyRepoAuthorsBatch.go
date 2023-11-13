@@ -35,6 +35,7 @@ func identifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTup
 	for key, value := range result.Data.Repository {
 		commits[key] = value
 	}
+	logger.LogBlue("commits", commits)
 
 	return commits, nil
 }
