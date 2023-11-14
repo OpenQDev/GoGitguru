@@ -11,6 +11,8 @@ func TestGitDependencyHistory(t *testing.T) {
 	// ARRANGE - GLOBAL
 	repoDir := "./mock/openqdev/dephistory-test-repo"
 	repoDirChurned := "./mock/openqdev/dephistory-test-repo-churned"
+	repoDirChurnedReturned := "./mock/openqdev/dephistory-test-repo-churned-returned"
+
 	dependencySearched := "chai"
 	depFilePaths := []string{"package.json"}
 
@@ -19,6 +21,9 @@ func TestGitDependencyHistory(t *testing.T) {
 
 	expectedDatesAddedReturnChurned := []int64{1698773760}
 	expectedDatesRemovedReturnChurned := []int64{1699555209}
+
+	expectedDatesAddedReturnChurnedReturned := []int64{1698773760, 1699983952}
+	expectedDatesRemovedReturnChurnedReturned := []int64{1699555209}
 
 	// ARRANGE - TESTS
 	tests := []struct {
@@ -32,6 +37,7 @@ func TestGitDependencyHistory(t *testing.T) {
 	}{
 		{"Added after init, never removed", dependencySearched, depFilePaths, expectedDatesAddedReturn, expectedDatesRemovedReturn, repoDir, false},
 		{"Added after init, then removed", dependencySearched, depFilePaths, expectedDatesAddedReturnChurned, expectedDatesRemovedReturnChurned, repoDirChurned, false},
+		{"Added after init, then removed, then re-added", dependencySearched, depFilePaths, expectedDatesAddedReturnChurnedReturned, expectedDatesRemovedReturnChurnedReturned, repoDirChurnedReturned, false},
 	}
 
 	for _, tt := range tests {

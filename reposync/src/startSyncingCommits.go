@@ -35,7 +35,17 @@ func StartSyncingCommits(
 			logger.LogBlue("repository %s exists. pulling...", repoUrl)
 			err := gitutil.PullRepo(prefixPath, organization, repo)
 			if err != nil {
-				logger.LogError("error cloning repo %s/%s", organization, repo)
+				logger.LogError("error pulling repo %s/%s: %s", organization, repo, err)
+
+				if strings.Contains(err.Error(), "exit status 128") {
+					logger.LogError("deleting repo url %s/%s since it does not exist or is private", organization, repo)
+					err := db.DeleteRepoURL(context.Background(), repoUrl)
+					if err != nil {
+						logger.LogError("error deleting repo url %s: %s", repoUrl, err)
+					}
+					logger.LogError("repo url %s/%s deleted!", organization, repo)
+				}
+
 				continue
 			}
 			logger.LogBlue("repository %s pulled!", repoUrl)
@@ -56,7 +66,17 @@ func StartSyncingCommits(
 			logger.LogBlue("repository %s does not exist. cloning...", repoUrl)
 			err := gitutil.CloneRepo(prefixPath, organization, repo)
 			if err != nil {
-				logger.LogError("error cloning repo %s/%s", organization, repo)
+				logger.LogError("error cloning repo %s/%s: %s", organization, repo, err)
+
+				if strings.Contains(err.Error(), "exit status 128") {
+					logger.LogError("deleting repo url %s/%s since it does not exist or is private", organization, repo)
+					err := db.DeleteRepoURL(context.Background(), repoUrl)
+					if err != nil {
+						logger.LogError("error deleting repo url %s: %s", repoUrl, err)
+					}
+					logger.LogError("repo url %s/%s deleted!", organization, repo)
+				}
+
 				continue
 			}
 			logger.LogBlue("repository %s cloned!", repoUrl)

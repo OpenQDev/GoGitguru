@@ -11,6 +11,15 @@ import (
 	"github.com/lib/pq"
 )
 
+const deleteRepoURL = `-- name: DeleteRepoURL :exec
+DELETE FROM repo_urls WHERE url = $1
+`
+
+func (q *Queries) DeleteRepoURL(ctx context.Context, url string) error {
+	_, err := q.exec(ctx, q.deleteRepoURLStmt, deleteRepoURL, url)
+	return err
+}
+
 const getRepoURL = `-- name: GetRepoURL :one
 SELECT url, status, created_at, updated_at FROM repo_urls WHERE url = $1
 `

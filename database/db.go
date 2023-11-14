@@ -33,6 +33,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.checkGithubUserExistsStmt, err = db.PrepareContext(ctx, checkGithubUserExists); err != nil {
 		return nil, fmt.Errorf("error preparing query CheckGithubUserExists: %w", err)
 	}
+	if q.deleteRepoURLStmt, err = db.PrepareContext(ctx, deleteRepoURL); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteRepoURL: %w", err)
+	}
 	if q.getAllUserCommitsStmt, err = db.PrepareContext(ctx, getAllUserCommits); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAllUserCommits: %w", err)
 	}
@@ -114,6 +117,11 @@ func (q *Queries) Close() error {
 	if q.checkGithubUserExistsStmt != nil {
 		if cerr := q.checkGithubUserExistsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing checkGithubUserExistsStmt: %w", cerr)
+		}
+	}
+	if q.deleteRepoURLStmt != nil {
+		if cerr := q.deleteRepoURLStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteRepoURLStmt: %w", cerr)
 		}
 	}
 	if q.getAllUserCommitsStmt != nil {
@@ -263,6 +271,7 @@ type Queries struct {
 	bulkInsertCommitsStmt                 *sql.Stmt
 	checkGithubRepoExistsStmt             *sql.Stmt
 	checkGithubUserExistsStmt             *sql.Stmt
+	deleteRepoURLStmt                     *sql.Stmt
 	getAllUserCommitsStmt                 *sql.Stmt
 	getCommitStmt                         *sql.Stmt
 	getCommitsStmt                        *sql.Stmt
@@ -293,6 +302,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		bulkInsertCommitsStmt:                 q.bulkInsertCommitsStmt,
 		checkGithubRepoExistsStmt:             q.checkGithubRepoExistsStmt,
 		checkGithubUserExistsStmt:             q.checkGithubUserExistsStmt,
+		deleteRepoURLStmt:                     q.deleteRepoURLStmt,
 		getAllUserCommitsStmt:                 q.getAllUserCommitsStmt,
 		getCommitStmt:                         q.getCommitStmt,
 		getCommitsStmt:                        q.getCommitsStmt,

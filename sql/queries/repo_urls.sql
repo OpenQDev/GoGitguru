@@ -1,6 +1,9 @@
 -- name: GetRepoURL :one
 SELECT * FROM repo_urls WHERE url = $1;
 
+-- name: DeleteRepoURL :exec
+DELETE FROM repo_urls WHERE url = $1;
+
 -- name: GetRepoURLs :many
 SELECT * FROM repo_urls;
 
