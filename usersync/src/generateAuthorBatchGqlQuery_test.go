@@ -1,7 +1,6 @@
 package usersync
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
