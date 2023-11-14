@@ -2,7 +2,7 @@ package gitutil
 
 import (
 	"fmt"
-	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -18,11 +18,16 @@ func CloneRepo(prefixPath string, organization string, repo string) error {
 
 	cmd := GitCloneCommand(cloneString, cloneDestination)
 
-	// This allows you to see the stdout and stderr of the command being run on the host machine
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	err := cmd.Run()
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		if exitError, ok := err.(*exec.ExitError); ok { // check if err is of type *os.ExitError
+			exitCode := exitError.ExitCode()
+			fmt.Printf("cmd.Run() failed with exit code: %d\n", exitCode)
+		} else {
+			fmt.Printf("cmd.Run() failed with %s\n", err)
+		}
+	}
+	fmt.Printf("combined out:\n%s\n", string(output))
 
 	return err
 }
