@@ -1,7 +1,6 @@
 package reposync
 
 import (
-	"fmt"
 	"io"
 	"strings"
 
@@ -48,21 +47,19 @@ func PrepareCommitHistoryForBulkInsertion(numberOfCommits int, log object.Commit
 			}
 		}
 
-		fmt.Println("commit", commit.Hash)
-
-		stats, err := commit.Stats()
-		if err != nil {
-			logger.LogFatalRedAndExit("error computing stats for repository %s: %s", params.repoUrl, err)
-		}
+		// stats, err := commit.Stats()
+		// if err != nil {
+		// 	logger.LogFatalRedAndExit("error computing stats for repository %s: %s", params.repoUrl, err)
+		// }
 
 		totalFilesChanged := 0
 		totalInsertions := 0
 		totalDeletions := 0
-		for _, stat := range stats {
-			totalInsertions += stat.Addition
-			totalDeletions += stat.Deletion
-			totalFilesChanged++
-		}
+		// for _, stat := range stats {
+		// 	totalInsertions += stat.Addition
+		// 	totalDeletions += stat.Deletion
+		// 	totalFilesChanged++
+		// }
 
 		commitHash[commitCount] = commit.Hash.String()
 		author[commitCount] = commit.Author.Name
