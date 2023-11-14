@@ -22,7 +22,7 @@ func TestGitDependencyHistory(t *testing.T) {
 	expectedDatesAddedReturnChurned := []int64{1698773760}
 	expectedDatesRemovedReturnChurned := []int64{1699555209}
 
-	expectedDatesAddedReturnChurnedReturned := []int64{1698773760, 1699983952}
+	expectedDatesAddedReturnChurnedReturned := []int64{1699983985}
 	expectedDatesRemovedReturnChurnedReturned := []int64{1699555209}
 
 	// ARRANGE - TESTS
@@ -43,7 +43,7 @@ func TestGitDependencyHistory(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				"Added after init, then removed",
+				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
 
 			datesAdded, datesRemoved, err := GitDependencyHistory(tt.repoDir, tt.dependencySearched, tt.depFilePaths)

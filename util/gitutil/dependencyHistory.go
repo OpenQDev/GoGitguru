@@ -53,5 +53,19 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 		}
 	}
 
-	return datesPresentCommits, datesRemovedCommits, nil
+	var presentArray []int64
+	if len(datesPresentCommits) > 0 {
+		presentArray = []int64{slices.Max(datesPresentCommits)}
+	} else {
+		presentArray = []int64{}
+	}
+
+	var removedArray []int64
+	if len(datesRemovedCommits) > 0 {
+		removedArray = []int64{slices.Max(datesRemovedCommits)}
+	} else {
+		removedArray = []int64{}
+	}
+
+	return presentArray, removedArray, nil
 }
