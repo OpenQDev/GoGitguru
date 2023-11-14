@@ -23,5 +23,6 @@ func CloneRepo(prefixPath string, organization string, repo string) error {
 	cmd.Stderr = os.Stderr
 
 	err := cmd.Run()
+
 	return err
 }

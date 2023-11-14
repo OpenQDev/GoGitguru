@@ -33,7 +33,11 @@ func StartSyncingCommits(
 		if gitutil.IsGitRepository(prefixPath, organization, repo) {
 			// If it is, pull the latest changes
 			logger.LogBlue("repository %s exists. pulling...", repoUrl)
-			gitutil.PullRepo(prefixPath, organization, repo)
+			err := gitutil.PullRepo(prefixPath, organization, repo)
+			if err != nil {
+				logger.LogError("error cloning repo %s/%s", organization, repo)
+				continue
+			}
 			logger.LogBlue("repository %s pulled!", repoUrl)
 
 			// there are cases where the repository may exist in local, but hasn't been synced
@@ -50,7 +54,11 @@ func StartSyncingCommits(
 		} else {
 			// If not, clone it
 			logger.LogBlue("repository %s does not exist. cloning...", repoUrl)
-			gitutil.CloneRepo(prefixPath, organization, repo)
+			err := gitutil.CloneRepo(prefixPath, organization, repo)
+			if err != nil {
+				logger.LogError("error cloning repo %s/%s", organization, repo)
+				continue
+			}
 			logger.LogBlue("repository %s cloned!", repoUrl)
 		}
 
