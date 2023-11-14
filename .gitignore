@@ -5,3 +5,6 @@ tmp/
 main
 **/repos/
 data/
+polygonrepos.txt
+polygonrepos.js
+output.json
