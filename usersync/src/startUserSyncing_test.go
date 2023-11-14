@@ -60,7 +60,7 @@ func TestStartUserSync(t *testing.T) {
 				queries,
 				"mock",
 				"",
-				2,
+				10,
 				serverUrl)
 
 			// ASSERT

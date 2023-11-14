@@ -53,7 +53,6 @@ func StartSyncingUser(
 		}
 
 		logger.LogGreenDebug("successfully fetched info for batch %s", repoToAuthorBatch.RepoURL)
-		logger.LogBlue("githubGraphQLCommitAuthorsMap", githubGraphQLCommitAuthorsMap)
 
 		if githubGraphQLCommitAuthorsMap == nil {
 			logger.LogError("commits is nil")

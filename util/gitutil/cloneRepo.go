@@ -1,9 +1,13 @@
 package gitutil
 
 import (
+	"bytes"
+	"context"
 	"fmt"
-	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
+	"time"
 )
 
 // CloneRepo clones a git repository from GitHub and places it in a specified directory.
@@ -16,13 +20,27 @@ func CloneRepo(prefixPath string, organization string, repo string) error {
 	cloneString := fmt.Sprintf("https://github.com/%s/%s.git", organization, repo)
 	cloneDestination := filepath.Join(prefixPath, organization, repo)
 
-	cmd := GitCloneCommand(cloneString, cloneDestination)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "git", "clone", cloneString, cloneDestination, "--single-branch")
 
-	// This allows you to see the stdout and stderr of the command being run on the host machine
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &out
 
 	err := cmd.Run()
 
-	return err
+	if ctx.Err() == context.DeadlineExceeded {
+		return fmt.Errorf("command timed out")
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if strings.Contains(out.String(), "empty repository") {
+		return fmt.Errorf("%s/%s is an empty repository", organization, repo)
+	}
+
+	return nil
 }

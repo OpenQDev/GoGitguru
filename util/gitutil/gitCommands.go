@@ -1,8 +1,10 @@
 package gitutil
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
+	"time"
 )
 
 /*
@@ -10,6 +12,15 @@ git clone https://github.com/OpenQDev/OpenQ-DRM repos/OpenQ-DRM
 */
 func GitCloneCommand(cloneString string, cloneDestination string) *exec.Cmd {
 	return exec.Command("git", "clone", cloneString, cloneDestination, "--single-branch")
+}
+
+/*
+git clone with a 1 minute timeout
+*/
+func GitCloneCommandWithTimeout(cloneString string, cloneDestination string) *exec.Cmd {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	return exec.CommandContext(ctx, "git", "clone", cloneString, cloneDestination, "--single-branch")
 }
 
 /*

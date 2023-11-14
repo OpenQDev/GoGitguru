@@ -72,7 +72,7 @@ func PrepareCommitHistoryForBulkInsertion(numberOfCommits int, log object.Commit
 		filesChanged[commitCount] = int32(totalFilesChanged)
 		repoUrls[commitCount] = params.repoUrl
 
-		if commitCount%100 == 0 {
+		if commitCount != 0 && commitCount%100 == 0 {
 			logger.LogGreenDebug("process %d commits for %s", commitCount, params.repoUrl)
 		}
 		commitCount++
