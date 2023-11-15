@@ -55,14 +55,21 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 
 	var presentArray []int64
 	if len(datesPresentCommits) > 0 {
-		presentArray = []int64{slices.Max(datesPresentCommits)}
+		// we only want to know when the dependency was first added
+		var earliestPresent = slices.Min(datesPresentCommits)
+		presentArray = []int64{earliestPresent}
 	} else {
 		presentArray = []int64{}
 	}
 
 	var removedArray []int64
 	if len(datesRemovedCommits) > 0 {
-		removedArray = []int64{slices.Max(datesRemovedCommits)}
+		// we only consider a dependency "removed" if it is still removed as of "today"
+		var latestAbsent = slices.Max(datesRemovedCommits)
+		var latestPresent = slices.Max(datesPresentCommits)
+		if latestAbsent > latestPresent {
+			removedArray = []int64{slices.Max(datesRemovedCommits)}
+		}
 	} else {
 		removedArray = []int64{}
 	}
