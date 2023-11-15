@@ -2,6 +2,7 @@ package reposync
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -27,7 +28,10 @@ func StartSyncingCommits(
 	for _, repoUrl := range repoUrls {
 		organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 		logger.LogGreenDebug("processing %s/%s...", organization, repo)
-		startDate := time.Unix(1577836800, 0) // Unix time for Jan 1, 2020
+		JAN_1_2020 := time.Unix(1577836800, 0)
+
+		startDate := JAN_1_2020 // Unix time for Jan 1, 2020
+		fmt.Println("startDate", startDate)
 
 		// Check if the repo is present in the repos directory
 		if gitutil.IsGitRepository(prefixPath, organization, repo) {
@@ -51,6 +55,7 @@ func StartSyncingCommits(
 			// there are cases where the repository may exist in local, but hasn't been synced
 			// no rows in result set just means it didn't have any commit entries for that repo
 			latestCommitterDate, err := db.GetLatestCommitterDate(context.Background(), repoUrl)
+			fmt.Println("latestCommitterDate", latestCommitterDate)
 
 			if err != nil {
 				if !strings.Contains(err.Error(), "sql: no rows in result set") {
@@ -58,7 +63,14 @@ func StartSyncingCommits(
 				}
 			}
 
-			startDate = time.Unix(int64(latestCommitterDate), 0)
+			latestCommitterDateTime := time.Unix(int64(latestCommitterDate), 0)
+			fmt.Println("latestCommitterDateTime", latestCommitterDateTime)
+
+			if latestCommitterDateTime.After(JAN_1_2020) {
+				startDate = latestCommitterDateTime
+			}
+
+			fmt.Println("startDate", startDate)
 		} else {
 			// If not, clone it
 			logger.LogBlue("repository %s does not exist. cloning...", repoUrl)
