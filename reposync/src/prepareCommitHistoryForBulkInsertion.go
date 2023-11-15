@@ -38,6 +38,10 @@ func PrepareCommitHistoryForBulkInsertion(numberOfCommits int, log object.Commit
 
 	commitCount := 0
 	for {
+		if commitCount >= numberOfCommits {
+			break
+		}
+
 		commit, err := log.Next()
 		if err != nil {
 			if err == io.EOF {
