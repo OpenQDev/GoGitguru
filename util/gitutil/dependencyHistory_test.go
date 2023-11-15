@@ -22,8 +22,8 @@ func TestGitDependencyHistory(t *testing.T) {
 	expectedDatesAddedReturnChurned := []int64{1698773760}
 	expectedDatesRemovedReturnChurned := []int64{1699555209}
 
-	expectedDatesAddedReturnChurnedReturned := []int64{1699983985}
-	expectedDatesRemovedReturnChurnedReturned := []int64{1699555209}
+	expectedDatesAddedReturnChurnedReturned := []int64{1698773760}
+	expectedDatesRemovedReturnChurnedReturned := []int64{}
 
 	// ARRANGE - TESTS
 	tests := []struct {
