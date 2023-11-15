@@ -41,7 +41,7 @@ func StartSyncingUser(
 	repoUrlToAuthorsMap := getRepoToAuthorsMap(newCommitAuthors)
 
 	// Create batches of repos for GraphQL query
-	repoToAuthorBatches := generateBatchAuthors(repoUrlToAuthorsMap, 2)
+	repoToAuthorBatches := generateBatchAuthors(repoUrlToAuthorsMap, batchSize)
 
 	// Get info for each batch
 	for _, repoToAuthorBatch := range repoToAuthorBatches {
