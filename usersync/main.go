@@ -22,11 +22,11 @@ func main() {
 
 	if env.UserSyncInterval != 0 {
 		for {
-			usersync.StartSyncingUser(database, "repos", env.GhAccessToken, 2, "https://api.github.com/graphql")
+			usersync.StartSyncingUser(database, "repos", env.GhAccessToken, 10, "https://api.github.com/graphql")
 			time.Sleep(time.Duration(env.UserSyncInterval) * time.Second)
 		}
 	} else {
-		usersync.StartSyncingUser(database, "repos", env.GhAccessToken, 2, "https://api.github.com/graphql")
+		usersync.StartSyncingUser(database, "repos", env.GhAccessToken, 10, "https://api.github.com/graphql")
 	}
 
 	logger.LogBlue("user sync completed!")
