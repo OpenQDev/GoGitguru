@@ -4,7 +4,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
@@ -39,12 +38,10 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 					return nil, nil, err
 				}
 				if strings.Contains(contents, dependencySearched) {
-					logger.LogGreenDebug("appening %s to dates present", c.Message)
 					datesPresentCommits = append(datesPresentCommits, c.Committer.When.Unix())
 					break
 				} else {
 					if len(datesPresentCommits) != 0 {
-						logger.LogGreenDebug("appening %s to dates absent", c.Message)
 						datesRemovedCommits = append(datesRemovedCommits, c.Committer.When.Unix())
 					}
 					break
