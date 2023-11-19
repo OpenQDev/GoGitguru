@@ -27,7 +27,7 @@ func GitCloneCommandWithTimeout(cloneString string, cloneDestination string) *ex
 git pull
 */
 func GitPullCommand(pullDestination string) *exec.Cmd {
-	return exec.Command("git", "-C", pullDestination, "pull")
+	return exec.Command("git", "-C", pullDestination, "pull", "--strategy-option=theirs")
 }
 
 /*
