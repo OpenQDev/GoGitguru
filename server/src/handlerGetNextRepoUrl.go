@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/setup"
@@ -19,7 +20,7 @@ func (apiCfg *ApiConfig) HandlerGetNextRepoUrl(w http.ResponseWriter, r *http.Re
 	db, _ := setup.GetSQLDatbase(apiCfg.DBURL)
 	defer db.Close()
 
-	repoUrl, err := GetDueURL(db, "10")
+	repoUrl, err := GetDueURL(db, strconv.Itoa(apiCfg.GetDueRepoUrlExpiration))
 	if err != nil {
 		logger.LogError("errror: %s", err)
 	}
@@ -44,7 +45,7 @@ func GetDueURL(db *sql.DB, repoSyncInterval string) (string, error) {
 	defer tx.Rollback()
 
 	// Prepare the SQL statement
-	query := `SELECT url FROM repo_urls WHERE status IN ('synced', 'pending', 'failed') OR updated_at IS NULL ORDER BY RANDOM() LIMIT 1 FOR UPDATE`
+	query := fmt.Sprintf(`SELECT url FROM repo_urls WHERE status IN ('synced', 'pending', 'failed') AND (updated_at < NOW() - INTERVAL '%s seconds' OR updated_at IS NULL) ORDER BY RANDOM() LIMIT 1 FOR UPDATE`, repoSyncInterval)
 	row := tx.QueryRowContext(context.Background(), query)
 
 	// Execute the query and scan the result

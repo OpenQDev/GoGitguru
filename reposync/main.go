@@ -22,11 +22,11 @@ func main() {
 
 	if env.RepoSyncInterval != 0 {
 		for {
-			reposync.StartSyncingCommits(database, "repos")
+			reposync.StartSyncingCommits(database, "repos", env.GitguruUrl, env.GetDueRepoUrlExpiration)
 			time.Sleep(time.Duration(env.RepoSyncInterval) * time.Second)
 		}
 	} else {
-		reposync.StartSyncingCommits(database, "repos")
+		reposync.StartSyncingCommits(database, "repos", env.GitguruUrl, env.GetDueRepoUrlExpiration)
 	}
 
 	logger.LogBlue("repo sync completed!")

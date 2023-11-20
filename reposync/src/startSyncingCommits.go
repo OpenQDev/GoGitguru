@@ -2,6 +2,9 @@ package reposync
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -11,20 +14,39 @@ import (
 	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
+type GetDueUrlResponse struct {
+	RepoUrl string `json:"repo_url"`
+}
+
 func StartSyncingCommits(
 	db *database.Queries,
-	prefixPath string) {
+	prefixPath string,
+	gitguruUrl string,
+	getDueRepoUrlExpiration int,
+) {
 
-	repoUrlObjects, err := db.GetRepoURLs(context.Background())
+	for {
+		url := fmt.Sprintf("%s/get-next-repo-url", gitguruUrl)
+		resp, err := http.Get(url)
+		if err != nil {
+			logger.LogFatalRedAndExit("error getting repo url: %s ", err)
+		}
+		defer resp.Body.Close()
 
-	repoUrls := sortRepoUrls(repoUrlObjects)
-	logger.LogGreenDebug("beginning sync for the following repos:\n%v", strings.Join(repoUrls, "\n"))
+		var getDueUrlResponse GetDueUrlResponse
+		err = json.NewDecoder(resp.Body).Decode(&getDueUrlResponse)
+		if err != nil {
+			logger.LogFatalRedAndExit("error decoding repo url: %s ", err)
+		}
 
-	if err != nil {
-		logger.LogFatalRedAndExit("error getting repo urls: %s ", err)
-	}
+		repoUrl := getDueUrlResponse.RepoUrl
 
-	for _, repoUrl := range repoUrls {
+		if repoUrl == "" {
+			break
+		}
+
+		logger.LogGreenDebug("beginning sync for the following repo:\n%s", repoUrl)
+
 		organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrl)
 		logger.LogGreenDebug("processing %s/%s...", organization, repo)
 		JAN_1_2020 := time.Unix(1577858400, 0)

@@ -7,14 +7,14 @@ import (
 	"github.com/OpenQDev/GoGitguru/util/setup"
 )
 
-func PrepareServerSingleton(dbUrl string) (*database.Queries, ApiConfig) {
+func PrepareServerSingleton(dbUrl string, repoUrlExpiration int) (*database.Queries, ApiConfig) {
 	database, err := setup.GetDatbase(dbUrl)
 
 	if err != nil {
 		logger.LogError("error getting database: %s", err)
 	}
 
-	apiCfg, err := GetApiConfig(database, dbUrl)
+	apiCfg, err := GetApiConfig(database, dbUrl, repoUrlExpiration)
 	if err != nil {
 		logger.LogFatalRedAndExit("can't connect to DB: %s", err)
 	}
