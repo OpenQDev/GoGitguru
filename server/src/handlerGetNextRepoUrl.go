@@ -17,6 +17,8 @@ type HandlerGetNextRepoUrlResponse struct {
 func (apiCfg *ApiConfig) HandlerGetNextRepoUrl(w http.ResponseWriter, r *http.Request) {
 	var response HandlerGetNextRepoUrlResponse
 	db, _ := setup.GetSQLDatbase(apiCfg.DBURL)
+	defer db.Close()
+
 	repoUrl, err := GetDueURL(db, "10")
 	if err != nil {
 		logger.LogError("errror: %s", err)
