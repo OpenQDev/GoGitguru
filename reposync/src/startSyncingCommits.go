@@ -26,6 +26,7 @@ func StartSyncingCommits(
 ) {
 
 	for {
+		logger.LogBlue("fetching next repo to sync...")
 		url := fmt.Sprintf("%s/get-next-repo-url", gitguruUrl)
 		resp, err := http.Get(url)
 		if err != nil {
@@ -42,6 +43,7 @@ func StartSyncingCommits(
 		repoUrl := getDueUrlResponse.RepoUrl
 
 		if repoUrl == "" {
+			logger.LogBlue("no new repo urls to sync. exiting...")
 			break
 		}
 
