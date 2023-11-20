@@ -33,6 +33,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.checkGithubUserExistsStmt, err = db.PrepareContext(ctx, checkGithubUserExists); err != nil {
 		return nil, fmt.Errorf("error preparing query CheckGithubUserExists: %w", err)
 	}
+	if q.checkGithubUserRestIdAuthorEmailExistsStmt, err = db.PrepareContext(ctx, checkGithubUserRestIdAuthorEmailExists); err != nil {
+		return nil, fmt.Errorf("error preparing query CheckGithubUserRestIdAuthorEmailExists: %w", err)
+	}
 	if q.deleteRepoURLStmt, err = db.PrepareContext(ctx, deleteRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteRepoURL: %w", err)
 	}
@@ -117,6 +120,11 @@ func (q *Queries) Close() error {
 	if q.checkGithubUserExistsStmt != nil {
 		if cerr := q.checkGithubUserExistsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing checkGithubUserExistsStmt: %w", cerr)
+		}
+	}
+	if q.checkGithubUserRestIdAuthorEmailExistsStmt != nil {
+		if cerr := q.checkGithubUserRestIdAuthorEmailExistsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing checkGithubUserRestIdAuthorEmailExistsStmt: %w", cerr)
 		}
 	}
 	if q.deleteRepoURLStmt != nil {
@@ -266,63 +274,65 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                                    DBTX
-	tx                                    *sql.Tx
-	bulkInsertCommitsStmt                 *sql.Stmt
-	checkGithubRepoExistsStmt             *sql.Stmt
-	checkGithubUserExistsStmt             *sql.Stmt
-	deleteRepoURLStmt                     *sql.Stmt
-	getAllUserCommitsStmt                 *sql.Stmt
-	getCommitStmt                         *sql.Stmt
-	getCommitsStmt                        *sql.Stmt
-	getCommitsWithAuthorInfoStmt          *sql.Stmt
-	getFirstCommitStmt                    *sql.Stmt
-	getGithubRepoStmt                     *sql.Stmt
-	getGithubUserStmt                     *sql.Stmt
-	getGroupOfEmailsStmt                  *sql.Stmt
-	getLatestCommitterDateStmt            *sql.Stmt
-	getLatestUncheckedCommitPerAuthorStmt *sql.Stmt
-	getRepoURLStmt                        *sql.Stmt
-	getRepoURLsStmt                       *sql.Stmt
-	getReposStatusStmt                    *sql.Stmt
-	getUserCommitsForReposStmt            *sql.Stmt
-	insertCommitStmt                      *sql.Stmt
-	insertGithubRepoStmt                  *sql.Stmt
-	insertRepoURLStmt                     *sql.Stmt
-	insertRestIdToEmailStmt               *sql.Stmt
-	insertUserStmt                        *sql.Stmt
-	multiRowInsertCommitsStmt             *sql.Stmt
-	updateStatusAndUpdatedAtStmt          *sql.Stmt
+	db                                         DBTX
+	tx                                         *sql.Tx
+	bulkInsertCommitsStmt                      *sql.Stmt
+	checkGithubRepoExistsStmt                  *sql.Stmt
+	checkGithubUserExistsStmt                  *sql.Stmt
+	checkGithubUserRestIdAuthorEmailExistsStmt *sql.Stmt
+	deleteRepoURLStmt                          *sql.Stmt
+	getAllUserCommitsStmt                      *sql.Stmt
+	getCommitStmt                              *sql.Stmt
+	getCommitsStmt                             *sql.Stmt
+	getCommitsWithAuthorInfoStmt               *sql.Stmt
+	getFirstCommitStmt                         *sql.Stmt
+	getGithubRepoStmt                          *sql.Stmt
+	getGithubUserStmt                          *sql.Stmt
+	getGroupOfEmailsStmt                       *sql.Stmt
+	getLatestCommitterDateStmt                 *sql.Stmt
+	getLatestUncheckedCommitPerAuthorStmt      *sql.Stmt
+	getRepoURLStmt                             *sql.Stmt
+	getRepoURLsStmt                            *sql.Stmt
+	getReposStatusStmt                         *sql.Stmt
+	getUserCommitsForReposStmt                 *sql.Stmt
+	insertCommitStmt                           *sql.Stmt
+	insertGithubRepoStmt                       *sql.Stmt
+	insertRepoURLStmt                          *sql.Stmt
+	insertRestIdToEmailStmt                    *sql.Stmt
+	insertUserStmt                             *sql.Stmt
+	multiRowInsertCommitsStmt                  *sql.Stmt
+	updateStatusAndUpdatedAtStmt               *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                                    tx,
-		tx:                                    tx,
-		bulkInsertCommitsStmt:                 q.bulkInsertCommitsStmt,
-		checkGithubRepoExistsStmt:             q.checkGithubRepoExistsStmt,
-		checkGithubUserExistsStmt:             q.checkGithubUserExistsStmt,
-		deleteRepoURLStmt:                     q.deleteRepoURLStmt,
-		getAllUserCommitsStmt:                 q.getAllUserCommitsStmt,
-		getCommitStmt:                         q.getCommitStmt,
-		getCommitsStmt:                        q.getCommitsStmt,
-		getCommitsWithAuthorInfoStmt:          q.getCommitsWithAuthorInfoStmt,
-		getFirstCommitStmt:                    q.getFirstCommitStmt,
-		getGithubRepoStmt:                     q.getGithubRepoStmt,
-		getGithubUserStmt:                     q.getGithubUserStmt,
-		getGroupOfEmailsStmt:                  q.getGroupOfEmailsStmt,
-		getLatestCommitterDateStmt:            q.getLatestCommitterDateStmt,
-		getLatestUncheckedCommitPerAuthorStmt: q.getLatestUncheckedCommitPerAuthorStmt,
-		getRepoURLStmt:                        q.getRepoURLStmt,
-		getRepoURLsStmt:                       q.getRepoURLsStmt,
-		getReposStatusStmt:                    q.getReposStatusStmt,
-		getUserCommitsForReposStmt:            q.getUserCommitsForReposStmt,
-		insertCommitStmt:                      q.insertCommitStmt,
-		insertGithubRepoStmt:                  q.insertGithubRepoStmt,
-		insertRepoURLStmt:                     q.insertRepoURLStmt,
-		insertRestIdToEmailStmt:               q.insertRestIdToEmailStmt,
-		insertUserStmt:                        q.insertUserStmt,
-		multiRowInsertCommitsStmt:             q.multiRowInsertCommitsStmt,
-		updateStatusAndUpdatedAtStmt:          q.updateStatusAndUpdatedAtStmt,
+		db:                        tx,
+		tx:                        tx,
+		bulkInsertCommitsStmt:     q.bulkInsertCommitsStmt,
+		checkGithubRepoExistsStmt: q.checkGithubRepoExistsStmt,
+		checkGithubUserExistsStmt: q.checkGithubUserExistsStmt,
+		checkGithubUserRestIdAuthorEmailExistsStmt: q.checkGithubUserRestIdAuthorEmailExistsStmt,
+		deleteRepoURLStmt:                          q.deleteRepoURLStmt,
+		getAllUserCommitsStmt:                      q.getAllUserCommitsStmt,
+		getCommitStmt:                              q.getCommitStmt,
+		getCommitsStmt:                             q.getCommitsStmt,
+		getCommitsWithAuthorInfoStmt:               q.getCommitsWithAuthorInfoStmt,
+		getFirstCommitStmt:                         q.getFirstCommitStmt,
+		getGithubRepoStmt:                          q.getGithubRepoStmt,
+		getGithubUserStmt:                          q.getGithubUserStmt,
+		getGroupOfEmailsStmt:                       q.getGroupOfEmailsStmt,
+		getLatestCommitterDateStmt:                 q.getLatestCommitterDateStmt,
+		getLatestUncheckedCommitPerAuthorStmt:      q.getLatestUncheckedCommitPerAuthorStmt,
+		getRepoURLStmt:                             q.getRepoURLStmt,
+		getRepoURLsStmt:                            q.getRepoURLsStmt,
+		getReposStatusStmt:                         q.getReposStatusStmt,
+		getUserCommitsForReposStmt:                 q.getUserCommitsForReposStmt,
+		insertCommitStmt:                           q.insertCommitStmt,
+		insertGithubRepoStmt:                       q.insertGithubRepoStmt,
+		insertRepoURLStmt:                          q.insertRepoURLStmt,
+		insertRestIdToEmailStmt:                    q.insertRestIdToEmailStmt,
+		insertUserStmt:                             q.insertUserStmt,
+		multiRowInsertCommitsStmt:                  q.multiRowInsertCommitsStmt,
+		updateStatusAndUpdatedAtStmt:               q.updateStatusAndUpdatedAtStmt,
 	}
 }

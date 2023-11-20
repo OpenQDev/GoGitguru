@@ -9,6 +9,22 @@ import (
 	"context"
 )
 
+const checkGithubUserRestIdAuthorEmailExists = `-- name: CheckGithubUserRestIdAuthorEmailExists :one
+SELECT EXISTS(SELECT 1 FROM github_user_rest_id_author_emails WHERE rest_id = $1 AND email = $2)
+`
+
+type CheckGithubUserRestIdAuthorEmailExistsParams struct {
+	RestID int32  `json:"rest_id"`
+	Email  string `json:"email"`
+}
+
+func (q *Queries) CheckGithubUserRestIdAuthorEmailExists(ctx context.Context, arg CheckGithubUserRestIdAuthorEmailExistsParams) (bool, error) {
+	row := q.queryRow(ctx, q.checkGithubUserRestIdAuthorEmailExistsStmt, checkGithubUserRestIdAuthorEmailExists, arg.RestID, arg.Email)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const insertRestIdToEmail = `-- name: InsertRestIdToEmail :one
 
 INSERT INTO github_user_rest_id_author_emails (
