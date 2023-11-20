@@ -9,6 +9,8 @@ COPY . .
 
 RUN go install github.com/cosmtrek/air@latest
 
+RUN git config --global pull.rebase false
+
 # Set the Current Working Directory inside the container to reposync directory
 WORKDIR /app/reposync
 

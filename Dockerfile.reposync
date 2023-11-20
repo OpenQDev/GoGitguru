@@ -4,6 +4,8 @@ WORKDIR /app
 
 COPY . .
 
+RUN git config --global pull.rebase false
+
 WORKDIR /app/reposync
 
 RUN go mod download
