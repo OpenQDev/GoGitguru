@@ -70,20 +70,9 @@ func StartSyncingUser(
 			fmt.Printf("%+v\n", commitAuthor)
 			author := commitAuthor.Author
 
-			restIdExists, err := db.CheckGithubUserRestIdAuthorEmailExists(context.Background(), database.CheckGithubUserRestIdAuthorEmailExistsParams{
-				RestID: int32(author.User.GithubRestID),
-				Email:  author.Email,
-			})
-
+			err := insertIntoRestIdToUser(author, db)
 			if err != nil {
-				logger.LogError("error checking if rest id to user exists: %s", err)
-			}
-
-			if !restIdExists {
-				err := insertIntoRestIdToUser(author, db)
-				if err != nil {
-					logger.LogError("error occured while inserting author RestID %s to Email %s: %s", author.Name, author.Email, err)
-				}
+				logger.LogError("error occured while inserting author RestID %s to Email %s: %s", author.User.GithubRestID, author.Email, err)
 			}
 
 			exists, err := db.CheckGithubUserExists(context.Background(), author.User.Login)
