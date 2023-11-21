@@ -2,8 +2,6 @@ package gitutil
 
 import (
 	"strings"
-
-	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
 func GitDependencyFiles(repoDir string, dependencyFiles []string) ([]string, error) {
@@ -14,7 +12,6 @@ func GitDependencyFiles(repoDir string, dependencyFiles []string) ([]string, err
 
 		out, err := cmd.CombinedOutput()
 		if err != nil {
-			logger.LogBlue("dependency file %s not found in %s", dependencyFile, repoDir)
 			continue
 		}
 
