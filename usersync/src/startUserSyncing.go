@@ -2,6 +2,7 @@ package usersync
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OpenQDev/GoGitguru/database"
 
@@ -66,6 +67,7 @@ func StartSyncingUser(
 		}
 
 		for _, commitAuthor := range githubGraphQLCommitAuthors {
+			fmt.Printf("%+v\n", commitAuthor)
 			author := commitAuthor.Author
 
 			restIdExists, err := db.CheckGithubUserRestIdAuthorEmailExists(context.Background(), database.CheckGithubUserRestIdAuthorEmailExistsParams{
