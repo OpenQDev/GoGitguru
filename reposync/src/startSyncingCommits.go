@@ -33,39 +33,40 @@ func StartSyncingCommits(
 
 		// Check if the repo is present in the repos directory
 		if gitutil.IsGitRepository(prefixPath, organization, repo) {
-			// If it is, pull the latest changes
-			logger.LogBlue("repository %s exists. pulling...", repoUrl)
-			err := gitutil.PullRepo(prefixPath, organization, repo)
-			if err != nil {
-				logger.LogError("error pulling repo %s/%s: %s", organization, repo, err)
+			// // If it is, pull the latest changes
+			// logger.LogBlue("repository %s exists. pulling...", repoUrl)
+			// err := gitutil.PullRepo(prefixPath, organization, repo)
+			// if err != nil {
+			// 	logger.LogError("error pulling repo %s/%s: %s", organization, repo, err)
 
-				logger.LogError("deleting repo url %s/%s since it does not exist, is private, too large, or is empty", organization, repo)
-				err := db.DeleteRepoURL(context.Background(), repoUrl)
-				if err != nil {
-					logger.LogError("error deleting repo url %s: %s", repoUrl, err)
-				}
-				logger.LogError("repo url %s/%s deleted!", organization, repo)
+			// 	logger.LogError("deleting repo url %s/%s since it does not exist, is private, too large, or is empty", organization, repo)
+			// 	err := db.DeleteRepoURL(context.Background(), repoUrl)
+			// 	if err != nil {
+			// 		logger.LogError("error deleting repo url %s: %s", repoUrl, err)
+			// 	}
+			// 	logger.LogError("repo url %s/%s deleted!", organization, repo)
 
-				continue
-			}
-			logger.LogBlue("repository %s pulled!", repoUrl)
+			// 	continue
+			// }
+			// logger.LogBlue("repository %s pulled!", repoUrl)
 
-			// there are cases where the repository may exist in local, but hasn't been synced
-			// no rows in result set just means it didn't have any commit entries for that repo
-			latestCommitterDate, err := db.GetLatestCommitterDate(context.Background(), repoUrl)
+			// // there are cases where the repository may exist in local, but hasn't been synced
+			// // no rows in result set just means it didn't have any commit entries for that repo
+			// latestCommitterDate, err := db.GetLatestCommitterDate(context.Background(), repoUrl)
 
-			if err != nil {
-				if !strings.Contains(err.Error(), "sql: no rows in result set") {
-					logger.LogFatalRedAndExit("error getting latest committer date: %s ", err)
-				}
-			}
+			// if err != nil {
+			// 	if !strings.Contains(err.Error(), "sql: no rows in result set") {
+			// 		logger.LogFatalRedAndExit("error getting latest committer date: %s ", err)
+			// 	}
+			// }
 
-			latestCommitterDateTime := time.Unix(int64(latestCommitterDate), 0)
+			// latestCommitterDateTime := time.Unix(int64(latestCommitterDate), 0)
 
-			// Unsure why but sometimes commits before JAN_1_2020 were being stored after initia clone-sync, causing issues
-			if latestCommitterDateTime.After(JAN_1_2020) {
-				startDate = latestCommitterDateTime
-			}
+			// // Unsure why but sometimes commits before JAN_1_2020 were being stored after initia clone-sync, causing issues
+			// if latestCommitterDateTime.After(JAN_1_2020) {
+			// 	startDate = latestCommitterDateTime
+			// }
+			continue
 		} else {
 			// If not, clone it
 			logger.LogBlue("repository %s does not exist. cloning...", repoUrl)
