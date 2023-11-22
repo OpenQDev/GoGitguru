@@ -2,6 +2,8 @@ package reposync
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -80,6 +82,13 @@ func StartSyncingCommits(
 					logger.LogError("error deleting repo url %s: %s", repoUrl, err)
 				}
 				logger.LogError("repo url %s/%s deleted!", organization, repo)
+
+				// Remove the repo from the filesystem
+				repoPath := filepath.Join(prefixPath, organization, repo)
+				err = os.RemoveAll(repoPath)
+				if err != nil {
+					logger.LogError("error removing repo from filesystem %s: %s", repoPath, err)
+				}
 
 				continue
 			}
