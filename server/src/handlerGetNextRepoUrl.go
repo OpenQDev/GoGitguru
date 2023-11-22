@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/setup"
@@ -20,7 +19,7 @@ func (apiCfg *ApiConfig) HandlerGetNextRepoUrl(w http.ResponseWriter, r *http.Re
 	db, _ := setup.GetSQLDatbase(apiCfg.DBURL)
 	defer db.Close()
 
-	repoUrl, err := GetDueURL(db, strconv.Itoa(apiCfg.GetDueRepoUrlExpiration))
+	repoUrl, err := GetDueURL(db)
 	if err != nil {
 		logger.LogError("errror: %s", err)
 	}
@@ -32,7 +31,7 @@ func (apiCfg *ApiConfig) HandlerGetNextRepoUrl(w http.ResponseWriter, r *http.Re
 	RespondWithJSON(w, 200, response)
 }
 
-func GetDueURL(db *sql.DB, getDueRepoUrlExpiration string) (string, error) {
+func GetDueURL(db *sql.DB) (string, error) {
 	var url string
 
 	// Start a new transaction

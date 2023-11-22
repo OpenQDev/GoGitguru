@@ -9,16 +9,15 @@ import (
 )
 
 type EnvConfig struct {
-	PortString              string
-	DbUrl                   string
-	OriginUrl               string
-	Debug                   bool
-	GhAccessToken           string
-	TargetLiveGithub        bool
-	RepoSyncInterval        int
-	UserSyncInterval        int
-	GetDueRepoUrlExpiration int
-	GitguruUrl              string
+	PortString       string
+	DbUrl            string
+	OriginUrl        string
+	Debug            bool
+	GhAccessToken    string
+	TargetLiveGithub bool
+	RepoSyncInterval int
+	UserSyncInterval int
+	GitguruUrl       string
 }
 
 func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
@@ -27,16 +26,15 @@ func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
 	}
 
 	return EnvConfig{
-		PortString:              getEnvVar("PORT", "string").(string),
-		DbUrl:                   getEnvVar("DB_URL", "string").(string),
-		OriginUrl:               getEnvVar("ORIGIN_URL", "string").(string),
-		Debug:                   getEnvVar("DEBUG_MODE", "bool").(bool),
-		GhAccessToken:           getEnvVar("GH_ACCESS_TOKEN", "string").(string),
-		TargetLiveGithub:        getEnvVar("TARGET_LIVE_GITHUB", "bool").(bool),
-		RepoSyncInterval:        getEnvVar("REPOSYNC_INTERVAL", "int").(int),
-		UserSyncInterval:        getEnvVar("USERSYNC_INTERVAL", "int").(int),
-		GetDueRepoUrlExpiration: getEnvVar("GET_DUE_REPO_URL_EXPIRATION", "int").(int),
-		GitguruUrl:              getEnvVar("GITGURU_URL", "string").(string),
+		PortString:       getEnvVar("PORT", "string").(string),
+		DbUrl:            getEnvVar("DB_URL", "string").(string),
+		OriginUrl:        getEnvVar("ORIGIN_URL", "string").(string),
+		Debug:            getEnvVar("DEBUG_MODE", "bool").(bool),
+		GhAccessToken:    getEnvVar("GH_ACCESS_TOKEN", "string").(string),
+		TargetLiveGithub: getEnvVar("TARGET_LIVE_GITHUB", "bool").(bool),
+		RepoSyncInterval: getEnvVar("REPOSYNC_INTERVAL", "int").(int),
+		UserSyncInterval: getEnvVar("USERSYNC_INTERVAL", "int").(int),
+		GitguruUrl:       getEnvVar("GITGURU_URL", "string").(string),
 	}
 }
 

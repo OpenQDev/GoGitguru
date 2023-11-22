@@ -23,7 +23,6 @@ func StartSyncingCommits(
 	db *database.Queries,
 	prefixPath string,
 	gitguruUrl string,
-	getDueRepoUrlExpiration int,
 ) {
 
 	for {
