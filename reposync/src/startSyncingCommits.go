@@ -90,6 +90,15 @@ func StartSyncingCommits(
 			// if latestCommitterDateTime.After(JAN_1_2020) {
 			// 	startDate = latestCommitterDateTime
 			// }
+			err := db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
+				Status: database.RepoStatusSynced,
+				Url:    repoUrl,
+			})
+
+			if err != nil {
+				logger.LogError("error setting to synced for existing repository %s: %s", repoUrl, err)
+			}
+
 			continue
 		} else {
 			// If not, clone it
