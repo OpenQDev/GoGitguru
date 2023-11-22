@@ -22,7 +22,9 @@ func main() {
 
 	if env.RepoSyncInterval != 0 {
 		for {
-			reposync.StartSyncingCommits(database, "repos", env.GitguruUrl, env.GetDueRepoUrlExpiration)
+			for i := 0; i < 2; i++ {
+				go reposync.StartSyncingCommits(database, "repos", env.GitguruUrl, env.GetDueRepoUrlExpiration)
+			}
 			time.Sleep(time.Duration(env.RepoSyncInterval) * time.Second)
 		}
 	} else {
