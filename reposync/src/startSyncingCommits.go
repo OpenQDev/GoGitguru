@@ -90,6 +90,8 @@ func StartSyncingCommits(
 			// if latestCommitterDateTime.After(JAN_1_2020) {
 			// 	startDate = latestCommitterDateTime
 			// }
+			logger.LogBlue("%s already synced", repoUrl)
+
 			err := db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
 				Status: database.RepoStatusSynced,
 				Url:    repoUrl,
