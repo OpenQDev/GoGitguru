@@ -8,13 +8,19 @@ import (
 )
 
 func sortRepoUrls(repoUrlObjects []database.RepoUrl) []string {
-	repoUrls := make([]string, len(repoUrlObjects))
+	pendingUrls := make([]string, 0)
+	otherUrls := make([]string, 0)
 
-	for i, repo := range repoUrlObjects {
-		// since sort.Strings uses case-sensitive lexicographic ordering, we must lowercase
-		repoUrls[i] = strings.ToLower(repo.Url)
+	for _, repo := range repoUrlObjects {
+		if repo.Status == database.RepoStatusPending {
+			pendingUrls = append(pendingUrls, strings.ToLower(repo.Url))
+		} else {
+			otherUrls = append(otherUrls, strings.ToLower(repo.Url))
+		}
 	}
 
-	sort.Strings(repoUrls)
-	return repoUrls
+	sort.Strings(pendingUrls)
+	sort.Strings(otherUrls)
+
+	return append(pendingUrls, otherUrls...)
 }

@@ -2,6 +2,7 @@ package usersync
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OpenQDev/GoGitguru/database"
 
@@ -66,11 +67,12 @@ func StartSyncingUser(
 		}
 
 		for _, commitAuthor := range githubGraphQLCommitAuthors {
+			fmt.Printf("%+v\n", commitAuthor)
 			author := commitAuthor.Author
 
 			err := insertIntoRestIdToUser(author, db)
 			if err != nil {
-				logger.LogError("error occured while inserting author RestID %s to Email %s: %s", author.Name, author.Email, err)
+				logger.LogError("error occured while inserting author RestID %s to Email %s: %s", author.User.GithubRestID, author.Email, err)
 			}
 
 			exists, err := db.CheckGithubUserExists(context.Background(), author.User.Login)
