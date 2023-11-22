@@ -32,7 +32,7 @@ func (apiCfg *ApiConfig) HandlerGetNextRepoUrl(w http.ResponseWriter, r *http.Re
 	RespondWithJSON(w, 200, response)
 }
 
-func GetDueURL(db *sql.DB, repoSyncInterval string) (string, error) {
+func GetDueURL(db *sql.DB, getDueRepoUrlExpiration string) (string, error) {
 	var url string
 
 	// Start a new transaction
@@ -45,7 +45,7 @@ func GetDueURL(db *sql.DB, repoSyncInterval string) (string, error) {
 	defer tx.Rollback()
 
 	// Prepare the SQL statement
-	query := fmt.Sprintf(`SELECT url FROM repo_urls WHERE status IN ('synced', 'pending', 'failed') AND (updated_at < NOW() - INTERVAL '%s seconds' OR updated_at IS NULL) ORDER BY RANDOM() LIMIT 1 FOR UPDATE`, repoSyncInterval)
+	query := "SELECT url FROM repo_urls WHERE status = 'pending' ORDER BY RANDOM() LIMIT 1 FOR UPDATE"
 	row := tx.QueryRowContext(context.Background(), query)
 
 	// Execute the query and scan the result

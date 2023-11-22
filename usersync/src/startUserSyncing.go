@@ -2,7 +2,6 @@ package usersync
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/OpenQDev/GoGitguru/database"
 
@@ -67,7 +66,6 @@ func StartSyncingUser(
 		}
 
 		for _, commitAuthor := range githubGraphQLCommitAuthors {
-			fmt.Printf("%+v\n", commitAuthor)
 			author := commitAuthor.Author
 
 			err := insertIntoRestIdToUser(author, db)
