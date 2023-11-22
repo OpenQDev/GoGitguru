@@ -20,10 +20,16 @@ func main() {
 	// PRODUCTION: This runs as a CronJob on Kubernetes. Therefore, it's interval is set by the CRON_STRING parameter
 	// DEVELOPMENT: To mimic the interval, here we check for the REPOSYNC_INTERVAL environment variable to periodically re-run StartSyncingCommits
 
+	const MAX_CONCURRENT_INSTANCES = 2
 	if env.RepoSyncInterval != 0 {
+		sem := make(chan bool, MAX_CONCURRENT_INSTANCES) // create a buffered channel with capacity 2
 		for {
-			for i := 0; i < 2; i++ {
-				go reposync.StartSyncingCommits(database, "repos", env.GitguruUrl, env.GetDueRepoUrlExpiration)
+			for i := 0; i < MAX_CONCURRENT_INSTANCES; i++ {
+				sem <- true // block if there are already 2 goroutines running
+				go func() {
+					reposync.StartSyncingCommits(database, "repos", env.GitguruUrl, env.GetDueRepoUrlExpiration)
+					<-sem // release the semaphore when goroutine finishes
+				}()
 			}
 			time.Sleep(time.Duration(env.RepoSyncInterval) * time.Second)
 		}
