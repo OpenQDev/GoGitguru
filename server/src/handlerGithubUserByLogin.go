@@ -15,7 +15,7 @@ type HandlerGithubUserByLoginResponse struct{}
 
 func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *http.Request) {
 	githubAccessToken := r.Header.Get("GH-Authorization")
-
+	fmt.Println("githubAccessToken: ", githubAccessToken)
 	if githubAccessToken == "" {
 		RespondWithError(w, http.StatusUnauthorized, "You must provide a GitHub access token.")
 		return
