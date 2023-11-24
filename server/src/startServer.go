@@ -36,6 +36,8 @@ func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
 
 	v1Router.Post("/dependency-history", apiCfg.HandlerDependencyHistory)
 
+	v1Router.Post("/dependency-repos", apiCfg.HandlerDependencyHistoryByDependency)
+
 	v1Router.Post("/status", apiCfg.HandlerStatus)
 
 	v1Router.Get("/get-next-repo-url", apiCfg.HandlerGetNextRepoUrl)

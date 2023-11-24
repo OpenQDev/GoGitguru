@@ -57,3 +57,7 @@ go test -bench=BenchmarkProcessRepo
 `psql "postgres://postgres:@localhost:5432/postgres?sslmode=disable"`
 
 `cd sql/schema && goose postgres "postgres://postgres:@localhost:5432/postgres?sslmode=disable" up && cd ~/Gitguru`
+
+## Goose on Linux
+
+Install linux as per goose docs instructions and then run `cd sql/schema && go get goose postgres "postgres://postgres:@localhost:5432/postgres?sslmode=disable" up && cd ~/Gitguru`

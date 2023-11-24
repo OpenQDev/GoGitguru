@@ -1,6 +1,11 @@
 -- name: GetGithubRepo :one
 SELECT * FROM github_repos WHERE full_name = $1;
 
+-- name: GetGithubReposByBatch :many
+SELECT * FROM github_repos
+ORDER BY github_rest_id
+LIMIT $1 OFFSET $2;
+
 -- name: CheckGithubRepoExists :one
 SELECT EXISTS(SELECT 1 FROM github_repos WHERE full_name = $1);
 
