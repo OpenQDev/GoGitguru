@@ -37,14 +37,17 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 				if err != nil {
 					return nil, nil, err
 				}
-				if strings.Contains(contents, dependencySearched) {
+
+				// Convert both contents and dependencySearched to lowercase for case-insensitive comparison
+				contentsLower := strings.ToLower(contents)
+				dependencySearchedLower := strings.ToLower(dependencySearched)
+
+				if strings.Contains(contentsLower, dependencySearchedLower) {
 					datesPresentCommits = append(datesPresentCommits, c.Committer.When.Unix())
-					break
 				} else {
 					if len(datesPresentCommits) != 0 {
 						datesRemovedCommits = append(datesRemovedCommits, c.Committer.When.Unix())
 					}
-					break
 				}
 			}
 		}
