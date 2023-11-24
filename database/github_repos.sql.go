@@ -68,8 +68,13 @@ ORDER BY github_rest_id
 LIMIT $1 OFFSET $2
 `
 
-func (q *Queries) GetGithubReposByBatch(ctx context.Context, limit int, offset int) ([]GithubRepo, error) {
-	rows, err := q.query(ctx, q.getGithubReposByBatchStmt, getGithubReposByBatch, limit, offset)
+type GetGithubReposByBatchParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) GetGithubReposByBatch(ctx context.Context, arg GetGithubReposByBatchParams) ([]GithubRepo, error) {
+	rows, err := q.query(ctx, q.getGithubReposByBatchStmt, getGithubReposByBatch, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

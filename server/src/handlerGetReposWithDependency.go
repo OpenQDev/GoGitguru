@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
-	"time"
 
+	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/OpenQDev/GoGitguru/util/gitutil"
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
 	"github.com/OpenQDev/GoGitguru/util/setup"
@@ -48,14 +48,52 @@ func (apiCfg *ApiConfig) HandlerDependencyHistoryByDependency(w http.ResponseWri
 
 	env := setup.ExtractAndVerifyEnvironment(".env")
 
-	database, _ := setup.GetDatbase(env.DbUrl)
-	repoUrlObjects, err := database.GetGithubReposByBatch(context.Background(), 9223372036854775807,
-		0,
-	)
+	db, _ := setup.GetDatbase(env.DbUrl)
+	take := int32(1000000)
+	repoUrlObjects, err := db.GetGithubReposByBatch(context.Background(), database.GetGithubReposByBatchParams{Limit: take, Offset: 0})
 	repoUrlsWithDependency := make([]string, 0)
+	repoIdsWithDependencyToBeIndexed := make([]int32, 0)
+	firstCommitDateValuesToBeIndexed := make([]int64, 0)
+	dateAddedValuesToBeIndexed := make([]int64, 0)
+	dateRemovedValuesToBeIndexed := make([]int64, 0)
 
+	type RepoDependencyData struct {
+		github_repo_id    int32
+		dependency_name   string
+		first_commit_date int64
+		date_added        int64
+		date_removed      int64
+	}
+
+	dependencyParams := database.InsertDependenciesParams{
+		DependencyName:  body.DependencySearched,
+		DependencyFiles: FilePaths,
+	}
+	res, err := db.InsertDependencies(context.Background(), dependencyParams)
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		fmt.Println("failed to insert dependency", err)
+		RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to insert dependency: %s", err))
+		return
+	}
+	fmt.Println("inserted dependency", res)
+
+	repoDependencyDataToBeIndexed := make([]RepoDependencyData, 0)
+	indexedReposWithDependency, err := checkIndexedReposWithDependency(db, body.DependencySearched, repoUrlObjects)
 	for _, repoUrlObject := range repoUrlObjects {
+		// if any of the indexed repos have the same id as repoUrlObject, then skip
+		hasIndexedRepoToDependency := getHasRepoToDependency(indexedReposWithDependency, repoUrlObject)
+		if hasIndexedRepoToDependency {
+			repoUrlsWithDependency = append(repoUrlsWithDependency, repoUrlObject.Url)
+			continue
+		}
+
+		if err != nil {
+			RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to check indexed repos with dependency: %s", err))
+			return
+		}
+
 		prefixPath := "./repos"
+
 		organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(repoUrlObject.Url)
 
 		organization = strings.ToLower(organization)
@@ -64,8 +102,7 @@ func (apiCfg *ApiConfig) HandlerDependencyHistoryByDependency(w http.ResponseWri
 		repoDir := filepath.Join(prefixPath, organization, repo)
 
 		if !gitutil.IsGitRepository(prefixPath, organization, repo) {
-			RespondWithError(w, http.StatusNotFound, fmt.Sprintf("directory %s is not a git repository", repoDir))
-			return
+			continue
 		}
 
 		allFilePaths, err := gitutil.GitDependencyFiles(repoDir, FilePaths)
@@ -79,36 +116,31 @@ func (apiCfg *ApiConfig) HandlerDependencyHistoryByDependency(w http.ResponseWri
 			RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error getting dependency history: %s", err))
 			return
 		}
-		// Convert Unix time to ISO strings
-		var lastDateAdded, lastDateRemoved int64 = 0, 0
-		var lastDateAddedIso, lastDateRemovedIso string
-		datesAddedISO := make([]string, len(datesAddedCommits))
-		for i, v := range datesAddedCommits {
-			if v >= lastDateAdded {
-				lastDateAdded = v
-				lastDateAddedIso = time.Unix(v, 0).Format(time.RFC3339)
-			}
-			datesAddedISO[i] = time.Unix(v, 0).Format(time.RFC3339)
-		}
+		hasNonIndexedRepoToDependency, lastDateAdded, lastDateRemoved := checkNonIndexedReposWithDependency(db, body.DependencySearched, repoUrlObjects, datesAddedCommits, datesRemovedCommits)
 
-		datesRemovedISO := make([]string, len(datesRemovedCommits))
-		for i, v := range datesRemovedCommits {
-			if v >= lastDateRemoved {
-				lastDateRemoved = v
-				lastDateRemovedIso = time.Unix(v, 0).Format(time.RFC3339)
-			}
-
-			datesRemovedISO[i] = time.Unix(v, 0).Format(time.RFC3339)
-		}
-		fmt.Println(lastDateAddedIso, lastDateRemovedIso)
-		hasDependency := lastDateAdded > lastDateRemoved || (lastDateAdded != 0 && lastDateRemoved == 0)
-		if hasDependency {
+		if hasNonIndexedRepoToDependency {
 			repoUrlsWithDependency = append(repoUrlsWithDependency, repoUrlObject.Url)
+			repoIdsWithDependencyToBeIndexed = append(repoIdsWithDependencyToBeIndexed, repoUrlObject.InternalID)
+			repoDependencyDataToBeIndexed = append(repoDependencyDataToBeIndexed, RepoDependencyData{
+				github_repo_id:    repoUrlObject.InternalID,
+				dependency_name:   body.DependencySearched,
+				first_commit_date: lastDateAdded,
+				date_added:        lastDateAdded,
+				date_removed:      lastDateRemoved,
+			})
+			firstCommitDateValuesToBeIndexed = append(firstCommitDateValuesToBeIndexed, lastDateAdded)
+			dateAddedValuesToBeIndexed = append(dateAddedValuesToBeIndexed, lastDateAdded)
+			dateRemovedValuesToBeIndexed = append(dateRemovedValuesToBeIndexed, lastDateRemoved)
+
 		}
 
 	}
 
-	fmt.Println("there")
+	err = BulkInsertRepoToDependencies(db, repoIdsWithDependencyToBeIndexed, body.DependencySearched, firstCommitDateValuesToBeIndexed, dateAddedValuesToBeIndexed, dateRemovedValuesToBeIndexed)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error getting dependency history: %s", err))
+		return
+	}
 	repoDependenciesResponse := DependencyHistoryByDependencyResponse{
 		RepoUrls: repoUrlsWithDependency,
 	}

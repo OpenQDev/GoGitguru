@@ -27,6 +27,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.bulkInsertCommitsStmt, err = db.PrepareContext(ctx, bulkInsertCommits); err != nil {
 		return nil, fmt.Errorf("error preparing query BulkInsertCommits: %w", err)
 	}
+	if q.bulkInsertRepoDependencyInfoStmt, err = db.PrepareContext(ctx, bulkInsertRepoDependencyInfo); err != nil {
+		return nil, fmt.Errorf("error preparing query BulkInsertRepoDependencyInfo: %w", err)
+	}
 	if q.checkGithubRepoExistsStmt, err = db.PrepareContext(ctx, checkGithubRepoExists); err != nil {
 		return nil, fmt.Errorf("error preparing query CheckGithubRepoExists: %w", err)
 	}
@@ -87,6 +90,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.insertCommitStmt, err = db.PrepareContext(ctx, insertCommit); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertCommit: %w", err)
 	}
+	if q.insertDependenciesStmt, err = db.PrepareContext(ctx, insertDependencies); err != nil {
+		return nil, fmt.Errorf("error preparing query InsertDependencies: %w", err)
+	}
 	if q.insertGithubRepoStmt, err = db.PrepareContext(ctx, insertGithubRepo); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertGithubRepo: %w", err)
 	}
@@ -102,6 +108,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.multiRowInsertCommitsStmt, err = db.PrepareContext(ctx, multiRowInsertCommits); err != nil {
 		return nil, fmt.Errorf("error preparing query MultiRowInsertCommits: %w", err)
 	}
+	if q.queryBulkRepoDependencyInfoStmt, err = db.PrepareContext(ctx, queryBulkRepoDependencyInfo); err != nil {
+		return nil, fmt.Errorf("error preparing query QueryBulkRepoDependencyInfo: %w", err)
+	}
 	if q.updateStatusAndUpdatedAtStmt, err = db.PrepareContext(ctx, updateStatusAndUpdatedAt); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateStatusAndUpdatedAt: %w", err)
 	}
@@ -113,6 +122,11 @@ func (q *Queries) Close() error {
 	if q.bulkInsertCommitsStmt != nil {
 		if cerr := q.bulkInsertCommitsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing bulkInsertCommitsStmt: %w", cerr)
+		}
+	}
+	if q.bulkInsertRepoDependencyInfoStmt != nil {
+		if cerr := q.bulkInsertRepoDependencyInfoStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing bulkInsertRepoDependencyInfoStmt: %w", cerr)
 		}
 	}
 	if q.checkGithubRepoExistsStmt != nil {
@@ -215,6 +229,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing insertCommitStmt: %w", cerr)
 		}
 	}
+	if q.insertDependenciesStmt != nil {
+		if cerr := q.insertDependenciesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing insertDependenciesStmt: %w", cerr)
+		}
+	}
 	if q.insertGithubRepoStmt != nil {
 		if cerr := q.insertGithubRepoStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing insertGithubRepoStmt: %w", cerr)
@@ -238,6 +257,11 @@ func (q *Queries) Close() error {
 	if q.multiRowInsertCommitsStmt != nil {
 		if cerr := q.multiRowInsertCommitsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing multiRowInsertCommitsStmt: %w", cerr)
+		}
+	}
+	if q.queryBulkRepoDependencyInfoStmt != nil {
+		if cerr := q.queryBulkRepoDependencyInfoStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing queryBulkRepoDependencyInfoStmt: %w", cerr)
 		}
 	}
 	if q.updateStatusAndUpdatedAtStmt != nil {
@@ -285,6 +309,7 @@ type Queries struct {
 	db                                         DBTX
 	tx                                         *sql.Tx
 	bulkInsertCommitsStmt                      *sql.Stmt
+	bulkInsertRepoDependencyInfoStmt           *sql.Stmt
 	checkGithubRepoExistsStmt                  *sql.Stmt
 	checkGithubUserExistsStmt                  *sql.Stmt
 	checkGithubUserRestIdAuthorEmailExistsStmt *sql.Stmt
@@ -305,21 +330,24 @@ type Queries struct {
 	getReposStatusStmt                         *sql.Stmt
 	getUserCommitsForReposStmt                 *sql.Stmt
 	insertCommitStmt                           *sql.Stmt
+	insertDependenciesStmt                     *sql.Stmt
 	insertGithubRepoStmt                       *sql.Stmt
 	insertRepoURLStmt                          *sql.Stmt
 	insertRestIdToEmailStmt                    *sql.Stmt
 	insertUserStmt                             *sql.Stmt
 	multiRowInsertCommitsStmt                  *sql.Stmt
+	queryBulkRepoDependencyInfoStmt            *sql.Stmt
 	updateStatusAndUpdatedAtStmt               *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                        tx,
-		tx:                        tx,
-		bulkInsertCommitsStmt:     q.bulkInsertCommitsStmt,
-		checkGithubRepoExistsStmt: q.checkGithubRepoExistsStmt,
-		checkGithubUserExistsStmt: q.checkGithubUserExistsStmt,
+		db:                               tx,
+		tx:                               tx,
+		bulkInsertCommitsStmt:            q.bulkInsertCommitsStmt,
+		bulkInsertRepoDependencyInfoStmt: q.bulkInsertRepoDependencyInfoStmt,
+		checkGithubRepoExistsStmt:        q.checkGithubRepoExistsStmt,
+		checkGithubUserExistsStmt:        q.checkGithubUserExistsStmt,
 		checkGithubUserRestIdAuthorEmailExistsStmt: q.checkGithubUserRestIdAuthorEmailExistsStmt,
 		deleteRepoURLStmt:                          q.deleteRepoURLStmt,
 		getAllUserCommitsStmt:                      q.getAllUserCommitsStmt,
@@ -338,11 +366,13 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getReposStatusStmt:                         q.getReposStatusStmt,
 		getUserCommitsForReposStmt:                 q.getUserCommitsForReposStmt,
 		insertCommitStmt:                           q.insertCommitStmt,
+		insertDependenciesStmt:                     q.insertDependenciesStmt,
 		insertGithubRepoStmt:                       q.insertGithubRepoStmt,
 		insertRepoURLStmt:                          q.insertRepoURLStmt,
 		insertRestIdToEmailStmt:                    q.insertRestIdToEmailStmt,
 		insertUserStmt:                             q.insertUserStmt,
 		multiRowInsertCommitsStmt:                  q.multiRowInsertCommitsStmt,
+		queryBulkRepoDependencyInfoStmt:            q.queryBulkRepoDependencyInfoStmt,
 		updateStatusAndUpdatedAtStmt:               q.updateStatusAndUpdatedAtStmt,
 	}
 }

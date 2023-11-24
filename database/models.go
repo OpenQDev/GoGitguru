@@ -71,6 +71,21 @@ type Commit struct {
 	RepoUrl       sql.NullString `json:"repo_url"`
 }
 
+type DependenciesToRepo struct {
+	InternalID           int32          `json:"internal_id"`
+	GithubRepoInternalID sql.NullInt32  `json:"github_repo_internal_id"`
+	DependencyName       sql.NullString `json:"dependency_name"`
+	FirstCommitDate      sql.NullInt32  `json:"first_commit_date"`
+	DateAdded            sql.NullInt32  `json:"date_added"`
+	DateRemoved          sql.NullInt32  `json:"date_removed"`
+}
+
+type Dependency struct {
+	InternalID      int32    `json:"internal_id"`
+	DependencyName  string   `json:"dependency_name"`
+	DependencyFiles []string `json:"dependency_files"`
+}
+
 type GithubRepo struct {
 	InternalID      int32          `json:"internal_id"`
 	GithubRestID    int32          `json:"github_rest_id"`
