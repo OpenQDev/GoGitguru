@@ -8,7 +8,7 @@ import (
 )
 
 func PrepareServerSingleton(dbUrl string) (*database.Queries, ApiConfig) {
-	database, err := setup.GetDatbase(dbUrl)
+	database, _, err := setup.GetDatbase(dbUrl)
 
 	if err != nil {
 		logger.LogError("error getting database: %s", err)

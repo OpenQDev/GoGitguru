@@ -11,7 +11,7 @@ import (
 func main() {
 	env := setup.ExtractAndVerifyEnvironment(".env")
 
-	database, _ := setup.GetDatbase(env.DbUrl)
+	database, _, _ := setup.GetDatbase(env.DbUrl)
 
 	logger.SetDebugMode(env.Debug)
 

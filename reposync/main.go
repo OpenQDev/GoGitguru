@@ -11,7 +11,8 @@ import (
 func main() {
 	env := setup.ExtractAndVerifyEnvironment(".env")
 
-	database, _ := setup.GetDatbase(env.DbUrl)
+	database, conn, _ := setup.GetDatbase(env.DbUrl)
+	defer conn.Close()
 
 	logger.SetDebugMode(env.Debug)
 
@@ -27,14 +28,14 @@ func main() {
 			for i := 0; i < MAX_CONCURRENT_INSTANCES; i++ {
 				sem <- true // block if there are already 2 goroutines running
 				go func() {
-					reposync.StartSyncingCommits(database, "repos", env.GitguruUrl)
+					reposync.StartSyncingCommits(database, conn, "repos", env.GitguruUrl)
 					<-sem // release the semaphore when goroutine finishes
 				}()
 			}
 			time.Sleep(time.Duration(env.RepoSyncInterval) * time.Second)
 		}
 	} else {
-		reposync.StartSyncingCommits(database, "repos", env.GitguruUrl)
+		reposync.StartSyncingCommits(database, conn, "repos", env.GitguruUrl)
 	}
 
 	logger.LogBlue("repo sync completed!")

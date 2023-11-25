@@ -2,9 +2,7 @@ package reposync
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
+	"database/sql"
 	"os"
 	"path/filepath"
 	"time"
@@ -21,26 +19,18 @@ type GetDueUrlResponse struct {
 
 func StartSyncingCommits(
 	db *database.Queries,
+	conn *sql.DB,
 	prefixPath string,
 	gitguruUrl string,
 ) {
 
 	for {
 		logger.LogBlue("fetching next repo to sync...")
-		url := fmt.Sprintf("%s/get-next-repo-url", gitguruUrl)
-		resp, err := http.Get(url)
-		if err != nil {
-			logger.LogFatalRedAndExit("error getting repo url: %s ", err)
-		}
-		defer resp.Body.Close()
 
-		var getDueUrlResponse GetDueUrlResponse
-		err = json.NewDecoder(resp.Body).Decode(&getDueUrlResponse)
+		repoUrl, err := GetDueURL(conn)
 		if err != nil {
-			logger.LogFatalRedAndExit("error decoding repo url: %s ", err)
+			logger.LogError("error fetching due repo url", err)
 		}
-
-		repoUrl := getDueUrlResponse.RepoUrl
 
 		if repoUrl == "" {
 			logger.LogBlue("no new repo urls to sync. exiting...")

@@ -1,35 +1,10 @@
-package server
+package reposync
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
-	"net/http"
-
-	"github.com/OpenQDev/GoGitguru/util/logger"
-	"github.com/OpenQDev/GoGitguru/util/setup"
 )
-
-type HandlerGetNextRepoUrlResponse struct {
-	RepoUrl string `json:"repo_url"`
-}
-
-func (apiCfg *ApiConfig) HandlerGetNextRepoUrl(w http.ResponseWriter, r *http.Request) {
-	var response HandlerGetNextRepoUrlResponse
-	_, db, _ := setup.GetDatbase(apiCfg.DBURL)
-	defer db.Close()
-
-	repoUrl, err := GetDueURL(db)
-	if err != nil {
-		logger.LogError("errror: %s", err)
-	}
-
-	response = HandlerGetNextRepoUrlResponse{
-		RepoUrl: repoUrl,
-	}
-
-	RespondWithJSON(w, 200, response)
-}
 
 func GetDueURL(db *sql.DB) (string, error) {
 	var url string
