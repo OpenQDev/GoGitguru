@@ -21,7 +21,7 @@ func main() {
 	// PRODUCTION: This runs as a CronJob on Kubernetes. Therefore, it's interval is set by the CRON_STRING parameter
 	// DEVELOPMENT: To mimic the interval, here we check for the REPOSYNC_INTERVAL environment variable to periodically re-run StartSyncingCommits
 
-	const MAX_CONCURRENT_INSTANCES = 2
+	const MAX_CONCURRENT_INSTANCES = 5
 	if env.RepoSyncInterval != 0 {
 		sem := make(chan bool, MAX_CONCURRENT_INSTANCES) // create a buffered channel with capacity 2
 		for {
