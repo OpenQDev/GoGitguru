@@ -28,8 +28,6 @@ FROM repo_urls
 WHERE url = ANY($1::text[])
 ORDER BY status, updated_at DESC;
 
-psql "postgres://doadmin:AVNS_Hwbc_bvEIXrp3n90tIy@drm-postgres-do-user-11025703-0.b.db.ondigitalocean.com:25060/gitguru" -c "\copy (SELECT DISTINCT(author_email) FROM commits WHERE author_email NOT IN (SELECT email FROM github_user_rest_id_author_emails)) TO './nixos_emails.txt'";
-
 -- name: GetAndUpdateRepoURL :one
 BEGIN;
 

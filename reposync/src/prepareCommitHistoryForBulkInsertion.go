@@ -65,6 +65,8 @@ func PrepareCommitHistoryForBulkInsertion(numberOfCommits int, log object.Commit
 		// 	totalFilesChanged++
 		// }
 
+		commit.Author.Email = strings.Trim(commit.Author.Email, "\"")
+
 		commitHash[commitCount] = commit.Hash.String()
 		author[commitCount] = commit.Author.Name
 		authorEmail[commitCount] = commit.Author.Email
