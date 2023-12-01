@@ -5,3 +5,11 @@ CREATE INDEX idx_full_name ON github_repos (full_name);
 CREATE INDEX idx_url ON repo_urls (url);
 CREATE INDEX idx_rest_id ON github_user_rest_id_author_emails (rest_id);
 CREATE INDEX idx_login ON github_users (login);
+
+-- +goose Down
+
+DROP INDEX idx_repo_url ON commits;
+DROP INDEX idx_full_name ON github_repos;
+DROP INDEX idx_url ON repo_urls;
+DROP INDEX idx_rest_id ON github_user_rest_id_author_emails;
+DROP INDEX idx_login ON github_users;
