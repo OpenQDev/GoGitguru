@@ -70,16 +70,19 @@ func (q *Queries) GetRepoURLs(ctx context.Context) ([]RepoUrl, error) {
 
 const getReposStatus = `-- name: GetReposStatus :many
 SELECT
-    url,
-    status,
-    (SELECT COUNT(DISTINCT(author_email))
-     FROM commits
-     WHERE author_email NOT IN (SELECT email FROM github_user_rest_id_author_emails)
-     AND repo_url = url
-    ) AS pending_authors
-FROM repo_urls
-WHERE url = ANY($1::text[])
-ORDER BY status, updated_at DESC
+    r.url,
+    r.status,
+    COUNT(DISTINCT c.author_email) FILTER (WHERE g.email IS NULL) AS pending_authors
+FROM
+    repo_urls r
+LEFT JOIN commits c ON c.repo_url = r.url
+LEFT JOIN github_user_rest_id_author_emails g ON c.author_email = g.email
+WHERE
+    r.url = ANY($1::text[])
+GROUP BY
+    r.url, r.status
+ORDER BY
+    r.status, r.updated_at DESC
 `
 
 type GetReposStatusRow struct {
