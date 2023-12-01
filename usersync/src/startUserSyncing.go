@@ -82,6 +82,8 @@ func StartSyncingUser(
 				err = insertGithubUser(author, db)
 				if err != nil {
 					logger.LogError("error occured while inserting author: %s", err)
+				} else {
+					logger.LogGreen("user %s inserted!", author.Name)
 				}
 			}
 
