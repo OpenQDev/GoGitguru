@@ -442,20 +442,15 @@ func (q *Queries) GetLatestCommitterDate(ctx context.Context, dollar_1 string) (
 }
 
 const getLatestUncheckedCommitPerAuthor = `-- name: GetLatestUncheckedCommitPerAuthor :many
-WITH LatestUncheckedCommitPerAuthor AS (
-    SELECT DISTINCT ON (author_email)
-    commit_hash,
-    author_email,
-    repo_url
-    FROM commits
-    WHERE author_email NOT IN (
-        SELECT email FROM github_user_rest_id_author_emails
-    )
-    ORDER BY author_email, author_date DESC
-)
-SELECT commit_hash, author_email, repo_url
-FROM LatestUncheckedCommitPerAuthor
-ORDER BY repo_url DESC
+SELECT DISTINCT ON (c.author_email)
+c.commit_hash,
+c.author_email,
+c.repo_url
+FROM commits c
+LEFT JOIN github_user_rest_id_author_emails g
+ON c.author_email = g.email
+WHERE g.email IS NULL
+ORDER BY c.author_email, c.author_date DESC
 `
 
 type GetLatestUncheckedCommitPerAuthorRow struct {
