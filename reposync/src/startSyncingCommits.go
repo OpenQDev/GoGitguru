@@ -3,8 +3,6 @@ package reposync
 import (
 	"context"
 	"database/sql"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
@@ -99,18 +97,12 @@ func StartSyncingCommits(
 			if err != nil {
 				logger.LogError("error cloning repo %s/%s: %s", organization, repo, err)
 
-				logger.LogError("deleting repo url %s/%s since it does not exist, is private, too large, or is empty", organization, repo)
-				err := db.DeleteRepoURL(context.Background(), repoUrl)
+				err = db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
+					Status: database.RepoStatusFailed,
+					Url:    repoUrl,
+				})
 				if err != nil {
-					logger.LogError("error deleting repo url %s: %s", repoUrl, err)
-				}
-				logger.LogError("repo url %s/%s deleted!", organization, repo)
-
-				// Remove the repo from the filesystem
-				repoPath := filepath.Join(prefixPath, organization, repo)
-				err = os.RemoveAll(repoPath)
-				if err != nil {
-					logger.LogError("error removing repo from filesystem %s: %s", repoPath, err)
+					logger.LogError("error setting repo status to failed", err)
 				}
 
 				continue
