@@ -22,7 +22,6 @@ func StartSyncingUser(
 	githubGraphQLUrl string,
 ) {
 	newCommitAuthorsRaw, err := getNewCommitAuthors(db)
-	logger.LogBlue("newCommitAuthorsRaw: %v", newCommitAuthorsRaw)
 
 	if err != nil {
 		logger.LogFatalRedAndExit("error getting new commit authors to process: %s", err)
@@ -46,8 +45,6 @@ func StartSyncingUser(
 
 	// Get info for each batch
 	for _, repoToAuthorBatch := range repoToAuthorBatches {
-		logger.LogBlue("repoToAuthorBatch: %v", repoToAuthorBatch)
-		logger.LogGreenDebug("%s", repoToAuthorBatch.RepoURL)
 
 		githubGraphQLCommitAuthorsMap, err := identifyRepoAuthorsBatch(repoToAuthorBatch.RepoURL, repoToAuthorBatch.AuthorCommitTuples, ghAccessToken, githubGraphQLUrl)
 		if err != nil {
