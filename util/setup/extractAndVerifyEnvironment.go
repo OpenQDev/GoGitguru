@@ -14,6 +14,7 @@ type EnvConfig struct {
 	OriginUrl        string
 	Debug            bool
 	GhAccessToken    string
+	GhAccessTokens   string
 	TargetLiveGithub bool
 	RepoSyncInterval int
 	UserSyncInterval int
@@ -31,6 +32,7 @@ func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
 		OriginUrl:        getEnvVar("ORIGIN_URL", "string").(string),
 		Debug:            getEnvVar("DEBUG_MODE", "bool").(bool),
 		GhAccessToken:    getEnvVar("GH_ACCESS_TOKEN", "string").(string),
+		GhAccessTokens:   getEnvVar("GH_ACCESS_TOKENS", "string").(string),
 		TargetLiveGithub: getEnvVar("TARGET_LIVE_GITHUB", "bool").(bool),
 		RepoSyncInterval: getEnvVar("REPOSYNC_INTERVAL", "int").(int),
 		UserSyncInterval: getEnvVar("USERSYNC_INTERVAL", "int").(int),
