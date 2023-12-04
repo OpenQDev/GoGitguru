@@ -8,8 +8,8 @@ CREATE INDEX idx_login ON github_users (login);
 
 -- +goose Down
 
-DROP INDEX idx_repo_url ON commits;
-DROP INDEX idx_full_name ON github_repos;
-DROP INDEX idx_url ON repo_urls;
-DROP INDEX idx_rest_id ON github_user_rest_id_author_emails;
-DROP INDEX idx_login ON github_users;
+DROP INDEX IF EXISTS idx_repo_url;
+DROP INDEX IF EXISTS idx_full_name;
+DROP INDEX IF EXISTS idx_url;
+DROP INDEX IF EXISTS idx_rest_id;
+DROP INDEX IF EXISTS idx_login;

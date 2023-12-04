@@ -5,5 +5,5 @@ CREATE INDEX idx_email ON github_user_rest_id_author_emails (email);
 
 -- +goose Down
 
-DROP INDEX idx_author_email ON commits;
-DROP INDEX idx_email ON github_user_rest_id_author_emails;
+DROP INDEX IF EXISTS idx_author_email;
+DROP INDEX IF EXISTS idx_email;
