@@ -31,7 +31,7 @@ func (apiCfg *ApiConfig) HandlerStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(body.RepoUrls) == 0 {
-		RespondWithError(w, http.StatusBadRequest, "repo_urls cannot be empty")
+		RespondWithJSON(w, 202, response)
 		return
 	}
 
