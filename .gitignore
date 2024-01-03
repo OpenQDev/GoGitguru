@@ -6,3 +6,4 @@ main
 **/repos/
 data/
 output.txt
+.DS_Store
