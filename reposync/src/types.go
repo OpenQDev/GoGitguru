@@ -11,3 +11,16 @@ type GitLog struct {
 	Insertions    int64
 	Deletions     int64
 }
+
+type CommitObject struct {
+	CommitHash    []string
+	Author        []string
+	AuthorEmail   []string
+	AuthorDate    []int64
+	CommitterDate []int64
+	Message       []string
+	Insertions    []int32
+	Deletions     []int32
+	FilesChanged  []int32
+	RepoUrls      []string
+}

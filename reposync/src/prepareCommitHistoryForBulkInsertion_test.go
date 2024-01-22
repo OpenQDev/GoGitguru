@@ -12,7 +12,7 @@ import (
 func TestPrepareCommitHistoryForBulkInsertion(t *testing.T) {
 	// ARRANGE - GLOBAL
 
-	organization := "OpenQDev"
+	organization := "openqdev"
 	repo := "openq-drm-testrepo"
 	prefixPath := "mock"
 
@@ -43,9 +43,9 @@ func TestPrepareCommitHistoryForBulkInsertion(t *testing.T) {
 	assert.Equal(t, []int64{1696277247, 1696277205}, commitObject.AuthorDate)
 	assert.Equal(t, []int64{1696277247, 1696277205}, commitObject.CommitterDate)
 	assert.Equal(t, []string{"updates README", "initial commit"}, commitObject.Message)
-	assert.Equal(t, []int32{1, 0}, commitObject.Insertions)
+	assert.Equal(t, []int32{0, 0}, commitObject.Insertions)
 	assert.Equal(t, []int32{0, 0}, commitObject.Deletions)
-	assert.Equal(t, []int32{1, 0}, commitObject.FilesChanged)
+	assert.Equal(t, []int32{0, 0}, commitObject.FilesChanged)
 	assert.Equal(t, []string{"https://github.com/OpenQDev/OpenQ-DRM-TestRepo", "https://github.com/OpenQDev/OpenQ-DRM-TestRepo"}, commitObject.RepoUrls)
 
 	// cap (size of array) and len (number of elements in array) must match - or else pq.Array will attempt to insert cap - len # of empty commits

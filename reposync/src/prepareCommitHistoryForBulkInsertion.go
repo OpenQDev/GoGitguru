@@ -9,19 +9,6 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
-type CommitObject struct {
-	CommitHash    []string
-	Author        []string
-	AuthorEmail   []string
-	AuthorDate    []int64
-	CommitterDate []int64
-	Message       []string
-	Insertions    []int32
-	Deletions     []int32
-	FilesChanged  []int32
-	RepoUrls      []string
-}
-
 func PrepareCommitHistoryForBulkInsertion(numberOfCommits int, log object.CommitIter, params GitLogParams) (CommitObject, error) {
 	var (
 		commitHash    = make([]string, numberOfCommits)
