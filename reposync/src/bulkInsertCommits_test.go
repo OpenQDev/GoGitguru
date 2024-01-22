@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OpenQDev/GoGitguru/database"
+	"github.com/OpenQDev/GoGitguru/util/setup"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/lib/pq"
@@ -12,15 +12,8 @@ import (
 )
 
 func TestBulkInsertCommits(t *testing.T) {
-	// Create mock database connection
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-	defer db.Close()
-
 	// Create new Queries instance with mock database
-	q := database.New(db)
+	mock, q := setup.GetMockDatabase()
 
 	// Define test data
 	commitCount := 2
@@ -50,7 +43,8 @@ func TestBulkInsertCommits(t *testing.T) {
 	}
 
 	// Define expected SQL statement
-	// go-sqlmock CANNOT accept slices as arguments. Must convert to pq.Array first as is done in databse.BulkInsertCommits
+	// go-sqlmock CANNOT accept slices as arguments.
+	// Must convert to pq.Array first as is done in databse.BulkInsertCommits
 	mock.ExpectExec("^-- name: BulkInsertCommits :exec.*").WithArgs(
 		pq.Array(commitHash),
 		pq.Array(author),
@@ -65,7 +59,7 @@ func TestBulkInsertCommits(t *testing.T) {
 	).WillReturnResult(sqlmock.NewResult(1, 1))
 
 	// Call function
-	err = BulkInsertCommits(q, commitHash, author, authorEmail, authorDate, committerDate, message, insertions, deletions, filesChanged, repoUrls)
+	err := BulkInsertCommits(q, commitHash, author, authorEmail, authorDate, committerDate, message, insertions, deletions, filesChanged, repoUrls)
 
 	// Assert expectations
 	assert.NoError(t, err)
