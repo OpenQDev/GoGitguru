@@ -13,7 +13,11 @@ import (
 func main() {
 	env := setup.ExtractAndVerifyEnvironment(".env")
 
-	database, _, _ := setup.GetDatbase(env.DbUrl)
+	database, conn, err := setup.GetDatbase(env.DbUrl)
+	if err != nil {
+		logger.LogFatalRedAndExit("unable to connect to database: %s", err)
+	}
+	defer conn.Close()
 
 	logger.SetDebugMode(env.Debug)
 
