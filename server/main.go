@@ -9,7 +9,9 @@ import (
 func main() {
 	env := setup.ExtractAndVerifyEnvironment(".env")
 
-	_, apiCfg := server.PrepareServerSingleton(env.DbUrl)
+	conn, apiCfg := server.PrepareServerSingleton(env.DbUrl)
+	defer conn.Close()
+
 	logger.SetDebugMode(env.Debug)
 	server.StartServer(apiCfg, env.PortString, env.OriginUrl)
 }

@@ -1,14 +1,14 @@
 package server
 
 import (
-	"github.com/OpenQDev/GoGitguru/database"
+	"database/sql"
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/setup"
 )
 
-func PrepareServerSingleton(dbUrl string) (*database.Queries, ApiConfig) {
-	database, _, err := setup.GetDatbase(dbUrl)
+func PrepareServerSingleton(dbUrl string) (*sql.DB, ApiConfig) {
+	database, conn, err := setup.GetDatbase(dbUrl)
 
 	if err != nil {
 		logger.LogError("error getting database: %s", err)
@@ -18,5 +18,5 @@ func PrepareServerSingleton(dbUrl string) (*database.Queries, ApiConfig) {
 	if err != nil {
 		logger.LogFatalRedAndExit("can't connect to DB: %s", err)
 	}
-	return database, apiCfg
+	return conn, apiCfg
 }
