@@ -15,7 +15,7 @@ import (
 
 func TestHandlerHealth(t *testing.T) {
 	// ARRANGE - GLOBAL
-	env := setup.ExtractAndVerifyEnvironment(".env")
+	env := setup.ExtractAndVerifyEnvironment("../../.env")
 	debugMode := env.Debug
 
 	logger.SetDebugMode(debugMode)

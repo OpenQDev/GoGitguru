@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	env := setup.ExtractAndVerifyEnvironment(".env")
+	env := setup.ExtractAndVerifyEnvironment("../.env")
 
 	database, conn, _ := setup.GetDatbase(env.DbUrl)
 	defer conn.Close()

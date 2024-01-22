@@ -43,7 +43,7 @@ func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
 func getEnvVar(name string, expectedType string) interface{} {
 	raw := os.Getenv(name)
 	if raw == "" {
-		logger.LogFatalRedAndExit(name + " is not found in the environment")
+		logger.LogFatalRedAndExit("%s is not found in the environment", name)
 	}
 
 	switch expectedType {

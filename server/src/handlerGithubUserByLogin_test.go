@@ -20,7 +20,7 @@ import (
 
 func TestHandlerGithubUserByLogin(t *testing.T) {
 	// ARRANGE - GLOBAL
-	env := setup.ExtractAndVerifyEnvironment(".env")
+	env := setup.ExtractAndVerifyEnvironment("../../.env")
 	debugMode := env.Debug
 	ghAccessToken := env.GhAccessToken
 	targetLiveGithub := env.TargetLiveGithub
