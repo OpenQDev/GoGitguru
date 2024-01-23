@@ -23,11 +23,12 @@ func TestStoreGitLogsForRepo(t *testing.T) {
 	tests := StoreGitLogsForRepoTestCases()
 
 	for _, tt := range tests {
-		testhelpers.CheckTestSkip(t, testhelpers.Targets(
-			testhelpers.RUN_ALL_TESTS,
-		), tt.name)
-
 		t.Run(tt.name, func(t *testing.T) {
+			testhelpers.CheckTestSkip(t, testhelpers.Targets(
+				testhelpers.RUN_ALL_TESTS,
+			), tt.name)
+
+			// BEFORE EACH
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				logger.LogFatalRedAndExit("can't create mock DB: %s", err)

@@ -19,19 +19,19 @@ func TestProcessRepo(t *testing.T) {
 	tests := ProcessRepoTestCases()
 
 	for _, tt := range tests {
-		testhelpers.CheckTestSkip(t, testhelpers.Targets(
-			testhelpers.RUN_ALL_TESTS,
-		), tt.name)
-
-		// BEFORE EACH
-		db, mock, err := sqlmock.New()
-		if err != nil {
-			t.Errorf("can't create mock DB: %s", err)
-		}
-
-		queries := database.New(db)
-
 		t.Run(tt.name, func(t *testing.T) {
+			testhelpers.CheckTestSkip(t, testhelpers.Targets(
+				testhelpers.RUN_ALL_TESTS,
+			), tt.name)
+
+			// BEFORE EACH
+			db, mock, err := sqlmock.New()
+			if err != nil {
+				t.Errorf("can't create mock DB: %s", err)
+			}
+
+			queries := database.New(db)
+
 			// ARRANGE - LOCAL
 			tt.setupMock(mock, tt.gitLogs, tt.repoUrl)
 
