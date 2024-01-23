@@ -104,7 +104,6 @@ func getAllUserCommits() HandlerGithubUserCommitsTestCase {
 			mock.ExpectQuery("^-- name: GetAllUserCommits :many.*").
 				WithArgs(sinceUnix, untilUnix, login).
 				WillReturnRows(row1, row2)
-
 		},
 	}
 }

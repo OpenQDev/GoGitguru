@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -25,19 +26,19 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 
 	logger.SetDebugMode(debugMode)
 
-	mock, queries := setup.GetMockDatabase()
-
-	apiCfg := ApiConfig{
-		DB: queries,
-	}
-
 	tests := HandlerGithubUserCommitsTestCases()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				testhelpers.RUN_ALL_TESTS,
+				"GET_ALL_USER_COMMITS",
 			), tt.name)
+
+			mock, queries := setup.GetMockDatabase()
+
+			apiCfg := ApiConfig{
+				DB: queries,
+			}
 
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
@@ -66,10 +67,11 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 			}
 
 			// ARRANGE - EXPECT
+			fmt.Println("rr.Body", rr.Body)
 			var actualRepoCommitsReturn []CommitWithAuthorInfo
 			err := marshaller.ReaderToType(rr.Body, &actualRepoCommitsReturn)
 			if err != nil {
-				t.Errorf("Failed to decode rr.Body into []RestRepo: %s", err)
+				t.Errorf("Failed to decode rr.Body into []CommitWithAuthorInfo: %s", err)
 				return
 			}
 
