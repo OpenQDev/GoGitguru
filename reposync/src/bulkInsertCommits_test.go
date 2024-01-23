@@ -12,10 +12,10 @@ import (
 )
 
 func TestBulkInsertCommits(t *testing.T) {
-	// Create new Queries instance with mock database
+	// BEFORE ALL
 	mock, q := setup.GetMockDatabase()
 
-	// Define test data
+	// ARRANGE
 	commitCount := 2
 	commitHash := make([]string, commitCount)
 	author := make([]string, commitCount)
@@ -28,7 +28,6 @@ func TestBulkInsertCommits(t *testing.T) {
 	filesChanged := make([]int32, commitCount)
 	repoUrls := make([]string, commitCount)
 
-	// Fill the arrays
 	for i := 0; i < commitCount; i++ {
 		commitHash[i] = fmt.Sprintf("hash%d", i+1)
 		author[i] = fmt.Sprintf("author%d", i+1)
@@ -58,10 +57,10 @@ func TestBulkInsertCommits(t *testing.T) {
 		pq.Array(repoUrls),
 	).WillReturnResult(sqlmock.NewResult(1, 1))
 
-	// Call function
+	// ACT
 	err := BulkInsertCommits(q, commitHash, author, authorEmail, authorDate, committerDate, message, insertions, deletions, filesChanged, repoUrls)
 
-	// Assert expectations
+	// ASSERT
 	assert.NoError(t, err)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }

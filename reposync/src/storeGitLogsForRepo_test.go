@@ -19,13 +19,6 @@ func TestStoreGitLogsForRepo(t *testing.T) {
 	prefixPath := "mock"
 	repo := "OpenQ-DRM-TestRepo"
 
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		logger.LogFatalRedAndExit("can't create mock DB: %s", err)
-	}
-
-	queries := database.New(db)
-
 	// ARRANGE - TESTS
 	tests := StoreGitLogsForRepoTestCases()
 
@@ -35,6 +28,13 @@ func TestStoreGitLogsForRepo(t *testing.T) {
 		), tt.name)
 
 		t.Run(tt.name, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			if err != nil {
+				logger.LogFatalRedAndExit("can't create mock DB: %s", err)
+			}
+
+			queries := database.New(db)
+
 			tt.setupMock(mock, tt.gitLogs, tt.repoUrl)
 
 			commitCount, err := StoreGitLogsForRepo(GitLogParams{prefixPath, organization, repo, tt.repoUrl, tt.fromCommitDate, queries})

@@ -11,7 +11,6 @@ import (
 
 func TestPrepareCommitHistoryForBulkInsertion(t *testing.T) {
 	// ARRANGE - GLOBAL
-
 	organization := "openqdev"
 	repo := "openq-drm-testrepo"
 	prefixPath := "mock"

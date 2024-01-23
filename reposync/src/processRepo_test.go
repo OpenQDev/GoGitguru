@@ -12,14 +12,7 @@ import (
 )
 
 func TestProcessRepo(t *testing.T) {
-	// ARRANGE - GLOBAL
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Errorf("can't create mock DB: %s", err)
-	}
-
-	queries := database.New(db)
-
+	// BEFORE ALL
 	prefixPath := "mock"
 
 	// ARRANGE - TESTS
@@ -30,9 +23,16 @@ func TestProcessRepo(t *testing.T) {
 			testhelpers.RUN_ALL_TESTS,
 		), tt.name)
 
+		// BEFORE EACH
+		db, mock, err := sqlmock.New()
+		if err != nil {
+			t.Errorf("can't create mock DB: %s", err)
+		}
+
+		queries := database.New(db)
+
 		t.Run(tt.name, func(t *testing.T) {
 			// ARRANGE - LOCAL
-
 			tt.setupMock(mock, tt.gitLogs, tt.repoUrl)
 
 			// ACT
