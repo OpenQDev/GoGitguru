@@ -48,8 +48,8 @@ func TestHandlerFirstCommit(t *testing.T) {
 
 			rr := httptest.NewRecorder()
 
-			bodyBytes, _ := json.Marshal(tt.requestBody)
-			req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+			reqBody, _ := json.Marshal(tt.requestBody)
+			req.Body = io.NopCloser(bytes.NewReader(reqBody))
 
 			tt.setupMock(mock)
 
@@ -63,10 +63,10 @@ func TestHandlerFirstCommit(t *testing.T) {
 			}
 
 			// ARRANGE - EXPECT
-			var actualRepoCommitsReturn []CommitWithAuthorInfo
+			var actualRepoCommitsReturn HandlerFirstCommitResponse
 			err := marshaller.ReaderToType(rr.Body, &actualRepoCommitsReturn)
 			if err != nil {
-				t.Errorf("Failed to decode rr.Body into []RestRepo: %s", err)
+				t.Errorf("Failed to decode rr.Body into HandlerFirstCommitResponse: %s", err)
 				return
 			}
 
