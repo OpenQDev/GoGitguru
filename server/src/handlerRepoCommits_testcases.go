@@ -23,6 +23,7 @@ type HandlerRepoCommitsTestCase struct {
 }
 
 func foo() HandlerRepoCommitsTestCase {
+	const login = "FlacoJones"
 	const UNAUTHORIZED = "UNAUTHORIZED"
 	return HandlerRepoCommitsTestCase{
 		name:               UNAUTHORIZED,
@@ -37,6 +38,7 @@ func foo() HandlerRepoCommitsTestCase {
 }
 
 func getAllRepoCommits() HandlerRepoCommitsTestCase {
+	const login = "FlacoJones"
 	const GET_ALL_REPO_COMMITS = "GET_ALL_REPO_COMMITS"
 
 	since := time.Now().AddDate(0, 0, -7).Format(time.RFC3339)

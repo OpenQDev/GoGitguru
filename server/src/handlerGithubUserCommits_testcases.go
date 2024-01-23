@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
+	"github.com/lib/pq"
 
 	"github.com/DATA-DOG/go-sqlmock"
 )
@@ -22,9 +23,9 @@ type HandlerGithubUserCommitsTestCase struct {
 	setupMock          func(mock sqlmock.Sqlmock)
 }
 
-const login = "DRM-Test-Organization"
-
 func notAuthorized() HandlerGithubUserCommitsTestCase {
+	const login = "FlacoJones"
+
 	const UNAUTHORIZED = "UNAUTHORIZED"
 
 	requestBody := HandlerGithubUserCommitsRequest{
@@ -46,12 +47,14 @@ func notAuthorized() HandlerGithubUserCommitsTestCase {
 }
 
 func getAllUserCommits() HandlerGithubUserCommitsTestCase {
+	const login = "FlacoJones"
+
 	const GET_ALL_USER_COMMITS = "GET_ALL_USER_COMMITS"
 	since := time.Now().AddDate(0, 0, -7).Format(time.RFC3339)
 	until := time.Now().AddDate(0, 0, 0).Format(time.RFC3339)
 
 	requestBody := HandlerGithubUserCommitsRequest{
-		RepoUrls: []string{},
+		RepoUrls: []string{"https://github.com/openqdev/openq-workflows"},
 		Since:    since,
 		Until:    until,
 	}
@@ -100,8 +103,9 @@ func getAllUserCommits() HandlerGithubUserCommitsTestCase {
 			)
 
 			// Expect the query with the mock rows
+			// MUST CONVERT ALL ARRAYS TO pq.Arrays!
 			mock.ExpectQuery("^-- name: GetUserCommitsForRepos :many.*").
-				WithArgs(sinceUnix, untilUnix, login).
+				WithArgs(sinceUnix, untilUnix, login, pq.Array(requestBody.RepoUrls)).
 				WillReturnRows(row1, row2)
 		},
 	}
