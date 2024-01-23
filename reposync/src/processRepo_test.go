@@ -3,11 +3,9 @@ package reposync
 import (
 	"testing"
 
-	"github.com/OpenQDev/GoGitguru/database"
-
+	"github.com/OpenQDev/GoGitguru/util/setup"
 	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,18 +23,13 @@ func TestProcessRepo(t *testing.T) {
 			), tt.name)
 
 			// BEFORE EACH
-			db, mock, err := sqlmock.New()
-			if err != nil {
-				t.Errorf("can't create mock DB: %s", err)
-			}
-
-			queries := database.New(db)
+			mock, queries := setup.GetMockDatabase()
 
 			// ARRANGE - LOCAL
 			tt.setupMock(mock, tt.gitLogs, tt.repoUrl)
 
 			// ACT
-			ProcessRepo(prefixPath, tt.organization, tt.repo, tt.repoUrl, tt.fromCommitDate, queries)
+			err := ProcessRepo(prefixPath, tt.organization, tt.repo, tt.repoUrl, tt.fromCommitDate, queries)
 			if err != nil {
 				t.Errorf("there was an error processing repo: %s", err)
 			}
