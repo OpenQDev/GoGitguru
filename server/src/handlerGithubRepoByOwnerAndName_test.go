@@ -25,8 +25,6 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 
 	logger.SetDebugMode(debugMode)
 
-	mock, queries := setup.GetMockDatabase()
-
 	// Open the JSON file
 	jsonFile, err := os.Open("./mocks/mockGithubRepoReturn.json")
 	if err != nil {
@@ -56,11 +54,6 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 		serverUrl = mockGithubServer.URL
 	}
 
-	apiCfg := ApiConfig{
-		DB:                   queries,
-		GithubRestAPIBaseUrl: serverUrl,
-	}
-
 	tests := HandlerGithubRepoByOwnerAndNameTestCases()
 
 	for _, tt := range tests {
@@ -68,6 +61,14 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
 				testhelpers.RUN_ALL_TESTS,
 			), tt.title)
+
+			// initialize mock, database, and apiCfg at the start of each test to prevent cross-test expectations
+			mock, queries := setup.GetMockDatabase()
+			apiCfg := ApiConfig{
+				DB:                   queries,
+				GithubRestAPIBaseUrl: serverUrl,
+			}
+
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 
