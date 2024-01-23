@@ -75,7 +75,6 @@ func getAllUserCommits() HandlerGithubUserCommitsTestCase {
 		expectedReturnBody: expectedReturnBody,
 		shouldError:        false,
 		setupMock: func(mock sqlmock.Sqlmock) {
-
 			sinceTime, _ := time.Parse(time.RFC3339, since)
 			untilTime, _ := time.Parse(time.RFC3339, until)
 			sinceUnix := sinceTime.Unix()
@@ -101,7 +100,7 @@ func getAllUserCommits() HandlerGithubUserCommitsTestCase {
 			)
 
 			// Expect the query with the mock rows
-			mock.ExpectQuery("^-- name: GetAllUserCommits :many.*").
+			mock.ExpectQuery("^-- name: GetUserCommitsForRepos :many.*").
 				WithArgs(sinceUnix, untilUnix, login).
 				WillReturnRows(row1, row2)
 		},

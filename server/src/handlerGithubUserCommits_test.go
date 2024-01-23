@@ -3,7 +3,6 @@ package server
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -31,7 +30,7 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				testhelpers.RUN_ALL_TESTS,
+				"GET_ALL_USER_COMMITS",
 			), tt.name)
 
 			// BEFORE EACH
@@ -67,7 +66,6 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 			}
 
 			// ARRANGE - EXPECT
-			fmt.Println("rr.Body", rr.Body)
 			var actualRepoCommitsReturn []CommitWithAuthorInfo
 			err := marshaller.ReaderToType(rr.Body, &actualRepoCommitsReturn)
 			if err != nil {
