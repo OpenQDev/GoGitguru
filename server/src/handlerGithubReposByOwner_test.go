@@ -25,8 +25,6 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 
 	logger.SetDebugMode(debugMode)
 
-	mock, queries := setup.GetMockDatabase()
-
 	// ARRANGE - TEST DATA
 
 	// Open the JSON file
@@ -60,19 +58,21 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 		serverUrl = mockGithubServer.URL
 	}
 
-	apiCfg := ApiConfig{
-		DB:                   queries,
-		GithubRestAPIBaseUrl: serverUrl,
-	}
-
 	// ARRANGE - TESTS
 	tests := HandlerGithubReposByOwnerTestCases()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				testhelpers.RUN_ALL_TESTS,
+				"SHOULD_STORE_ALL_REPOS_FOR_ORG",
 			), tt.name)
+
+			mock, queries := setup.GetMockDatabase()
+			apiCfg := ApiConfig{
+				DB:                   queries,
+				GithubRestAPIBaseUrl: serverUrl,
+			}
+
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 			// Add {owner} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
