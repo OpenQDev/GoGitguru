@@ -36,21 +36,21 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 
 		req, err := http.NewRequest("GET", requestUrl, nil)
 		if err != nil {
-			RespondWithError(w, 500, fmt.Sprintf("Failed to create request: %s", err))
+			RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to create request: %s", err))
 			return
 		}
 
 		req.Header.Add("Authorization", "token "+githubAccessToken)
 		resp, err := client.Do(req)
 		if err != nil {
-			RespondWithError(w, 500, fmt.Sprintf("Failed to make request %s: %s", requestUrl, err))
+			RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to make request %s: %s", requestUrl, err))
 			return
 		}
 
 		var restReposResponse []githubRest.GithubRestRepo
 		err = marshaller.ReaderToType(resp.Body, &restReposResponse)
 		if err != nil {
-			RespondWithError(w, 500, fmt.Sprintf("Failed to decode response from %s to []GithubRestRepo: %s", requestUrl, err))
+			RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to decode response from %s to []GithubRestRepo: %s", requestUrl, err))
 			return
 		}
 
@@ -70,7 +70,8 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 
 		_, err := apiConfig.DB.InsertGithubRepo(context.Background(), params)
 		if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
-			RespondWithError(w, 500, fmt.Sprintf("failed to insert repo into database: %s", err))
+			fmt.Println("IN DB ERROR", err)
+			RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("failed to insert repo into database: %s", err))
 			return
 		}
 
