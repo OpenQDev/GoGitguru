@@ -59,7 +59,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.title, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				"SHOULD_STORE_REPO_IF_NOT_IN_DB",
+				testhelpers.RUN_ALL_TESTS,
 			), tt.title)
 
 			// BEFORE EACH

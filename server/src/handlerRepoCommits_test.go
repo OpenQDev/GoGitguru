@@ -39,6 +39,7 @@ func TestHandlerRepoCommits(t *testing.T) {
 			apiCfg := ApiConfig{
 				DB: queries,
 			}
+
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 

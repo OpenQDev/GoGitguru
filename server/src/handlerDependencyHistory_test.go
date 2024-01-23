@@ -32,10 +32,10 @@ func TestHandlerDependencyHistory(t *testing.T) {
 
 			// BEFORE EACH
 			_, queries := setup.GetMockDatabase()
-
 			apiCfg := ApiConfig{
 				DB: queries,
 			}
+
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("POST", "", nil)
 

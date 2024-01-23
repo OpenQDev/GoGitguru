@@ -69,6 +69,7 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 				DB:                   queries,
 				GithubRestAPIBaseUrl: serverUrl,
 			}
+
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 			// Add {owner} and {name} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router

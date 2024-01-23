@@ -34,7 +34,6 @@ func TestAddHandler(t *testing.T) {
 
 			// BEFORE EACH
 			mock, queries := setup.GetMockDatabase()
-
 			apiCfg := ApiConfig{
 				DB: queries,
 			}
