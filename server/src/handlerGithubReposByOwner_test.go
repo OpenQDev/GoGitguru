@@ -64,7 +64,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				testhelpers.RUN_ALL_TESTS,
+				"SHOULD_STORE_ALL_REPOS_FOR_ORG",
 			), tt.name)
 
 			// BEFORE EACH
