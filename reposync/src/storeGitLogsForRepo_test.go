@@ -3,12 +3,9 @@ package reposync
 import (
 	"testing"
 
-	"github.com/OpenQDev/GoGitguru/database"
-
-	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/setup"
 	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -29,12 +26,7 @@ func TestStoreGitLogsForRepo(t *testing.T) {
 			), tt.name)
 
 			// BEFORE EACH
-			db, mock, err := sqlmock.New()
-			if err != nil {
-				logger.LogFatalRedAndExit("can't create mock DB: %s", err)
-			}
-
-			queries := database.New(db)
+			mock, queries := setup.GetMockDatabase()
 
 			tt.setupMock(mock, tt.gitLogs, tt.repoUrl)
 
