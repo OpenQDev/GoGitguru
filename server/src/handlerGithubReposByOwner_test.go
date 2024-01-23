@@ -85,7 +85,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 
 			rr := httptest.NewRecorder()
 
-			tt.setupMock(mock, repos[0])
+			tt.setupMock(mock, RestRepoToDatabaseParams(repos[0]))
 
 			// ACT
 			apiCfg.HandlerGithubReposByOwner(rr, req)
