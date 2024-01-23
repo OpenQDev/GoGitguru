@@ -29,7 +29,6 @@ func TestStartUserSync(t *testing.T) {
 	}
 
 	// ARRANGE - GLOBAL
-	mock, queries := setup.GetMockDatabase()
 
 	mockGithubMux := http.NewServeMux()
 	mockGithubMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -53,6 +52,10 @@ func TestStartUserSync(t *testing.T) {
 				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
 
+			// BEFORE EACH
+			mock, queries := setup.GetMockDatabase()
+
+			// ARRANGE - LOCAL
 			tt.setupMock(mock, tt.author)
 
 			// ACT

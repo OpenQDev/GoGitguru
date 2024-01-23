@@ -11,8 +11,6 @@ import (
 
 func TestGetNewCommitAuthors(t *testing.T) {
 	// ARRANGE - GLOBAL
-	mock, queries := setup.GetMockDatabase()
-
 	tests := GetNewCommitAuthorsTestCases()
 
 	for _, tt := range tests {
@@ -20,6 +18,8 @@ func TestGetNewCommitAuthors(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
 				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
+
+			mock, queries := setup.GetMockDatabase()
 
 			tt.setupMock(mock)
 
