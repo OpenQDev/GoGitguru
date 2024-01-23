@@ -25,12 +25,6 @@ func TestHandlerFirstCommit(t *testing.T) {
 
 	logger.SetDebugMode(debugMode)
 
-	mock, queries := setup.GetMockDatabase()
-
-	apiCfg := ApiConfig{
-		DB: queries,
-	}
-
 	tests := HandlerFirstCommitTestCases()
 
 	for _, tt := range tests {
@@ -38,6 +32,13 @@ func TestHandlerFirstCommit(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
 				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
+
+			// BEFORE EACH
+			mock, queries := setup.GetMockDatabase()
+
+			apiCfg := ApiConfig{
+				DB: queries,
+			}
 
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("POST", "", nil)

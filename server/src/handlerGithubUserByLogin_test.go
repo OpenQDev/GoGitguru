@@ -27,8 +27,6 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 
 	logger.SetDebugMode(debugMode)
 
-	mock, queries := setup.GetMockDatabase()
-
 	jsonFile, err := os.Open("./mocks/mockGithubUserResponse.json")
 	if err != nil {
 		t.Errorf("error opening json file: %s", err)
@@ -57,11 +55,6 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 		serverUrl = mockGithubServer.URL
 	}
 
-	apiCfg := ApiConfig{
-		DB:                   queries,
-		GithubRestAPIBaseUrl: serverUrl,
-	}
-
 	tests := HandlerGithubUserByLoginTestCases()
 
 	for _, tt := range tests {
@@ -70,6 +63,12 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 				testhelpers.RUN_ALL_TESTS,
 			), tt.title)
 
+			// BEFORE EACH
+			mock, queries := setup.GetMockDatabase()
+			apiCfg := ApiConfig{
+				DB:                   queries,
+				GithubRestAPIBaseUrl: serverUrl,
+			}
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 			// Add {owner} and {name} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router

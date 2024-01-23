@@ -31,11 +31,11 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				"GET_ALL_USER_COMMITS",
+				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
 
+			// BEFORE EACH
 			mock, queries := setup.GetMockDatabase()
-
 			apiCfg := ApiConfig{
 				DB: queries,
 			}

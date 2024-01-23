@@ -22,12 +22,6 @@ func TestHandlerDependencyHistory(t *testing.T) {
 
 	logger.SetDebugMode(debugMode)
 
-	_, queries := setup.GetMockDatabase()
-
-	apiCfg := ApiConfig{
-		DB: queries,
-	}
-
 	tests := HandlerDependencyHistoryTestCases()
 
 	for _, tt := range tests {
@@ -36,6 +30,12 @@ func TestHandlerDependencyHistory(t *testing.T) {
 				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
 
+			// BEFORE EACH
+			_, queries := setup.GetMockDatabase()
+
+			apiCfg := ApiConfig{
+				DB: queries,
+			}
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("POST", "", nil)
 

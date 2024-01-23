@@ -20,21 +20,20 @@ func TestHandlerVersion(t *testing.T) {
 
 	logger.SetDebugMode(debugMode)
 
-	_, queries := setup.GetMockDatabase()
-
-	apiCfg := ApiConfig{
-		DB: queries,
-	}
-
 	// ARRANGE - TESTS
 	tests := HandlerVersionTestCases()
 
 	for _, tt := range tests {
-		testhelpers.CheckTestSkip(t, testhelpers.Targets(
-			testhelpers.RUN_ALL_TESTS,
-		), tt.name)
-
 		t.Run(tt.name, func(t *testing.T) {
+			testhelpers.CheckTestSkip(t, testhelpers.Targets(
+				testhelpers.RUN_ALL_TESTS,
+			), tt.name)
+
+			// BEFORE EACH
+			_, queries := setup.GetMockDatabase()
+			apiCfg := ApiConfig{
+				DB: queries,
+			}
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 			rr := httptest.NewRecorder()

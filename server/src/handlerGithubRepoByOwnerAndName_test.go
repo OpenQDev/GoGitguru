@@ -59,10 +59,10 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.title, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				testhelpers.RUN_ALL_TESTS,
+				"SHOULD_STORE_REPO_IF_NOT_IN_DB",
 			), tt.title)
 
-			// initialize mock, database, and apiCfg at the start of each test to prevent cross-test expectations
+			// BEFORE EACH
 			mock, queries := setup.GetMockDatabase()
 			apiCfg := ApiConfig{
 				DB:                   queries,
