@@ -23,10 +23,10 @@ func main() {
 
 	const MAX_CONCURRENT_INSTANCES = 5
 	if env.RepoSyncInterval != 0 {
-		sem := make(chan bool, MAX_CONCURRENT_INSTANCES) // create a buffered channel with capacity 2
+		sem := make(chan bool, MAX_CONCURRENT_INSTANCES) // create a buffered channel with capacity MAX_CONCURRENT_INSTANCES
 		for {
 			for i := 0; i < MAX_CONCURRENT_INSTANCES; i++ {
-				sem <- true // block if there are already 2 goroutines running
+				sem <- true // block if there are already MAX_CONCURRENT_INSTANCES goroutines running
 				go func() {
 					reposync.StartSyncingCommits(database, conn, "repos", env.GitguruUrl)
 					<-sem // release the semaphore when goroutine finishes
