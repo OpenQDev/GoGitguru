@@ -67,7 +67,7 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.title, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				"VALID",
+				testhelpers.RUN_ALL_TESTS,
 			), tt.title)
 
 			// ARRANGE - LOCAL
