@@ -19,17 +19,11 @@ import (
 
 func TestHandlerFirstCommit(t *testing.T) {
 	// ARRANGE - GLOBAL
-	env := setup.ExtractAndVerifyEnvironment(".env")
+	env := setup.ExtractAndVerifyEnvironment("../../.env")
 	debugMode := env.Debug
 	ghAccessToken := env.GhAccessToken
 
 	logger.SetDebugMode(debugMode)
-
-	mock, queries := setup.GetMockDatabase()
-
-	apiCfg := ApiConfig{
-		DB: queries,
-	}
 
 	tests := HandlerFirstCommitTestCases()
 
@@ -38,6 +32,12 @@ func TestHandlerFirstCommit(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
 				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
+
+			// BEFORE EACH
+			mock, queries := setup.GetMockDatabase()
+			apiCfg := ApiConfig{
+				DB: queries,
+			}
 
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("POST", "", nil)
@@ -48,8 +48,8 @@ func TestHandlerFirstCommit(t *testing.T) {
 
 			rr := httptest.NewRecorder()
 
-			bodyBytes, _ := json.Marshal(tt.requestBody)
-			req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+			reqBody, _ := json.Marshal(tt.requestBody)
+			req.Body = io.NopCloser(bytes.NewReader(reqBody))
 
 			tt.setupMock(mock)
 
@@ -63,10 +63,10 @@ func TestHandlerFirstCommit(t *testing.T) {
 			}
 
 			// ARRANGE - EXPECT
-			var actualRepoCommitsReturn []CommitWithAuthorInfo
+			var actualRepoCommitsReturn HandlerFirstCommitResponse
 			err := marshaller.ReaderToType(rr.Body, &actualRepoCommitsReturn)
 			if err != nil {
-				t.Errorf("Failed to decode rr.Body into []RestRepo: %s", err)
+				t.Errorf("Failed to decode rr.Body into HandlerFirstCommitResponse: %s", err)
 				return
 			}
 

@@ -18,14 +18,12 @@ import (
 
 func TestHandlerGithubReposByOwner(t *testing.T) {
 	// ARRANGE - GLOBAL
-	env := setup.ExtractAndVerifyEnvironment(".env")
+	env := setup.ExtractAndVerifyEnvironment("../../.env")
 	debugMode := env.Debug
 	ghAccessToken := env.GhAccessToken
 	targetLiveGithub := env.TargetLiveGithub
 
 	logger.SetDebugMode(debugMode)
-
-	mock, queries := setup.GetMockDatabase()
 
 	// ARRANGE - TEST DATA
 
@@ -60,19 +58,22 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 		serverUrl = mockGithubServer.URL
 	}
 
-	apiCfg := ApiConfig{
-		DB:                   queries,
-		GithubRestAPIBaseUrl: serverUrl,
-	}
-
 	// ARRANGE - TESTS
 	tests := HandlerGithubReposByOwnerTestCases()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				testhelpers.RUN_ALL_TESTS,
+				"SHOULD_STORE_ALL_REPOS_FOR_ORG",
 			), tt.name)
+
+			// BEFORE EACH
+			mock, queries := setup.GetMockDatabase()
+			apiCfg := ApiConfig{
+				DB:                   queries,
+				GithubRestAPIBaseUrl: serverUrl,
+			}
+
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 			// Add {owner} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
@@ -84,7 +85,7 @@ func TestHandlerGithubReposByOwner(t *testing.T) {
 
 			rr := httptest.NewRecorder()
 
-			tt.setupMock(mock, repos[0])
+			tt.setupMock(mock, RestRepoToDatabaseParams(repos[0]))
 
 			// ACT
 			apiCfg.HandlerGithubReposByOwner(rr, req)

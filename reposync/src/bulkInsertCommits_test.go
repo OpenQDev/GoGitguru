@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OpenQDev/GoGitguru/database"
+	"github.com/OpenQDev/GoGitguru/util/setup"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/lib/pq"
@@ -12,17 +12,10 @@ import (
 )
 
 func TestBulkInsertCommits(t *testing.T) {
-	// Create mock database connection
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-	defer db.Close()
+	// BEFORE ALL
+	mock, q := setup.GetMockDatabase()
 
-	// Create new Queries instance with mock database
-	q := database.New(db)
-
-	// Define test data
+	// ARRANGE
 	commitCount := 2
 	commitHash := make([]string, commitCount)
 	author := make([]string, commitCount)
@@ -35,7 +28,6 @@ func TestBulkInsertCommits(t *testing.T) {
 	filesChanged := make([]int32, commitCount)
 	repoUrls := make([]string, commitCount)
 
-	// Fill the arrays
 	for i := 0; i < commitCount; i++ {
 		commitHash[i] = fmt.Sprintf("hash%d", i+1)
 		author[i] = fmt.Sprintf("author%d", i+1)
@@ -50,7 +42,8 @@ func TestBulkInsertCommits(t *testing.T) {
 	}
 
 	// Define expected SQL statement
-	// go-sqlmock CANNOT accept slices as arguments. Must convert to pq.Array first as is done in databse.BulkInsertCommits
+	// go-sqlmock CANNOT accept slices as arguments.
+	// Must convert to pq.Array first as is done in databse.BulkInsertCommits
 	mock.ExpectExec("^-- name: BulkInsertCommits :exec.*").WithArgs(
 		pq.Array(commitHash),
 		pq.Array(author),
@@ -64,10 +57,10 @@ func TestBulkInsertCommits(t *testing.T) {
 		pq.Array(repoUrls),
 	).WillReturnResult(sqlmock.NewResult(1, 1))
 
-	// Call function
-	err = BulkInsertCommits(q, commitHash, author, authorEmail, authorDate, committerDate, message, insertions, deletions, filesChanged, repoUrls)
+	// ACT
+	err := BulkInsertCommits(q, commitHash, author, authorEmail, authorDate, committerDate, message, insertions, deletions, filesChanged, repoUrls)
 
-	// Assert expectations
+	// ASSERT
 	assert.NoError(t, err)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }

@@ -18,7 +18,7 @@ type StoreGitLogsForRepoTestCase struct {
 }
 
 func sucessfulGitLog() StoreGitLogsForRepoTestCase {
-	foo := StoreGitLogsForRepoTestCase{
+	sucessfulGitLogTestCase := StoreGitLogsForRepoTestCase{
 		name:           "Valid git logs",
 		repoUrl:        "https://github.com/OpenQDev/OpenQ-DRM-TestRepo",
 		repo:           "OpenQ-DRM-TestRepo",
@@ -31,8 +31,8 @@ func sucessfulGitLog() StoreGitLogsForRepoTestCase {
 				AuthorDate:    1696277247,
 				CommitDate:    1696277247,
 				CommitMessage: "updates README",
-				FilesChanged:  1,
-				Insertions:    1,
+				FilesChanged:  0,
+				Insertions:    0,
 				Deletions:     0,
 			},
 			{
@@ -92,7 +92,7 @@ func sucessfulGitLog() StoreGitLogsForRepoTestCase {
 		},
 	}
 
-	return foo
+	return sucessfulGitLogTestCase
 }
 
 func StoreGitLogsForRepoTestCases() []StoreGitLogsForRepoTestCase {

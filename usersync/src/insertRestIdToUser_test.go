@@ -11,8 +11,6 @@ import (
 
 func TestInsertIntoRestIdToUser(t *testing.T) {
 	// ARRANGE - GLOBAL
-	mock, queries := setup.GetMockDatabase()
-
 	tests := InsertIntoRestIdToUserTestCases()
 
 	for _, tt := range tests {
@@ -20,6 +18,9 @@ func TestInsertIntoRestIdToUser(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
 				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
+
+			// BEFORE EACH
+			mock, queries := setup.GetMockDatabase()
 
 			tt.setupMock(mock, tt.author)
 

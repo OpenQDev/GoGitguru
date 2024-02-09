@@ -16,9 +16,8 @@ type HandlerGithubUserByLoginTestCase struct {
 	setupMock      func(mock sqlmock.Sqlmock, user User)
 }
 
-const userLogin = "FlacoJones"
-
 func should401() HandlerGithubUserByLoginTestCase {
+	const userLogin = "FlacoJones"
 	const UNAUTHORIZED = "UNAUTHORIZED"
 	return HandlerGithubUserByLoginTestCase{
 		title:          UNAUTHORIZED,
@@ -32,6 +31,7 @@ func should401() HandlerGithubUserByLoginTestCase {
 
 func valid() HandlerGithubUserByLoginTestCase {
 	const VALID = "VALID"
+	const login = "DRM-Test-Organization"
 	return HandlerGithubUserByLoginTestCase{
 		title:          VALID,
 		login:          login,

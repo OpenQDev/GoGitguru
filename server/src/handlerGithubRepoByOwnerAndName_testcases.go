@@ -53,6 +53,7 @@ func shouldReturn401() HandlerGithubRepoByOwnerAndNameTest {
 
 func shouldStoreRepoIfNotInDb() HandlerGithubRepoByOwnerAndNameTest {
 	const SHOULD_STORE_REPO_IF_NOT_IN_DB = "SHOULD_STORE_REPO_IF_NOT_IN_DB"
+
 	return HandlerGithubRepoByOwnerAndNameTest{
 		title:          SHOULD_STORE_REPO_IF_NOT_IN_DB,
 		owner:          drmTestOrg,

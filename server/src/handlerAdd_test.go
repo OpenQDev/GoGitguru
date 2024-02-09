@@ -19,15 +19,9 @@ import (
 
 func TestAddHandler(t *testing.T) {
 	// ARRANGE - GLOBAL
-	env := setup.ExtractAndVerifyEnvironment(".env")
+	env := setup.ExtractAndVerifyEnvironment("../../.env")
 	debugMode := env.Debug
 	logger.SetDebugMode(debugMode)
-
-	mock, queries := setup.GetMockDatabase()
-
-	apiCfg := ApiConfig{
-		DB: queries,
-	}
 
 	// ARRANGE - TESTS
 	tests := HandlerAddTestCases()
@@ -37,6 +31,12 @@ func TestAddHandler(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
 				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
+
+			// BEFORE EACH
+			mock, queries := setup.GetMockDatabase()
+			apiCfg := ApiConfig{
+				DB: queries,
+			}
 
 			// ARRANGE - LOCAL
 			requestBody, err := marshaller.TypeToReader(tt.requestBody)

@@ -17,16 +17,10 @@ import (
 
 func TestHandlerDependencyHistory(t *testing.T) {
 	// ARRANGE - GLOBAL
-	env := setup.ExtractAndVerifyEnvironment(".env")
+	env := setup.ExtractAndVerifyEnvironment("../../.env")
 	debugMode := env.Debug
 
 	logger.SetDebugMode(debugMode)
-
-	_, queries := setup.GetMockDatabase()
-
-	apiCfg := ApiConfig{
-		DB: queries,
-	}
 
 	tests := HandlerDependencyHistoryTestCases()
 
@@ -35,6 +29,12 @@ func TestHandlerDependencyHistory(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
 				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
+
+			// BEFORE EACH
+			_, queries := setup.GetMockDatabase()
+			apiCfg := ApiConfig{
+				DB: queries,
+			}
 
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("POST", "", nil)

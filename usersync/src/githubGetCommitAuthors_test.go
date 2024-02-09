@@ -9,7 +9,7 @@ import (
 )
 
 func TestGithubGetCommitAuthors(t *testing.T) {
-	env := setup.ExtractAndVerifyEnvironment("../.env")
+	env := setup.ExtractAndVerifyEnvironment("../../.env")
 	ghAccessToken := env.GhAccessToken
 	targetLiveGithub := env.TargetLiveGithub
 
@@ -23,11 +23,11 @@ func TestGithubGetCommitAuthors(t *testing.T) {
 	tests := GithubGetCommitAuthorsTestCases()
 
 	for _, tt := range tests {
-		testhelpers.CheckTestSkip(t, testhelpers.Targets(
-			testhelpers.RUN_ALL_TESTS,
-		), tt.name)
-
 		t.Run(tt.name, func(t *testing.T) {
+			testhelpers.CheckTestSkip(t, testhelpers.Targets(
+				testhelpers.RUN_ALL_TESTS,
+			), tt.name)
+
 			var commitDetails string
 
 			for i, commit := range tt.commits {

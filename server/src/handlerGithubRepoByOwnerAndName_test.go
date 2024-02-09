@@ -18,14 +18,12 @@ import (
 
 func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 	// ARRANGE - GLOBAL
-	env := setup.ExtractAndVerifyEnvironment(".env")
+	env := setup.ExtractAndVerifyEnvironment("../../.env")
 	debugMode := env.Debug
 	ghAccessToken := env.GhAccessToken
 	targetLiveGithub := env.TargetLiveGithub
 
 	logger.SetDebugMode(debugMode)
-
-	mock, queries := setup.GetMockDatabase()
 
 	// Open the JSON file
 	jsonFile, err := os.Open("./mocks/mockGithubRepoReturn.json")
@@ -56,11 +54,6 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 		serverUrl = mockGithubServer.URL
 	}
 
-	apiCfg := ApiConfig{
-		DB:                   queries,
-		GithubRestAPIBaseUrl: serverUrl,
-	}
-
 	tests := HandlerGithubRepoByOwnerAndNameTestCases()
 
 	for _, tt := range tests {
@@ -68,6 +61,14 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
 				testhelpers.RUN_ALL_TESTS,
 			), tt.title)
+
+			// BEFORE EACH
+			mock, queries := setup.GetMockDatabase()
+			apiCfg := ApiConfig{
+				DB:                   queries,
+				GithubRestAPIBaseUrl: serverUrl,
+			}
+
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 

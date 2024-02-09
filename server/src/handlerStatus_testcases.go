@@ -27,10 +27,10 @@ func noRepoUrls() HandlerStatusTest {
 
 	noRepoUrls := HandlerStatusTest{
 		name:               NO_REPO_URLS,
-		expectedStatus:     http.StatusBadRequest,
+		expectedStatus:     http.StatusAccepted,
 		requestBody:        noRequestsBody,
 		expectedReturnBody: []HandlerStatusResponse{},
-		shouldError:        true,
+		shouldError:        false,
 		setupMock:          func(mock sqlmock.Sqlmock, repos []string) {},
 	}
 

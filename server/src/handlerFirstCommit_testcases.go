@@ -16,16 +16,16 @@ type HandlerFirstCommitTestCase struct {
 	expectedStatus     int
 	authorized         bool
 	requestBody        HandlerFirstCommitRequest
-	expectedReturnBody CommitWithAuthorInfo
+	expectedReturnBody HandlerFirstCommitResponse
 	shouldError        bool
 	setupMock          func(mock sqlmock.Sqlmock)
 }
 
-const firstCommitLogin = "FlacoJones"
-const firstCommitRepoUrl = "https://github.com/OpenQDev/OpenQ-Workflows"
-
 func getFirstCommit() HandlerFirstCommitTestCase {
 	const GET_FIRST_USER_COMMIT = "GET_FIRST_USER_COMMIT"
+
+	const firstCommitRepoUrl = "https://github.com/OpenQDev/OpenQ-Workflows"
+	const firstCommitLogin = "mktcode"
 
 	requestBody := HandlerFirstCommitRequest{
 		RepoUrl: firstCommitRepoUrl,
@@ -38,13 +38,16 @@ func getFirstCommit() HandlerFirstCommitTestCase {
 		log.Fatal(err)
 	}
 	defer jsonFile.Close()
-	marshaller.JsonFileToType(jsonFile, &commitResponse)
+	err = marshaller.JsonFileToType(jsonFile, &commitResponse)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	expectedReturnBody := commitResponse
+	expectedReturnBody := HandlerFirstCommitResponse{AuthorDate: 1697637308}
 
 	return HandlerFirstCommitTestCase{
 		name:               GET_FIRST_USER_COMMIT,
-		login:              login,
+		login:              firstCommitLogin,
 		expectedStatus:     http.StatusOK,
 		authorized:         true,
 		requestBody:        requestBody,
@@ -64,8 +67,8 @@ func getFirstCommit() HandlerFirstCommitTestCase {
 			)
 
 			// Expect the query with the mock rows
-			mock.ExpectQuery("^-- name: GetFirstCommit :onoe.*").
-				WithArgs(firstCommitRepoUrl, login).
+			mock.ExpectQuery("^-- name: GetFirstCommit :one.*").
+				WithArgs(firstCommitRepoUrl, firstCommitLogin).
 				WillReturnRows(row1)
 		},
 	}

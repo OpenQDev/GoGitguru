@@ -9,19 +9,6 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
-type CommitObject struct {
-	CommitHash    []string
-	Author        []string
-	AuthorEmail   []string
-	AuthorDate    []int64
-	CommitterDate []int64
-	Message       []string
-	Insertions    []int32
-	Deletions     []int32
-	FilesChanged  []int32
-	RepoUrls      []string
-}
-
 func PrepareCommitHistoryForBulkInsertion(numberOfCommits int, log object.CommitIter, params GitLogParams) (CommitObject, error) {
 	var (
 		commitHash    = make([]string, numberOfCommits)
@@ -51,19 +38,22 @@ func PrepareCommitHistoryForBulkInsertion(numberOfCommits int, log object.Commit
 			}
 		}
 
+		// TODO: Git stats is run JIT and is extremely time consuming, as it diffs each patch to the prior.
+		// TODO: Ignoring for now, but this is how it's done.
+
 		// stats, err := commit.Stats()
 		// if err != nil {
 		// 	logger.LogFatalRedAndExit("error computing stats for repository %s: %s", params.repoUrl, err)
 		// }
-
-		totalFilesChanged := 0
-		totalInsertions := 0
-		totalDeletions := 0
 		// for _, stat := range stats {
 		// 	totalInsertions += stat.Addition
 		// 	totalDeletions += stat.Deletion
 		// 	totalFilesChanged++
 		// }
+
+		totalFilesChanged := 0
+		totalInsertions := 0
+		totalDeletions := 0
 
 		commit.Author.Email = strings.Trim(commit.Author.Email, "\"")
 		commit.Author.Email = strings.Trim(commit.Author.Email, ".")

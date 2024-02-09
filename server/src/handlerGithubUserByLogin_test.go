@@ -20,14 +20,12 @@ import (
 
 func TestHandlerGithubUserByLogin(t *testing.T) {
 	// ARRANGE - GLOBAL
-	env := setup.ExtractAndVerifyEnvironment(".env")
+	env := setup.ExtractAndVerifyEnvironment("../../.env")
 	debugMode := env.Debug
 	ghAccessToken := env.GhAccessToken
 	targetLiveGithub := env.TargetLiveGithub
 
 	logger.SetDebugMode(debugMode)
-
-	mock, queries := setup.GetMockDatabase()
 
 	jsonFile, err := os.Open("./mocks/mockGithubUserResponse.json")
 	if err != nil {
@@ -57,18 +55,20 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 		serverUrl = mockGithubServer.URL
 	}
 
-	apiCfg := ApiConfig{
-		DB:                   queries,
-		GithubRestAPIBaseUrl: serverUrl,
-	}
-
 	tests := HandlerGithubUserByLoginTestCases()
 
 	for _, tt := range tests {
 		t.Run(tt.title, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				"VALID",
+				testhelpers.RUN_ALL_TESTS,
 			), tt.title)
+
+			// BEFORE EACH
+			mock, queries := setup.GetMockDatabase()
+			apiCfg := ApiConfig{
+				DB:                   queries,
+				GithubRestAPIBaseUrl: serverUrl,
+			}
 
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)

@@ -38,8 +38,8 @@ func validProcessRepoTest() ProcessRepoTestCase {
 				AuthorDate:    1696277247,
 				CommitDate:    1696277247,
 				CommitMessage: "updates README",
-				FilesChanged:  1,
-				Insertions:    1,
+				FilesChanged:  0,
+				Insertions:    0,
 				Deletions:     0,
 			},
 			{

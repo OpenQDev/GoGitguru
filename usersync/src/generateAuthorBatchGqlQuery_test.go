@@ -13,7 +13,7 @@ func TestGenerateAuthorBatchGqlQuery(t *testing.T) {
 
 	for _, tt := range tests {
 		testhelpers.CheckTestSkip(t, testhelpers.Targets(
-			"SINGLE_AUTHOR",
+			testhelpers.RUN_ALL_TESTS,
 		), tt.title)
 
 		t.Run(tt.title, func(t *testing.T) {

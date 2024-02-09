@@ -3,40 +3,33 @@ package reposync
 import (
 	"testing"
 
-	"github.com/OpenQDev/GoGitguru/database"
-
+	"github.com/OpenQDev/GoGitguru/util/setup"
 	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestProcessRepo(t *testing.T) {
-	// ARRANGE - GLOBAL
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Errorf("can't create mock DB: %s", err)
-	}
-
-	queries := database.New(db)
-
+	// BEFORE ALL
 	prefixPath := "mock"
 
 	// ARRANGE - TESTS
 	tests := ProcessRepoTestCases()
 
 	for _, tt := range tests {
-		testhelpers.CheckTestSkip(t, testhelpers.Targets(
-			testhelpers.RUN_ALL_TESTS,
-		), tt.name)
-
 		t.Run(tt.name, func(t *testing.T) {
-			// ARRANGE - LOCAL
+			testhelpers.CheckTestSkip(t, testhelpers.Targets(
+				testhelpers.RUN_ALL_TESTS,
+			), tt.name)
 
+			// BEFORE EACH
+			mock, queries := setup.GetMockDatabase()
+
+			// ARRANGE - LOCAL
 			tt.setupMock(mock, tt.gitLogs, tt.repoUrl)
 
 			// ACT
-			ProcessRepo(prefixPath, tt.organization, tt.repo, tt.repoUrl, tt.fromCommitDate, queries)
+			err := ProcessRepo(prefixPath, tt.organization, tt.repo, tt.repoUrl, tt.fromCommitDate, queries)
 			if err != nil {
 				t.Errorf("there was an error processing repo: %s", err)
 			}

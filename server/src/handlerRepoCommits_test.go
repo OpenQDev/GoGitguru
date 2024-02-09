@@ -19,27 +19,27 @@ import (
 
 func TestHandlerRepoCommits(t *testing.T) {
 	// ARRANGE - GLOBAL
-	env := setup.ExtractAndVerifyEnvironment(".env")
+	env := setup.ExtractAndVerifyEnvironment("../../.env")
 	debugMode := env.Debug
 	ghAccessToken := env.GhAccessToken
 
 	logger.SetDebugMode(debugMode)
 
-	mock, queries := setup.GetMockDatabase()
-
-	apiCfg := ApiConfig{
-		DB: queries,
-	}
-
 	// Define test cases
 	tests := HandlerRepoCommitsTestCases()
 
 	for _, tt := range tests {
-		testhelpers.CheckTestSkip(t, testhelpers.Targets(
-			testhelpers.RUN_ALL_TESTS,
-		), tt.name)
-
 		t.Run(tt.name, func(t *testing.T) {
+			testhelpers.CheckTestSkip(t, testhelpers.Targets(
+				testhelpers.RUN_ALL_TESTS,
+			), tt.name)
+
+			// BEFORE EACH
+			mock, queries := setup.GetMockDatabase()
+			apiCfg := ApiConfig{
+				DB: queries,
+			}
+
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("GET", "", nil)
 
