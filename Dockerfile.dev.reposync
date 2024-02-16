@@ -13,6 +13,8 @@ RUN git config --global pull.rebase false
 
 RUN git config --global --add safe.directory '*'
 
+RUN git config --system --add safe.directory '*'
+
 # Set the Current Working Directory inside the container to reposync directory
 WORKDIR /app/reposync
 
