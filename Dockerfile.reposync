@@ -6,6 +6,8 @@ COPY . .
 
 RUN git config --global pull.rebase false
 
+RUN git config --global --add safe.directory '*'
+
 WORKDIR /app/reposync
 
 RUN go mod download
