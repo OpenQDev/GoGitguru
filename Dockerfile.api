@@ -4,6 +4,10 @@ WORKDIR /app
 
 COPY . .
 
+RUN git config --global --add safe.directory '*'
+
+RUN git config --system --add safe.directory '*'
+
 WORKDIR /app/server
 
 RUN go mod download

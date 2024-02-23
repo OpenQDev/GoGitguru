@@ -41,8 +41,11 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 	repoDir := filepath.Join(prefixPath, organization, repo)
 
 	if !gitutil.IsGitRepository(prefixPath, organization, repo) {
-		RespondWithError(w, http.StatusNotFound, fmt.Sprintf("directory %s is not a git repository", repoDir))
-		return
+		err := gitutil.CloneRepo(prefixPath, organization, repo)
+		if err != nil {
+			RespondWithError(w, http.StatusNotFound, fmt.Sprintf("directory %s is not a git repository", repoDir))
+			return
+		}
 	}
 
 	// "package.json" -> ["util/package.json", "app/package.json"]

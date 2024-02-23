@@ -7,6 +7,10 @@ WORKDIR /app
 # Copy everything from the current directory to the PWD(Present Working Directory) inside the container
 COPY . .
 
+RUN git config --global --add safe.directory '*'
+
+RUN git config --system --add safe.directory '*'
+
 RUN go install github.com/cosmtrek/air@latest
 
 # Set the Current Working Directory inside the container to reposync directory
