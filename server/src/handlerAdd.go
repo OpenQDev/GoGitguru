@@ -44,27 +44,16 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 	alreadyInQueue := []string{}
 
 	for _, repoUrl := range repoUrls.RepoUrls {
-		repoIsListed, err := isListed(repoUrl, w, r, apiCfg)
 
+		err = addToList(apiCfg, r, repoUrl, w)
 		if err != nil {
-			msg := fmt.Sprintf("error checking if repo is listed: %s", err)
+			msg := fmt.Sprintf("error adding %s to repo_urls: %s", repoUrl, err)
 			logger.LogError(msg)
 			RespondWithError(w, 500, msg)
 			return
 		}
+		accepted = append(accepted, repoUrl)
 
-		if repoIsListed {
-			alreadyInQueue = append(alreadyInQueue, repoUrl)
-		} else {
-			err := addToList(apiCfg, r, repoUrl, w)
-			if err != nil {
-				msg := fmt.Sprintf("error adding %s to repo_urls: %s", repoUrl, err)
-				logger.LogError(msg)
-				RespondWithError(w, 500, msg)
-				return
-			}
-			accepted = append(accepted, repoUrl)
-		}
 	}
 
 	response := HandlerAddResponse{
@@ -76,7 +65,7 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 }
 
 func addToList(apiCfg *ApiConfig, r *http.Request, repoUrl string, w http.ResponseWriter) error {
-	err := apiCfg.DB.InsertRepoURL(r.Context(), repoUrl)
+	err := apiCfg.DB.UpsertRepoURL(r.Context(), repoUrl)
 
 	return err
 }

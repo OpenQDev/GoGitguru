@@ -56,7 +56,7 @@ go test -bench=BenchmarkProcessRepo
 `psql "postgres://postgres:@localhost:5432/gitguru?sslmode=disable"`
 `psql "postgres://postgres:@localhost:5432/postgres?sslmode=disable"`
 
-`cd sql/schema && goose postgres "postgres://postgres:@localhost:5432/postgres?sslmode=disable" up && cd ~/Gitguru`
+`cd sql/schema && goose postgres "postgres://postgres:@localhost:5432/postgres?sslmode=disable" up && cd ~/GoGitguru`
 
 ## Kill PG connections
 
