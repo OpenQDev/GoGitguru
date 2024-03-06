@@ -6,6 +6,8 @@ cmd = "go build -o ./tmp/main -buildvcs=false ."
 bin = "tmp/main"
 # Customize binary.
 full_bin = "APP_ENV=development APP_USER=air ./tmp/main"
+# Send Interrupt signal before killing process
+send_interrupt = true
 
 # Excluding these files or directories
 exclude_dir = ["tmp", "repos"]
