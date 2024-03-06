@@ -34,7 +34,7 @@ func main() {
 		select {
 		case <-stopChan:
 			logger.LogBlue("shutting down gracefully...")
-			return
+			os.Exit(0)
 		default:
 			for i := 0; i < MAX_CONCURRENT_INSTANCES; i++ {
 				sem <- true

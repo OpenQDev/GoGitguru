@@ -34,7 +34,7 @@ func main() {
 		select {
 		case <-stopChan:
 			logger.LogBlue("shutting down gracefully...")
-			return
+			os.Exit(0)
 		default:
 			logger.LogBlue("beginning user syncing...")
 			usersync.StartSyncingUser(database, "repos", randomToken, 10, "https://api.github.com/graphql")
