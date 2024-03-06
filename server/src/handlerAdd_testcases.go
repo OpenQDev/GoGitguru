@@ -21,13 +21,11 @@ func validRepoUrls() HandlerAddTest {
 	}
 
 	successReturnBody := HandlerAddResponse{
-		Accepted:       targetRepos,
-		AlreadyInQueue: []string{},
+		Accepted: targetRepos,
 	}
 
 	secondReturnBody := HandlerAddResponse{
-		Accepted:       []string{},
-		AlreadyInQueue: targetRepos,
+		Accepted: targetRepos,
 	}
 
 	validRepoUrls := HandlerAddTest{

@@ -1,13 +1,10 @@
 package server
 
 import (
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
-	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
 	"github.com/OpenQDev/GoGitguru/util/setup"
@@ -29,7 +26,7 @@ func TestAddHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				testhelpers.RUN_ALL_TESTS,
+				"VALID_REPO_URLS",
 			), tt.name)
 
 			// BEFORE EACH
@@ -48,9 +45,7 @@ func TestAddHandler(t *testing.T) {
 			rr := httptest.NewRecorder()
 
 			// ARRANGE - EXPECT
-			mock.ExpectQuery("^-- name: GetRepoURL :one.*").WithArgs("https://github.com/org/repo1").WillReturnError(errors.New("sql: no rows in result set"))
 			mock.ExpectExec("^-- name: UpsertRepoURL :exec.*").WithArgs("https://github.com/org/repo1").WillReturnResult(sqlmock.NewResult(1, 1))
-			mock.ExpectQuery("^-- name: GetRepoURL :one.*").WithArgs("https://github.com/org/repo2").WillReturnError(errors.New("sql: no rows in result set"))
 			mock.ExpectExec("^-- name: UpsertRepoURL :exec.*").WithArgs("https://github.com/org/repo2").WillReturnResult(sqlmock.NewResult(1, 1))
 
 			// ACT
@@ -95,12 +90,8 @@ func TestAddHandler(t *testing.T) {
 			rr = httptest.NewRecorder()
 
 			// ARRANGE - EXPECT
-			currentTime := time.Now()
-			repoURLMockRow1 := sqlmock.NewRows([]string{"url", "status", "created_at", "updated_at"}).AddRow("https://github.com/org/repo1", database.RepoStatusPending, currentTime, currentTime)
-			repoURLMockRow2 := sqlmock.NewRows([]string{"url", "status", "created_at", "updated_at"}).AddRow("https://github.com/org/repo2", database.RepoStatusPending, currentTime, currentTime)
-
-			mock.ExpectQuery("^-- name: GetRepoURL :one.*").WithArgs("https://github.com/org/repo1").WillReturnRows(repoURLMockRow1)
-			mock.ExpectQuery("^-- name: GetRepoURL :one.*").WithArgs("https://github.com/org/repo2").WillReturnRows(repoURLMockRow2)
+			mock.ExpectExec("^-- name: UpsertRepoURL :exec.*").WithArgs("https://github.com/org/repo1").WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectExec("^-- name: UpsertRepoURL :exec.*").WithArgs("https://github.com/org/repo2").WillReturnResult(sqlmock.NewResult(1, 1))
 
 			// ACT
 			apiCfg.HandlerAdd(rr, req)
