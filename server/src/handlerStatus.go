@@ -43,6 +43,7 @@ func (apiCfg *ApiConfig) HandlerStatus(w http.ResponseWriter, r *http.Request) {
 
 	for _, repoStatus := range repoStatuses {
 		if slices.Contains(body.RepoUrls, repoStatus.Url) {
+			println("repoStatus.Url: ", repoStatus)
 			response = append(response, HandlerStatusResponse{
 				Url:            repoStatus.Url,
 				Status:         repoStatus.Status,
