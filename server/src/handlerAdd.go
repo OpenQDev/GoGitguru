@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
 )
@@ -16,8 +15,7 @@ type HandlerAddRequest struct {
 }
 
 type HandlerAddResponse struct {
-	Accepted       []string `json:"accepted"`
-	AlreadyInQueue []string `json:"already_in_queue"`
+	Accepted []string `json:"accepted"`
 }
 
 func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
@@ -41,11 +39,10 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 	}
 
 	accepted := []string{}
-	alreadyInQueue := []string{}
 
 	for _, repoUrl := range repoUrls.RepoUrls {
 
-		err = addToList(apiCfg, r, repoUrl, w)
+		err = addToList(apiCfg, r, repoUrl)
 		if err != nil {
 			msg := fmt.Sprintf("error adding %s to repo_urls: %s", repoUrl, err)
 			logger.LogError(msg)
@@ -53,33 +50,17 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		accepted = append(accepted, repoUrl)
-
 	}
 
 	response := HandlerAddResponse{
-		Accepted:       accepted,
-		AlreadyInQueue: alreadyInQueue,
+		Accepted: accepted,
 	}
 
 	RespondWithJSON(w, 202, response)
 }
 
-func addToList(apiCfg *ApiConfig, r *http.Request, repoUrl string, w http.ResponseWriter) error {
+func addToList(apiCfg *ApiConfig, r *http.Request, repoUrl string) error {
 	err := apiCfg.DB.UpsertRepoURL(r.Context(), repoUrl)
 
 	return err
-}
-
-func isListed(repoUrl string, w http.ResponseWriter, r *http.Request, apiCfg *ApiConfig) (bool, error) {
-	_, err := apiCfg.DB.GetRepoURL(r.Context(), repoUrl)
-
-	if err != nil {
-		if strings.Contains(err.Error(), "sql: no rows in result set") {
-			return false, nil
-		} else {
-			return false, err
-		}
-	}
-
-	return true, nil
 }
