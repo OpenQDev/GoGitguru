@@ -8,6 +8,8 @@ bin = "tmp/main"
 full_bin = "APP_ENV=development APP_USER=air ./tmp/main"
 # Send Interrupt signal before killing process
 send_interrupt = true
+# Give the main goroutine time to shut down gracefully
+kill_delay = 5000
 
 # Excluding these files or directories
 exclude_dir = ["tmp", "repos"]
