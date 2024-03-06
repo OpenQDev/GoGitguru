@@ -10,7 +10,7 @@ SELECT * FROM repo_urls;
 -- name: UpsertRepoURL :exec
 INSERT INTO repo_urls (url, created_at, updated_at) 
 VALUES ($1, NOW(), NOW())
-ON CONFLICT (url) DO UPDATE SET updated_at = NOW() status = 'pending'::repo_status
+ON CONFLICT (url) DO UPDATE SET updated_at = NOW(), status = 'pending'::repo_status
 RETURNING *;
 
 -- name: UpdateStatusAndUpdatedAt :exec
