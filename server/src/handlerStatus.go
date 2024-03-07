@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
@@ -43,11 +44,22 @@ func (apiCfg *ApiConfig) HandlerStatus(w http.ResponseWriter, r *http.Request) {
 
 	for _, repoStatus := range repoStatuses {
 		if slices.Contains(body.RepoUrls, repoStatus.Url) {
+			// check if updatedAt is more than 1 day ago
+			oneDayAgo := time.Now().AddDate(0, 0, -1)
+			if repoStatus.UpdatedAt.Time.Before(oneDayAgo) {
+				response = append(response, HandlerStatusResponse{
+					Url:            repoStatus.Url,
+					Status:         "outdated",
+					PendingAuthors: int(repoStatus.PendingAuthors),
+				})
+				continue
+			}
 			response = append(response, HandlerStatusResponse{
 				Url:            repoStatus.Url,
 				Status:         repoStatus.Status,
 				PendingAuthors: int(repoStatus.PendingAuthors),
 			})
+
 		} else {
 			response = append(response, HandlerStatusResponse{
 				Url:            repoStatus.Url,

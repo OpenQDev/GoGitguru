@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/lib/pq"
 )
@@ -86,6 +87,7 @@ const getReposStatus = `-- name: GetReposStatus :many
 SELECT
     r.url,
     r.status,
+    r.updated_at,
     COUNT(DISTINCT c.author_email) FILTER (WHERE g.email IS NULL) AS pending_authors
 FROM
     repo_urls r
@@ -100,9 +102,10 @@ ORDER BY
 `
 
 type GetReposStatusRow struct {
-	Url            string     `json:"url"`
-	Status         RepoStatus `json:"status"`
-	PendingAuthors int64      `json:"pending_authors"`
+	Url            string       `json:"url"`
+	Status         RepoStatus   `json:"status"`
+	UpdatedAt      sql.NullTime `json:"updated_at"`
+	PendingAuthors int64        `json:"pending_authors"`
 }
 
 func (q *Queries) GetReposStatus(ctx context.Context, dollar_1 []string) ([]GetReposStatusRow, error) {
@@ -114,7 +117,12 @@ func (q *Queries) GetReposStatus(ctx context.Context, dollar_1 []string) ([]GetR
 	var items []GetReposStatusRow
 	for rows.Next() {
 		var i GetReposStatusRow
-		if err := rows.Scan(&i.Url, &i.Status, &i.PendingAuthors); err != nil {
+		if err := rows.Scan(
+			&i.Url,
+			&i.Status,
+			&i.UpdatedAt,
+			&i.PendingAuthors,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

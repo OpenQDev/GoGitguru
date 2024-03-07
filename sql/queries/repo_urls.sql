@@ -20,6 +20,7 @@ UPDATE repo_urls SET status = $1, updated_at = NOW() WHERE url = $2;
 SELECT
     r.url,
     r.status,
+    r.updated_at,
     COUNT(DISTINCT c.author_email) FILTER (WHERE g.email IS NULL) AS pending_authors
 FROM
     repo_urls r
