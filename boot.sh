@@ -24,8 +24,10 @@ goose postgres "postgres://postgres:@localhost:$POSTGRES_PORT/postgres?sslmode=d
 
 cd ../..
 
-psql -h "localhost" -U "postgres" -p $POSTGRES_PORT -f ./repos.sql
+# psql -h "localhost" -U "postgres" -p $POSTGRES_PORT -f ./repos.sql
+
+lsof -ti tcp:8000 | xargs kill
 
 # To install go air, a Go runtime with live reloads on code changes,
 # run the following command: go get -u github.com/cosmtrek/air
-cd $APP && air
+cd $APP && air -c .air.toml
