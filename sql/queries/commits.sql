@@ -35,7 +35,17 @@ INSERT INTO commits (commit_hash, author, author_email, author_date, committer_d
   unnest($8::int[]),  
   unnest($9::int[]),  
   unnest($10::varchar[])  
-);
+)ON CONFLICT (commit_hash) DO UPDATE 
+SET 
+    author = EXCLUDED.author,
+    author_email = EXCLUDED.author_email,
+    author_date = EXCLUDED.author_date,
+    committer_date = EXCLUDED.committer_date,
+    message = EXCLUDED.message,
+    insertions = EXCLUDED.insertions,
+    deletions = EXCLUDED.deletions,
+    files_changed = EXCLUDED.files_changed,
+    repo_url = EXCLUDED.repo_url;
 
 -- name: GetLatestUncheckedCommitPerAuthor :many
 SELECT DISTINCT ON (c.author_email)
