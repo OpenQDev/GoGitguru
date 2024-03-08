@@ -75,15 +75,10 @@ func StartSyncingCommits(
 			if latestCommitterDateTime.After(JAN_1_2020) {
 				startDate = latestCommitterDateTime
 			}
-			logger.LogBlue("%s already synced", repoUrl)
 
-			err = db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
-				Status: database.RepoStatusSynced,
-				Url:    repoUrl,
-			})
-
+			err = ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db)
 			if err != nil {
-				logger.LogError("error setting to synced for existing repository %s: %s", repoUrl, err)
+				logger.LogFatalRedAndExit("error while processing repository %s: %s", repoUrl, err)
 			}
 
 			continue

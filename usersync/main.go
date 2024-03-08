@@ -2,7 +2,10 @@ package main
 
 import (
 	"math/rand"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	usersync "github.com/OpenQDev/GoGitguru/usersync/src"
@@ -21,15 +24,31 @@ func main() {
 
 	logger.SetDebugMode(env.Debug)
 
-	// PRODUCTION: This runs as a CronJob on Kubernetes. Therefore, it's interval is set by the CRON_STRING parameter
-	// DEVELOPMENT: To mimic the interval, here we check for the USERSYNC_INTERVAL environment variable to periodically re-run StartSyncingUser
-
 	tokens := strings.Split(env.GhAccessTokens, ",")
 	randomToken := tokens[rand.Intn(len(tokens))]
 
+	stopChan := make(chan struct{})
+	setupSignalHandler(stopChan)
+
 	for {
-		logger.LogBlue("beginning user syncing...")
-		usersync.StartSyncingUser(database, "repos", randomToken, 10, "https://api.github.com/graphql")
-		time.Sleep(time.Duration(env.UserSyncInterval) * time.Second)
+		select {
+		case <-stopChan:
+			logger.LogBlue("shutting down gracefully...")
+			os.Exit(0)
+		default:
+			logger.LogBlue("beginning user syncing...")
+			usersync.StartSyncingUser(database, "repos", randomToken, 10, "https://api.github.com/graphql")
+			time.Sleep(time.Duration(env.UserSyncInterval) * time.Second)
+		}
 	}
+}
+
+func setupSignalHandler(stopChan chan<- struct{}) {
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT)
+
+	go func() {
+		<-sigChan
+		close(stopChan)
+	}()
 }
