@@ -18,6 +18,7 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 	ref, _ := r.Head()
 	commits, _ := r.Log(&git.LogOptions{From: ref.Hash()})
 
+	fmt.Println("creating commit list for", repoDir)
 	commitList := make([]*object.Commit, 0)
 	err = commits.ForEach(func(c *object.Commit) error {
 		commitList = append(commitList, c)
@@ -27,11 +28,13 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 		return nil, nil, err
 	}
 
+	fmt.Println("reversing commit list for", repoDir)
 	slices.Reverse(commitList)
 
 	datesPresentCommits := []int64{}
 	datesRemovedCommits := []int64{}
 
+	fmt.Println("range over commits", repoDir)
 	for _, c := range commitList {
 		for _, depFilePath := range depFilePaths {
 			if file, err := c.File(depFilePath); err == nil {
@@ -55,6 +58,7 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 		}
 	}
 
+	fmt.Println("assemble arrays for", repoDir)
 	var presentArray []int64
 	if len(datesPresentCommits) > 0 {
 		// we only want to know when the dependency was first added
