@@ -40,7 +40,7 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 
 	repoDir := filepath.Join(prefixPath, organization, repo)
 
-	fmt.Println("gitutil.IsGitRepository(prefixPath, organization, repo)", gitutil.IsGitRepository(prefixPath, organization, repo))
+	fmt.Println("is git repo for ", repoDir, gitutil.IsGitRepository(prefixPath, organization, repo))
 
 	if !gitutil.IsGitRepository(prefixPath, organization, repo) {
 		err := gitutil.CloneRepo(prefixPath, organization, repo)
