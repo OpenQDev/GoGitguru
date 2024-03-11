@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 func GitDependencyHistory(repoDir string, dependencySearched string, depFilePaths []string) ([]int64, []int64, error) {
-	fmt.Println("running for", repoDir)
+	fmt.Println(time.Now().Format(time.RFC3339), "running for", repoDir)
 	r, err := git.PlainOpen(repoDir)
 	if err != nil {
 		return nil, nil, err
@@ -80,6 +81,6 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 		removedArray = []int64{}
 	}
 
-	fmt.Println("RAN FOR", repoDir)
+	fmt.Println(time.Now().Format(time.RFC3339), "RAN FOR", repoDir)
 	return presentArray, removedArray, nil
 }
