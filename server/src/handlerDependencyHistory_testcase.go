@@ -39,10 +39,13 @@ func largeFrontend() HandlerDependencyHistoryTestCase {
 		expectedStatus: http.StatusOK,
 		requestBody: DependencyHistoryRequest{
 			RepoUrl:            openqFrontend,
-			FilePaths:          []string{},
-			DependencySearched: "web3",
+			FilePaths:          []string{"package.json", ".config.", ".yaml", ".yml", "truffle", ".toml", "network", "hardhat", "deploy", "go.mod", "composer.json"},
+			DependencySearched: "ethers",
 		},
-		expectedDependencyHistroyResponse: DependencyHistoryResponse{},
+		expectedDependencyHistroyResponse: DependencyHistoryResponse{
+			DatesAdded:   []string{"2021-08-25T13:39:56-05:00"},
+			DatesRemoved: []string{},
+		},
 	}
 }
 

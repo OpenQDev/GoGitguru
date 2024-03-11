@@ -79,8 +79,5 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 		DatesRemoved: datesRemovedISO,
 	}
 
-	fmt.Println("datesRemovedISO", datesAddedISO)
-	fmt.Println("datesRemovedISO", datesRemovedISO)
-
 	RespondWithJSON(w, http.StatusOK, dependencyHistoryResponse)
 }
