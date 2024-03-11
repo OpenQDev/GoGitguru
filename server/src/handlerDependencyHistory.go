@@ -23,7 +23,6 @@ type DependencyHistoryResponse struct {
 }
 
 func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("IN DEP HANDLER")
 	var dependencyHistoryResponse DependencyHistoryResponse
 
 	var body DependencyHistoryRequest
@@ -40,6 +39,8 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 	repo = strings.ToLower(repo)
 
 	repoDir := filepath.Join(prefixPath, organization, repo)
+
+	fmt.Println("gitutil.IsGitRepository(prefixPath, organization, repo)", gitutil.IsGitRepository(prefixPath, organization, repo))
 
 	if !gitutil.IsGitRepository(prefixPath, organization, repo) {
 		err := gitutil.CloneRepo(prefixPath, organization, repo)
@@ -81,5 +82,5 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 	fmt.Println("datesRemovedISO", datesAddedISO)
 	fmt.Println("datesRemovedISO", datesRemovedISO)
 
-	RespondWithJSON(w, 200, dependencyHistoryResponse)
+	RespondWithJSON(w, http.StatusOK, dependencyHistoryResponse)
 }
