@@ -23,6 +23,7 @@ type DependencyHistoryResponse struct {
 }
 
 func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("IN DEP HANDLER")
 	var dependencyHistoryResponse DependencyHistoryResponse
 
 	var body DependencyHistoryRequest
@@ -76,6 +77,9 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 		DatesAdded:   datesAddedISO,
 		DatesRemoved: datesRemovedISO,
 	}
+
+	fmt.Println("datesRemovedISO", datesAddedISO)
+	fmt.Println("datesRemovedISO", datesRemovedISO)
 
 	RespondWithJSON(w, 200, dependencyHistoryResponse)
 }
