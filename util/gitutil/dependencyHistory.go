@@ -1,6 +1,7 @@
 package gitutil
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 
@@ -9,6 +10,7 @@ import (
 )
 
 func GitDependencyHistory(repoDir string, dependencySearched string, depFilePaths []string) ([]int64, []int64, error) {
+	fmt.Println("running for", repoDir)
 	r, err := git.PlainOpen(repoDir)
 	if err != nil {
 		return nil, nil, err
@@ -74,5 +76,6 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 		removedArray = []int64{}
 	}
 
+	fmt.Println("RAN FOR", repoDir)
 	return presentArray, removedArray, nil
 }
