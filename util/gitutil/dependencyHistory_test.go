@@ -40,13 +40,13 @@ func TestGitDependencyHistory(t *testing.T) {
 		{"Added after init, never removed", dependencySearched, depFilePaths, expectedDatesAddedReturn, expectedDatesRemovedReturn, repoDir, false},
 		{"Added after init, then removed", dependencySearched, depFilePaths, expectedDatesAddedReturnChurned, expectedDatesRemovedReturnChurned, repoDirChurned, false},
 		{"Added after init, then removed, then re-added", dependencySearched, depFilePaths, expectedDatesAddedReturnChurnedReturned, expectedDatesRemovedReturnChurnedReturned, repoDirChurnedReturned, false},
-		{"large frontend", "web3", depFilePathsFE, []int64{1635528734}, []int64{}, repoDirFrontend, false},
+		{"large frontend", "web3", depFilePathsFE, []int64{1635888145}, []int64{}, repoDirFrontend, false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				"large frontend",
+				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
 
 			datesAdded, datesRemoved, err := GitDependencyHistory(tt.repoDir, tt.dependencySearched, tt.depFilePaths)

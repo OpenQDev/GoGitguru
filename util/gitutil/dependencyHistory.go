@@ -37,7 +37,7 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 
 	fmt.Println("range over ", len(commitList), "commits", repoDir)
 	commitNumber := 0
-	commitWindow := 100
+	commitWindow := 50
 	for i := 0; i < len(commitList); i += commitWindow {
 		c := commitList[i]
 		commitNumber += commitWindow
@@ -50,16 +50,22 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 				}
 
 				// Convert both contents and dependencySearched to lowercase for case-insensitive comparison
-				contentsLower := strings.ToLower(contents)
-				dependencySearchedLower := strings.ToLower(dependencySearched)
+				datesPresentCommits, datesRemovedCommits = checkForDependencyInFile(contents, dependencySearched, datesPresentCommits, c, datesRemovedCommits)
+			}
+		}
+	}
 
-				if strings.Contains(contentsLower, dependencySearchedLower) {
-					datesPresentCommits = append(datesPresentCommits, c.Committer.When.Unix())
-				} else {
-					if len(datesPresentCommits) != 0 {
-						datesRemovedCommits = append(datesRemovedCommits, c.Committer.When.Unix())
-					}
+	if len(commitList)%commitWindow != 0 {
+		c := commitList[len(commitList)-1]
+		for _, depFilePath := range depFilePaths {
+			if file, err := c.File(depFilePath); err == nil {
+				contents, err := file.Contents()
+				if err != nil {
+					return nil, nil, err
 				}
+
+				// Convert both contents and dependencySearched to lowercase for case-insensitive comparison
+				datesPresentCommits, datesRemovedCommits = checkForDependencyInFile(contents, dependencySearched, datesPresentCommits, c, datesRemovedCommits)
 			}
 		}
 	}
@@ -88,4 +94,18 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 
 	fmt.Println(time.Now().Format(time.RFC3339), "RAN FOR", repoDir)
 	return presentArray, removedArray, nil
+}
+
+func checkForDependencyInFile(contents string, dependencySearched string, datesPresentCommits []int64, c *object.Commit, datesRemovedCommits []int64) ([]int64, []int64) {
+	contentsLower := strings.ToLower(contents)
+	dependencySearchedLower := strings.ToLower(dependencySearched)
+
+	if strings.Contains(contentsLower, dependencySearchedLower) {
+		datesPresentCommits = append(datesPresentCommits, c.Committer.When.Unix())
+	} else {
+		if len(datesPresentCommits) != 0 {
+			datesRemovedCommits = append(datesRemovedCommits, c.Committer.When.Unix())
+		}
+	}
+	return datesPresentCommits, datesRemovedCommits
 }
