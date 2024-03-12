@@ -3,7 +3,6 @@ package gitutil
 import (
 	"fmt"
 	"slices"
-	"strings"
 	"time"
 
 	"github.com/go-git/go-git/v5"
@@ -40,27 +39,27 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 	for _, c := range commitList {
 		commitNumber++
 		fmt.Printf("Commit number %d: %s\n", commitNumber, c.Hash)
-		for _, __ := range depFilePaths {
-			fmt.Println(__)
-			if true {
-				contents := "hi"
+		for _, depFilePath := range depFilePaths {
+			depFilePath = depFilePath + ""
+			// if file, err := c.File(depFilePath); err == nil {
+			// 	contents, err := file.Contents()
+			// 	fmt.Println(contents)
+			// 	if err != nil {
+			// 		return nil, nil, err
+			// 	}
 
-				// if err != nil {
-				// 	return nil, nil, err
-				// }
+			// 	// Convert both contents and dependencySearched to lowercase for case-insensitive comparison
+			// 	contentsLower := strings.ToLower(contents)
+			// 	dependencySearchedLower := strings.ToLower(dependencySearched)
 
-				// Convert both contents and dependencySearched to lowercase for case-insensitive comparison
-				contentsLower := strings.ToLower(contents)
-				dependencySearchedLower := strings.ToLower(dependencySearched)
-
-				if strings.Contains(contentsLower, dependencySearchedLower) {
-					datesPresentCommits = append(datesPresentCommits, c.Committer.When.Unix())
-				} else {
-					if len(datesPresentCommits) != 0 {
-						datesRemovedCommits = append(datesRemovedCommits, c.Committer.When.Unix())
-					}
-				}
-			}
+			// 	if strings.Contains(contentsLower, dependencySearchedLower) {
+			// 		datesPresentCommits = append(datesPresentCommits, c.Committer.When.Unix())
+			// 	} else {
+			// 		if len(datesPresentCommits) != 0 {
+			// 			datesRemovedCommits = append(datesRemovedCommits, c.Committer.When.Unix())
+			// 		}
+			// 	}
+			// }
 		}
 	}
 
