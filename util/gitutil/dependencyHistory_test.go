@@ -46,7 +46,7 @@ func TestGitDependencyHistory(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				testhelpers.RUN_ALL_TESTS,
+				"large frontend",
 			), tt.name)
 
 			datesAdded, datesRemoved, err := GitDependencyHistory(tt.repoDir, tt.dependencySearched, tt.depFilePaths)
