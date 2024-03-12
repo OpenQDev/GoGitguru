@@ -35,8 +35,9 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 	datesPresentCommits := []int64{}
 	datesRemovedCommits := []int64{}
 
-	fmt.Println("range over commits", repoDir)
+	fmt.Println("range over ", len(commitList), "commits", repoDir)
 	for _, c := range commitList {
+		fmt.Println(c.Hash)
 		for _, depFilePath := range depFilePaths {
 			if file, err := c.File(depFilePath); err == nil {
 				contents, err := file.Contents()
