@@ -38,7 +38,7 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 
 	fmt.Println("range over ", len(commitList), "commits", repoDir)
 	commitNumber := 0
-	commitWindow := int(math.Floor(float64(len(commitList)) * 0.01))
+	commitWindow := getCommitWindow(len(commitList))
 	for i := 0; i < len(commitList); i += commitWindow {
 		c := commitList[i]
 		commitNumber += commitWindow
@@ -109,4 +109,8 @@ func checkForDependencyInFile(contents string, dependencySearched string, datesP
 		}
 	}
 	return datesPresentCommits, datesRemovedCommits
+}
+
+func getCommitWindow(lenCommitList int) int {
+	return int(math.Min(1, math.Floor(float64(lenCommitList)*0.01)))
 }
