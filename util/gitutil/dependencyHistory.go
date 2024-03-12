@@ -37,8 +37,10 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 
 	fmt.Println("range over ", len(commitList), "commits", repoDir)
 	commitNumber := 0
-	for _, c := range commitList {
-		commitNumber++
+	commitWindow := 100
+	for i := 0; i < len(commitList); i += commitWindow {
+		c := commitList[i]
+		commitNumber += commitWindow
 		fmt.Printf("Commit number %d: %s\n", commitNumber, c.Hash)
 		for _, depFilePath := range depFilePaths {
 			if file, err := c.File(depFilePath); err == nil {
