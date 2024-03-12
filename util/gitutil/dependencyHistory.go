@@ -2,6 +2,7 @@ package gitutil
 
 import (
 	"fmt"
+	"math"
 	"slices"
 	"strings"
 	"time"
@@ -37,7 +38,7 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 
 	fmt.Println("range over ", len(commitList), "commits", repoDir)
 	commitNumber := 0
-	commitWindow := 50
+	commitWindow := int(math.Floor(float64(len(commitList)) * 0.01))
 	for i := 0; i < len(commitList); i += commitWindow {
 		c := commitList[i]
 		commitNumber += commitWindow
