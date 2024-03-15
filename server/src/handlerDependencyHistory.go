@@ -40,6 +40,8 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 
 	repoDir := filepath.Join(prefixPath, organization, repo)
 
+	fmt.Println("is git repo for ", repoDir, gitutil.IsGitRepository(prefixPath, organization, repo))
+
 	if !gitutil.IsGitRepository(prefixPath, organization, repo) {
 		err := gitutil.CloneRepo(prefixPath, organization, repo)
 		if err != nil {
@@ -77,5 +79,5 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 		DatesRemoved: datesRemovedISO,
 	}
 
-	RespondWithJSON(w, 200, dependencyHistoryResponse)
+	RespondWithJSON(w, http.StatusOK, dependencyHistoryResponse)
 }

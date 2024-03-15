@@ -12,9 +12,11 @@ func TestGitDependencyHistory(t *testing.T) {
 	repoDir := "./mock/openqdev/dephistory-test-repo"
 	repoDirChurned := "./mock/openqdev/dephistory-test-repo-churned"
 	repoDirChurnedReturned := "./mock/openqdev/dephistory-test-repo-churned-returned"
+	repoDirFrontend := "./mock/openqdev/openq-frontend"
 
 	dependencySearched := "chai"
 	depFilePaths := []string{"package.json"}
+	depFilePathsFE := []string{"package.json", ".config.", ".yaml", ".yml", "truffle", ".toml", "network", "hardhat", "deploy", "go.mod", "composer.json"}
 
 	expectedDatesAddedReturn := []int64{1698773760}
 	expectedDatesRemovedReturn := []int64{}
@@ -38,12 +40,13 @@ func TestGitDependencyHistory(t *testing.T) {
 		{"Added after init, never removed", dependencySearched, depFilePaths, expectedDatesAddedReturn, expectedDatesRemovedReturn, repoDir, false},
 		{"Added after init, then removed", dependencySearched, depFilePaths, expectedDatesAddedReturnChurned, expectedDatesRemovedReturnChurned, repoDirChurned, false},
 		{"Added after init, then removed, then re-added", dependencySearched, depFilePaths, expectedDatesAddedReturnChurnedReturned, expectedDatesRemovedReturnChurnedReturned, repoDirChurnedReturned, false},
+		{"large frontend", "web3", depFilePathsFE, []int64{1635888145}, []int64{}, repoDirFrontend, false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				testhelpers.RUN_ALL_TESTS,
+				"large frontend",
 			), tt.name)
 
 			datesAdded, datesRemoved, err := GitDependencyHistory(tt.repoDir, tt.dependencySearched, tt.depFilePaths)

@@ -28,8 +28,30 @@ func isNotAGitRepository() HandlerDependencyHistoryTestCase {
 	}
 }
 
+func largeFrontend() HandlerDependencyHistoryTestCase {
+	const openqFrontend = "https://github.com/OpenQDev/OpenQ-Frontend"
+
+	LARGE_FRONTEND := "LARGE_FRONTEND"
+
+	return HandlerDependencyHistoryTestCase{
+		name:           LARGE_FRONTEND,
+		shouldError:    false,
+		expectedStatus: http.StatusOK,
+		requestBody: DependencyHistoryRequest{
+			RepoUrl:            openqFrontend,
+			FilePaths:          []string{"package.json", ".config.", ".yaml", ".yml", "truffle", ".toml", "network", "hardhat", "deploy", "go.mod", "composer.json"},
+			DependencySearched: "ethers",
+		},
+		expectedDependencyHistroyResponse: DependencyHistoryResponse{
+			DatesAdded:   []string{"2021-08-25T13:39:56-05:00"},
+			DatesRemoved: []string{},
+		},
+	}
+}
+
 func HandlerDependencyHistoryTestCases() []HandlerDependencyHistoryTestCase {
 	return []HandlerDependencyHistoryTestCase{
 		isNotAGitRepository(),
+		largeFrontend(),
 	}
 }
