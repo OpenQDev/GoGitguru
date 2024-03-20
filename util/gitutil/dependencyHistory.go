@@ -111,5 +111,5 @@ func checkForDependencyInFile(contents string, dependencySearched string, datesP
 }
 
 func getCommitWindow(lenCommitList int) int {
-	return int(math.Max(1, math.Floor(float64(lenCommitList)*0.01)))
+	return int(math.Max(1, math.Floor(float64(lenCommitList)*0.05)))
 }
