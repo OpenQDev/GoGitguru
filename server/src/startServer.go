@@ -2,14 +2,17 @@ package server
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/ratelimit"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 )
 
 func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
+	rateLimiter := ratelimit.NewRateLimiter(5, 10*time.Second)
 	// Initialize a primary Chi router
 	// This is where global middleware will be attached
 	router := chi.NewRouter()
@@ -42,7 +45,7 @@ func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
 	v1Router.Post("/users/github/{login}/commits", apiCfg.HandlerGithubUserCommits)
 
 	// DEPENDENCY HISTORY
-	v1Router.Post("/dependency-history", apiCfg.HandlerDependencyHistory)
+	v1Router.With(ratelimit.RateLimitMiddleware(rateLimiter)).Post("/dependency-history", apiCfg.HandlerDependencyHistory)
 
 	// DEPENDENCY HISTORY
 	v1Router.Post("/status", apiCfg.HandlerStatus)
