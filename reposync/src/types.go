@@ -24,3 +24,9 @@ type CommitObject struct {
 	FilesChanged  []int32
 	RepoUrls      []string
 }
+type RepoDependencyHistoryObject struct {
+	DependencyId     []int32
+	DateFirstPresent []int64
+	DateLastRemoved  []int64
+	RepoUrls         []string
+}

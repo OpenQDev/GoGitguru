@@ -1,7 +1,10 @@
 package reposync
 
 import (
+	"context"
 	"fmt"
+	"path/filepath"
+	"slices"
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
@@ -23,8 +26,30 @@ func StoreGitLogsForRepo(params GitLogParams) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	dependencies, err := params.db.GetDependencies(context.Background())
+	if err != nil {
+		println("error getting dependencies")
+	}
+	println(len(dependencies), "dependencies found")
+	dependenciesFiles := make([]string, len(dependencies))
+	dependencyNames := make([]string, len(dependencies))
+	for i, dependency := range dependencies {
 
-	log, err := gitutil.GetCommitHistory(r, params.fromCommitDate)
+		if slices.Contains(dependenciesFiles, dependency.DependencyFile) {
+			dependenciesFiles[i] = dependency.DependencyFile
+		}
+		if slices.Contains(dependencyNames, dependency.DependencyName) {
+			dependencyNames[i] = dependency.DependencyName
+		}
+	}
+
+	repoDir := filepath.Join(params.prefixPath, params.organization, params.repo)
+	allFilePaths, err := gitutil.GitDependencyFiles(repoDir, dependenciesFiles)
+
+	dependencyHistory, log, err := gitutil.GitDependencyHistory(repoDir, dependencyNames, allFilePaths, dependencies)
+
+	dependencyHistoryObjects, err := PrepareDependencyHistoryForBulkInsertion(dependencyHistory, dependencies, params.repoUrl)
+
 	if err != nil {
 		return 0, err
 	}
@@ -44,6 +69,10 @@ func StoreGitLogsForRepo(params GitLogParams) (int, error) {
 
 	if err != nil {
 		return 0, err
+	}
+	err = BulkInsertDependencyHistory(params.db, dependencyHistoryObjects.RepoUrls, dependencyHistoryObjects.DependencyId, dependencyHistoryObjects.DateFirstPresent, dependencyHistoryObjects.DateLastRemoved)
+	if err != nil {
+		return 0, fmt.Errorf("error storing dependency history for %s: %s", params.repoUrl, err)
 	}
 
 	err = BulkInsertCommits(

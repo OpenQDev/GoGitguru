@@ -36,6 +36,7 @@ func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
 
 	// REPOSITORY
 	v1Router.Post("/add", apiCfg.HandlerAdd)
+	v1Router.Post("/add-dependency", apiCfg.HandlerAddDependency)
 	v1Router.Get("/repos/github/{owner}/{name}", apiCfg.HandlerGithubRepoByOwnerAndName)
 	v1Router.Get("/repos/github/{owner}", apiCfg.HandlerGithubReposByOwner)
 	v1Router.Post("/repos/commits", apiCfg.HandlerRepoCommits)
@@ -46,6 +47,7 @@ func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
 
 	// DEPENDENCY HISTORY
 	v1Router.With(ratelimit.RateLimitMiddleware(rateLimiter)).Post("/dependency-history", apiCfg.HandlerDependencyHistory)
+	v1Router.Post("/user-dependency-history", apiCfg.HandlerUserDependencyHistory)
 
 	// DEPENDENCY HISTORY
 	v1Router.Post("/status", apiCfg.HandlerStatus)
