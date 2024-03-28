@@ -56,8 +56,18 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 		RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to determine if file paths exist dependency-history: %s", err))
 		return
 	}
+	dependencySearchedArray := []string{body.DependencySearched}
+	dependencies, err := apiCfg.DB.GetDependenciesByNames(r.Context(), body.DependencySearched)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error getting dependencies: %s", err))
+		return
+	}
+	dependencyHistory, _, err := gitutil.GitDependencyHistory(repoDir, dependencySearchedArray, allFilePaths, dependencies)
+	singleDependencyHistory := dependencyHistory[dependencies[0].InternalID]
 
-	datesAddedCommits, datesRemovedCommits, err := gitutil.GitDependencyHistory(repoDir, body.DependencySearched, allFilePaths)
+	datesAddedCommits := []int64{singleDependencyHistory.DateFirstPresent}
+	datesRemovedCommits := []int64{singleDependencyHistory.DateLastRemoved}
+
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error getting dependency history: %s", err))
 		return

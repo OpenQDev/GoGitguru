@@ -8,6 +8,10 @@ RUN git config --global --add safe.directory '*'
 
 RUN git config --system --add safe.directory '*'
 
+# adds default user for git
+RUN git config --global user.email info@openq.dev
+RUN git config --global user.name "OpenQ Default"
+
 WORKDIR /app/server
 
 RUN go mod download
