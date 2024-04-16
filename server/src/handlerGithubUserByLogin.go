@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
 
@@ -21,7 +22,7 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 		return
 	}
 
-	login := chi.URLParam(r, "login")
+	login := strings.ToLower(chi.URLParam(r, "login"))
 
 	userExists, err := apiConfig.DB.CheckGithubUserExists(context.Background(), login)
 	if err != nil {
