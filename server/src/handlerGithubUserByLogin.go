@@ -57,10 +57,15 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusNotFound {
+		RespondWithError(w, http.StatusNotFound, "GitHub user not found.")
+		return
+	}
+
 	var user User
 	err = marshaller.ReaderToType(resp.Body, &user)
 	if err != nil {
-		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to decode response.: %s", err))
+		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to decode response: %s", err))
 		return
 	}
 
