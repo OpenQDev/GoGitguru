@@ -2,6 +2,7 @@ package usersync
 
 import (
 	"database/sql"
+	"strings"
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
@@ -11,7 +12,7 @@ func convertAuthorToInsertUserParams(author GithubGraphQLAuthor, createdAt time.
 	authorParams := database.InsertUserParams{
 		GithubRestID:    int32(author.User.GithubRestID),
 		GithubGraphqlID: author.User.GithubGraphqlID,
-		Login:           author.User.Login,
+		Login:           strings.ToLower(author.User.Login),
 		Name:            sql.NullString{String: author.User.Name, Valid: true},
 		Email:           sql.NullString{String: author.User.Email, Valid: true},
 		AvatarUrl:       sql.NullString{String: author.User.AvatarURL, Valid: true},
