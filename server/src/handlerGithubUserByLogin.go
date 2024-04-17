@@ -28,6 +28,10 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 		RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+	fmt.Println("login")
+	fmt.Println(login)
+	fmt.Println("userExists")
+	fmt.Println(userExists)
 
 	if userExists {
 		user, err := apiConfig.DB.GetGithubUser(context.Background(), login)
