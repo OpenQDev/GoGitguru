@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
 
@@ -21,7 +22,7 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 		return
 	}
 
-	login := chi.URLParam(r, "login")
+	login := strings.ToLower(chi.URLParam(r, "login"))
 
 	userExists, err := apiConfig.DB.CheckGithubUserExists(context.Background(), login)
 	if err != nil {
@@ -60,10 +61,15 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusNotFound {
+		RespondWithError(w, http.StatusNotFound, "GitHub user not found.")
+		return
+	}
+
 	var user User
 	err = marshaller.ReaderToType(resp.Body, &user)
 	if err != nil {
-		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to decode response.: %s", err))
+		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to decode response: %s", err))
 		return
 	}
 

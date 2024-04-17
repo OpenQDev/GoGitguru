@@ -2,6 +2,7 @@ package server
 
 import (
 	"database/sql"
+	"strings"
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
@@ -14,7 +15,7 @@ func ConvertServerUserToInsertUserParams(user User) database.InsertUserParams {
 	return database.InsertUserParams{
 		GithubRestID:    int32(user.GithubRestID),
 		GithubGraphqlID: user.GithubGraphqlID,
-		Login:           user.Login,
+		Login:           strings.ToLower(user.Login), // we lowercase the login before user exists check, and before insertion
 		Name:            sql.NullString{String: user.Name, Valid: true},
 		Email:           sql.NullString{String: user.Email, Valid: true},
 		AvatarUrl:       sql.NullString{String: user.AvatarURL, Valid: true},

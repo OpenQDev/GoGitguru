@@ -47,6 +47,11 @@ func (apiConfig *ApiConfig) HandlerGithubReposByOwner(w http.ResponseWriter, r *
 			return
 		}
 
+		if resp.StatusCode == http.StatusNotFound {
+			RespondWithError(w, http.StatusNotFound, "GitHub owner not found.")
+			return
+		}
+
 		var restReposResponse []githubRest.GithubRestRepo
 		err = marshaller.ReaderToType(resp.Body, &restReposResponse)
 		if err != nil {
