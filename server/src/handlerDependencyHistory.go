@@ -56,21 +56,25 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 		RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to determine if file paths exist dependency-history: %s", err))
 		return
 	}
+	
+	dependencies := []string{"eslint", "ethers", "threejs", body.DependencySearched}
 
-	datesAddedCommits, datesRemovedCommits, err := gitutil.GitDependencyHistory(repoDir, body.DependencySearched, allFilePaths)
+	datesAddedCommits, datesRemovedCommits, err := gitutil.GitDependencyHistory(repoDir, dependencies, allFilePaths)
+	currentDatesAdded := datesAddedCommits[body.DependencySearched]
+	currentDatesRemoved := datesRemovedCommits[body.DependencySearched]
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error getting dependency history: %s", err))
 		return
 	}
 
 	// Convert Unix time to ISO strings
-	datesAddedISO := make([]string, len(datesAddedCommits))
-	for i, v := range datesAddedCommits {
+	datesAddedISO := make([]string, len(currentDatesAdded))
+	for i, v := range currentDatesAdded {
 		datesAddedISO[i] = time.Unix(v, 0).Format(time.RFC3339)
 	}
 
-	datesRemovedISO := make([]string, len(datesRemovedCommits))
-	for i, v := range datesRemovedCommits {
+	datesRemovedISO := make([]string, len(currentDatesRemoved))
+	for i, v := range currentDatesRemoved {
 		datesRemovedISO[i] = time.Unix(v, 0).Format(time.RFC3339)
 	}
 
