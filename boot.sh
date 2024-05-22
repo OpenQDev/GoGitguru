@@ -6,7 +6,7 @@ docker stop gitguru-postgres >/dev/null 2>/dev/null
 docker rm gitguru-postgres >/dev/null 2>/dev/null
 
 POSTGRES_PORT=5432
-APP=${1:-"reposync"}
+APP=${1:-"server"}
 
 # echo "Starting new container: $(docker run --name gitguru-postgres -d -e POSTGRES_HOST_AUTH_METHOD=trust -p $POSTGRES_PORT:5432 -v ./data:/var/lib/postgresql/data postgres)"
 echo "Starting new container: $(docker run --name gitguru-postgres -d -e POSTGRES_HOST_AUTH_METHOD=trust -p $POSTGRES_PORT:5432 postgres)"
