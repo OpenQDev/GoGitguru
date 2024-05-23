@@ -49,9 +49,31 @@ func largeFrontend() HandlerDependencyHistoryTestCase {
 	}
 }
 
+func linea() HandlerDependencyHistoryTestCase {
+	const linea = "https://github.com/compound-finance/comet"
+
+	LINEA := "LINEA"
+
+	return HandlerDependencyHistoryTestCase{
+		name:           LINEA,
+		shouldError:    false,
+		expectedStatus: http.StatusOK,
+		requestBody: DependencyHistoryRequest{
+			RepoUrl:            linea,
+			FilePaths:          []string{"hardhat.config"},
+			DependencySearched: "linea",
+		},
+		expectedDependencyHistroyResponse: DependencyHistoryResponse{
+			DatesAdded:   []string{"2024-04-10T18:40:37-05:00"},
+			DatesRemoved: []string{},
+		},
+	}
+}
+
 func HandlerDependencyHistoryTestCases() []HandlerDependencyHistoryTestCase {
 	return []HandlerDependencyHistoryTestCase{
 		isNotAGitRepository(),
 		largeFrontend(),
+		linea(),
 	}
 }
