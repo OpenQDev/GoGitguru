@@ -54,19 +54,18 @@ func GitDependencyHistory(repoDir string, dependencySearched string, depFilePath
 		}
 	}
 
-	if len(commitList)%commitWindow != 0 {
-		c := commitList[len(commitList)-1]
-		fmt.Printf("Commit number %d: %s\n", len(commitList)-1, c.Hash)
-		for _, depFilePath := range depFilePaths {
-			if file, err := c.File(depFilePath); err == nil {
-				contents, err := file.Contents()
-				if err != nil {
-					return nil, nil, err
-				}
-
-				// Convert both contents and dependencySearched to lowercase for case-insensitive comparison
-				datesPresentCommits, datesRemovedCommits = checkForDependencyInFile(contents, dependencySearched, datesPresentCommits, c, datesRemovedCommits)
+	// always check last commit
+	c := commitList[len(commitList)-1]
+	fmt.Printf("Commit number %d: %s\n", len(commitList)-1, c.Hash)
+	for _, depFilePath := range depFilePaths {
+		if file, err := c.File(depFilePath); err == nil {
+			contents, err := file.Contents()
+			if err != nil {
+				return nil, nil, err
 			}
+
+			// Convert both contents and dependencySearched to lowercase for case-insensitive comparison
+			datesPresentCommits, datesRemovedCommits = checkForDependencyInFile(contents, dependencySearched, datesPresentCommits, c, datesRemovedCommits)
 		}
 	}
 
