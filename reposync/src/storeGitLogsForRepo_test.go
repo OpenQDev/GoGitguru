@@ -11,13 +11,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestStoreGitLogsForRepo(t *testing.T) {
+func TestStoreGitLogsAndDepsHistoryForRepo(t *testing.T) {
 	// ARRANGE - GLOBAL
 	prefixPath := "mock"
 	repo := "OpenQ-DRM-TestRepo"
 
 	// ARRANGE - TESTS
-	tests := StoreGitLogsForRepoTestCases()
+	tests := StoreGitLogsAndDepsHistoryForRepoTestCases()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -30,7 +30,7 @@ func TestStoreGitLogsForRepo(t *testing.T) {
 
 			tt.setupMock(mock, tt.gitLogs, tt.repoUrl)
 
-			commitCount, err := StoreGitLogsForRepo(GitLogParams{prefixPath, organization, repo, tt.repoUrl, tt.fromCommitDate, queries})
+			commitCount, err := StoreGitLogsAndDepsHistoryForRepo(GitLogParams{prefixPath, organization, repo, tt.repoUrl, tt.fromCommitDate, queries})
 			if err != nil && tt.shouldError == false {
 				t.Errorf("there was an error storing this commit: %v - the error was: %s", commitCount, err)
 			}

@@ -1,16 +1,21 @@
 @echo off
-REM Remove existing postgres container
-docker stop gitguru-postgres >nul 2>nul
-docker rm gitguru-postgres >nul 2>nul
-
 
 SET APP=%1
 SET POSTGRES_PORT=5433
-IF "%APP%"=="" SET APP="reposync"
+IF "%APP%"=="" SET APP="server"
 
-REM Start new container
-echo Starting new container: 
-docker run --name gitguru-postgres -d -e POSTGRES_HOST_AUTH_METHOD=trust -p %POSTGRES_PORT%:5432 postgres
+docker inspect gitguru-postgres >nul 2>nul
+if errorlevel 1 (
+    REM Remove existing postgres container
+    docker stop gitguru-postgres >nul 2>nul
+    docker rm gitguru-postgres >nul 2>nul
+
+    REM Start new container
+    echo Starting new container: 
+    docker run --name gitguru-postgres -d -e POSTGRES_HOST_AUTH_METHOD=trust -p %POSTGRES_PORT%:5432 postgres
+) else (
+    echo Postgres container is already running
+)
 :retry
 psql -h "localhost" -U "postgres" -p %POSTGRES_PORT% -c \q >nul 2>nul
 if errorlevel 1 goto retry

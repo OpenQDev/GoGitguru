@@ -1,7 +1,10 @@
 package reposync
 
 import (
+	"context"
 	"fmt"
+	"path/filepath"
+	"slices"
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
@@ -18,13 +21,38 @@ type GitLogParams struct {
 	db             *database.Queries
 }
 
-func StoreGitLogsForRepo(params GitLogParams) (int, error) {
-	r, err := gitutil.OpenGitRepo(params.prefixPath, params.organization, params.repo)
+func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams) (int, error) {
+	
+
+	dependencies, err := params.db.GetDependencies(context.Background())
+	if err != nil {
+		println("error getting dependencies")
+	}
+	dependenciesFiles := make([]string, len(dependencies))
+	dependencyNames := make([]string, len(dependencies))
+	for i, dependency := range dependencies {
+
+		if slices.Contains(dependenciesFiles, dependency.DependencyFile) {
+			dependenciesFiles[i] = dependency.DependencyFile
+		}
+		if slices.Contains(dependencyNames, dependency.DependencyName) {
+			dependencyNames[i] = dependency.DependencyName
+		}
+	}
+
+	repoDir := filepath.Join(params.prefixPath, params.organization, params.repo)
 	if err != nil {
 		return 0, err
 	}
 
-	log, err := gitutil.GetCommitHistory(r, params.fromCommitDate)
+	dependencyHistory, log, err := gitutil.GitDependencyHistory(repoDir,  dependencies)
+	if(err != nil) {
+		return 0, err
+	}
+	println("dependency history", len(dependencyHistory))
+
+	dependencyHistoryObjects, err := PrepareDependencyHistoryForBulkInsertion(dependencyHistory, dependencies, params.repoUrl)
+
 	if err != nil {
 		return 0, err
 	}
@@ -45,23 +73,15 @@ func StoreGitLogsForRepo(params GitLogParams) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-
-	err = BulkInsertCommits(
-		params.db,
-		commitObjects.CommitHash,
-		commitObjects.Author,
-		commitObjects.AuthorEmail,
-		commitObjects.AuthorDate,
-		commitObjects.CommitterDate,
-		commitObjects.Message,
-		commitObjects.Insertions,
-		commitObjects.Deletions,
-		commitObjects.FilesChanged,
-		commitObjects.RepoUrls,
-	)
+	err = BulkInsertDependencyHistory(params.db, dependencyHistoryObjects.RepoUrls, dependencyHistoryObjects.DependencyId, dependencyHistoryObjects.DateFirstPresent, dependencyHistoryObjects.DateLastRemoved)
 	if err != nil {
-		return 0, fmt.Errorf("error storing commits for %s: %s", params.repoUrl, err)
+		return 0, fmt.Errorf("error storing dependency history for %s: %s", params.repoUrl, err)
+	}
+	for commitIndex := 0; commitIndex < numberOfCommits; commitIndex++ {
+		println(commitObjects.RepoUrls[commitIndex])
 	}
 
-	return numberOfCommits, nil
+
+
+	return 8, nil
 }

@@ -16,7 +16,7 @@ exclude_dir = ["tmp", "repos"]
 # These are the default values
 [watch]
 # Directories to watch
-includes = ["."]
+includes = ["../../util/gitutil"]
 # Watching these filename suffixes
 suffixes = [".go"]
 

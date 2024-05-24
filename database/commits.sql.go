@@ -35,17 +35,7 @@ INSERT INTO commits (
     unnest($8::int[]),  
     unnest($9::int[]),  
     unnest($10::varchar[])  
-) ON CONFLICT (commit_hash, repo_url) DO UPDATE 
-SET 
-    author = EXCLUDED.author,
-    author_email = EXCLUDED.author_email,
-    author_date = EXCLUDED.author_date,
-    committer_date = EXCLUDED.committer_date,
-    message = EXCLUDED.message,
-    insertions = EXCLUDED.insertions,
-    deletions = EXCLUDED.deletions,
-    files_changed = EXCLUDED.files_changed,
-    repo_url = EXCLUDED.repo_url
+) ON CONFLICT (commit_hash, repo_url) DO NOTHING
 `
 
 type BulkInsertCommitsParams struct {

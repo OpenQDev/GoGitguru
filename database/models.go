@@ -71,6 +71,19 @@ type Commit struct {
 	RepoUrl       sql.NullString `json:"repo_url"`
 }
 
+type DependenciesToUser struct {
+	DependencyID int32         `json:"dependency_id"`
+	UserID       int32         `json:"user_id"`
+	FirstUseData sql.NullInt64 `json:"first_use_data"`
+	LastUseData  sql.NullInt64 `json:"last_use_data"`
+}
+
+type Dependency struct {
+	InternalID     int32  `json:"internal_id"`
+	DependencyName string `json:"dependency_name"`
+	DependencyFile string `json:"dependency_file"`
+}
+
 type GithubRepo struct {
 	InternalID      int32          `json:"internal_id"`
 	GithubRestID    int32          `json:"github_rest_id"`
@@ -134,4 +147,12 @@ type RepoUrl struct {
 	Status    RepoStatus   `json:"status"`
 	CreatedAt time.Time    `json:"created_at"`
 	UpdatedAt sql.NullTime `json:"updated_at"`
+}
+
+type ReposToDependency struct {
+	Url          string         `json:"url"`
+	DependencyID int32          `json:"dependency_id"`
+	FirstUseData sql.NullInt64  `json:"first_use_data"`
+	LastUseData  sql.NullInt64  `json:"last_use_data"`
+	Status       sql.NullString `json:"status"`
 }

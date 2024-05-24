@@ -7,7 +7,7 @@ import (
 	"github.com/lib/pq"
 )
 
-type StoreGitLogsForRepoTestCase struct {
+type StoreGitLogsAndDepsHistoryForRepoTestCase struct {
 	name           string
 	repoUrl        string
 	repo           string
@@ -17,8 +17,8 @@ type StoreGitLogsForRepoTestCase struct {
 	setupMock      func(mock sqlmock.Sqlmock, gitLogs []GitLog, repoUrl string)
 }
 
-func sucessfulGitLog() StoreGitLogsForRepoTestCase {
-	sucessfulGitLogTestCase := StoreGitLogsForRepoTestCase{
+func sucessfulGitLog() StoreGitLogsAndDepsHistoryForRepoTestCase {
+	sucessfulGitLogTestCase := StoreGitLogsAndDepsHistoryForRepoTestCase{
 		name:           "Valid git logs",
 		repoUrl:        "https://github.com/OpenQDev/OpenQ-DRM-TestRepo",
 		repo:           "OpenQ-DRM-TestRepo",
@@ -95,8 +95,8 @@ func sucessfulGitLog() StoreGitLogsForRepoTestCase {
 	return sucessfulGitLogTestCase
 }
 
-func StoreGitLogsForRepoTestCases() []StoreGitLogsForRepoTestCase {
-	return []StoreGitLogsForRepoTestCase{
+func StoreGitLogsAndDepsHistoryForRepoTestCases() []StoreGitLogsAndDepsHistoryForRepoTestCase {
+	return []StoreGitLogsAndDepsHistoryForRepoTestCase{
 		sucessfulGitLog(),
 	}
 }

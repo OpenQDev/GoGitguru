@@ -51,30 +51,34 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 	}
 
 	// "package.json" -> ["util/package.json", "app/package.json"]
-	allFilePaths, err := gitutil.GitDependencyFiles(repoDir, body.FilePaths)
 	if err != nil {
 		RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to determine if file paths exist dependency-history: %s", err))
 		return
 	}
-	
-	dependencies := []string{"eslint", "ethers", "threejs", body.DependencySearched}
+	dependencies, err := apiCfg.DB.GetDependenciesByNames(r.Context(), body.DependencySearched)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error getting dependencies: %s", err))
+		return
+	}
+	dependencyHistory, _, err := gitutil.GitDependencyHistory(repoDir,  dependencies)
+	singleDependencyHistory := dependencyHistory[dependencies[0].InternalID]
 
-	datesAddedCommits, datesRemovedCommits, err := gitutil.GitDependencyHistory(repoDir, dependencies, allFilePaths)
-	currentDatesAdded := datesAddedCommits[body.DependencySearched]
-	currentDatesRemoved := datesRemovedCommits[body.DependencySearched]
+	datesAddedCommits := []int64{singleDependencyHistory.DateFirstPresent}
+	datesRemovedCommits := []int64{singleDependencyHistory.DateLastRemoved}
+
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error getting dependency history: %s", err))
 		return
 	}
 
 	// Convert Unix time to ISO strings
-	datesAddedISO := make([]string, len(currentDatesAdded))
-	for i, v := range currentDatesAdded {
+	datesAddedISO := make([]string, len(datesAddedCommits))
+	for i, v := range datesAddedCommits {
 		datesAddedISO[i] = time.Unix(v, 0).Format(time.RFC3339)
 	}
 
-	datesRemovedISO := make([]string, len(currentDatesRemoved))
-	for i, v := range currentDatesRemoved {
+	datesRemovedISO := make([]string, len(datesRemovedCommits))
+	for i, v := range datesRemovedCommits {
 		datesRemovedISO[i] = time.Unix(v, 0).Format(time.RFC3339)
 	}
 

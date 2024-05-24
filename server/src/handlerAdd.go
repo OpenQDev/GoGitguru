@@ -7,11 +7,14 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
 type HandlerAddRequest struct {
-	RepoUrls []string `json:"repo_urls"`
+	RepoUrls     []string `json:"repo_urls"`
+	Dependencies []string `json:"dependencies"`
+	FileNames    []string `json:"file_names"`
 }
 
 type HandlerAddResponse struct {
@@ -29,18 +32,30 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(bytes.NewReader(bodyBytes))
 
 	// Make struct repoUrls to decode the body into
-	repoUrls := HandlerAddRequest{}
+	request := HandlerAddRequest{}
 
-	err := decoder.Decode(&repoUrls)
-	if err != nil || len(repoUrls.RepoUrls) == 0 {
+	err := decoder.Decode(&request)
+	if err != nil || len(request.RepoUrls) == 0 {
 		msg := fmt.Sprintf("error parsing JSON for: %s", string(bodyBytes))
 		RespondWithError(w, 400, msg)
 		return
 	}
 
 	accepted := []string{}
-
-	for _, repoUrl := range repoUrls.RepoUrls {
+	depsResults := make([][]int32, len(request.Dependencies))
+	for index, dependency := range request.Dependencies {
+		println("dependency", dependency)
+		dependencyParams := database.BulkInsertDependenciesParams{
+			DependencyName: dependency,
+			Column2:        request.FileNames,
+		}
+		insertDepsResult, err := apiCfg.DB.BulkInsertDependencies(r.Context(), dependencyParams)
+		depsResults[index] = insertDepsResult
+		if err != nil {
+			RespondWithError(w, 500, fmt.Sprintf("error inserting dependencies: %s", err))
+		}
+	}
+	for _, repoUrl := range request.RepoUrls {
 
 		err = addToList(apiCfg, r, repoUrl)
 		if err != nil {
@@ -49,7 +64,22 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 			RespondWithError(w, 500, msg)
 			return
 		}
+
 		accepted = append(accepted, repoUrl)
+		for index := range request.Dependencies {
+			repoDependencyParams := database.InitializeRepoDependenciesParams{
+				Url:     repoUrl,
+				Column2: depsResults[index],
+			}
+			fmt.Sprintf("inserting repo dependencies")
+
+			err = apiCfg.DB.InitializeRepoDependencies(r.Context(), repoDependencyParams)
+			if err != nil {
+				println("error initializing repo dependencies", err.Error())
+				RespondWithError(w, 500, fmt.Sprintf("error initializing repo dependencies: %s", err))
+			}
+
+		}
 	}
 
 	response := HandlerAddResponse{

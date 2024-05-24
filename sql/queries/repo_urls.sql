@@ -15,23 +15,26 @@ RETURNING *;
 
 -- name: UpdateStatusAndUpdatedAt :exec
 UPDATE repo_urls SET status = $1, updated_at = NOW() WHERE url = $2;
-
 -- name: GetReposStatus :many
-SELECT
+SELECT 
     r.url,
     r.status,
     r.updated_at,
-    COUNT(DISTINCT c.author_email) FILTER (WHERE g.email IS NULL) AS pending_authors
+    COUNT(DISTINCT c.author_email) FILTER (WHERE g.email IS NULL) AS pending_authors,
+    JSON_AGG( json_build_object('dependency_name', d.dependency_name, 'dependency_file', d.dependency_file) ) AS dependencies
+    
 FROM
     repo_urls r
 LEFT JOIN commits c ON c.repo_url = r.url
 LEFT JOIN github_user_rest_id_author_emails g ON c.author_email = g.email
+LEFT JOIN repos_to_dependencies rd ON r.url = rd.url
+LEFT JOIN dependencies d ON rd.dependency_id = d.internal_id 
+
 WHERE
     r.url = ANY($1::text[])
 GROUP BY
-    r.url, r.status
-ORDER BY
-    r.status, r.updated_at DESC;
+    r.url, r.status;
+ORDER BY r.status, r.updated_at DESC;
 
 -- name: GetAndUpdateRepoURL :one
 BEGIN;

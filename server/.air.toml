@@ -2,7 +2,7 @@
 [build]
 # Just plain old shell command. You could use `make` as well.
 poll = true
-cmd = "go build -o ./tmp/main.exe-buildvcs=false ."
+cmd = "go build -o ./tmp/main.exe -buildvcs=false ."
 # Binary file yields from `cmd`.
 bin = "tmp/main.exe"
 # Send Interrupt signal before killing process
