@@ -9,7 +9,7 @@ import (
 )
 
 func PrepareCommitHistoryForBulkInsertion(numberOfCommits int, commitList []*object.Commit, params GitLogParams) (CommitObject, error) {
-	println(params.repoUrl, "is the repo url inner")
+
 	var (
 		commitHash    = make([]string, numberOfCommits)
 		author        = make([]string, numberOfCommits)
