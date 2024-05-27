@@ -43,11 +43,11 @@ func GitDependencyHistory(repoDir string, dependencies []database.Dependency) (m
 		dependenciesResults, err = checkForDependencies(c, dependenciesResults, dependencies)
 	}
 
-	if len(commitList)%commitWindow != 0 {
-		c := commitList[len(commitList)-1]
+	// always check last commit
+	c := commitList[len(commitList)-1]
+	fmt.Printf("Commit number %d: %s\n", len(commitList)-1, c.Hash)
 
-		dependenciesResults, err = checkForDependencies(c, dependenciesResults, dependencies)
-	}
+	dependenciesResults, err = checkForDependencies(c, dependenciesResults, dependencies)
 
 	fmt.Println("assemble arrays for", repoDir)
 
