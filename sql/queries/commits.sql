@@ -97,7 +97,7 @@ AND c.repo_url = ANY($4::VARCHAR[])
 ORDER BY c.author_date DESC;
 
 -- name: GetLatestCommitterDate :one
-SELECT committer_date + 1 AS next_committer_date
+SELECT (committer_date + 1)::bigint AS next_committer_date
 FROM commits
 WHERE repo_url = CAST($1 AS VARCHAR)
 ORDER BY committer_date DESC
