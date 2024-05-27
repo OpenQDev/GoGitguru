@@ -84,6 +84,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getLatestUncheckedCommitPerAuthorStmt, err = db.PrepareContext(ctx, getLatestUncheckedCommitPerAuthor); err != nil {
 		return nil, fmt.Errorf("error preparing query GetLatestUncheckedCommitPerAuthor: %w", err)
 	}
+	if q.getRepoDependenciesStmt, err = db.PrepareContext(ctx, getRepoDependencies); err != nil {
+		return nil, fmt.Errorf("error preparing query GetRepoDependencies: %w", err)
+	}
 	if q.getRepoURLStmt, err = db.PrepareContext(ctx, getRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRepoURL: %w", err)
 	}
@@ -225,6 +228,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getLatestUncheckedCommitPerAuthorStmt: %w", cerr)
 		}
 	}
+	if q.getRepoDependenciesStmt != nil {
+		if cerr := q.getRepoDependenciesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getRepoDependenciesStmt: %w", cerr)
+		}
+	}
 	if q.getRepoURLStmt != nil {
 		if cerr := q.getRepoURLStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getRepoURLStmt: %w", cerr)
@@ -344,6 +352,7 @@ type Queries struct {
 	getGroupOfEmailsStmt                       *sql.Stmt
 	getLatestCommitterDateStmt                 *sql.Stmt
 	getLatestUncheckedCommitPerAuthorStmt      *sql.Stmt
+	getRepoDependenciesStmt                    *sql.Stmt
 	getRepoURLStmt                             *sql.Stmt
 	getRepoURLsStmt                            *sql.Stmt
 	getReposStatusStmt                         *sql.Stmt
@@ -382,6 +391,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getGroupOfEmailsStmt:                       q.getGroupOfEmailsStmt,
 		getLatestCommitterDateStmt:                 q.getLatestCommitterDateStmt,
 		getLatestUncheckedCommitPerAuthorStmt:      q.getLatestUncheckedCommitPerAuthorStmt,
+		getRepoDependenciesStmt:                    q.getRepoDependenciesStmt,
 		getRepoURLStmt:                             q.getRepoURLStmt,
 		getRepoURLsStmt:                            q.getRepoURLsStmt,
 		getReposStatusStmt:                         q.getReposStatusStmt,

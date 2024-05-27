@@ -7,13 +7,14 @@ package database
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/lib/pq"
 )
 
 const batchInsertRepoDependencies = `-- name: BatchInsertRepoDependencies :exec
 INSERT INTO repos_to_dependencies (url, dependency_id, first_use_data, last_use_data) VALUES (  
-  unnest($1::varchar[]),  
+  $1,  
   unnest($2::int[]),  
   unnest($3::bigint[]),  
   unnest($4::bigint[]) 
@@ -24,20 +25,65 @@ first_use_data = excluded.first_use_data
 `
 
 type BatchInsertRepoDependenciesParams struct {
-	Column1 []string `json:"column_1"`
-	Column2 []int32  `json:"column_2"`
-	Column3 []int64  `json:"column_3"`
-	Column4 []int64  `json:"column_4"`
+	Url     string  `json:"url"`
+	Column2 []int32 `json:"column_2"`
+	Column3 []int64 `json:"column_3"`
+	Column4 []int64 `json:"column_4"`
 }
 
 func (q *Queries) BatchInsertRepoDependencies(ctx context.Context, arg BatchInsertRepoDependenciesParams) error {
 	_, err := q.exec(ctx, q.batchInsertRepoDependenciesStmt, batchInsertRepoDependencies,
-		pq.Array(arg.Column1),
+		arg.Url,
 		pq.Array(arg.Column2),
 		pq.Array(arg.Column3),
 		pq.Array(arg.Column4),
 	)
 	return err
+}
+
+const getRepoDependencies = `-- name: GetRepoDependencies :many
+SELECT 
+d.dependency_name,
+rd.first_use_data,
+rd.last_use_data
+FROM dependencies d
+LEFT JOIN repos_to_dependencies rd ON d.internal_id = rd.dependency_id
+WHERE d.dependency_name = $1 AND rd.url = $2 AND d.dependency_file = ANY($3::text[])
+`
+
+type GetRepoDependenciesParams struct {
+	DependencyName string   `json:"dependency_name"`
+	Url            string   `json:"url"`
+	Column3        []string `json:"column_3"`
+}
+
+type GetRepoDependenciesRow struct {
+	DependencyName string        `json:"dependency_name"`
+	FirstUseData   sql.NullInt64 `json:"first_use_data"`
+	LastUseData    sql.NullInt64 `json:"last_use_data"`
+}
+
+func (q *Queries) GetRepoDependencies(ctx context.Context, arg GetRepoDependenciesParams) ([]GetRepoDependenciesRow, error) {
+	rows, err := q.query(ctx, q.getRepoDependenciesStmt, getRepoDependencies, arg.DependencyName, arg.Url, pq.Array(arg.Column3))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetRepoDependenciesRow
+	for rows.Next() {
+		var i GetRepoDependenciesRow
+		if err := rows.Scan(&i.DependencyName, &i.FirstUseData, &i.LastUseData); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const initializeRepoDependencies = `-- name: InitializeRepoDependencies :exec

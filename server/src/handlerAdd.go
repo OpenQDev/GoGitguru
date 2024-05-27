@@ -44,7 +44,6 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 	accepted := []string{}
 	depsResults := make([][]int32, len(request.Dependencies))
 	for index, dependency := range request.Dependencies {
-		println("dependency", dependency)
 		dependencyParams := database.BulkInsertDependenciesParams{
 			DependencyName: dependency,
 			Column2:        request.FileNames,
@@ -71,11 +70,9 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 				Url:     repoUrl,
 				Column2: depsResults[index],
 			}
-			fmt.Sprintf("inserting repo dependencies")
 
 			err = apiCfg.DB.InitializeRepoDependencies(r.Context(), repoDependencyParams)
 			if err != nil {
-				println("error initializing repo dependencies", err.Error())
 				RespondWithError(w, 500, fmt.Sprintf("error initializing repo dependencies: %s", err))
 			}
 

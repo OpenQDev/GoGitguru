@@ -1,7 +1,6 @@
 package reposync
 
 import (
-	"io"
 	"strings"
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
@@ -9,7 +8,8 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
-func PrepareCommitHistoryForBulkInsertion(numberOfCommits int, log object.CommitIter, params GitLogParams) (CommitObject, error) {
+func PrepareCommitHistoryForBulkInsertion(numberOfCommits int, commitList []*object.Commit, params GitLogParams) (CommitObject, error) {
+	println(params.repoUrl, "is the repo url inner")
 	var (
 		commitHash    = make([]string, numberOfCommits)
 		author        = make([]string, numberOfCommits)
@@ -23,21 +23,13 @@ func PrepareCommitHistoryForBulkInsertion(numberOfCommits int, log object.Commit
 		repoUrls      = make([]string, numberOfCommits)
 	)
 
-	commitCount := 0
-	for {
+	for commitCount, commit := range commitList {
 		if commitCount >= numberOfCommits {
+			println("commit count is greater than or equal to number of commits", commitCount, numberOfCommits)
 			break
 		}
 
-		commit, err := log.Next()
-		if err != nil {
-			if err == io.EOF {
-				break
-			} else {
-				return CommitObject{}, err
-			}
-		}
-
+		repoUrls[commitCount] = params.repoUrl
 		// TODO: Git stats is run JIT and is extremely time consuming, as it diffs each patch to the prior.
 		// TODO: Ignoring for now, but this is how it's done.
 
@@ -67,8 +59,6 @@ func PrepareCommitHistoryForBulkInsertion(numberOfCommits int, log object.Commit
 		insertions[commitCount] = int32(totalInsertions)
 		deletions[commitCount] = int32(totalDeletions)
 		filesChanged[commitCount] = int32(totalFilesChanged)
-		repoUrls[commitCount] = params.repoUrl
-
 		if commitCount != 0 && commitCount%100 == 0 {
 			logger.LogGreenDebug("process %d commits for %s", commitCount, params.repoUrl)
 		}

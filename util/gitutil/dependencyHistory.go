@@ -11,7 +11,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
-func GitDependencyHistory(repoDir string,  dependencies []database.Dependency) (map[int32]DependencyResult, object.CommitIter, error) {
+func GitDependencyHistory(repoDir string, dependencies []database.Dependency) (map[int32]DependencyResult, []*object.Commit, error) {
 
 	r, err := git.PlainOpen(repoDir)
 	if err != nil {
@@ -39,22 +39,19 @@ func GitDependencyHistory(repoDir string,  dependencies []database.Dependency) (
 	commitWindow := getCommitWindow(len(commitList))
 	for i := 0; i < len(commitList); i += commitWindow {
 		c := commitList[i]
-		fmt.Printf("Commit number %d: %s\n", i, c.Hash)
-	
-		dependenciesResults, err=	checkForDependencies(c, dependenciesResults, dependencies)
+
+		dependenciesResults, err = checkForDependencies(c, dependenciesResults, dependencies)
 	}
 
 	if len(commitList)%commitWindow != 0 {
 		c := commitList[len(commitList)-1]
-		fmt.Printf("Commit number %d: %s\n", len(commitList)-1, c.Hash)
-	
-		dependenciesResults, err=checkForDependencies(c, dependenciesResults, dependencies)
-		}
-	 
+
+		dependenciesResults, err = checkForDependencies(c, dependenciesResults, dependencies)
+	}
 
 	fmt.Println("assemble arrays for", repoDir)
 
-	return dependenciesResults, commits, err
+	return dependenciesResults, commitList, err
 }
 
 type DependencyResult struct {
@@ -62,41 +59,35 @@ type DependencyResult struct {
 	DateLastRemoved  int64
 }
 
-func checkForDependencies(  c *object.Commit, currentDependenciesResult map[int32]DependencyResult,  dependencies []database.Dependency) (map[int32]DependencyResult, error) {
-	
+func checkForDependencies(c *object.Commit, currentDependenciesResult map[int32]DependencyResult, dependencies []database.Dependency) (map[int32]DependencyResult, error) {
+
 	results := make(map[int32]DependencyResult)
 	for _, dependencyRecord := range dependencies {
 		if file, err := c.File(dependencyRecord.DependencyFile); err == nil {
 			contents, err := file.Contents()
 			contentsLower := strings.ToLower(contents)
 			if err != nil {
-				return nil,  err
+				return nil, err
 			}
 
-
-		dependency := findDependency(dependencies, dependencyRecord.DependencyFile, dependencyRecord.DependencyName)
-		dependencySearchedLower := strings.ToLower(dependency.DependencyName)
-		currentDateFirstPresent := currentDependenciesResult[dependency.InternalID].DateFirstPresent
-		currentDateLastRemoved := currentDependenciesResult[dependency.InternalID].DateLastRemoved
-		if strings.Contains(contentsLower, dependencySearchedLower) {
-			currentDateFirstPresent = c.Committer.When.Unix()
-		} else {
-			if currentDateFirstPresent != 0 {
-				currentDateLastRemoved = c.Committer.When.Unix()
+			dependency := findDependency(dependencies, dependencyRecord.DependencyFile, dependencyRecord.DependencyName)
+			dependencySearchedLower := strings.ToLower(dependency.DependencyName)
+			currentDateFirstPresent := currentDependenciesResult[dependency.InternalID].DateFirstPresent
+			currentDateLastRemoved := currentDependenciesResult[dependency.InternalID].DateLastRemoved
+			if strings.Contains(contentsLower, dependencySearchedLower) {
+				currentDateFirstPresent = c.Committer.When.Unix()
+			} else {
+				if currentDateFirstPresent != 0 {
+					currentDateLastRemoved = c.Committer.When.Unix()
+				}
 			}
+			dependencyResult := DependencyResult{
+				DateFirstPresent: currentDateFirstPresent,
+				DateLastRemoved:  currentDateLastRemoved,
+			}
+			results[dependency.InternalID] = dependencyResult
+
 		}
-		dependencyResult := DependencyResult{
-			DateFirstPresent: currentDateFirstPresent,
-			DateLastRemoved:  currentDateLastRemoved,
-		}
-		results[dependency.InternalID] = dependencyResult
-		for k, v := range results {
-			println("dependency", k, "dateFirstPresent", v.DateFirstPresent)
-		}
-	}
-}
-	for k, v := range results {
-		println("dependency", k, "dateFirstPresent", v.DateFirstPresent, "outside if")
 	}
 	return results, nil
 }

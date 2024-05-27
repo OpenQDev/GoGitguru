@@ -33,7 +33,7 @@ LEFT JOIN dependencies d ON rd.dependency_id = d.internal_id
 WHERE
     r.url = ANY($1::text[])
 GROUP BY
-    r.url, r.status;
+    r.url, r.status
 ORDER BY r.status, r.updated_at DESC;
 
 -- name: GetAndUpdateRepoURL :one

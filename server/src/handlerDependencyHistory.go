@@ -3,11 +3,9 @@ package server
 import (
 	"fmt"
 	"net/http"
-	"path/filepath"
-	"strings"
 	"time"
 
-	"github.com/OpenQDev/GoGitguru/util/gitutil"
+	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
 )
 
@@ -32,59 +30,37 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 		return
 	}
 
-	prefixPath := "./repos"
-	organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(body.RepoUrl)
-
-	organization = strings.ToLower(organization)
-	repo = strings.ToLower(repo)
-
-	repoDir := filepath.Join(prefixPath, organization, repo)
-
-	fmt.Println("is git repo for ", repoDir, gitutil.IsGitRepository(prefixPath, organization, repo))
-
-	if !gitutil.IsGitRepository(prefixPath, organization, repo) {
-		err := gitutil.CloneRepo(prefixPath, organization, repo)
-		if err != nil {
-			RespondWithError(w, http.StatusNotFound, fmt.Sprintf("directory %s is not a git repository", repoDir))
-			return
-		}
+	repoDependencyParams := database.GetRepoDependenciesParams{
+		DependencyName: body.DependencySearched,
+		Url:            body.RepoUrl,
+		Column3:        body.FilePaths,
 	}
-
-	// "package.json" -> ["util/package.json", "app/package.json"]
-	if err != nil {
-		RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to determine if file paths exist dependency-history: %s", err))
-		return
-	}
-	dependencies, err := apiCfg.DB.GetDependenciesByNames(r.Context(), body.DependencySearched)
+	dependencyResult, err := apiCfg.DB.GetRepoDependencies(r.Context(), repoDependencyParams)
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error getting dependencies: %s", err))
 		return
 	}
-	dependencyHistory, _, err := gitutil.GitDependencyHistory(repoDir,  dependencies)
-	singleDependencyHistory := dependencyHistory[dependencies[0].InternalID]
+	datesAdded := []string{}
+	datesRemoved := []string{}
 
-	datesAddedCommits := []int64{singleDependencyHistory.DateFirstPresent}
-	datesRemovedCommits := []int64{singleDependencyHistory.DateLastRemoved}
+	for _, dependency := range dependencyResult {
+		if dependency.FirstUseData.Int64 != 0 {
+			t := time.Unix(dependency.FirstUseData.Int64, 0).UTC()
+			formattedDate := t.Format(time.RFC3339)
+			datesAdded = append(datesAdded, formattedDate)
 
-	if err != nil {
-		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error getting dependency history: %s", err))
-		return
-	}
-
-	// Convert Unix time to ISO strings
-	datesAddedISO := make([]string, len(datesAddedCommits))
-	for i, v := range datesAddedCommits {
-		datesAddedISO[i] = time.Unix(v, 0).Format(time.RFC3339)
-	}
-
-	datesRemovedISO := make([]string, len(datesRemovedCommits))
-	for i, v := range datesRemovedCommits {
-		datesRemovedISO[i] = time.Unix(v, 0).Format(time.RFC3339)
+		}
+		if dependency.LastUseData.Int64 != 0 {
+			//get date in this format 2023-01-10T17:55:48Z from timestamp
+			t := time.Unix(dependency.LastUseData.Int64, 0).UTC()
+			formattedDate := t.Format(time.RFC3339)
+			datesRemoved = append(datesRemoved, formattedDate)
+		}
 	}
 
 	dependencyHistoryResponse = DependencyHistoryResponse{
-		DatesAdded:   datesAddedISO,
-		DatesRemoved: datesRemovedISO,
+		DatesAdded:   datesAdded,
+		DatesRemoved: datesRemoved,
 	}
 
 	RespondWithJSON(w, http.StatusOK, dependencyHistoryResponse)

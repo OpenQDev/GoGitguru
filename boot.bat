@@ -14,7 +14,7 @@ if errorlevel 1 (
     echo Starting new container: 
     docker run --name gitguru-postgres -d -e POSTGRES_HOST_AUTH_METHOD=trust -p %POSTGRES_PORT%:5432 postgres
 ) else (
-    echo Postgres container is already running
+    echo Postgres container already exists, you need to start it if it is not running
 )
 :retry
 psql -h "localhost" -U "postgres" -p %POSTGRES_PORT% -c \q >nul 2>nul

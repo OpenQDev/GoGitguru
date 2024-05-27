@@ -11,19 +11,16 @@ func PrepareDependencyHistoryForBulkInsertion(dependencyHistory map[int32]gituti
 		dependencyId     = make([]int32, numberOfDependencies)
 		dateFirstPresent = make([]int64, numberOfDependencies)
 		dateLastRemoved  = make([]int64, numberOfDependencies)
-		repoUrls         = make([]string, numberOfDependencies)
 	)
 	for i, dependency := range dependencies {
 		dependencyId[i] = dependency.InternalID
 		dateFirstPresent[i] = dependencyHistory[dependency.InternalID].DateFirstPresent
 		dateLastRemoved[i] = dependencyHistory[dependency.InternalID].DateLastRemoved
-		repoUrls[i] = repoUrl
 	}
 	depenencyHistoryObject := RepoDependencyHistoryObject{
 		DependencyId:     dependencyId,
 		DateFirstPresent: dateFirstPresent,
 		DateLastRemoved:  dateLastRemoved,
-		RepoUrls:         repoUrls,
 	}
 	return depenencyHistoryObject, nil
 }

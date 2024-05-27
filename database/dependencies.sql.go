@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/lib/pq"
 )
@@ -52,19 +53,30 @@ func (q *Queries) BulkInsertDependencies(ctx context.Context, arg BulkInsertDepe
 }
 
 const getDependencies = `-- name: GetDependencies :many
-SELECT internal_id, dependency_name, dependency_file FROM dependencies LIMIT 10
+SELECT d.dependency_name,
+d.dependency_file,
+d.internal_id
+ FROM repos_to_dependencies rd
+LEFT JOIN dependencies d ON rd.dependency_id = d.internal_id
+WHERE rd.url = $1
 `
 
-func (q *Queries) GetDependencies(ctx context.Context) ([]Dependency, error) {
-	rows, err := q.query(ctx, q.getDependenciesStmt, getDependencies)
+type GetDependenciesRow struct {
+	DependencyName sql.NullString `json:"dependency_name"`
+	DependencyFile sql.NullString `json:"dependency_file"`
+	InternalID     sql.NullInt32  `json:"internal_id"`
+}
+
+func (q *Queries) GetDependencies(ctx context.Context, url string) ([]GetDependenciesRow, error) {
+	rows, err := q.query(ctx, q.getDependenciesStmt, getDependencies, url)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Dependency
+	var items []GetDependenciesRow
 	for rows.Next() {
-		var i Dependency
-		if err := rows.Scan(&i.InternalID, &i.DependencyName, &i.DependencyFile); err != nil {
+		var i GetDependenciesRow
+		if err := rows.Scan(&i.DependencyName, &i.DependencyFile, &i.InternalID); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -79,11 +91,11 @@ func (q *Queries) GetDependencies(ctx context.Context) ([]Dependency, error) {
 }
 
 const getDependenciesByNames = `-- name: GetDependenciesByNames :many
-SELECT internal_id, dependency_name, dependency_file FROM dependencies WHERE dependency_name = ANY($1)
+SELECT internal_id, dependency_name, dependency_file FROM dependencies WHERE dependency_name =ANY($1::text[])
 `
 
-func (q *Queries) GetDependenciesByNames(ctx context.Context, dependencyName string) ([]Dependency, error) {
-	rows, err := q.query(ctx, q.getDependenciesByNamesStmt, getDependenciesByNames, dependencyName)
+func (q *Queries) GetDependenciesByNames(ctx context.Context, dollar_1 []string) ([]Dependency, error) {
+	rows, err := q.query(ctx, q.getDependenciesByNamesStmt, getDependenciesByNames, pq.Array(dollar_1))
 	if err != nil {
 		return nil, err
 	}

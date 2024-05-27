@@ -90,7 +90,7 @@ SELECT
     r.status,
     r.updated_at,
     COUNT(DISTINCT c.author_email) FILTER (WHERE g.email IS NULL) AS pending_authors,
-    JSON_AGG( json_build_object('dependency_name', d.dependency_name, 'dependency_file', d.dependency_file)) AS dependencies
+    JSON_AGG( json_build_object('dependency_name', d.dependency_name, 'dependency_file', d.dependency_file) ) AS dependencies
     
 FROM
     repo_urls r
@@ -103,6 +103,7 @@ WHERE
     r.url = ANY($1::text[])
 GROUP BY
     r.url, r.status
+ORDER BY r.status, r.updated_at DESC
 `
 
 type GetReposStatusRow struct {
