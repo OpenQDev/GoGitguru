@@ -21,6 +21,8 @@ type GitLogParams struct {
 	db             *database.Queries
 }
 
+// from commitDate should be the date of the last commit that was synced for the repository or any of the dependencies.
+
 func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams) (int, error) {
 	rawDependencies, err := params.db.GetDependencies(context.Background(), params.repoUrl)
 	if err != nil {

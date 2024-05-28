@@ -11,17 +11,17 @@ import (
 	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
-type HandlerAddRequest struct {
-	RepoUrls     []string `json:"repo_urls"`
+type HandlerAddUserFingerPrintRequest struct {
+	Logins       []string `json:"logins"`
 	Dependencies []string `json:"dependencies"`
 	FileNames    []string `json:"file_names"`
 }
 
-type HandlerAddResponse struct {
+type HandlerAddUserFingerPrintResponse struct {
 	Accepted []string `json:"accepted"`
 }
 
-func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
+func (apiCfg *ApiConfig) HandlerAddUserFingerPrint(w http.ResponseWriter, r *http.Request) {
 	// Read off the JSON body to bodyBytes for use in error logging if needed
 	bodyBytes, _ := io.ReadAll(r.Body)
 
@@ -32,16 +32,17 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(bytes.NewReader(bodyBytes))
 
 	// Make struct repoUrls to decode the body into
-	request := HandlerAddRequest{}
+	request := HandlerAddUserFingerPrintRequest{}
 
 	err := decoder.Decode(&request)
-	if err != nil || len(request.RepoUrls) == 0 {
+	if err != nil || len(request.Logins) == 0 {
 		msg := fmt.Sprintf("error parsing JSON for: %s", string(bodyBytes))
 		RespondWithError(w, 400, msg)
 		return
 	}
 
 	accepted := []string{}
+
 	depsResults := make([][]int32, len(request.Dependencies))
 	for index, dependency := range request.Dependencies {
 		dependencyParams := database.BulkInsertDependenciesParams{
@@ -54,42 +55,34 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 			RespondWithError(w, 500, fmt.Sprintf("error inserting dependencies: %s", err))
 		}
 	}
-	for _, repoUrl := range request.RepoUrls {
+	for _, login := range request.Logins {
 
-		err = addToList(apiCfg, r, repoUrl)
 		if err != nil {
-			msg := fmt.Sprintf("error adding %s to repo_urls: %s", repoUrl, err)
+			msg := fmt.Sprintf("error adding %s to repo_urls: %s", login, err)
 			logger.LogError(msg)
 			RespondWithError(w, 500, msg)
 			return
 		}
 
-		accepted = append(accepted, repoUrl)
+		accepted = append(accepted, login)
 		for index := range request.Dependencies {
-			fmt.Println("depsResults: ", request.Dependencies)
-			repoDependencyParams := database.InitializeRepoDependenciesParams{
-				Url:     repoUrl,
+			userDependencyParams := database.InitializeUserDependenciesParams{
+				Login:   login,
 				Column2: depsResults[index],
 			}
 
-			err = apiCfg.DB.InitializeRepoDependencies(r.Context(), repoDependencyParams)
+			err = apiCfg.DB.InitializeUserDependencies(r.Context(), userDependencyParams)
 			if err != nil {
 				RespondWithError(w, 500, fmt.Sprintf("error initializing repo dependencies: %s", err))
 			}
-			println("initializxed repo dependencies")
+			fmt.Println("my stuff", userDependencyParams)
 
 		}
 	}
 
-	response := HandlerAddResponse{
+	response := HandlerAddUserFingerPrintResponse{
 		Accepted: accepted,
 	}
 
 	RespondWithJSON(w, 202, response)
-}
-
-func addToList(apiCfg *ApiConfig, r *http.Request, repoUrl string) error {
-	err := apiCfg.DB.UpsertRepoURL(r.Context(), repoUrl)
-
-	return err
 }

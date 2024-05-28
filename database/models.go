@@ -76,6 +76,7 @@ type DependenciesToUser struct {
 	UserID       int32         `json:"user_id"`
 	FirstUseData sql.NullInt64 `json:"first_use_data"`
 	LastUseData  sql.NullInt64 `json:"last_use_data"`
+	UpdatedAt    sql.NullTime  `json:"updated_at"`
 }
 
 type Dependency struct {
@@ -155,4 +156,5 @@ type ReposToDependency struct {
 	FirstUseData sql.NullInt64  `json:"first_use_data"`
 	LastUseData  sql.NullInt64  `json:"last_use_data"`
 	Status       sql.NullString `json:"status"`
+	CommitHash   sql.NullString `json:"commit_hash"`
 }

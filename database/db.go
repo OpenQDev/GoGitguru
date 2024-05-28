@@ -27,6 +27,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.batchInsertRepoDependenciesStmt, err = db.PrepareContext(ctx, batchInsertRepoDependencies); err != nil {
 		return nil, fmt.Errorf("error preparing query BatchInsertRepoDependencies: %w", err)
 	}
+	if q.batchInsertUserDependenciesStmt, err = db.PrepareContext(ctx, batchInsertUserDependencies); err != nil {
+		return nil, fmt.Errorf("error preparing query BatchInsertUserDependencies: %w", err)
+	}
 	if q.bulkInsertCommitsStmt, err = db.PrepareContext(ctx, bulkInsertCommits); err != nil {
 		return nil, fmt.Errorf("error preparing query BulkInsertCommits: %w", err)
 	}
@@ -99,11 +102,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getUserCommitsForReposStmt, err = db.PrepareContext(ctx, getUserCommitsForRepos); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUserCommitsForRepos: %w", err)
 	}
+	if q.getUserDependenciesByUpdatedAtStmt, err = db.PrepareContext(ctx, getUserDependenciesByUpdatedAt); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserDependenciesByUpdatedAt: %w", err)
+	}
 	if q.initializeRepoDependenciesStmt, err = db.PrepareContext(ctx, initializeRepoDependencies); err != nil {
 		return nil, fmt.Errorf("error preparing query InitializeRepoDependencies: %w", err)
 	}
-	if q.insertCommitStmt, err = db.PrepareContext(ctx, insertCommit); err != nil {
-		return nil, fmt.Errorf("error preparing query InsertCommit: %w", err)
+	if q.initializeUserDependenciesStmt, err = db.PrepareContext(ctx, initializeUserDependencies); err != nil {
+		return nil, fmt.Errorf("error preparing query InitializeUserDependencies: %w", err)
 	}
 	if q.insertGithubRepoStmt, err = db.PrepareContext(ctx, insertGithubRepo); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertGithubRepo: %w", err)
@@ -113,9 +119,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.insertUserStmt, err = db.PrepareContext(ctx, insertUser); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertUser: %w", err)
-	}
-	if q.multiRowInsertCommitsStmt, err = db.PrepareContext(ctx, multiRowInsertCommits); err != nil {
-		return nil, fmt.Errorf("error preparing query MultiRowInsertCommits: %w", err)
 	}
 	if q.updateStatusAndUpdatedAtStmt, err = db.PrepareContext(ctx, updateStatusAndUpdatedAt); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateStatusAndUpdatedAt: %w", err)
@@ -131,6 +134,11 @@ func (q *Queries) Close() error {
 	if q.batchInsertRepoDependenciesStmt != nil {
 		if cerr := q.batchInsertRepoDependenciesStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing batchInsertRepoDependenciesStmt: %w", cerr)
+		}
+	}
+	if q.batchInsertUserDependenciesStmt != nil {
+		if cerr := q.batchInsertUserDependenciesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing batchInsertUserDependenciesStmt: %w", cerr)
 		}
 	}
 	if q.bulkInsertCommitsStmt != nil {
@@ -253,14 +261,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getUserCommitsForReposStmt: %w", cerr)
 		}
 	}
+	if q.getUserDependenciesByUpdatedAtStmt != nil {
+		if cerr := q.getUserDependenciesByUpdatedAtStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserDependenciesByUpdatedAtStmt: %w", cerr)
+		}
+	}
 	if q.initializeRepoDependenciesStmt != nil {
 		if cerr := q.initializeRepoDependenciesStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing initializeRepoDependenciesStmt: %w", cerr)
 		}
 	}
-	if q.insertCommitStmt != nil {
-		if cerr := q.insertCommitStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing insertCommitStmt: %w", cerr)
+	if q.initializeUserDependenciesStmt != nil {
+		if cerr := q.initializeUserDependenciesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing initializeUserDependenciesStmt: %w", cerr)
 		}
 	}
 	if q.insertGithubRepoStmt != nil {
@@ -276,11 +289,6 @@ func (q *Queries) Close() error {
 	if q.insertUserStmt != nil {
 		if cerr := q.insertUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing insertUserStmt: %w", cerr)
-		}
-	}
-	if q.multiRowInsertCommitsStmt != nil {
-		if cerr := q.multiRowInsertCommitsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing multiRowInsertCommitsStmt: %w", cerr)
 		}
 	}
 	if q.updateStatusAndUpdatedAtStmt != nil {
@@ -333,6 +341,7 @@ type Queries struct {
 	db                                         DBTX
 	tx                                         *sql.Tx
 	batchInsertRepoDependenciesStmt            *sql.Stmt
+	batchInsertUserDependenciesStmt            *sql.Stmt
 	bulkInsertCommitsStmt                      *sql.Stmt
 	bulkInsertDependenciesStmt                 *sql.Stmt
 	checkGithubRepoExistsStmt                  *sql.Stmt
@@ -357,12 +366,12 @@ type Queries struct {
 	getRepoURLsStmt                            *sql.Stmt
 	getReposStatusStmt                         *sql.Stmt
 	getUserCommitsForReposStmt                 *sql.Stmt
+	getUserDependenciesByUpdatedAtStmt         *sql.Stmt
 	initializeRepoDependenciesStmt             *sql.Stmt
-	insertCommitStmt                           *sql.Stmt
+	initializeUserDependenciesStmt             *sql.Stmt
 	insertGithubRepoStmt                       *sql.Stmt
 	insertRestIdToEmailStmt                    *sql.Stmt
 	insertUserStmt                             *sql.Stmt
-	multiRowInsertCommitsStmt                  *sql.Stmt
 	updateStatusAndUpdatedAtStmt               *sql.Stmt
 	upsertRepoURLStmt                          *sql.Stmt
 }
@@ -372,6 +381,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		db:                              tx,
 		tx:                              tx,
 		batchInsertRepoDependenciesStmt: q.batchInsertRepoDependenciesStmt,
+		batchInsertUserDependenciesStmt: q.batchInsertUserDependenciesStmt,
 		bulkInsertCommitsStmt:           q.bulkInsertCommitsStmt,
 		bulkInsertDependenciesStmt:      q.bulkInsertDependenciesStmt,
 		checkGithubRepoExistsStmt:       q.checkGithubRepoExistsStmt,
@@ -396,12 +406,12 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getRepoURLsStmt:                            q.getRepoURLsStmt,
 		getReposStatusStmt:                         q.getReposStatusStmt,
 		getUserCommitsForReposStmt:                 q.getUserCommitsForReposStmt,
+		getUserDependenciesByUpdatedAtStmt:         q.getUserDependenciesByUpdatedAtStmt,
 		initializeRepoDependenciesStmt:             q.initializeRepoDependenciesStmt,
-		insertCommitStmt:                           q.insertCommitStmt,
+		initializeUserDependenciesStmt:             q.initializeUserDependenciesStmt,
 		insertGithubRepoStmt:                       q.insertGithubRepoStmt,
 		insertRestIdToEmailStmt:                    q.insertRestIdToEmailStmt,
 		insertUserStmt:                             q.insertUserStmt,
-		multiRowInsertCommitsStmt:                  q.multiRowInsertCommitsStmt,
 		updateStatusAndUpdatedAtStmt:               q.updateStatusAndUpdatedAtStmt,
 		upsertRepoURLStmt:                          q.upsertRepoURLStmt,
 	}

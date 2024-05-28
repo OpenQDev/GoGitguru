@@ -4,10 +4,6 @@ SELECT * FROM commits WHERE commit_hash = $1;
 -- name: GetCommits :many
 SELECT * FROM commits;
 
--- name: InsertCommit :one
-INSERT INTO commits (commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, files_changed, repo_url) 
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-RETURNING *;
 
 -- name: GetCommitsWithAuthorInfo :many
 SELECT *
@@ -59,19 +55,6 @@ ON c.author_email = g.email
 WHERE g.email IS NULL
 ORDER BY c.author_email, c.author_date DESC;
 
--- name: MultiRowInsertCommits :exec
-INSERT INTO commits (commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, files_changed, repo_url) VALUES (  
-  unnest($1::varchar[]),  
-  unnest($2::varchar[]),  
-  unnest($3::varchar[]),  
-  unnest($4::bigint[]),  
-  unnest($5::bigint[]),  
-  unnest($6::text[]),  
-  unnest($7::int[]),  
-  unnest($8::int[]),  
-  unnest($9::int[]),  
-  unnest($10::varchar[])  
-);
 
 -- name: GetUserCommitsForRepos :many
 WITH commits_cte AS (

@@ -35,19 +35,17 @@ func GitDependencyHistory(repoDir string, dependencies []database.Dependency) (m
 
 	dependenciesResults := make(map[int32]DependencyResult)
 
-	fmt.Println("range over ", len(commitList), "commits", repoDir)
-	commitWindow := getCommitWindow(len(commitList))
-	for i := 0; i < len(commitList); i += commitWindow {
-		c := commitList[i]
-
-		dependenciesResults, err = checkForDependencies(c, dependenciesResults, dependencies)
-	}
-
 	// always check last commit
 	c := commitList[len(commitList)-1]
 	fmt.Printf("Commit number %d: %s\n", len(commitList)-1, c.Hash)
 
 	dependenciesResults, err = checkForDependencies(c, dependenciesResults, dependencies)
+	fmt.Println("nge over ", len(commitList), "commits", repoDir)
+	commitWindow := getCommitWindow(len(commitList))
+	for i := 0; i < len(commitList); i += commitWindow {
+		c := commitList[i]
+		dependenciesResults, err = checkForDependencies(c, dependenciesResults, dependencies)
+	}
 
 	fmt.Println("assemble arrays for", repoDir)
 
@@ -74,8 +72,12 @@ func checkForDependencies(c *object.Commit, currentDependenciesResult map[int32]
 			dependencySearchedLower := strings.ToLower(dependency.DependencyName)
 			currentDateFirstPresent := currentDependenciesResult[dependency.InternalID].DateFirstPresent
 			currentDateLastRemoved := currentDependenciesResult[dependency.InternalID].DateLastRemoved
+			println(currentDateFirstPresent)
 			if strings.Contains(contentsLower, dependencySearchedLower) {
-				currentDateFirstPresent = c.Committer.When.Unix()
+				if currentDateFirstPresent > c.Committer.When.Unix() || currentDateFirstPresent == 0 {
+					println("setting first present for ", dependency.DependencyName)
+					currentDateFirstPresent = c.Committer.When.Unix()
+				}
 			} else {
 				if currentDateFirstPresent != 0 {
 					currentDateLastRemoved = c.Committer.When.Unix()

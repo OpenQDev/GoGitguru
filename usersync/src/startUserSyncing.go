@@ -2,7 +2,10 @@ package usersync
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
 	"strings"
+	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
 
@@ -22,6 +25,18 @@ func StartSyncingUser(
 	batchSize int,
 	githubGraphQLUrl string,
 ) {
+	var weekAgo sql.NullTime
+	weekAgo.Time = time.Now().AddDate(0, 0, -7)
+	usersDependenciesToSync, err := db.GetUserDependenciesByUpdatedAt(context.Background())
+	if err != nil {
+		logger.LogError("error getting user dependencies by updated at: %s", err)
+	}
+	fmt.Println("result", usersDependenciesToSync)
+	// one week in go timevar
+	for _, userDependency := range usersDependenciesToSync {
+		println("my stuff", userDependency.DependencyID, userDependency.UserID)
+		// find repo_deps that exist where user_id -> author -> commit  is shared with a repo
+	}
 	newCommitAuthorsRaw, err := getNewCommitAuthors(db)
 
 	if err != nil {
@@ -77,7 +92,7 @@ func StartSyncingUser(
 			if err != nil {
 				logger.LogError("error checking if github user exists: %s", err)
 			}
-
+			// TODO update their for that specific repo.
 			if !exists {
 				logger.LogBlue("inserting github user %s", author.Name)
 				err = insertGithubUser(author, db)
@@ -87,6 +102,8 @@ func StartSyncingUser(
 					logger.LogGreen("user %s inserted!", author.Name)
 				}
 			}
+
+			// attached github user does exist
 
 			if exists {
 				continue
