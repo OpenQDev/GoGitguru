@@ -41,6 +41,64 @@ func (q *Queries) BatchInsertUserDependencies(ctx context.Context, arg BatchInse
 	return err
 }
 
+const bulkInsertUserDependencies = `-- name: BulkInsertUserDependencies :many
+INSERT INTO dependencies_to_users (user_id, dependency_id, first_use_data, last_use_data, updated_at) VALUES (  
+  unnest($1::int[]),  
+  unnest($2::int[]),  
+  unnest($3::bigint[]),  
+  unnest($4::bigint[]),
+  $5
+)
+ON CONFLICT (user_id, dependency_id) DO UPDATE
+SET last_use_data = excluded.last_use_data,
+first_use_data = excluded.first_use_data,
+updated_at = excluded.updated_at
+RETURNING user_id, dependency_id, updated_at
+`
+
+type BulkInsertUserDependenciesParams struct {
+	Column1   []int32      `json:"column_1"`
+	Column2   []int32      `json:"column_2"`
+	Column3   []int64      `json:"column_3"`
+	Column4   []int64      `json:"column_4"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
+}
+
+type BulkInsertUserDependenciesRow struct {
+	UserID       int32        `json:"user_id"`
+	DependencyID int32        `json:"dependency_id"`
+	UpdatedAt    sql.NullTime `json:"updated_at"`
+}
+
+func (q *Queries) BulkInsertUserDependencies(ctx context.Context, arg BulkInsertUserDependenciesParams) ([]BulkInsertUserDependenciesRow, error) {
+	rows, err := q.query(ctx, q.bulkInsertUserDependenciesStmt, bulkInsertUserDependencies,
+		pq.Array(arg.Column1),
+		pq.Array(arg.Column2),
+		pq.Array(arg.Column3),
+		pq.Array(arg.Column4),
+		arg.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []BulkInsertUserDependenciesRow
+	for rows.Next() {
+		var i BulkInsertUserDependenciesRow
+		if err := rows.Scan(&i.UserID, &i.DependencyID, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserDependenciesByUpdatedAt = `-- name: GetUserDependenciesByUpdatedAt :many
 
 WITH computed_dates AS (

@@ -36,6 +36,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.bulkInsertDependenciesStmt, err = db.PrepareContext(ctx, bulkInsertDependencies); err != nil {
 		return nil, fmt.Errorf("error preparing query BulkInsertDependencies: %w", err)
 	}
+	if q.bulkInsertUserDependenciesStmt, err = db.PrepareContext(ctx, bulkInsertUserDependencies); err != nil {
+		return nil, fmt.Errorf("error preparing query BulkInsertUserDependencies: %w", err)
+	}
 	if q.checkGithubRepoExistsStmt, err = db.PrepareContext(ctx, checkGithubRepoExists); err != nil {
 		return nil, fmt.Errorf("error preparing query CheckGithubRepoExists: %w", err)
 	}
@@ -149,6 +152,11 @@ func (q *Queries) Close() error {
 	if q.bulkInsertDependenciesStmt != nil {
 		if cerr := q.bulkInsertDependenciesStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing bulkInsertDependenciesStmt: %w", cerr)
+		}
+	}
+	if q.bulkInsertUserDependenciesStmt != nil {
+		if cerr := q.bulkInsertUserDependenciesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing bulkInsertUserDependenciesStmt: %w", cerr)
 		}
 	}
 	if q.checkGithubRepoExistsStmt != nil {
@@ -344,6 +352,7 @@ type Queries struct {
 	batchInsertUserDependenciesStmt            *sql.Stmt
 	bulkInsertCommitsStmt                      *sql.Stmt
 	bulkInsertDependenciesStmt                 *sql.Stmt
+	bulkInsertUserDependenciesStmt             *sql.Stmt
 	checkGithubRepoExistsStmt                  *sql.Stmt
 	checkGithubUserExistsStmt                  *sql.Stmt
 	checkGithubUserRestIdAuthorEmailExistsStmt *sql.Stmt
@@ -384,6 +393,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		batchInsertUserDependenciesStmt: q.batchInsertUserDependenciesStmt,
 		bulkInsertCommitsStmt:           q.bulkInsertCommitsStmt,
 		bulkInsertDependenciesStmt:      q.bulkInsertDependenciesStmt,
+		bulkInsertUserDependenciesStmt:  q.bulkInsertUserDependenciesStmt,
 		checkGithubRepoExistsStmt:       q.checkGithubRepoExistsStmt,
 		checkGithubUserExistsStmt:       q.checkGithubUserExistsStmt,
 		checkGithubUserRestIdAuthorEmailExistsStmt: q.checkGithubUserRestIdAuthorEmailExistsStmt,

@@ -74,3 +74,17 @@ GROUP BY
     login,
     user_id,
     dependency_id;
+
+-- name: BulkInsertUserDependencies :many
+INSERT INTO dependencies_to_users (user_id, dependency_id, first_use_data, last_use_data, updated_at) VALUES (  
+  unnest($1::int[]),  
+  unnest($2::int[]),  
+  unnest($3::bigint[]),  
+  unnest($4::bigint[]),
+  $5
+)
+ON CONFLICT (user_id, dependency_id) DO UPDATE
+SET last_use_data = excluded.last_use_data,
+first_use_data = excluded.first_use_data,
+updated_at = excluded.updated_at
+RETURNING user_id, dependency_id, updated_at;

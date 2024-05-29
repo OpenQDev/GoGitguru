@@ -3,7 +3,6 @@ package usersync
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"strings"
 	"time"
 
@@ -25,17 +24,38 @@ func StartSyncingUser(
 	batchSize int,
 	githubGraphQLUrl string,
 ) {
-	var weekAgo sql.NullTime
-	weekAgo.Time = time.Now().AddDate(0, 0, -7)
+
+	weekAgo := time.Now()
 	usersDependenciesToSync, err := db.GetUserDependenciesByUpdatedAt(context.Background())
 	if err != nil {
 		logger.LogError("error getting user dependencies by updated at: %s", err)
 	}
-	fmt.Println("result", usersDependenciesToSync)
 	// one week in go timevar
+	bulkInsertUserDependenciesParams := database.BulkInsertUserDependenciesParams{
+
+		UpdatedAt: sql.NullTime{Time: weekAgo, Valid: true},
+	}
+
 	for _, userDependency := range usersDependenciesToSync {
-		println("my stuff", userDependency.DependencyID, userDependency.UserID)
+		println(bulkInsertUserDependenciesParams.UpdatedAt.Time.String())
+		bulkInsertUserDependenciesParams.Column1 = append(bulkInsertUserDependenciesParams.Column1, userDependency.UserID)
+		bulkInsertUserDependenciesParams.Column2 = append(bulkInsertUserDependenciesParams.Column2, userDependency.DependencyID)
+		firstUseDate, _ok := userDependency.EarliestFirstUseDate.(int64)
+		if !_ok {
+			firstUseDate = 0
+		}
+		lastUseDate, _ok := userDependency.LatestLastUseDate.(int64)
+		if !_ok {
+			lastUseDate = 0
+		}
+		bulkInsertUserDependenciesParams.Column3 = append(bulkInsertUserDependenciesParams.Column3, firstUseDate)
+		bulkInsertUserDependenciesParams.Column4 = append(bulkInsertUserDependenciesParams.Column4, lastUseDate)
+
 		// find repo_deps that exist where user_id -> author -> commit  is shared with a repo
+	}
+	_, err = db.BulkInsertUserDependencies(context.Background(), bulkInsertUserDependenciesParams)
+	if err != nil {
+		logger.LogError("error inserting user dependencies: %s", err)
 	}
 	newCommitAuthorsRaw, err := getNewCommitAuthors(db)
 
