@@ -26,23 +26,20 @@ INSERT INTO commits (
     author_email, 
     author_date, 
     committer_date, 
-    message, 
-    insertions, 
-    deletions, 
+    message,
     files_changed, 
     repo_url
-) VALUES (  
-    unnest($1::varchar[]),  
-    unnest($2::varchar[]),  
-    unnest($3::varchar[]),  
-    unnest($4::bigint[]),  
-    unnest($5::bigint[]),  
-    unnest($6::text[]),  
-    unnest($7::int[]),  
-    unnest($8::int[]),  
-    unnest($9::int[]),  
-    unnest($10::varchar[])  
-) ON CONFLICT (commit_hash, repo_url) DO NOTHING;
+) 
+SELECT
+    unnest(sqlc.arg(commitHashes)::varchar[]),  
+    unnest(sqlc.arg(authors)::varchar[]),  
+    unnest(sqlc.arg(authorEmails)::varchar[]),  
+    unnest(sqlc.arg(authorDates)::bigint[]),  
+    unnest(sqlc.arg(committerDates)::bigint[]),  
+    unnest(sqlc.arg(messages)::text[]),
+    unnest(sqlc.arg(filesChanged)::int[]),  
+    sqlc.arg(repoUrl)
+ON CONFLICT (commit_hash, repo_url) DO NOTHING;
 
 -- name: GetLatestUncheckedCommitPerAuthor :many
 SELECT DISTINCT ON (c.author_email)

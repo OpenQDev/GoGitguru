@@ -24,20 +24,22 @@ func StartSyncingUser(
 	batchSize int,
 	githubGraphQLUrl string,
 ) {
-
-	weekAgo := time.Now()
-	usersDependenciesToSync, err := db.GetUserDependenciesByUpdatedAt(context.Background())
+	// time int
+	weekAgo := time.Now().Unix() - 604800
+	usersDependenciesToSync, err := db.GetUserDependenciesByUpdatedAt(context.Background(), sql.NullInt64{Valid: true, Int64: weekAgo})
 	if err != nil {
 		logger.LogError("error getting user dependencies by updated at: %s", err)
 	}
 	// one week in go timevar
 	bulkInsertUserDependenciesParams := database.BulkInsertUserDependenciesParams{
 
-		UpdatedAt: sql.NullTime{Time: weekAgo, Valid: true},
+		UpdatedAt: sql.NullInt64{
+			Int64: weekAgo,
+			Valid: true,
+		},
 	}
 
 	for _, userDependency := range usersDependenciesToSync {
-		println(bulkInsertUserDependenciesParams.UpdatedAt.Time.String())
 		bulkInsertUserDependenciesParams.Column1 = append(bulkInsertUserDependenciesParams.Column1, userDependency.UserID)
 		bulkInsertUserDependenciesParams.Column2 = append(bulkInsertUserDependenciesParams.Column2, userDependency.DependencyID)
 		firstUseDate, _ok := userDependency.EarliestFirstUseDate.(int64)

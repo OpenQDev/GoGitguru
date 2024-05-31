@@ -4,12 +4,9 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
-	"slices"
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
-
-	"github.com/OpenQDev/GoGitguru/util/gitutil"
 )
 
 type GitLogParams struct {
@@ -24,82 +21,36 @@ type GitLogParams struct {
 // from commitDate should be the date of the last commit that was synced for the repository or any of the dependencies.
 
 func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams) (int, error) {
-	rawDependencies, err := params.db.GetDependencies(context.Background(), params.repoUrl)
+
+	repoDir := filepath.Join(params.prefixPath, params.organization, params.repo)
+	dependencies, err := GetRepoDependencies(params.db, params.repoUrl)
 	if err != nil {
 		println("error getting rawDependencies")
 	}
-	dependenciesFiles := make([]string, len(rawDependencies))
-	dependencyNames := make([]string, len(rawDependencies))
-	dependencies := []database.Dependency{}
-	for i, rawDependency := range rawDependencies {
-		dependency := database.Dependency{
-			DependencyName: rawDependency.DependencyName.String,
-			DependencyFile: rawDependency.DependencyFile.String,
-			InternalID:     rawDependency.InternalID.Int32,
-		}
-		dependencies = append(dependencies, dependency)
-
-		if slices.Contains(dependenciesFiles, dependency.DependencyFile) {
-			dependenciesFiles[i] = dependency.DependencyFile
-		}
-		if slices.Contains(dependencyNames, dependency.DependencyName) {
-			dependencyNames[i] = dependency.DependencyName
-		}
-	}
-
-	repoDir := filepath.Join(params.prefixPath, params.organization, params.repo)
+	commitList, err := CreateStartWithLatestCommitList(repoDir)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("error getting commit list %s: %s", params.repoUrl, err)
 	}
-	dependencyHistory, commitList, err := gitutil.GitDependencyHistory(repoDir, dependencies)
+
+	numberOfCommits, err := GetNumberOfCommitsPerDependency(dependencies, params)
+	if err != nil {
+		return 0, fmt.Errorf("error getting number of commits for %s: %s", params.repoUrl, err)
+	}
+
+	dependencyHistoryObjects, commitObject, err := GetObjectsFromCommitList(params, dependencies, commitList, numberOfCommits)
 	if err != nil {
 		return 0, err
 	}
 
-	dependencyHistoryObjects, err := PrepareDependencyHistoryForBulkInsertion(dependencyHistory, dependencies, params.repoUrl)
-
-	if err != nil {
-		return 0, err
-	}
-
-	numberOfCommits, err := gitutil.GetNumberOfCommits(params.prefixPath, params.organization, params.repo, params.fromCommitDate)
-	if err != nil {
-		return 0, err
-	}
-
-	err = BulkInsertDependencyHistory(params.db, params.repoUrl, dependencyHistoryObjects.DependencyId, dependencyHistoryObjects.DateFirstPresent, dependencyHistoryObjects.DateLastRemoved)
+	err = params.db.BatchInsertRepoDependencies(context.Background(), dependencyHistoryObjects)
 	if err != nil {
 		return 0, fmt.Errorf("error storing dependency history for %s: %s", params.repoUrl, err)
 	}
+	err = params.db.BulkInsertCommits(context.Background(), commitObject)
 
-	fmt.Printf("%s has %d commits to sync\n", params.repoUrl, numberOfCommits)
-
-	if numberOfCommits == 0 {
-		return 0, nil
-	}
-
-	commitObjects, err := PrepareCommitHistoryForBulkInsertion(numberOfCommits, commitList, params)
-
-	if err != nil {
-		return 0, err
-	}
-
-	err = BulkInsertCommits(
-		params.db,
-		commitObjects.CommitHash,
-		commitObjects.Author,
-		commitObjects.AuthorEmail,
-		commitObjects.AuthorDate,
-		commitObjects.CommitterDate,
-		commitObjects.Message,
-		commitObjects.Insertions,
-		commitObjects.Deletions,
-		commitObjects.FilesChanged,
-		commitObjects.RepoUrls,
-	)
 	if err != nil {
 		return 0, fmt.Errorf("error storing commits for %s: %s", params.repoUrl, err)
 	}
 
-	return numberOfCommits, nil
+	return numberOfCommits.ToSync, nil
 }

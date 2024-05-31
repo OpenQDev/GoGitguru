@@ -55,7 +55,8 @@ func (q *Queries) BulkInsertDependencies(ctx context.Context, arg BulkInsertDepe
 const getDependencies = `-- name: GetDependencies :many
 SELECT d.dependency_name,
 d.dependency_file,
-d.internal_id
+d.internal_id,
+rd.updated_at
  FROM repos_to_dependencies rd
 LEFT JOIN dependencies d ON rd.dependency_id = d.internal_id
 WHERE rd.url = $1
@@ -65,6 +66,7 @@ type GetDependenciesRow struct {
 	DependencyName sql.NullString `json:"dependency_name"`
 	DependencyFile sql.NullString `json:"dependency_file"`
 	InternalID     sql.NullInt32  `json:"internal_id"`
+	UpdatedAt      sql.NullInt64  `json:"updated_at"`
 }
 
 func (q *Queries) GetDependencies(ctx context.Context, url string) ([]GetDependenciesRow, error) {
@@ -76,7 +78,12 @@ func (q *Queries) GetDependencies(ctx context.Context, url string) ([]GetDepende
 	var items []GetDependenciesRow
 	for rows.Next() {
 		var i GetDependenciesRow
-		if err := rows.Scan(&i.DependencyName, &i.DependencyFile, &i.InternalID); err != nil {
+		if err := rows.Scan(
+			&i.DependencyName,
+			&i.DependencyFile,
+			&i.InternalID,
+			&i.UpdatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

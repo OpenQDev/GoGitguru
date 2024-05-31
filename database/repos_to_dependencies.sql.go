@@ -13,30 +13,40 @@ import (
 )
 
 const batchInsertRepoDependencies = `-- name: BatchInsertRepoDependencies :exec
-INSERT INTO repos_to_dependencies (url, dependency_id, first_use_data, last_use_data) VALUES (  
-  $1,  
+INSERT INTO repos_to_dependencies (
+  url, 
+  dependency_id, 
+  first_use_data, 
+  last_use_data, 
+  updated_at
+) 
+SELECT
+  $1, 
   unnest($2::int[]),  
   unnest($3::bigint[]),  
-  unnest($4::bigint[]) 
-)
+  unnest($4::bigint[]),  
+  $5
 ON CONFLICT (url, dependency_id) DO UPDATE 
-SET last_use_data = excluded.last_use_data, 
-first_use_data = excluded.first_use_data
+SET 
+  last_use_data = excluded.last_use_data, 
+  first_use_data = excluded.first_use_data
 `
 
 type BatchInsertRepoDependenciesParams struct {
-	Url     string  `json:"url"`
-	Column2 []int32 `json:"column_2"`
-	Column3 []int64 `json:"column_3"`
-	Column4 []int64 `json:"column_4"`
+	Url           string        `json:"url"`
+	Dependencyids []int32       `json:"dependencyids"`
+	Firstusedates []int64       `json:"firstusedates"`
+	Lastusedates  []int64       `json:"lastusedates"`
+	Updatedat     sql.NullInt64 `json:"updatedat"`
 }
 
 func (q *Queries) BatchInsertRepoDependencies(ctx context.Context, arg BatchInsertRepoDependenciesParams) error {
 	_, err := q.exec(ctx, q.batchInsertRepoDependenciesStmt, batchInsertRepoDependencies,
 		arg.Url,
-		pq.Array(arg.Column2),
-		pq.Array(arg.Column3),
-		pq.Array(arg.Column4),
+		pq.Array(arg.Dependencyids),
+		pq.Array(arg.Firstusedates),
+		pq.Array(arg.Lastusedates),
+		arg.Updatedat,
 	)
 	return err
 }
@@ -45,7 +55,8 @@ const getRepoDependencies = `-- name: GetRepoDependencies :many
 SELECT 
 d.dependency_name,
 rd.first_use_data,
-rd.last_use_data
+rd.last_use_data,
+rd.updated_at
 FROM dependencies d
 LEFT JOIN repos_to_dependencies rd ON d.internal_id = rd.dependency_id
 WHERE d.dependency_name = $1 AND rd.url = $2 AND d.dependency_file = ANY($3::text[])
@@ -61,6 +72,7 @@ type GetRepoDependenciesRow struct {
 	DependencyName string        `json:"dependency_name"`
 	FirstUseData   sql.NullInt64 `json:"first_use_data"`
 	LastUseData    sql.NullInt64 `json:"last_use_data"`
+	UpdatedAt      sql.NullInt64 `json:"updated_at"`
 }
 
 func (q *Queries) GetRepoDependencies(ctx context.Context, arg GetRepoDependenciesParams) ([]GetRepoDependenciesRow, error) {
@@ -72,7 +84,12 @@ func (q *Queries) GetRepoDependencies(ctx context.Context, arg GetRepoDependenci
 	var items []GetRepoDependenciesRow
 	for rows.Next() {
 		var i GetRepoDependenciesRow
-		if err := rows.Scan(&i.DependencyName, &i.FirstUseData, &i.LastUseData); err != nil {
+		if err := rows.Scan(
+			&i.DependencyName,
+			&i.FirstUseData,
+			&i.LastUseData,
+			&i.UpdatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

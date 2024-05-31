@@ -71,14 +71,6 @@ type Commit struct {
 	RepoUrl       sql.NullString `json:"repo_url"`
 }
 
-type DependenciesToUser struct {
-	DependencyID int32         `json:"dependency_id"`
-	UserID       int32         `json:"user_id"`
-	FirstUseData sql.NullInt64 `json:"first_use_data"`
-	LastUseData  sql.NullInt64 `json:"last_use_data"`
-	UpdatedAt    sql.NullTime  `json:"updated_at"`
-}
-
 type Dependency struct {
 	InternalID     int32  `json:"internal_id"`
 	DependencyName string `json:"dependency_name"`
@@ -155,6 +147,14 @@ type ReposToDependency struct {
 	DependencyID int32          `json:"dependency_id"`
 	FirstUseData sql.NullInt64  `json:"first_use_data"`
 	LastUseData  sql.NullInt64  `json:"last_use_data"`
+	UpdatedAt    sql.NullInt64  `json:"updated_at"`
 	Status       sql.NullString `json:"status"`
-	CommitHash   sql.NullString `json:"commit_hash"`
+}
+
+type UserToDependency struct {
+	DependencyID int32         `json:"dependency_id"`
+	UserID       int32         `json:"user_id"`
+	FirstUseData sql.NullInt64 `json:"first_use_data"`
+	LastUseData  sql.NullInt64 `json:"last_use_data"`
+	UpdatedAt    sql.NullInt64 `json:"updated_at"`
 }

@@ -13,7 +13,7 @@ import (
 )
 
 const batchInsertUserDependencies = `-- name: BatchInsertUserDependencies :exec
-INSERT INTO dependencies_to_users (user_id, dependency_id, first_use_data, last_use_data) VALUES (  
+INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_data, last_use_data) VALUES (  
   $1,  
   unnest($2::int[]),  
   unnest($3::bigint[]),  
@@ -42,7 +42,7 @@ func (q *Queries) BatchInsertUserDependencies(ctx context.Context, arg BatchInse
 }
 
 const bulkInsertUserDependencies = `-- name: BulkInsertUserDependencies :many
-INSERT INTO dependencies_to_users (user_id, dependency_id, first_use_data, last_use_data, updated_at) VALUES (  
+INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_data, last_use_data, updated_at) VALUES (  
   unnest($1::int[]),  
   unnest($2::int[]),  
   unnest($3::bigint[]),  
@@ -57,17 +57,17 @@ RETURNING user_id, dependency_id, updated_at
 `
 
 type BulkInsertUserDependenciesParams struct {
-	Column1   []int32      `json:"column_1"`
-	Column2   []int32      `json:"column_2"`
-	Column3   []int64      `json:"column_3"`
-	Column4   []int64      `json:"column_4"`
-	UpdatedAt sql.NullTime `json:"updated_at"`
+	Column1   []int32       `json:"column_1"`
+	Column2   []int32       `json:"column_2"`
+	Column3   []int64       `json:"column_3"`
+	Column4   []int64       `json:"column_4"`
+	UpdatedAt sql.NullInt64 `json:"updated_at"`
 }
 
 type BulkInsertUserDependenciesRow struct {
-	UserID       int32        `json:"user_id"`
-	DependencyID int32        `json:"dependency_id"`
-	UpdatedAt    sql.NullTime `json:"updated_at"`
+	UserID       int32         `json:"user_id"`
+	DependencyID int32         `json:"dependency_id"`
+	UpdatedAt    sql.NullInt64 `json:"updated_at"`
 }
 
 func (q *Queries) BulkInsertUserDependencies(ctx context.Context, arg BulkInsertUserDependenciesParams) ([]BulkInsertUserDependenciesRow, error) {
@@ -115,7 +115,7 @@ WITH computed_dates AS (
             ELSE GREATEST(subquery.first_commit_date, subquery.first_use_date)
         END AS first_use_date
     FROM
-        dependencies_to_users du
+        user_to_dependencies du
     LEFT JOIN
         dependencies d ON du.dependency_id = d.internal_id
     LEFT JOIN
@@ -142,8 +142,7 @@ WITH computed_dates AS (
         commits first_commit ON first_commit.author_date = subquery.first_commit_date
     LEFT JOIN
         commits last_commit ON last_commit.author_date = subquery.last_commit_date
-    WHERE
-        du.updated_at IS NULL OR du.updated_at < NOW() - INTERVAL '1 week'
+    WHERE du.updated_at IS NULL OR du.updated_at < $1
 )
 SELECT
     login,
@@ -167,8 +166,8 @@ type GetUserDependenciesByUpdatedAtRow struct {
 	LatestLastUseDate    interface{}    `json:"latest_last_use_date"`
 }
 
-func (q *Queries) GetUserDependenciesByUpdatedAt(ctx context.Context) ([]GetUserDependenciesByUpdatedAtRow, error) {
-	rows, err := q.query(ctx, q.getUserDependenciesByUpdatedAtStmt, getUserDependenciesByUpdatedAt)
+func (q *Queries) GetUserDependenciesByUpdatedAt(ctx context.Context, updatedAt sql.NullInt64) ([]GetUserDependenciesByUpdatedAtRow, error) {
+	rows, err := q.query(ctx, q.getUserDependenciesByUpdatedAtStmt, getUserDependenciesByUpdatedAt, updatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -197,7 +196,7 @@ func (q *Queries) GetUserDependenciesByUpdatedAt(ctx context.Context) ([]GetUser
 }
 
 const initializeUserDependencies = `-- name: InitializeUserDependencies :exec
-INSERT INTO dependencies_to_users ( user_id, dependency_id)
+INSERT INTO user_to_dependencies ( user_id, dependency_id)
 SELECT  internal_id, unnest($2::int[])
 FROM github_users
 WHERE login = $1

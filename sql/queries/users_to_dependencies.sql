@@ -1,5 +1,5 @@
 -- name: BatchInsertUserDependencies :exec
-INSERT INTO dependencies_to_users (user_id, dependency_id, first_use_data, last_use_data) VALUES (  
+INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_data, last_use_data) VALUES (  
   $1,  
   unnest($2::int[]),  
   unnest($3::bigint[]),  
@@ -10,7 +10,7 @@ SET last_use_data = excluded.last_use_data,
 first_use_data = excluded.first_use_data;
 
 -- name: InitializeUserDependencies :exec
-INSERT INTO dependencies_to_users ( user_id, dependency_id)
+INSERT INTO user_to_dependencies ( user_id, dependency_id)
 SELECT  internal_id, unnest($2::int[])
 FROM github_users
 WHERE login = $1
@@ -32,7 +32,7 @@ WITH computed_dates AS (
             ELSE GREATEST(subquery.first_commit_date, subquery.first_use_date)
         END AS first_use_date
     FROM
-        dependencies_to_users du
+        user_to_dependencies du
     LEFT JOIN
         dependencies d ON du.dependency_id = d.internal_id
     LEFT JOIN
@@ -59,8 +59,7 @@ WITH computed_dates AS (
         commits first_commit ON first_commit.author_date = subquery.first_commit_date
     LEFT JOIN
         commits last_commit ON last_commit.author_date = subquery.last_commit_date
-    WHERE
-        du.updated_at IS NULL OR du.updated_at < NOW() - INTERVAL '1 week'
+    WHERE du.updated_at IS NULL OR du.updated_at < $1
 )
 SELECT
     login,
@@ -76,7 +75,7 @@ GROUP BY
     dependency_id;
 
 -- name: BulkInsertUserDependencies :many
-INSERT INTO dependencies_to_users (user_id, dependency_id, first_use_data, last_use_data, updated_at) VALUES (  
+INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_data, last_use_data, updated_at) VALUES (  
   unnest($1::int[]),  
   unnest($2::int[]),  
   unnest($3::bigint[]),  
