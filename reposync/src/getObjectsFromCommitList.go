@@ -1,6 +1,7 @@
 package reposync
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/OpenQDev/GoGitguru/database"
@@ -25,6 +26,10 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 	commitWindow := GetCommitWindow(len(commitList))
 
 	commitObject := database.BulkInsertCommitsParams{
+		Repourl: sql.NullString{
+			String: params.repoUrl,
+			Valid:  true,
+		},
 		Commithashes:   []string{},
 		Authors:        []string{},
 		Authoremails:   []string{},

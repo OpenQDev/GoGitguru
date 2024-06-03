@@ -83,6 +83,7 @@ func StartSyncingUser(
 
 	// Get info for each batch
 	for _, repoToAuthorBatch := range repoToAuthorBatches {
+		println("repoToAuthorBatch.RepoURL", repoToAuthorBatch.RepoURL)
 
 		githubGraphQLCommitAuthorsMap, err := identifyRepoAuthorsBatch(repoToAuthorBatch.RepoURL, repoToAuthorBatch.AuthorCommitTuples, ghAccessToken, githubGraphQLUrl)
 		if err != nil {
