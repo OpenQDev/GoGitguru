@@ -75,7 +75,6 @@ func (apiCfg *ApiConfig) HandlerAddUserFingerPrint(w http.ResponseWriter, r *htt
 			if err != nil {
 				RespondWithError(w, 500, fmt.Sprintf("error initializing repo dependencies: %s", err))
 			}
-			fmt.Println("my stuff", userDependencyParams)
 
 		}
 	}

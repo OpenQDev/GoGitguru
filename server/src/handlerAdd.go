@@ -66,7 +66,6 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 
 		accepted = append(accepted, repoUrl)
 		for index := range request.Dependencies {
-			fmt.Println("depsResults: ", request.Dependencies)
 			repoDependencyParams := database.InitializeRepoDependenciesParams{
 				Url:     repoUrl,
 				Column2: depsResults[index],
@@ -76,7 +75,6 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				RespondWithError(w, 500, fmt.Sprintf("error initializing repo dependencies: %s", err))
 			}
-			println("initializxed repo dependencies")
 
 		}
 	}

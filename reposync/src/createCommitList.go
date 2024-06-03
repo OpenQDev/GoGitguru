@@ -19,7 +19,6 @@ func CreateStartWithLatestCommitList(repoDir string) ([]*object.Commit, error) {
 	commitList := make([]*object.Commit, 0)
 	err = commits.ForEach(func(c *object.Commit) error {
 		commitList = append(commitList, c)
-		println(c.Author.When.Unix(), "date")
 		return nil
 	})
 	// we want to look at commits from oldest to newest

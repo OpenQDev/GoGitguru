@@ -8,20 +8,21 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
-func AddCommitToCommitObject(c *object.Commit, commitObject *database.BulkInsertCommitsParams, commitCount int) {
+func AddCommitToCommitObject(c *object.Commit, commitObject *database.BulkInsertCommitsParams, commitCount int) int {
 
-	totalFilesChanged := 0
 	c.Author.Email = strings.Trim(c.Author.Email, "\"")
 	c.Author.Email = strings.Trim(c.Author.Email, ".")
-	commitObject.Commithashes[commitCount] = c.Hash.String()
-	commitObject.Authors[commitCount] = c.Author.Name
-	commitObject.Authoremails[commitCount] = c.Author.Email
-	commitObject.Authordates[commitCount] = int64(c.Author.When.Unix())
-	commitObject.Committerdates[commitCount] = int64(c.Committer.When.Unix())
-	commitObject.Messages[commitCount] = strings.TrimRight(c.Message, "\n")
-	commitObject.Fileschanged[commitCount] = int32(totalFilesChanged)
+	commitObject.Commithashes = append(commitObject.Commithashes, c.Hash.String())
+	commitObject.Authors = append(commitObject.Authors, c.Author.Name)
+	commitObject.Authoremails = append(commitObject.Authoremails, c.Author.Email)
+	commitObject.Authordates = append(commitObject.Authordates, int64(c.Author.When.Unix()))
+	commitObject.Committerdates = append(commitObject.Committerdates, c.Committer.When.Unix())
+	commitObject.Messages = append(commitObject.Messages, strings.TrimRight(c.Message, "\n"))
+	commitObject.Fileschanged = append(commitObject.Fileschanged, 0)
 	if commitCount != 0 && commitCount%100 == 0 {
 		logger.LogGreenDebug("process %d commits for %s", commitCount)
 	}
+	commitCount++
+	return commitCount
 
 }

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
+	"github.com/OpenQDev/GoGitguru/util/gitutil"
 )
 
 type GitLogParams struct {
@@ -23,25 +24,24 @@ type GitLogParams struct {
 func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams) (int, error) {
 
 	repoDir := filepath.Join(params.prefixPath, params.organization, params.repo)
-	dependencies, err := GetRepoDependencies(params.db, params.repoUrl)
-	if err != nil {
-		println("error getting rawDependencies")
-	}
+
 	commitList, err := CreateStartWithLatestCommitList(repoDir)
 	if err != nil {
 		return 0, fmt.Errorf("error getting commit list %s: %s", params.repoUrl, err)
 	}
 
-	numberOfCommits, err := GetNumberOfCommitsPerDependency(dependencies, params)
+	numberOfCommitsToSync, err := gitutil.GetNumberOfCommits(params.prefixPath, params.organization, params.repo, params.fromCommitDate)
 	if err != nil {
 		return 0, fmt.Errorf("error getting number of commits for %s: %s", params.repoUrl, err)
 	}
 
-	dependencyHistoryObjects, commitObject, err := GetObjectsFromCommitList(params, dependencies, commitList, numberOfCommits)
+	currentDependencies, err := params.db.GetRepoDependenciesByURL(context.Background(), params.repoUrl)
+
+	dependencyHistoryObjects, commitObject, err := GetObjectsFromCommitList(params, commitList, numberOfCommitsToSync, currentDependencies)
+
 	if err != nil {
 		return 0, err
 	}
-
 	err = params.db.BatchInsertRepoDependencies(context.Background(), dependencyHistoryObjects)
 	if err != nil {
 		return 0, fmt.Errorf("error storing dependency history for %s: %s", params.repoUrl, err)
@@ -51,6 +51,5 @@ func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("error storing commits for %s: %s", params.repoUrl, err)
 	}
-
-	return numberOfCommits.ToSync, nil
+	return numberOfCommitsToSync, nil
 }

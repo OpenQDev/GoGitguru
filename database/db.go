@@ -93,6 +93,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getRepoDependenciesStmt, err = db.PrepareContext(ctx, getRepoDependencies); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRepoDependencies: %w", err)
 	}
+	if q.getRepoDependenciesByURLStmt, err = db.PrepareContext(ctx, getRepoDependenciesByURL); err != nil {
+		return nil, fmt.Errorf("error preparing query GetRepoDependenciesByURL: %w", err)
+	}
 	if q.getRepoURLStmt, err = db.PrepareContext(ctx, getRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRepoURL: %w", err)
 	}
@@ -249,6 +252,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getRepoDependenciesStmt: %w", cerr)
 		}
 	}
+	if q.getRepoDependenciesByURLStmt != nil {
+		if cerr := q.getRepoDependenciesByURLStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getRepoDependenciesByURLStmt: %w", cerr)
+		}
+	}
 	if q.getRepoURLStmt != nil {
 		if cerr := q.getRepoURLStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getRepoURLStmt: %w", cerr)
@@ -371,6 +379,7 @@ type Queries struct {
 	getLatestCommitterDateStmt                 *sql.Stmt
 	getLatestUncheckedCommitPerAuthorStmt      *sql.Stmt
 	getRepoDependenciesStmt                    *sql.Stmt
+	getRepoDependenciesByURLStmt               *sql.Stmt
 	getRepoURLStmt                             *sql.Stmt
 	getRepoURLsStmt                            *sql.Stmt
 	getReposStatusStmt                         *sql.Stmt
@@ -412,6 +421,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getLatestCommitterDateStmt:                 q.getLatestCommitterDateStmt,
 		getLatestUncheckedCommitPerAuthorStmt:      q.getLatestUncheckedCommitPerAuthorStmt,
 		getRepoDependenciesStmt:                    q.getRepoDependenciesStmt,
+		getRepoDependenciesByURLStmt:               q.getRepoDependenciesByURLStmt,
 		getRepoURLStmt:                             q.getRepoURLStmt,
 		getRepoURLsStmt:                            q.getRepoURLsStmt,
 		getReposStatusStmt:                         q.getReposStatusStmt,
