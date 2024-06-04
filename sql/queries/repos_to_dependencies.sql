@@ -21,8 +21,8 @@ dependency_ids AS (
   SELECT
     d.internal_id AS dependency_id,
     s.url,
-    s.firstUseDates AS first_use_data,
-    s.lastUseDates AS last_use_data
+    s.firstUseDates AS first_use_date,
+    s.lastUseDates AS last_use_date
   FROM (
     SELECT
       sqlc.arg(url) AS url,
@@ -36,20 +36,20 @@ unnest(COALESCE(sqlc.arg(lastUseDates)::bigint[], ARRAY[]::bigint[])) AS lastUse
 INSERT INTO repos_to_dependencies (
   url, 
   dependency_id, 
-  first_use_data,
-  last_use_data
+  first_use_date,
+  last_use_date
 ) 
 SELECT DISTINCT
   url, 
   dependency_id,  
-  first_use_data,
-  last_use_data
+  first_use_date,
+  last_use_date
 FROM
   dependency_ids
 ON CONFLICT (url, dependency_id) DO UPDATE 
 SET 
-  first_use_data = EXCLUDED.first_use_data,
-  last_use_data = EXCLUDED.last_use_data;
+  first_use_date = EXCLUDED.first_use_date,
+  last_use_date = EXCLUDED.last_use_date;
 
 
 
@@ -63,8 +63,8 @@ ON CONFLICT (url, dependency_id) DO NOTHING;
 -- name: GetRepoDependencies :many
 SELECT 
 d.dependency_name,
-rd.first_use_data,
-rd.last_use_data
+rd.first_use_date,
+rd.last_use_date
 FROM dependencies d
 LEFT JOIN repos_to_dependencies rd ON d.internal_id = rd.dependency_id
 WHERE d.dependency_name = $1 AND rd.url = $2 AND d.dependency_file = ANY($3::text[]);
@@ -74,8 +74,8 @@ WHERE d.dependency_name = $1 AND rd.url = $2 AND d.dependency_file = ANY($3::tex
 SELECT 
 d.dependency_name,
 d.dependency_file,
-rd.first_use_data,
-rd.last_use_data
+rd.first_use_date,
+rd.last_use_date
 FROM dependencies d
 LEFT JOIN repos_to_dependencies rd ON d.internal_id = rd.dependency_id
 WHERE rd.url = $1;

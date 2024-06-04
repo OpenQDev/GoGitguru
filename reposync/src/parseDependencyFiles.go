@@ -13,7 +13,8 @@ import (
 
 // Dependency structure for package.json
 type PackageJSON struct {
-	Dependencies map[string]string `json:"dependencies"`
+	Dependencies    map[string]string `json:"dependencies"`
+	DevDependencies map[string]string `json:"devDependencies"`
 }
 
 // Dependency structure for pom.xml
@@ -94,6 +95,9 @@ func parsePackageJSON(file *object.File) ([]string, error) {
 	var dependencies []string
 	for dep := range pkg.Dependencies {
 		dependencies = append(dependencies, dep)
+	}
+	for devDep := range pkg.DevDependencies {
+		dependencies = append(dependencies, devDep)
 	}
 	return dependencies, nil
 }

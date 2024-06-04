@@ -2,9 +2,7 @@ package usersync
 
 import (
 	"context"
-	"database/sql"
 	"strings"
-	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
 
@@ -24,41 +22,13 @@ func StartSyncingUser(
 	batchSize int,
 	githubGraphQLUrl string,
 ) {
-	// time int
-	weekAgo := time.Now().Unix() - 604800
-	usersDependenciesToSync, err := db.GetUserDependenciesByUpdatedAt(context.Background(), sql.NullInt64{Valid: true, Int64: weekAgo})
+
+	err := SyncUserDependencies(db)
 	if err != nil {
-		logger.LogError("error getting user dependencies by updated at: %s", err)
-	}
-	// one week in go timevar
-	bulkInsertUserDependenciesParams := database.BulkInsertUserDependenciesParams{
-
-		UpdatedAt: sql.NullInt64{
-			Int64: weekAgo,
-			Valid: true,
-		},
+		logger.LogFatalRedAndExit("error syncing dependencies: %s", err)
+		return
 	}
 
-	for _, userDependency := range usersDependenciesToSync {
-		bulkInsertUserDependenciesParams.Column1 = append(bulkInsertUserDependenciesParams.Column1, userDependency.UserID)
-		bulkInsertUserDependenciesParams.Column2 = append(bulkInsertUserDependenciesParams.Column2, userDependency.DependencyID)
-		firstUseDate, _ok := userDependency.EarliestFirstUseDate.(int64)
-		if !_ok {
-			firstUseDate = 0
-		}
-		lastUseDate, _ok := userDependency.LatestLastUseDate.(int64)
-		if !_ok {
-			lastUseDate = 0
-		}
-		bulkInsertUserDependenciesParams.Column3 = append(bulkInsertUserDependenciesParams.Column3, firstUseDate)
-		bulkInsertUserDependenciesParams.Column4 = append(bulkInsertUserDependenciesParams.Column4, lastUseDate)
-
-		// find repo_deps that exist where user_id -> author -> commit  is shared with a repo
-	}
-	_, err = db.BulkInsertUserDependencies(context.Background(), bulkInsertUserDependenciesParams)
-	if err != nil {
-		logger.LogError("error inserting user dependencies: %s", err)
-	}
 	newCommitAuthorsRaw, err := getNewCommitAuthors(db)
 
 	if err != nil {
@@ -83,7 +53,6 @@ func StartSyncingUser(
 
 	// Get info for each batch
 	for _, repoToAuthorBatch := range repoToAuthorBatches {
-		println("repoToAuthorBatch.RepoURL", repoToAuthorBatch.RepoURL)
 
 		githubGraphQLCommitAuthorsMap, err := identifyRepoAuthorsBatch(repoToAuthorBatch.RepoURL, repoToAuthorBatch.AuthorCommitTuples, ghAccessToken, githubGraphQLUrl)
 		if err != nil {

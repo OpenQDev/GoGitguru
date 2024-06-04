@@ -44,15 +44,15 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 	datesRemoved := []string{}
 
 	for _, dependency := range dependencyResult {
-		if dependency.FirstUseData.Int64 != 0 {
-			t := time.Unix(dependency.FirstUseData.Int64, 0).UTC()
+		if dependency.FirstUseDate.Int64 != 0 {
+			t := time.Unix(dependency.FirstUseDate.Int64, 0).UTC()
 			formattedDate := t.Format(time.RFC3339)
 			datesAdded = append(datesAdded, formattedDate)
 
 		}
-		if dependency.LastUseData.Int64 != 0 {
+		if dependency.LastUseDate.Int64 != 0 {
 			//get date in this format 2023-01-10T17:55:48Z from timestamp
-			t := time.Unix(dependency.LastUseData.Int64, 0).UTC()
+			t := time.Unix(dependency.LastUseDate.Int64, 0).UTC()
 			formattedDate := t.Format(time.RFC3339)
 			datesRemoved = append(datesRemoved, formattedDate)
 		}

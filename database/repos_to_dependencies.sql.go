@@ -35,8 +35,8 @@ dependency_ids AS (
   SELECT
     d.internal_id AS dependency_id,
     s.url,
-    s.firstUseDates AS first_use_data,
-    s.lastUseDates AS last_use_data
+    s.firstUseDates AS first_use_date,
+    s.lastUseDates AS last_use_date
   FROM (
     SELECT
       $3 AS url,
@@ -50,20 +50,20 @@ unnest(COALESCE($5::bigint[], ARRAY[]::bigint[])) AS lastUseDates
 INSERT INTO repos_to_dependencies (
   url, 
   dependency_id, 
-  first_use_data,
-  last_use_data
+  first_use_date,
+  last_use_date
 ) 
 SELECT DISTINCT
   url, 
   dependency_id,  
-  first_use_data,
-  last_use_data
+  first_use_date,
+  last_use_date
 FROM
   dependency_ids
 ON CONFLICT (url, dependency_id) DO UPDATE 
 SET 
-  first_use_data = EXCLUDED.first_use_data,
-  last_use_data = EXCLUDED.last_use_data
+  first_use_date = EXCLUDED.first_use_date,
+  last_use_date = EXCLUDED.last_use_date
 `
 
 type BatchInsertRepoDependenciesParams struct {
@@ -88,8 +88,8 @@ func (q *Queries) BatchInsertRepoDependencies(ctx context.Context, arg BatchInse
 const getRepoDependencies = `-- name: GetRepoDependencies :many
 SELECT 
 d.dependency_name,
-rd.first_use_data,
-rd.last_use_data
+rd.first_use_date,
+rd.last_use_date
 FROM dependencies d
 LEFT JOIN repos_to_dependencies rd ON d.internal_id = rd.dependency_id
 WHERE d.dependency_name = $1 AND rd.url = $2 AND d.dependency_file = ANY($3::text[])
@@ -103,8 +103,8 @@ type GetRepoDependenciesParams struct {
 
 type GetRepoDependenciesRow struct {
 	DependencyName string        `json:"dependency_name"`
-	FirstUseData   sql.NullInt64 `json:"first_use_data"`
-	LastUseData    sql.NullInt64 `json:"last_use_data"`
+	FirstUseDate   sql.NullInt64 `json:"first_use_date"`
+	LastUseDate    sql.NullInt64 `json:"last_use_date"`
 }
 
 func (q *Queries) GetRepoDependencies(ctx context.Context, arg GetRepoDependenciesParams) ([]GetRepoDependenciesRow, error) {
@@ -116,7 +116,7 @@ func (q *Queries) GetRepoDependencies(ctx context.Context, arg GetRepoDependenci
 	var items []GetRepoDependenciesRow
 	for rows.Next() {
 		var i GetRepoDependenciesRow
-		if err := rows.Scan(&i.DependencyName, &i.FirstUseData, &i.LastUseData); err != nil {
+		if err := rows.Scan(&i.DependencyName, &i.FirstUseDate, &i.LastUseDate); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -134,8 +134,8 @@ const getRepoDependenciesByURL = `-- name: GetRepoDependenciesByURL :many
 SELECT 
 d.dependency_name,
 d.dependency_file,
-rd.first_use_data,
-rd.last_use_data
+rd.first_use_date,
+rd.last_use_date
 FROM dependencies d
 LEFT JOIN repos_to_dependencies rd ON d.internal_id = rd.dependency_id
 WHERE rd.url = $1
@@ -144,8 +144,8 @@ WHERE rd.url = $1
 type GetRepoDependenciesByURLRow struct {
 	DependencyName string        `json:"dependency_name"`
 	DependencyFile string        `json:"dependency_file"`
-	FirstUseData   sql.NullInt64 `json:"first_use_data"`
-	LastUseData    sql.NullInt64 `json:"last_use_data"`
+	FirstUseDate   sql.NullInt64 `json:"first_use_date"`
+	LastUseDate    sql.NullInt64 `json:"last_use_date"`
 }
 
 func (q *Queries) GetRepoDependenciesByURL(ctx context.Context, url string) ([]GetRepoDependenciesByURLRow, error) {
@@ -160,8 +160,8 @@ func (q *Queries) GetRepoDependenciesByURL(ctx context.Context, url string) ([]G
 		if err := rows.Scan(
 			&i.DependencyName,
 			&i.DependencyFile,
-			&i.FirstUseData,
-			&i.LastUseData,
+			&i.FirstUseDate,
+			&i.LastUseDate,
 		); err != nil {
 			return nil, err
 		}

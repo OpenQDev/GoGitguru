@@ -1,7 +1,5 @@
 package usersync
 
-import "fmt"
-
 type RepoToAuthorCommitTuples struct {
 	Repos map[string][]AuthorCommitTuple
 }
@@ -15,7 +13,6 @@ type AuthorCommitTuple struct {
 func getRepoToAuthorsMap(repoAuthorCommits []UserSync) RepoToAuthorCommitTuples {
 	repoToAuthorCommitTuples := RepoToAuthorCommitTuples{Repos: make(map[string][]AuthorCommitTuple)}
 	for _, repoAuthorCommit := range repoAuthorCommits {
-		fmt.Println("repoAuthorCommits", repoAuthorCommit.RepoUrl)
 		if repoAuthorCommit.RepoUrl != "" {
 			authorCommitTuple := AuthorCommitTuple{
 				Author:     repoAuthorCommit.AuthorEmail,

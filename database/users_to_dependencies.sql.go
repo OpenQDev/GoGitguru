@@ -13,15 +13,15 @@ import (
 )
 
 const batchInsertUserDependencies = `-- name: BatchInsertUserDependencies :exec
-INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_data, last_use_data) VALUES (  
+INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_date, last_use_date) VALUES (  
   $1,  
   unnest($2::int[]),  
   unnest($3::bigint[]),  
   unnest($4::bigint[]) 
 )
 ON CONFLICT (user_id, dependency_id) DO UPDATE 
-SET last_use_data = excluded.last_use_data, 
-first_use_data = excluded.first_use_data
+SET last_use_date = excluded.last_use_date, 
+first_use_date = excluded.first_use_date
 `
 
 type BatchInsertUserDependenciesParams struct {
@@ -42,32 +42,28 @@ func (q *Queries) BatchInsertUserDependencies(ctx context.Context, arg BatchInse
 }
 
 const bulkInsertUserDependencies = `-- name: BulkInsertUserDependencies :many
-INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_data, last_use_data, updated_at) VALUES (  
+INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_date, last_use_date) VALUES (  
   unnest($1::int[]),  
   unnest($2::int[]),  
   unnest($3::bigint[]),  
-  unnest($4::bigint[]),
-  $5
+  unnest($4::bigint[])
 )
 ON CONFLICT (user_id, dependency_id) DO UPDATE
-SET last_use_data = excluded.last_use_data,
-first_use_data = excluded.first_use_data,
-updated_at = excluded.updated_at
-RETURNING user_id, dependency_id, updated_at
+SET last_use_date = excluded.last_use_date,
+first_use_date = excluded.first_use_date
+RETURNING user_id, dependency_id
 `
 
 type BulkInsertUserDependenciesParams struct {
-	Column1   []int32       `json:"column_1"`
-	Column2   []int32       `json:"column_2"`
-	Column3   []int64       `json:"column_3"`
-	Column4   []int64       `json:"column_4"`
-	UpdatedAt sql.NullInt64 `json:"updated_at"`
+	Column1 []int32 `json:"column_1"`
+	Column2 []int32 `json:"column_2"`
+	Column3 []int64 `json:"column_3"`
+	Column4 []int64 `json:"column_4"`
 }
 
 type BulkInsertUserDependenciesRow struct {
-	UserID       int32         `json:"user_id"`
-	DependencyID int32         `json:"dependency_id"`
-	UpdatedAt    sql.NullInt64 `json:"updated_at"`
+	UserID       int32 `json:"user_id"`
+	DependencyID int32 `json:"dependency_id"`
 }
 
 func (q *Queries) BulkInsertUserDependencies(ctx context.Context, arg BulkInsertUserDependenciesParams) ([]BulkInsertUserDependenciesRow, error) {
@@ -76,7 +72,6 @@ func (q *Queries) BulkInsertUserDependencies(ctx context.Context, arg BulkInsert
 		pq.Array(arg.Column2),
 		pq.Array(arg.Column3),
 		pq.Array(arg.Column4),
-		arg.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -85,7 +80,7 @@ func (q *Queries) BulkInsertUserDependencies(ctx context.Context, arg BulkInsert
 	var items []BulkInsertUserDependenciesRow
 	for rows.Next() {
 		var i BulkInsertUserDependenciesRow
-		if err := rows.Scan(&i.UserID, &i.DependencyID, &i.UpdatedAt); err != nil {
+		if err := rows.Scan(&i.UserID, &i.DependencyID); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -101,73 +96,36 @@ func (q *Queries) BulkInsertUserDependencies(ctx context.Context, arg BulkInsert
 
 const getUserDependenciesByUpdatedAt = `-- name: GetUserDependenciesByUpdatedAt :many
 
-WITH computed_dates AS (
-    SELECT
-        gu.login,
-        du.user_id,
-        du.dependency_id,
-        CASE
-            WHEN subquery.last_use_date = 0 THEN NULL
-            ELSE LEAST(subquery.last_commit_date, subquery.last_use_date)
+SELECT s.internal_id as user_id, MIN(first_use_date) as first_use_date,
+CASE
+            WHEN MIN(last_use_date) = 0 THEN NULL
+            ELSE MAX(last_use_date)
         END AS last_use_date,
-        CASE
-            WHEN subquery.first_use_date = 0 THEN NULL
-            ELSE GREATEST(subquery.first_commit_date, subquery.first_use_date)
-        END AS first_use_date
-    FROM
-        user_to_dependencies du
-    LEFT JOIN
-        dependencies d ON du.dependency_id = d.internal_id
-    LEFT JOIN
-        github_users gu ON du.user_id = gu.internal_id
-    LEFT JOIN
-        github_user_rest_id_author_emails gure ON gu.github_rest_id = gure.rest_id
-    LEFT JOIN (
-        SELECT
-            rd.dependency_id,
-            rd.url,
-            MIN(c1.author_date) AS first_commit_date,
-            MAX(c1.author_date) AS last_commit_date,
-            MIN(rd.first_use_data) AS first_use_date,
-            MAX(rd.last_use_data) AS last_use_date
-        FROM
-            repos_to_dependencies rd
-        LEFT JOIN
-            commits c1 ON c1.repo_url = rd.url
-        GROUP BY
-            rd.dependency_id,
-            rd.url
-    ) subquery ON subquery.dependency_id = d.internal_id
-    LEFT JOIN
-        commits first_commit ON first_commit.author_date = subquery.first_commit_date
-    LEFT JOIN
-        commits last_commit ON last_commit.author_date = subquery.last_commit_date
-    WHERE du.updated_at IS NULL OR du.updated_at < $1
-)
-SELECT
-    login,
-    user_id,
-    dependency_id,
-    MIN(first_use_date) AS earliest_first_use_date,
-    MAX(last_use_date) AS latest_last_use_date
-FROM
-    computed_dates
-GROUP BY
-    login,
-    user_id,
-    dependency_id
+        s.dependency_id
+
+ FROM (
+
+SELECT GREATEST(first_use_date , MIN(c.committer_date)) as first_use_date_result,  LEAST(last_use_date, MAX(c.committer_date)) as last_use_date_result, rd.url, gu.internal_id, rd.dependency_id
+FROM repos_to_dependencies rd
+LEFT JOIN commits c ON c.repo_url = rd.url
+LEFT JOIN github_user_rest_id_author_emails guriae ON guriae.email = c.author_email
+LEFT JOIN github_users gu ON gu.github_rest_id = guriae.rest_id
+GROUP BY gu.internal_id, rd.dependency_id, rd.url
+) s
+LEFT JOIN user_to_dependencies ud ON s.internal_id = ud.user_id AND s.dependency_id = ud.dependency_id
+WHERE first_use_date_result <> ud.first_use_date or last_use_date_result <> ud.last_use_date
+GROUP BY s.internal_id, s.dependency_id
 `
 
 type GetUserDependenciesByUpdatedAtRow struct {
-	Login                sql.NullString `json:"login"`
-	UserID               int32          `json:"user_id"`
-	DependencyID         int32          `json:"dependency_id"`
-	EarliestFirstUseDate interface{}    `json:"earliest_first_use_date"`
-	LatestLastUseDate    interface{}    `json:"latest_last_use_date"`
+	UserID       sql.NullInt32 `json:"user_id"`
+	FirstUseDate interface{}   `json:"first_use_date"`
+	LastUseDate  interface{}   `json:"last_use_date"`
+	DependencyID int32         `json:"dependency_id"`
 }
 
-func (q *Queries) GetUserDependenciesByUpdatedAt(ctx context.Context, updatedAt sql.NullInt64) ([]GetUserDependenciesByUpdatedAtRow, error) {
-	rows, err := q.query(ctx, q.getUserDependenciesByUpdatedAtStmt, getUserDependenciesByUpdatedAt, updatedAt)
+func (q *Queries) GetUserDependenciesByUpdatedAt(ctx context.Context) ([]GetUserDependenciesByUpdatedAtRow, error) {
+	rows, err := q.query(ctx, q.getUserDependenciesByUpdatedAtStmt, getUserDependenciesByUpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -176,11 +134,10 @@ func (q *Queries) GetUserDependenciesByUpdatedAt(ctx context.Context, updatedAt 
 	for rows.Next() {
 		var i GetUserDependenciesByUpdatedAtRow
 		if err := rows.Scan(
-			&i.Login,
 			&i.UserID,
+			&i.FirstUseDate,
+			&i.LastUseDate,
 			&i.DependencyID,
-			&i.EarliestFirstUseDate,
-			&i.LatestLastUseDate,
 		); err != nil {
 			return nil, err
 		}
