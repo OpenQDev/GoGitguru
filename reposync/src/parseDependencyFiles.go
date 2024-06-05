@@ -260,9 +260,132 @@ func parseComposerJSON(file *object.File) ([]string, error) {
 	return dependencies, nil
 }
 
+func parseBlockChains(file *object.File) ([]string, error) {
+	contents, err := file.Contents()
+	if err != nil {
+		return nil, err
+	}
+	blockChainsContained := []string{}
+	lowerContents := strings.ToLower(contents)
+
+	blockChains := []string{
+		"Ethereum",
+		"Polkadot",
+		"Polygon",
+		"Cosmos",
+		"Arbitrum",
+		"BNB",
+		"Avalanche",
+		"Solana",
+		"Optimism",
+		"Bitcoin",
+		"Kusama",
+		"NEAR",
+		"Celo",
+		"Fantom",
+		"Gnosis Chain",
+		"Starknet",
+		"Base",
+		"ZKSync",
+		"Moonbeam",
+		"Cardano",
+		"Internet Computer",
+		"Aptos",
+		"Moonriver",
+		"IPFS",
+		"Filecoin",
+		"Lightning",
+		"Aurora",
+		"Polygon zkEVM",
+		"Osmosis",
+		"Tezos",
+		"Mina Protocol",
+		"Harmony",
+		"Sui Network",
+		"Oasis",
+		"Hedera",
+		"Stellar",
+		"Status",
+		"Flow",
+		"Linea",
+		"Acala",
+		"Stacks",
+		"Boba",
+		"Algorand",
+		"Klaytn",
+		"MultiversX (Elrond)",
+		"Arweave",
+		"Astar Network",
+		"XRP",
+		"Scroll",
+		"Basic Attention Token",
+		"Terra",
+		"EOS",
+		"Fuel",
+		"Chainlink",
+		"Celestia",
+		"TON",
+		"Aztec Protocol",
+		"Mantle",
+		"Metis Token",
+		"Litecoin",
+		"Sora",
+		"IOTA",
+		"Cronos",
+		"Monero",
+		"Decentraland",
+		"Injective",
+		"Terra Classic",
+		"Vega Protocol",
+		"Sei Network",
+		"The Graph",
+		"EVMOS",
+		"Kava.io",
+		"Kujira",
+		"Nostr",
+		"Urbit",
+		"Chia",
+		"Zcash",
+		"Axelar Network",
+		"Anoma",
+		"Holochain",
+		"Huobi Token",
+		"Radix DLT",
+		"Kadena",
+		"HECO",
+		"dYdX",
+		"Aragon",
+		"Rootstock",
+		"Audius",
+		"Wormhole",
+		"Dogecoin",
+		"Dash",
+		"Synthetix",
+		"THORChain",
+		"Balancer",
+		"Aleo",
+		"Canto",
+		"Ergo",
+		"Tron",
+		"Golem",
+		"Ocean Protocol",
+	}
+	for _, blockChain := range blockChains {
+		lowerBlockChain := strings.ToLower(blockChain)
+
+		if strings.Contains(lowerContents, lowerBlockChain) {
+			blockChainsContained = append(blockChainsContained, lowerBlockChain)
+		}
+
+	}
+	fmt.Println(blockChainsContained, "blocks")
+	return blockChainsContained, nil
+
+}
+
 func ParseFile(file *object.File) []string {
 	dependencies := []string{}
-
+	println(file.Name, "filename")
 	errors := []error{}
 	switch file.Name {
 	case "Pipfile":
@@ -303,6 +426,12 @@ func ParseFile(file *object.File) []string {
 		errors = append(errors, err)
 	case "composer.json":
 		myDependencies, err := parseComposerJSON(file)
+		dependencies = append(dependencies, myDependencies...)
+		errors = append(errors, err)
+	default:
+
+		myDependencies, err := parseBlockChains(file)
+		fmt.Println(myDependencies)
 		dependencies = append(dependencies, myDependencies...)
 		errors = append(errors, err)
 
