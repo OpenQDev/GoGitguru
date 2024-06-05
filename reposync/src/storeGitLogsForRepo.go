@@ -25,7 +25,7 @@ func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams) (int, error) {
 
 	repoDir := filepath.Join(params.prefixPath, params.organization, params.repo)
 
-	commitList, err := CreateStartWithLatestCommitList(repoDir)
+	commitList, err := CreateCommitList(repoDir)
 	if err != nil {
 		return 0, fmt.Errorf("error getting commit list %s: %s", params.repoUrl, err)
 	}
@@ -36,6 +36,10 @@ func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams) (int, error) {
 	}
 
 	currentDependencies, err := params.db.GetRepoDependenciesByURL(context.Background(), params.repoUrl)
+
+	if err != nil {
+		return 0, fmt.Errorf("error getting current dependencies for %s: %s", params.repoUrl, err)
+	}
 
 	dependencyHistoryObjects, commitObject, err := GetObjectsFromCommitList(params, commitList, numberOfCommitsToSync, currentDependencies)
 

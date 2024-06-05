@@ -7,7 +7,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
-func CreateStartWithLatestCommitList(repoDir string) ([]*object.Commit, error) {
+func CreateCommitList(repoDir string) ([]*object.Commit, error) {
 
 	r, err := git.PlainOpen(repoDir)
 	if err != nil {

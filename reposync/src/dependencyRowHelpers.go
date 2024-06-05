@@ -51,7 +51,8 @@ func setDateRemoved(dependencyHistoryObject *database.BatchInsertRepoDependencie
 	for savedDependencyIndex := range dependencyHistoryObject.Dependencynames {
 		if !slices.Contains(dependenciesThatDoExistCurrentlyIndexes, savedDependencyIndex) {
 			currentRemovedDate := dependencyHistoryObject.Lastusedates[savedDependencyIndex]
-			if currentRemovedDate > currentCommitDate || currentRemovedDate == 0 {
+
+			if currentRemovedDate < currentCommitDate || currentRemovedDate == 0 {
 				dependencyHistoryObject.Lastusedates[savedDependencyIndex] = currentCommitDate
 			}
 		}

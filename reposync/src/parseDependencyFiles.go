@@ -378,14 +378,12 @@ func parseBlockChains(file *object.File) ([]string, error) {
 		}
 
 	}
-	fmt.Println(blockChainsContained, "blocks")
 	return blockChainsContained, nil
 
 }
 
 func ParseFile(file *object.File) []string {
 	dependencies := []string{}
-	println(file.Name, "filename")
 	errors := []error{}
 	switch file.Name {
 	case "Pipfile":
@@ -431,7 +429,6 @@ func ParseFile(file *object.File) []string {
 	default:
 
 		myDependencies, err := parseBlockChains(file)
-		fmt.Println(myDependencies)
 		dependencies = append(dependencies, myDependencies...)
 		errors = append(errors, err)
 

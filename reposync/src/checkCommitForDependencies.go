@@ -1,7 +1,6 @@
 package reposync
 
 import (
-	"fmt"
 	"slices"
 
 	"github.com/OpenQDev/GoGitguru/database"
@@ -33,7 +32,6 @@ func CheckCommitForDependencies(c *object.Commit, repoDir string, dependencyHist
 	if err != nil {
 		return err
 	}
-	fmt.Println("dependencyFiles", dependencyFiles, "files")
 	for _, dependencyFileName := range dependencyFiles {
 		currentCommitDate := c.Committer.When.Unix()
 		file, err := c.File(dependencyFileName)

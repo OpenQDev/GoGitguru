@@ -1,7 +1,6 @@
 package reposync
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -34,7 +33,6 @@ func TestAddCommitToCommitObject(t *testing.T) {
 		},
 	}
 	_ = AddCommitToCommitObject(commit, &commitObject, 0)
-	fmt.Println(commitObject.Authors[0], "authors")
 
 	if commitObject.Commithashes[0] != hash.String() {
 		t.Errorf("Expected %s, got %s", hashString, commitObject.Commithashes[0])

@@ -31,3 +31,6 @@ type DependencyWithUpdatedTime struct {
 	UpdatedAt      int64
 	InternalID     int32
 }
+
+const organization = "openqdev"
+const repo = "openq-drm-testrepo"
