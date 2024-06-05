@@ -9,7 +9,6 @@ func GitDependencyFiles(repoDir string, dependencyFiles []string) ([]string, err
 
 	for _, dependencyFile := range dependencyFiles {
 		cmd := LogDependencyFiles(repoDir, dependencyFile)
-
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			continue
