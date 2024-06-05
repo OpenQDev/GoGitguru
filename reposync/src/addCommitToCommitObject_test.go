@@ -1,6 +1,7 @@
 package reposync
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -11,13 +12,13 @@ import (
 
 func TestAddCommitToCommitObject(t *testing.T) {
 	commitObject := database.BulkInsertCommitsParams{
-		Commithashes:   make([]string, 1),
-		Authors:        make([]string, 1),
-		Authoremails:   make([]string, 1),
-		Authordates:    make([]int64, 1),
-		Committerdates: make([]int64, 1),
-		Messages:       make([]string, 1),
-		Fileschanged:   make([]int32, 1),
+		Commithashes:   []string{},
+		Authors:        []string{},
+		Authoremails:   []string{},
+		Authordates:    []int64{},
+		Committerdates: []int64{},
+		Messages:       []string{},
+		Fileschanged:   []int32{},
 	}
 	hashString := "d3b07384d113edec49eaa6238ad5ff00"
 
@@ -33,6 +34,7 @@ func TestAddCommitToCommitObject(t *testing.T) {
 		},
 	}
 	_ = AddCommitToCommitObject(commit, &commitObject, 0)
+	fmt.Println(commitObject.Authors[0], "authors")
 
 	if commitObject.Commithashes[0] != hash.String() {
 		t.Errorf("Expected %s, got %s", hashString, commitObject.Commithashes[0])

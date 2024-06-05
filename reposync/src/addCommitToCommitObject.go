@@ -23,6 +23,7 @@ func AddCommitToCommitObject(c *object.Commit, commitObject *database.BulkInsert
 		logger.LogGreenDebug("process %d commits for %s", commitCount)
 	}
 	commitCount++
+	println("commit count is", commitCount)
 	return commitCount
 
 }
