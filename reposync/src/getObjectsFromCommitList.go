@@ -3,6 +3,7 @@ package reposync
 import (
 	"database/sql"
 	"fmt"
+	"path/filepath"
 
 	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -10,7 +11,7 @@ import (
 
 func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, numberOfCommits int, currentDependencies []database.GetRepoDependenciesByURLRow) (database.BatchInsertRepoDependenciesParams, database.BulkInsertCommitsParams, error) {
 	// sync this from the db
-	repoDir := params.prefixPath + "/" + params.organization + "/" + params.repo
+	repoDir := filepath.Join(params.prefixPath, params.organization, params.repo)
 	dependencyHistoryObject := database.BatchInsertRepoDependenciesParams{
 		Url:             params.repoUrl,
 		Firstusedates:   []int64{},
