@@ -62,6 +62,5 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 	// always check last commit last
 	fmt.Printf("Commit number %d: %s\n", len(commitList)-1, c.Hash)
 	err = CheckCommitForDependencies(c, repoDir, &dependencyHistoryObject)
-
 	return dependencyHistoryObject, commitObject, err
 }
