@@ -32,7 +32,6 @@ func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
 
 	// REPOSITORY
 	v1Router.Post("/add", apiCfg.HandlerAdd)
-	v1Router.Post("/add-dependency", apiCfg.HandlerAddUserFingerPrint)
 	v1Router.Get("/repos/github/{owner}/{name}", apiCfg.HandlerGithubRepoByOwnerAndName)
 	v1Router.Get("/repos/github/{owner}", apiCfg.HandlerGithubReposByOwner)
 	v1Router.Post("/repos/commits", apiCfg.HandlerRepoCommits)

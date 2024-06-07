@@ -12,35 +12,6 @@ import (
 	"github.com/lib/pq"
 )
 
-const batchInsertUserDependencies = `-- name: BatchInsertUserDependencies :exec
-INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_date, last_use_date) VALUES (  
-  $1,  
-  unnest($2::int[]),  
-  unnest($3::bigint[]),  
-  unnest($4::bigint[]) 
-)
-ON CONFLICT (user_id, dependency_id) DO UPDATE 
-SET last_use_date = excluded.last_use_date, 
-first_use_date = excluded.first_use_date
-`
-
-type BatchInsertUserDependenciesParams struct {
-	UserID  int32   `json:"user_id"`
-	Column2 []int32 `json:"column_2"`
-	Column3 []int64 `json:"column_3"`
-	Column4 []int64 `json:"column_4"`
-}
-
-func (q *Queries) BatchInsertUserDependencies(ctx context.Context, arg BatchInsertUserDependenciesParams) error {
-	_, err := q.exec(ctx, q.batchInsertUserDependenciesStmt, batchInsertUserDependencies,
-		arg.UserID,
-		pq.Array(arg.Column2),
-		pq.Array(arg.Column3),
-		pq.Array(arg.Column4),
-	)
-	return err
-}
-
 const bulkInsertUserDependencies = `-- name: BulkInsertUserDependencies :many
 INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_date, last_use_date) VALUES (  
   unnest($1::int[]),  
@@ -96,16 +67,21 @@ func (q *Queries) BulkInsertUserDependencies(ctx context.Context, arg BulkInsert
 
 const getUserDependenciesByUpdatedAt = `-- name: GetUserDependenciesByUpdatedAt :many
 
-SELECT s.internal_id as user_id, MIN(first_use_date) as first_use_date,
-CASE
-            WHEN MIN(last_use_date) = 0 THEN NULL
-            ELSE MAX(last_use_date)
+SELECT s.internal_id as user_id, 
+MIN(s.first_use_date_result) as first_use_date,
+
+ CASE
+            WHEN MIN(s.last_use_date_result) = 0 THEN NULL
+            ELSE MAX(s.last_use_date_result)
         END AS last_use_date,
-        s.dependency_id
+ s.dependency_id
 
  FROM (
 
-SELECT GREATEST(first_use_date , MIN(c.committer_date)) as first_use_date_result,  LEAST(last_use_date, MAX(c.committer_date)) as last_use_date_result, rd.url, gu.internal_id, rd.dependency_id
+SELECT GREATEST(rd.first_use_date , MAX(c.committer_date)) as first_use_date_result, 
+	 LEAST(rd.last_use_date, MAX(c.committer_date)) as last_use_date_result, 
+	 rd.url, 
+	 gu.internal_id, rd.dependency_id
 FROM repos_to_dependencies rd
 LEFT JOIN commits c ON c.repo_url = rd.url
 LEFT JOIN github_user_rest_id_author_emails guriae ON guriae.email = c.author_email
@@ -113,7 +89,9 @@ LEFT JOIN github_users gu ON gu.github_rest_id = guriae.rest_id
 GROUP BY gu.internal_id, rd.dependency_id, rd.url
 ) s
 LEFT JOIN user_to_dependencies ud ON s.internal_id = ud.user_id AND s.dependency_id = ud.dependency_id
-WHERE first_use_date_result <> ud.first_use_date or last_use_date_result <> ud.last_use_date
+WHERE (first_use_date_result <> ud.first_use_date or last_use_date_result <> ud.last_use_date OR first_use_date = null)
+ OR (ud.first_use_date IS NULL AND ud.last_use_date IS NULL)
+   
 GROUP BY s.internal_id, s.dependency_id
 `
 
@@ -150,22 +128,4 @@ func (q *Queries) GetUserDependenciesByUpdatedAt(ctx context.Context) ([]GetUser
 		return nil, err
 	}
 	return items, nil
-}
-
-const initializeUserDependencies = `-- name: InitializeUserDependencies :exec
-INSERT INTO user_to_dependencies ( user_id, dependency_id)
-SELECT  internal_id, unnest($2::int[])
-FROM github_users
-WHERE login = $1
-ON CONFLICT (user_id, dependency_id) DO NOTHING
-`
-
-type InitializeUserDependenciesParams struct {
-	Login   string  `json:"login"`
-	Column2 []int32 `json:"column_2"`
-}
-
-func (q *Queries) InitializeUserDependencies(ctx context.Context, arg InitializeUserDependenciesParams) error {
-	_, err := q.exec(ctx, q.initializeUserDependenciesStmt, initializeUserDependencies, arg.Login, pq.Array(arg.Column2))
-	return err
 }

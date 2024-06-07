@@ -27,9 +27,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.batchInsertRepoDependenciesStmt, err = db.PrepareContext(ctx, batchInsertRepoDependencies); err != nil {
 		return nil, fmt.Errorf("error preparing query BatchInsertRepoDependencies: %w", err)
 	}
-	if q.batchInsertUserDependenciesStmt, err = db.PrepareContext(ctx, batchInsertUserDependencies); err != nil {
-		return nil, fmt.Errorf("error preparing query BatchInsertUserDependencies: %w", err)
-	}
 	if q.bulkInsertCommitsStmt, err = db.PrepareContext(ctx, bulkInsertCommits); err != nil {
 		return nil, fmt.Errorf("error preparing query BulkInsertCommits: %w", err)
 	}
@@ -114,9 +111,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.initializeRepoDependenciesStmt, err = db.PrepareContext(ctx, initializeRepoDependencies); err != nil {
 		return nil, fmt.Errorf("error preparing query InitializeRepoDependencies: %w", err)
 	}
-	if q.initializeUserDependenciesStmt, err = db.PrepareContext(ctx, initializeUserDependencies); err != nil {
-		return nil, fmt.Errorf("error preparing query InitializeUserDependencies: %w", err)
-	}
 	if q.insertGithubRepoStmt, err = db.PrepareContext(ctx, insertGithubRepo); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertGithubRepo: %w", err)
 	}
@@ -140,11 +134,6 @@ func (q *Queries) Close() error {
 	if q.batchInsertRepoDependenciesStmt != nil {
 		if cerr := q.batchInsertRepoDependenciesStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing batchInsertRepoDependenciesStmt: %w", cerr)
-		}
-	}
-	if q.batchInsertUserDependenciesStmt != nil {
-		if cerr := q.batchInsertUserDependenciesStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing batchInsertUserDependenciesStmt: %w", cerr)
 		}
 	}
 	if q.bulkInsertCommitsStmt != nil {
@@ -287,11 +276,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing initializeRepoDependenciesStmt: %w", cerr)
 		}
 	}
-	if q.initializeUserDependenciesStmt != nil {
-		if cerr := q.initializeUserDependenciesStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing initializeUserDependenciesStmt: %w", cerr)
-		}
-	}
 	if q.insertGithubRepoStmt != nil {
 		if cerr := q.insertGithubRepoStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing insertGithubRepoStmt: %w", cerr)
@@ -357,7 +341,6 @@ type Queries struct {
 	db                                         DBTX
 	tx                                         *sql.Tx
 	batchInsertRepoDependenciesStmt            *sql.Stmt
-	batchInsertUserDependenciesStmt            *sql.Stmt
 	bulkInsertCommitsStmt                      *sql.Stmt
 	bulkInsertDependenciesStmt                 *sql.Stmt
 	bulkInsertUserDependenciesStmt             *sql.Stmt
@@ -386,7 +369,6 @@ type Queries struct {
 	getUserCommitsForReposStmt                 *sql.Stmt
 	getUserDependenciesByUpdatedAtStmt         *sql.Stmt
 	initializeRepoDependenciesStmt             *sql.Stmt
-	initializeUserDependenciesStmt             *sql.Stmt
 	insertGithubRepoStmt                       *sql.Stmt
 	insertRestIdToEmailStmt                    *sql.Stmt
 	insertUserStmt                             *sql.Stmt
@@ -399,7 +381,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		db:                              tx,
 		tx:                              tx,
 		batchInsertRepoDependenciesStmt: q.batchInsertRepoDependenciesStmt,
-		batchInsertUserDependenciesStmt: q.batchInsertUserDependenciesStmt,
 		bulkInsertCommitsStmt:           q.bulkInsertCommitsStmt,
 		bulkInsertDependenciesStmt:      q.bulkInsertDependenciesStmt,
 		bulkInsertUserDependenciesStmt:  q.bulkInsertUserDependenciesStmt,
@@ -428,7 +409,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getUserCommitsForReposStmt:                 q.getUserCommitsForReposStmt,
 		getUserDependenciesByUpdatedAtStmt:         q.getUserDependenciesByUpdatedAtStmt,
 		initializeRepoDependenciesStmt:             q.initializeRepoDependenciesStmt,
-		initializeUserDependenciesStmt:             q.initializeUserDependenciesStmt,
 		insertGithubRepoStmt:                       q.insertGithubRepoStmt,
 		insertRestIdToEmailStmt:                    q.insertRestIdToEmailStmt,
 		insertUserStmt:                             q.insertUserStmt,
