@@ -438,5 +438,17 @@ func ParseFile(file *object.File) []string {
 		fmt.Printf("Error parsing %s: %s\n", file.Name, errors[len(errors)-1])
 	}
 
-	return dependencies
+	return getUniqueDependencies(dependencies)
+}
+
+func getUniqueDependencies(dependencies []string) []string {
+	uniqueDependencies := []string{}
+	dependencyMap := make(map[string]bool)
+	for _, dep := range dependencies {
+		if _, ok := dependencyMap[dep]; !ok {
+			uniqueDependencies = append(uniqueDependencies, dep)
+			dependencyMap[dep] = true
+		}
+	}
+	return uniqueDependencies
 }
