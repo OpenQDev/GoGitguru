@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/OpenQDev/GoGitguru/util/githubRest"
@@ -18,7 +19,8 @@ import (
 
 func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 	// ARRANGE - GLOBAL
-	env := setup.ExtractAndVerifyEnvironment("../../.env")
+	envFilePath := filepath.Join("..", "..", ".env")
+	env := setup.ExtractAndVerifyEnvironment(envFilePath)
 	debugMode := env.Debug
 	ghAccessToken := env.GhAccessToken
 	targetLiveGithub := env.TargetLiveGithub

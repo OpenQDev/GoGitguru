@@ -20,7 +20,7 @@ func TestGetObjectsFromCommitList(t *testing.T) {
 			), tt.name)
 
 			// ACT
-			bulkInsertDependencyParams, bulkInsertCommitParams, err := GetObjectsFromCommitList(tt.params, tt.commitList, tt.numberOfCommits, tt.currentDependencies)
+			bulkInsertDependencyParams, bulkInsertCommitParams, _, err := GetObjectsFromCommitList(tt.params, tt.commitList, tt.numberOfCommits, tt.currentDependencies)
 			if err != nil {
 				t.Errorf("there was an error storing this commit: %v - the error was: %s", bulkInsertCommitParams, err)
 			}

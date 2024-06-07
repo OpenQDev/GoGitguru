@@ -43,7 +43,6 @@ func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
 
 	// DEPENDENCY HISTORY
 	v1Router.Post("/dependency-history", apiCfg.HandlerDependencyHistory)
-	v1Router.Post("/user-dependency-history", apiCfg.HandlerUserDependencyHistory)
 
 	// DEPENDENCY HISTORY
 	v1Router.Post("/status", apiCfg.HandlerStatus)

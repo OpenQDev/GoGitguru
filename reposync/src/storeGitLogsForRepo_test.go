@@ -35,7 +35,7 @@ func TestStoreGitLogsAndDepsHistoryForRepo(t *testing.T) {
 				t.Errorf("there was an error storing this commit: %v - the error was: %s", commitCount, err)
 			}
 
-			require.Equal(t, 2, commitCount)
+			require.Equal(t, 8, commitCount)
 
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)

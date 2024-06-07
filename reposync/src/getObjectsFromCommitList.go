@@ -9,7 +9,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
-func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, numberOfCommits int, currentDependencies []database.GetRepoDependenciesByURLRow) (database.BatchInsertRepoDependenciesParams, database.BulkInsertCommitsParams, error) {
+func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, numberOfCommits int, currentDependencies []database.GetRepoDependenciesByURLRow) (database.BatchInsertRepoDependenciesParams, database.BulkInsertCommitsParams, int, error) {
 	// sync this from the db
 	repoDir := filepath.Join(params.prefixPath, params.organization, params.repo)
 	dependencyHistoryObject := database.BatchInsertRepoDependenciesParams{
@@ -51,7 +51,7 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 			if commitCount%commitWindow == 0 {
 				err = CheckCommitForDependencies(commit, repoDir, &dependencyHistoryObject)
 				if err != nil {
-					return dependencyHistoryObject, commitObject, err
+					return dependencyHistoryObject, commitObject, 0, err
 				}
 			}
 			AddCommitToCommitObject(commit, &commitObject, commitCount)
@@ -62,5 +62,5 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 	// always check last commit last
 	fmt.Printf("Commit number %d: %s\n", len(commitList)-1, c.Hash)
 	err = CheckCommitForDependencies(c, repoDir, &dependencyHistoryObject)
-	return dependencyHistoryObject, commitObject, err
+	return dependencyHistoryObject, commitObject, numberOfCommits, err
 }

@@ -41,7 +41,7 @@ func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams) (int, error) {
 		return 0, fmt.Errorf("error getting current dependencies for %s: %s", params.repoUrl, err)
 	}
 
-	dependencyHistoryObjects, commitObject, err := GetObjectsFromCommitList(params, commitList, numberOfCommitsToSync, currentDependencies)
+	dependencyHistoryObjects, commitObject, numberOfCommitsToSync, err := GetObjectsFromCommitList(params, commitList, numberOfCommitsToSync, currentDependencies)
 
 	if err != nil {
 		return 0, err

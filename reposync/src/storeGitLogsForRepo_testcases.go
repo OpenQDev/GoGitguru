@@ -25,23 +25,89 @@ func sucessfulGitLog() StoreGitLogsAndDepsHistoryForRepoTestCase {
 		fromCommitDate: time.Unix(1696277204, 0),
 		gitLogs: []GitLog{
 			{
-				CommitHash:    "06a12f9c203112a149707ff73e4298749744c358",
-				AuthorName:    "FlacoJones",
-				AuthorEmail:   "andrew@openq.dev",
-				AuthorDate:    1696277247,
-				CommitDate:    1696277247,
-				CommitMessage: "updates README",
+				CommitHash:    "09442fceb096a56226fb528368ddf971e776057f",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
+				AuthorDate:    1699383601,
+				CommitDate:    1699383601,
+				CommitMessage: "Initial commit",
 				FilesChanged:  0,
 				Insertions:    0,
 				Deletions:     0,
 			},
 			{
-				CommitHash:    "9fae86bc8e89895b961d81bd7e9e4e897501c8bb",
-				AuthorName:    "FlacoJones",
-				AuthorEmail:   "andrew@openq.dev",
-				AuthorDate:    1696277205,
-				CommitDate:    1696277205,
-				CommitMessage: "initial commit",
+				CommitHash:    "a7ce99317e5347735ec5349f303c7036cd007d94",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
+				AuthorDate:    1699383684,
+				CommitDate:    1699383684,
+				CommitMessage: "Create package.json",
+				FilesChanged:  0,
+				Insertions:    0,
+				Deletions:     0,
+			},
+			{
+				CommitHash:    "9141d952c3b15d1ad8121527f1f4bfb65f9000c0",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
+				AuthorDate:    1699384512,
+				CommitDate:    1699384512,
+				CommitMessage: "Create BigFile.json",
+				FilesChanged:  0,
+				Insertions:    0,
+				Deletions:     0,
+			},
+			{
+				CommitHash:    "a8b0336d4e05acfa79d46beb2442c56c0fb23017",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
+				AuthorDate:    1699384731,
+				CommitDate:    1699384731,
+				CommitMessage: "Create BigFile2.json",
+				FilesChanged:  0,
+				Insertions:    0,
+				Deletions:     0,
+			},
+			{
+				CommitHash:    "0cc787dfb7f6a5808c54b5654e7bf871f004b890",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
+				AuthorDate:    1699385002,
+				CommitDate:    1699385002,
+				CommitMessage: "Add files via upload",
+				FilesChanged:  0,
+				Insertions:    0,
+				Deletions:     0,
+			},
+			{
+				CommitHash:    "70488e2cc8ef84edaab39aafda542b0ac2cee092",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
+				AuthorDate:    1699385069,
+				CommitDate:    1699385069,
+				CommitMessage: "Add files via upload",
+				FilesChanged:  0,
+				Insertions:    0,
+				Deletions:     0,
+			},
+			{
+				CommitHash:    "a4b132ba0fac0380bc7479730a4216218c39b716",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
+				AuthorDate:    1699385139,
+				CommitDate:    1699385139,
+				CommitMessage: "Add files via upload",
+				FilesChanged:  0,
+				Insertions:    0,
+				Deletions:     0,
+			},
+			{
+				CommitHash:    "32f8b288406652840a600e18d562a51661d64d99",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "info@openq.dev",
+				AuthorDate:    1699386034,
+				CommitDate:    1699386034,
+				CommitMessage: "updates",
 				FilesChanged:  0,
 				Insertions:    0,
 				Deletions:     0,
@@ -49,6 +115,8 @@ func sucessfulGitLog() StoreGitLogsAndDepsHistoryForRepoTestCase {
 		},
 		shouldError: false,
 		setupMock: func(mock sqlmock.Sqlmock, gitLogs []GitLog, repoUrl string) {
+			mock.ExpectQuery("^-- name: GetRepoDependenciesByURL :many.*").WithArgs(repoUrl).WillReturnRows(sqlmock.NewRows([]string{"url"}))
+
 			numberOfCommits := len(gitLogs)
 			var (
 				commitHash    = make([]string, numberOfCommits)
@@ -75,6 +143,21 @@ func sucessfulGitLog() StoreGitLogsAndDepsHistoryForRepoTestCase {
 				filesChanged[i] = int32(commit.FilesChanged)
 				repoUrls[i] = repoUrl
 			}
+			files := []string{"package.json",
+				"reposync/go.mod",
+				"reposync/go.mod",
+				"reposync/go.mod",
+				"server/go.mod",
+				"server/go.mod",
+				"server/go.mod",
+				"usersync/go.mod",
+				"usersync/go.mod",
+				"usersync/go.mod"}
+			dependencies := []string{"web3", "base", "ton", "ergo", "base", "ton", "ergo", "base", "ton", "ergo"}
+			firstUseDates := []int64{1699383684, 1699385002, 1699385002, 1699385002, 1699385069, 1699385069, 1699385069, 1699385139, 1699385139, 1699385139}
+			lastUseDates := []int64{1699386034, 1699386034, 1699386034, 1699386034, 1699386034, 1699386034, 1699386034, 1699386034, 1699386034, 1699386034}
+
+			mock.ExpectExec("^-- name: BatchInsertRepoDependencies :exec.*").WithArgs(pq.Array(files), pq.Array(dependencies), repoUrl, pq.Array(firstUseDates), pq.Array(lastUseDates)).WillReturnResult(sqlmock.NewResult(1, 1))
 
 			// BULK INSERT COMMITS
 			mock.ExpectExec("^-- name: BulkInsertCommits :exec.*").WithArgs(
@@ -84,10 +167,8 @@ func sucessfulGitLog() StoreGitLogsAndDepsHistoryForRepoTestCase {
 				pq.Array(authorDate),
 				pq.Array(committerDate),
 				pq.Array(message),
-				pq.Array(insertions),
-				pq.Array(deletions),
 				pq.Array(filesChanged),
-				pq.Array(repoUrls),
+				repoUrl,
 			).WillReturnResult(sqlmock.NewResult(1, 1))
 		},
 	}
