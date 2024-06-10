@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -10,15 +11,14 @@ import (
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/setup"
-	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandlerDependencyHistory(t *testing.T) {
 	// ARRANGE - GLOBAL
-	env := setup.ExtractAndVerifyEnvironment("../../.env")
-	debugMode := env.Debug
+	//_ := setup.ExtractAndVerifyEnvironment("../../.env")
+	debugMode := true
 
 	logger.SetDebugMode(debugMode)
 
@@ -26,15 +26,13 @@ func TestHandlerDependencyHistory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				"LINEA",
-			), tt.name)
 
 			// BEFORE EACH
-			_, queries := setup.GetMockDatabase()
+			mock, queries := setup.GetMockDatabase()
 			apiCfg := ApiConfig{
 				DB: queries,
 			}
+			tt.setupMock(mock)
 
 			// ARRANGE - LOCAL
 			req, _ := http.NewRequest("POST", "", nil)
@@ -60,6 +58,7 @@ func TestHandlerDependencyHistory(t *testing.T) {
 				assert.Equal(t, tt.expectedStatus, rr.Code)
 				return
 			}
+			fmt.Println(actualDependencyHistroyResponse)
 
 			assert.Equal(t, tt.expectedDependencyHistroyResponse, actualDependencyHistroyResponse)
 		})

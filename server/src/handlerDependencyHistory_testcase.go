@@ -1,6 +1,10 @@
 package server
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/DATA-DOG/go-sqlmock"
+)
 
 type HandlerDependencyHistoryTestCase struct {
 	name                              string
@@ -8,6 +12,7 @@ type HandlerDependencyHistoryTestCase struct {
 	expectedStatus                    int
 	requestBody                       DependencyHistoryRequest
 	expectedDependencyHistroyResponse DependencyHistoryResponse
+	setupMock                         func(mock sqlmock.Sqlmock)
 }
 
 func isNotAGitRepository() HandlerDependencyHistoryTestCase {
@@ -25,6 +30,14 @@ func isNotAGitRepository() HandlerDependencyHistoryTestCase {
 			DependencySearched: "foo",
 		},
 		expectedDependencyHistroyResponse: DependencyHistoryResponse{},
+		setupMock: func(mock sqlmock.Sqlmock) {
+			mock.ExpectQuery("-- name: GetRepoDependencies :many").WithArgs("foo", nonExistentRepoUrl, []string{}).WillReturnRows(sqlmock.NewRows([]string{
+				"first_use_date",
+				"last_use_date",
+				"dependency_name",
+			}).AddRow(nil, nil, "foo"),
+			)
+		},
 	}
 }
 
@@ -46,6 +59,20 @@ func largeFrontend() HandlerDependencyHistoryTestCase {
 			DatesAdded:   []string{"2021-08-25T13:39:56-05:00"},
 			DatesRemoved: []string{},
 		},
+
+		setupMock: func(mock sqlmock.Sqlmock) {
+			mockRows := sqlmock.NewRows([]string{
+				"first_use_date",
+				"last_use_date",
+				"dependency_name",
+			})
+			row1 := mockRows.AddRow("2021-08-25T13:39:56-05:00", nil, "ethers")
+
+			mock.ExpectQuery("-- name: GetRepoDependencies :many").
+				WithArgs("ethers", openqFrontend, []string{"package.json", ".config.", ".yaml", ".yml", "truffle", ".toml", "network", "hardhat", "deploy", "go.mod", "composer.json"}).
+				WillReturnRows(row1)
+
+		},
 	}
 }
 
@@ -66,6 +93,14 @@ func linea() HandlerDependencyHistoryTestCase {
 		expectedDependencyHistroyResponse: DependencyHistoryResponse{
 			DatesAdded:   []string{"2024-04-10T18:40:37-05:00"},
 			DatesRemoved: []string{},
+		},
+		setupMock: func(mock sqlmock.Sqlmock) {
+			mock.ExpectQuery("^-- name: GetRepoDependencies :many*").WithArgs("linea", linea, []string{"hardhat.config"}).WillReturnRows(sqlmock.NewRows([]string{
+				"first_use_date",
+				"last_use_date",
+				"dependency_name",
+			}).AddRow("2024-04-10T18:40:37-05:00", nil, "linea"),
+			)
 		},
 	}
 }

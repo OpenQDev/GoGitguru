@@ -22,7 +22,7 @@ type DependencyHistoryResponse struct {
 
 func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http.Request) {
 	var dependencyHistoryResponse DependencyHistoryResponse
-
+	fmt.Println("starting")
 	var body DependencyHistoryRequest
 	err := marshaller.ReaderToType(r.Body, &body)
 	if err != nil {
@@ -35,14 +35,16 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 		Url:            body.RepoUrl,
 		Column3:        body.FilePaths,
 	}
+	fmt.Println("repoDependencyParams", repoDependencyParams)
 	dependencyResult, err := apiCfg.DB.GetRepoDependencies(r.Context(), repoDependencyParams)
+	fmt.Println("dependencyResult", dependencyResult)
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error getting dependencies: %s", err))
 		return
 	}
 	datesAdded := []string{}
 	datesRemoved := []string{}
-
+	fmt.Println("dependencyResult", dependencyResult)
 	for _, dependency := range dependencyResult {
 		if dependency.FirstUseDate.Int64 != 0 {
 			t := time.Unix(dependency.FirstUseDate.Int64, 0).UTC()
