@@ -323,16 +323,16 @@ func (q *Queries) GetFirstCommit(ctx context.Context, arg GetFirstCommitParams) 
 }
 
 const getLatestCommitterDate = `-- name: GetLatestCommitterDate :one
-SELECT committer_date + 1 AS next_committer_date
+SELECT (committer_date + 1)::bigint AS next_committer_date
 FROM commits
 WHERE repo_url = CAST($1 AS VARCHAR)
 ORDER BY committer_date DESC
 LIMIT 1
 `
 
-func (q *Queries) GetLatestCommitterDate(ctx context.Context, dollar_1 string) (int32, error) {
+func (q *Queries) GetLatestCommitterDate(ctx context.Context, dollar_1 string) (int64, error) {
 	row := q.queryRow(ctx, q.getLatestCommitterDateStmt, getLatestCommitterDate, dollar_1)
-	var next_committer_date int32
+	var next_committer_date int64
 	err := row.Scan(&next_committer_date)
 	return next_committer_date, err
 }
