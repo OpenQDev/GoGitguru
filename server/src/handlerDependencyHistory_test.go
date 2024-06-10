@@ -11,6 +11,7 @@ import (
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/setup"
+	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -26,6 +27,9 @@ func TestHandlerDependencyHistory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			testhelpers.CheckTestSkip(t, testhelpers.Targets(
+				testhelpers.RUN_ALL_TESTS,
+			), tt.name)
 
 			// BEFORE EACH
 			mock, queries := setup.GetMockDatabase()

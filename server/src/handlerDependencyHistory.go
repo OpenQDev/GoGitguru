@@ -35,22 +35,22 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 		Url:            body.RepoUrl,
 		Column3:        body.FilePaths,
 	}
+
 	fmt.Println("repoDependencyParams", repoDependencyParams)
 	dependencyResult, err := apiCfg.DB.GetRepoDependencies(r.Context(), repoDependencyParams)
 	fmt.Println("dependencyResult", dependencyResult)
 	if err != nil {
+		fmt.Println(err)
 		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error getting dependencies: %s", err))
 		return
 	}
 	datesAdded := []string{}
 	datesRemoved := []string{}
-	fmt.Println("dependencyResult", dependencyResult)
 	for _, dependency := range dependencyResult {
 		if dependency.FirstUseDate.Int64 != 0 {
 			t := time.Unix(dependency.FirstUseDate.Int64, 0).UTC()
 			formattedDate := t.Format(time.RFC3339)
 			datesAdded = append(datesAdded, formattedDate)
-
 		}
 		if dependency.LastUseDate.Int64 != 0 {
 			//get date in this format 2023-01-10T17:55:48Z from timestamp

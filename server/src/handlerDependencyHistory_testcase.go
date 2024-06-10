@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/lib/pq"
 )
 
 type HandlerDependencyHistoryTestCase struct {
@@ -56,22 +57,20 @@ func largeFrontend() HandlerDependencyHistoryTestCase {
 			DependencySearched: "ethers",
 		},
 		expectedDependencyHistroyResponse: DependencyHistoryResponse{
-			DatesAdded:   []string{"2021-08-25T13:39:56-05:00"},
+			DatesAdded:   []string{"2021-08-25T19:19:56Z"},
 			DatesRemoved: []string{},
 		},
-
 		setupMock: func(mock sqlmock.Sqlmock) {
+			// TODO: Changed the date format to BIGINT since that's what it is in the schema first_use_date BIGINT DEFAULT NULL,
 			mockRows := sqlmock.NewRows([]string{
+				"dependency_name",
 				"first_use_date",
 				"last_use_date",
-				"dependency_name",
-			})
-			row1 := mockRows.AddRow("2021-08-25T13:39:56-05:00", nil, "ethers")
+			}).AddRow("ethers", 1629919196, nil)
 
-			mock.ExpectQuery("-- name: GetRepoDependencies :many").
-				WithArgs("ethers", openqFrontend, []string{"package.json", ".config.", ".yaml", ".yml", "truffle", ".toml", "network", "hardhat", "deploy", "go.mod", "composer.json"}).
-				WillReturnRows(row1)
-
+			mock.ExpectQuery("^-- name: GetRepoDependencies :many*").
+				WithArgs("ethers", openqFrontend, pq.Array([]string{"package.json", ".config.", ".yaml", ".yml", "truffle", ".toml", "network", "hardhat", "deploy", "go.mod", "composer.json"})).
+				WillReturnRows(mockRows)
 		},
 	}
 }
@@ -91,15 +90,15 @@ func linea() HandlerDependencyHistoryTestCase {
 			DependencySearched: "linea",
 		},
 		expectedDependencyHistroyResponse: DependencyHistoryResponse{
-			DatesAdded:   []string{"2024-04-10T18:40:37-05:00"},
+			DatesAdded:   []string{"2024-05-13T10:20:37Z"},
 			DatesRemoved: []string{},
 		},
 		setupMock: func(mock sqlmock.Sqlmock) {
-			mock.ExpectQuery("^-- name: GetRepoDependencies :many*").WithArgs("linea", linea, []string{"hardhat.config"}).WillReturnRows(sqlmock.NewRows([]string{
+			mock.ExpectQuery("^-- name: GetRepoDependencies :many*").WithArgs("linea", linea, pq.Array([]string{"hardhat.config"})).WillReturnRows(sqlmock.NewRows([]string{
+				"dependency_name",
 				"first_use_date",
 				"last_use_date",
-				"dependency_name",
-			}).AddRow("2024-04-10T18:40:37-05:00", nil, "linea"),
+			}).AddRow("linea", 1715595637, nil),
 			)
 		},
 	}
