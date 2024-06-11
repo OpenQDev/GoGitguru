@@ -32,7 +32,6 @@ func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
 		OriginUrl:        getEnvVar("ORIGIN_URL", "string").(string),
 		Debug:            getEnvVar("DEBUG_MODE", "bool").(bool),
 		GhAccessTokens:   getEnvVar("GH_ACCESS_TOKENS", "string").(string),
-		GhAccessToken:    getEnvVar("GH_ACCESS_TOKEN", "string").(string),
 		TargetLiveGithub: getEnvVar("TARGET_LIVE_GITHUB", "bool").(bool),
 		RepoSyncInterval: getEnvVar("REPOSYNC_INTERVAL", "int").(int),
 		UserSyncInterval: getEnvVar("USERSYNC_INTERVAL", "int").(int),
