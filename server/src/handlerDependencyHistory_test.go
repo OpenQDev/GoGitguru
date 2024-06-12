@@ -28,7 +28,7 @@ func TestHandlerDependencyHistory(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				testhelpers.RUN_ALL_TESTS,
+				"NOT_A_GIT_REPOSITORY",
 			), tt.name)
 
 			// BEFORE EACH

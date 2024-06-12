@@ -32,11 +32,11 @@ func isNotAGitRepository() HandlerDependencyHistoryTestCase {
 		},
 		expectedDependencyHistroyResponse: DependencyHistoryResponse{},
 		setupMock: func(mock sqlmock.Sqlmock) {
-			mock.ExpectQuery("-- name: GetRepoDependencies :many").WithArgs("foo", nonExistentRepoUrl, []string{}).WillReturnRows(sqlmock.NewRows([]string{
+			mock.ExpectQuery("-- name: GetRepoDependencies :many").WithArgs("foo", nonExistentRepoUrl, pq.Array([]string{})).WillReturnRows(sqlmock.NewRows([]string{
+				"dependency_name",
 				"first_use_date",
 				"last_use_date",
-				"dependency_name",
-			}).AddRow(nil, nil, "foo"),
+			}).AddRow("foo", nil, nil),
 			)
 		},
 	}
