@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/OpenQDev/GoGitguru/util/githubRest"
@@ -19,10 +18,9 @@ import (
 
 func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 	// ARRANGE - GLOBAL
-	envFilePath := filepath.Join("..", "..", ".env")
-	env := setup.ExtractAndVerifyEnvironment(envFilePath)
+	env := setup.ExtractAndVerifyEnvironment("../../.env")
 	debugMode := env.Debug
-	ghAccessToken := env.GhAccessToken
+	ghAccessToken := env.GhAccessTokens
 	targetLiveGithub := env.TargetLiveGithub
 
 	logger.SetDebugMode(debugMode)
@@ -77,7 +75,6 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 			// Add {owner} and {name} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
 			req = AppendPathParamToChiContext(req, "name", tt.name)
 			req = AppendPathParamToChiContext(req, "owner", tt.owner)
-
 			if tt.authorized {
 				req.Header.Add("GH-Authorization", ghAccessToken)
 			}

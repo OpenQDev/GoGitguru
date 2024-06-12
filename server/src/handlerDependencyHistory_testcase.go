@@ -22,15 +22,19 @@ func isNotAGitRepository() HandlerDependencyHistoryTestCase {
 	NOT_A_GIT_REPOSITORY := "NOT_A_GIT_REPOSITORY"
 
 	return HandlerDependencyHistoryTestCase{
+
 		name:           NOT_A_GIT_REPOSITORY,
-		shouldError:    true,
-		expectedStatus: http.StatusNotFound,
+		shouldError:    false,
+		expectedStatus: http.StatusOK,
 		requestBody: DependencyHistoryRequest{
 			RepoUrl:            nonExistentRepoUrl,
 			FilePaths:          []string{},
 			DependencySearched: "foo",
 		},
-		expectedDependencyHistroyResponse: DependencyHistoryResponse{},
+		expectedDependencyHistroyResponse: DependencyHistoryResponse{
+			DatesAdded:   []string{},
+			DatesRemoved: []string{},
+		},
 		setupMock: func(mock sqlmock.Sqlmock) {
 			mock.ExpectQuery("-- name: GetRepoDependencies :many").WithArgs("foo", nonExistentRepoUrl, pq.Array([]string{})).WillReturnRows(sqlmock.NewRows([]string{
 				"dependency_name",

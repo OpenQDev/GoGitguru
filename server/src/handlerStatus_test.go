@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -60,7 +59,6 @@ func TestStatusHandler(t *testing.T) {
 			var actualHandlerStatusResponse []HandlerStatusResponse
 			err = marshaller.ReaderToType(rr.Body, &actualHandlerStatusResponse)
 			if err != nil {
-				fmt.Println(rr.Body.String(), "that other thing", err)
 				t.Errorf("Failed to decode rr.Body into HandlerStatusResponse: %s", err)
 				return
 			}

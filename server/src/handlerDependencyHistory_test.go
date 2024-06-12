@@ -3,7 +3,6 @@ package server
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -28,7 +27,7 @@ func TestHandlerDependencyHistory(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
-				"NOT_A_GIT_REPOSITORY",
+				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
 
 			// BEFORE EACH
@@ -62,7 +61,6 @@ func TestHandlerDependencyHistory(t *testing.T) {
 				assert.Equal(t, tt.expectedStatus, rr.Code)
 				return
 			}
-			fmt.Println(actualDependencyHistroyResponse)
 
 			assert.Equal(t, tt.expectedDependencyHistroyResponse, actualDependencyHistroyResponse)
 		})

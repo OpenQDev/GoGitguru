@@ -104,9 +104,9 @@ func missingRepoUrl() HandlerStatusTest {
 			PendingAuthors: 0,
 		},
 	}
-
+	today := time.Now()
 	rows := sqlmock.NewRows([]string{"url", "status", "updated_at", "pending_authors"})
-	rows.AddRow(repo1Url, database.RepoStatusPending, nil, 1)
+	rows.AddRow(repo1Url, database.RepoStatusPending, today, 1)
 
 	oneMissingRepoUrl := HandlerStatusTest{
 		name:               MISSING_REPO_URL,
