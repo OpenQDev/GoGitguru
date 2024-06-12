@@ -37,7 +37,6 @@ func (apiCfg *ApiConfig) HandlerStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	repoStatuses, err := apiCfg.DB.GetReposStatus(r.Context(), body.RepoUrls)
-	fmt.Println("response", repoStatuses, err)
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error in GetReposStatus: %s", err))
 		return
