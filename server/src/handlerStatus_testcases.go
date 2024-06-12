@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/OpenQDev/GoGitguru/database"
@@ -59,10 +60,11 @@ func statusValidRepoUrls() HandlerStatusTest {
 			PendingAuthors: 2,
 		},
 	}
-
-	rows := sqlmock.NewRows([]string{"url", "status", "pending_authors"})
-	rows.AddRow(repo1Url, database.RepoStatusPending, 1)
-	rows.AddRow(repo2Url, database.RepoStatusPending, 2)
+	// current time
+	today := time.Now()
+	rows := sqlmock.NewRows([]string{"url", "status", "updated_at", "pending_authors"})
+	rows.AddRow(repo1Url, database.RepoStatusPending, today, 1)
+	rows.AddRow(repo2Url, database.RepoStatusPending, today, 2)
 
 	validRepoUrls := HandlerStatusTest{
 		name:               VALID_REPO_URLS,
@@ -103,8 +105,8 @@ func missingRepoUrl() HandlerStatusTest {
 		},
 	}
 
-	rows := sqlmock.NewRows([]string{"url", "status", "pending_authors"})
-	rows.AddRow(repo1Url, database.RepoStatusPending, 1)
+	rows := sqlmock.NewRows([]string{"url", "status", "updated_at", "pending_authors"})
+	rows.AddRow(repo1Url, database.RepoStatusPending, nil, 1)
 
 	oneMissingRepoUrl := HandlerStatusTest{
 		name:               MISSING_REPO_URL,

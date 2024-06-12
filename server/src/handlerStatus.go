@@ -11,9 +11,7 @@ import (
 )
 
 type HandlerStatusRequest struct {
-	RepoUrls        []string `json:"repo_urls"`
-	Dependencies    []string `json:"dependencies,omitempty"`
-	DependencyFiles []string `json:"file_names,omitempty"`
+	RepoUrls []string `json:"repo_urls"`
 }
 
 type HandlerStatusResponse struct {
@@ -21,12 +19,9 @@ type HandlerStatusResponse struct {
 	Status         database.RepoStatus `json:"status"`
 	PendingAuthors int                 `json:"pending_authors"`
 }
-type Dependency struct {
-	DependencyName string `json:"dependency_name"`
-	DependencyFile string `json:"dependency_file"`
-}
 
 func (apiCfg *ApiConfig) HandlerStatus(w http.ResponseWriter, r *http.Request) {
+
 	response := []HandlerStatusResponse{}
 
 	var body HandlerStatusRequest
@@ -42,25 +37,14 @@ func (apiCfg *ApiConfig) HandlerStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	repoStatuses, err := apiCfg.DB.GetReposStatus(r.Context(), body.RepoUrls)
+	fmt.Println("response", repoStatuses, err)
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error in GetReposStatus: %s", err))
 		return
 	}
 
 	for _, repoStatus := range repoStatuses {
-
 		if slices.Contains(body.RepoUrls, repoStatus.Url) {
-
-			repoStatusDependencies := []Dependency{}
-			err = marshaller.JsonToArrayOfType(repoStatus.Dependencies, &repoStatusDependencies)
-
-			if err != nil {
-				RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error parsing dependencies: %s", err))
-				return
-			}
-
-			// Assuming jsonData contains the JSON data returned by the SQL query
-
 			// check if updatedAt is more than 1 day ago
 			oneDayAgo := time.Now().AddDate(0, 0, -1)
 			if repoStatus.UpdatedAt.Time.Before(oneDayAgo) {
@@ -101,6 +85,5 @@ func (apiCfg *ApiConfig) HandlerStatus(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 	}
-
 	RespondWithJSON(w, 202, response)
 }
