@@ -35,7 +35,7 @@ func makeCommitByReference(hashString string, author string, authorEmail string)
 }
 
 func validGetObjectsFromCommitListTest() GetObjectsFromCommitListTestCase {
-	const VALID_GIT_LOGS = "VALID_GIT_LOGS"
+	const THREE_COMMITS = "THREE_COMMITS"
 	currentDependency := database.GetRepoDependenciesByURLRow{
 		DependencyName: "eslint",
 		DependencyFile: "package.json",
@@ -43,7 +43,7 @@ func validGetObjectsFromCommitListTest() GetObjectsFromCommitListTestCase {
 		LastUseDate:    sql.NullInt64{Int64: 0, Valid: true},
 	}
 	goodGetObjectsFromCommitListTestCase := GetObjectsFromCommitListTestCase{
-		name: VALID_GIT_LOGS,
+		name: THREE_COMMITS,
 		commitList: []*object.Commit{
 			makeCommitByReference("09442fceb096a56226fb528368ddf971e776057f", "DRM-Test-User", "150183211+DRM-Test-User@users.noreply.github.com"),
 			makeCommitByReference("a7ce99317e5347735ec5349f303c7036cd007d94", "DRM-Test-User", "150183211+DRM-Test-User@users.noreply.github.com"),

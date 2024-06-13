@@ -16,10 +16,10 @@ type AddRowToDependencyHistoryObjectTestCase struct {
 }
 
 func validAddRowToDependencyHistoryObjectTest() AddRowToDependencyHistoryObjectTestCase {
-	const VALID_GIT_LOGS = "VALID_GIT_LOGS"
+	const ADD_ONE_ROW = "ADD_ONE_ROW"
 
 	goodAddRowToDependencyHistoryObjectTestCase := AddRowToDependencyHistoryObjectTestCase{
-		name:                  VALID_GIT_LOGS,
+		name:                  ADD_ONE_ROW,
 		currentDependency:     "eslint",
 		currentDependencyFile: "package.json",
 		firstUseDate:          1620000000,
@@ -49,10 +49,10 @@ type SetDateFirstUsedTestCase struct {
 }
 
 func validSetDateFirstUsedTest() SetDateFirstUsedTestCase {
-	const VALID_GIT_LOGS = "VALID_GIT_LOGS"
+	const SET_FIRST_USE_DATE = "SET_FIRST_USE_DATE"
 
 	goodSetDateFirstUsedTestCase := SetDateFirstUsedTestCase{
-		name: VALID_GIT_LOGS,
+		name: SET_FIRST_USE_DATE,
 		dependencyHistoryObject: database.BatchInsertRepoDependenciesParams{
 			Filenames:       []string{"package.json"},
 			Dependencynames: []string{"eslint"},
@@ -91,10 +91,10 @@ type SetDateRemovedTestCase struct {
 }
 
 func validSetDateRemovedTest() SetDateRemovedTestCase {
-	const VALID_GIT_LOGS = "VALID_GIT_LOGS"
+	const SET_LAST_USE_DATE = "SET_LAST_USE_DATE"
 
 	goodSetDateRemovedTestCase := SetDateRemovedTestCase{
-		name: VALID_GIT_LOGS,
+		name: SET_LAST_USE_DATE,
 		dependencyHistoryObject: database.BatchInsertRepoDependenciesParams{
 			Filenames:       []string{"package.json"},
 			Dependencynames: []string{"eslint"},
@@ -132,14 +132,13 @@ type GetPreviousDependenciesInfoTestCase struct {
 	commit                                  object.Commit
 	dependencySavedIndex                    int
 	dependenciesThatDoExistCurrentlyIndexes []int
-	expectedResult                          database.BatchInsertRepoDependenciesParams
 }
 
-func validGetPreviousDependenciesInfoTest() GetPreviousDependenciesInfoTestCase {
-	const VALID_GIT_LOGS = "VALID_GIT_LOGS"
+func dependencyNotExistGetPreviousDependenciesInfoTest() GetPreviousDependenciesInfoTestCase {
+	const NO_DEPENDENCY = "NO_DEPENDENCY"
 
 	goodGetPreviousDependenciesInfoTestCase := GetPreviousDependenciesInfoTestCase{
-		name: VALID_GIT_LOGS,
+		name: NO_DEPENDENCY,
 		dependencyHistoryObject: database.BatchInsertRepoDependenciesParams{
 			Filenames:       []string{"package.json"},
 			Dependencynames: []string{"eslint"},
@@ -155,21 +154,16 @@ func validGetPreviousDependenciesInfoTest() GetPreviousDependenciesInfoTestCase 
 		dependencyFileName:                      "package.json",
 		dependencySavedIndex:                    -1,
 		dependenciesThatDoExistCurrentlyIndexes: []int{},
-		expectedResult: database.BatchInsertRepoDependenciesParams{
-			Filenames:       []string{"package.json"},
-			Dependencynames: []string{"eslint"},
-			Firstusedates:   []int64{1620000000},
-			Lastusedates:    []int64{1420000000},
-		}}
+	}
 
 	return goodGetPreviousDependenciesInfoTestCase
 }
 
-func otherGetPreviousDependenciesInfoTest() GetPreviousDependenciesInfoTestCase {
-	const VALID_GIT_LOGS = "VALID_GIT_LOGS"
+func dependencyExistsGetPreviousDependenciesInfoTest() GetPreviousDependenciesInfoTestCase {
+	const DEPENDENCY_EXISTS = "DEPENDENCY_EXISTS"
 
-	goodGetPreviousDependenciesInfoTestCase := GetPreviousDependenciesInfoTestCase{
-		name: VALID_GIT_LOGS,
+	dependencyExistsGetPreviousDependenciesInfoTestCase := GetPreviousDependenciesInfoTestCase{
+		name: DEPENDENCY_EXISTS,
 		dependencyHistoryObject: database.BatchInsertRepoDependenciesParams{
 			Filenames:       []string{"package.json"},
 			Dependencynames: []string{"eslint"},
@@ -186,13 +180,13 @@ func otherGetPreviousDependenciesInfoTest() GetPreviousDependenciesInfoTestCase 
 		dependencySavedIndex:                    0,
 		dependenciesThatDoExistCurrentlyIndexes: []int{0}}
 
-	return goodGetPreviousDependenciesInfoTestCase
+	return dependencyExistsGetPreviousDependenciesInfoTestCase
 }
 
 func GetPreviousDependenciesInfoTestCases() []GetPreviousDependenciesInfoTestCase {
 	return []GetPreviousDependenciesInfoTestCase{
-		validGetPreviousDependenciesInfoTest(),
-		otherGetPreviousDependenciesInfoTest(),
+		dependencyNotExistGetPreviousDependenciesInfoTest(),
+		dependencyExistsGetPreviousDependenciesInfoTest(),
 	}
 
 }
