@@ -22,7 +22,6 @@ func identifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTup
 
 	if result.Errors != nil {
 		fmt.Printf("skipping due to graphQL error: %v\n", result.Errors)
-		fmt.Println()
 		return nil, err
 	}
 

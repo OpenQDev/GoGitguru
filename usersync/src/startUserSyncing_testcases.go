@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/lib/pq"
 
 	"github.com/DATA-DOG/go-sqlmock"
 )
@@ -23,7 +24,7 @@ func startUserSyncingTest1() StartUserSyncingTestCase {
 	user := GithubGraphQLUser{
 		GithubRestID:    93455288,
 		GithubGraphqlID: "U_kgDOBZIDuA",
-		Login:           "FlacoJones",
+		Login:           "flacojones",
 		Name:            "AndrewOBrien",
 		Email:           "",
 		AvatarURL:       "https://avatars.githubusercontent.com/u/93455288?u=fd1fb04b6ff2bf397f8353eafffc3bfb4bd66e84\u0026v=4",
@@ -44,7 +45,7 @@ func startUserSyncingTest1() StartUserSyncingTestCase {
 			TotalCount: 0,
 		},
 		CreatedAt: "2021-10-30T23:43:10Z",
-		UpdatedAt: "2023-10-10T15:52:33Z",
+		UpdatedAt: "2024-04-17T19:30:12Z",
 	}
 
 	author := GithubGraphQLAuthor{
@@ -60,7 +61,7 @@ func startUserSyncingTest1() StartUserSyncingTestCase {
 		setupMock: func(mock sqlmock.Sqlmock, author GithubGraphQLAuthor) {
 			// EXPECT - GetLatestUncheckedCommitPerAuthor
 			rows := sqlmock.NewRows([]string{"commit_hash", "author_email", "repo_url"}).
-				AddRow("abc123", "andrew@openq.dev", "https://github.com/OpenQDev/OpenQ-Workflows")
+				AddRow("65062be663cc004b77ca8a3b13255bc5efa42f25", "andrew@openq.dev", "https://github.com/OpenQDev/OpenQ-Workflows")
 			mock.ExpectQuery("^-- name: GetLatestUncheckedCommitPerAuthor :many.*").WillReturnRows(rows)
 
 			// EXPECT - InsertRestIdToEmail
@@ -76,7 +77,7 @@ func startUserSyncingTest1() StartUserSyncingTestCase {
 			if err != nil && !createdAt.IsZero() {
 				logger.LogError("error parsing time: %s", err)
 			}
-
+			mock.ExpectQuery("^-- name: CheckGithubUserExists :one.*").WithArgs(author.User.Login).WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(false))
 			// NOTE - this INTERNALID is generated upon insertion - so it will only appear in the return row
 			// it will NOT appear in the call to InsertUser
 			rows = sqlmock.NewRows([]string{
@@ -137,6 +138,21 @@ func startUserSyncingTest1() StartUserSyncingTestCase {
 				createdAt,
 				updatedAt,
 			).WillReturnRows(rows)
+			column1 := []int{1}
+			column2 := []int{1}
+			column3 := []uint64{2}
+			column4 := []uint64{2}
+			depRows := sqlmock.NewRows([]string{
+				"user_id", "first_use_date", "last_use_date", "dependency_id"})
+			depRows.AddRow(1, 2, 2, 1)
+			mock.ExpectQuery("^-- name: GetUserDependenciesByUpdatedAt :many.*").WithArgs().WillReturnRows(depRows)
+
+			mock.ExpectExec("^-- name: BulkInsertUserDependencies.").WithArgs(
+				pq.Array(column1),
+				pq.Array(column2),
+				pq.Array(column3),
+				pq.Array(column4),
+			).WillReturnResult(sqlmock.NewResult(1, 1))
 		},
 	}
 }

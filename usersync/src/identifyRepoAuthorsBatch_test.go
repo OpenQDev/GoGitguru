@@ -16,7 +16,7 @@ import (
 
 func TestIdentifyRepoAuthorsBatch(t *testing.T) {
 	// ARRANGE - GLOBAL
-	env := setup.ExtractAndVerifyEnvironment("../.env")
+	env := setup.ExtractAndVerifyEnvironment("../../.env")
 	debugMode := env.Debug
 	targetLiveGithub := env.TargetLiveGithub
 
@@ -59,7 +59,7 @@ func TestIdentifyRepoAuthorsBatch(t *testing.T) {
 			), tt.title)
 
 			// ACT
-			resp, err := identifyRepoAuthorsBatch(tt.repoUrl, tt.authorCommitList, "", serverUrl)
+			resp, err := identifyRepoAuthorsBatch(tt.repoUrl, tt.authorCommitList, env.GhAccessTokens, serverUrl)
 			if err != nil {
 				t.Fatalf("error in identifyRepoAuthorsBatch test: %s", err)
 			}

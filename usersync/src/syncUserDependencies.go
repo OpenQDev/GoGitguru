@@ -29,7 +29,7 @@ func SyncUserDependencies(db *database.Queries) error {
 
 		// find repo_deps that exist where user_id -> author -> commit  is shared with a repo
 	}
-	_, err = db.BulkInsertUserDependencies(context.Background(), bulkInsertUserDependenciesParams)
+	err = db.BulkInsertUserDependencies(context.Background(), bulkInsertUserDependenciesParams)
 	if err != nil {
 		return err
 	}

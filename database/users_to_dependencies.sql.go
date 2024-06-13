@@ -12,7 +12,7 @@ import (
 	"github.com/lib/pq"
 )
 
-const bulkInsertUserDependencies = `-- name: BulkInsertUserDependencies :many
+const bulkInsertUserDependencies = `-- name: BulkInsertUserDependencies :exec
 INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_date, last_use_date) VALUES (  
   unnest($1::int[]),  
   unnest($2::int[]),  
@@ -32,37 +32,14 @@ type BulkInsertUserDependenciesParams struct {
 	Column4 []int64 `json:"column_4"`
 }
 
-type BulkInsertUserDependenciesRow struct {
-	UserID       int32 `json:"user_id"`
-	DependencyID int32 `json:"dependency_id"`
-}
-
-func (q *Queries) BulkInsertUserDependencies(ctx context.Context, arg BulkInsertUserDependenciesParams) ([]BulkInsertUserDependenciesRow, error) {
-	rows, err := q.query(ctx, q.bulkInsertUserDependenciesStmt, bulkInsertUserDependencies,
+func (q *Queries) BulkInsertUserDependencies(ctx context.Context, arg BulkInsertUserDependenciesParams) error {
+	_, err := q.exec(ctx, q.bulkInsertUserDependenciesStmt, bulkInsertUserDependencies,
 		pq.Array(arg.Column1),
 		pq.Array(arg.Column2),
 		pq.Array(arg.Column3),
 		pq.Array(arg.Column4),
 	)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []BulkInsertUserDependenciesRow
-	for rows.Next() {
-		var i BulkInsertUserDependenciesRow
-		if err := rows.Scan(&i.UserID, &i.DependencyID); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+	return err
 }
 
 const getUserDependenciesByUpdatedAt = `-- name: GetUserDependenciesByUpdatedAt :many

@@ -28,7 +28,7 @@ WHERE (first_use_date_result <> ud.first_use_date or last_use_date_result <> ud.
 GROUP BY s.internal_id, s.dependency_id;
 
 
--- name: BulkInsertUserDependencies :many
+-- name: BulkInsertUserDependencies :exec
 INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_date, last_use_date) VALUES (  
   unnest($1::int[]),  
   unnest($2::int[]),  

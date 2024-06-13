@@ -37,7 +37,7 @@ func identifyRepoAuthorsBatchTest1() IdentifyRepoAuthorsBatchTestCase {
 			TotalCount: 0,
 		},
 		CreatedAt: "2021-10-30T23:43:10Z",
-		UpdatedAt: "2023-10-10T15:52:33Z",
+		UpdatedAt: "2024-04-17T19:30:12Z",
 	}
 
 	author := GithubGraphQLAuthor{
@@ -56,7 +56,11 @@ func identifyRepoAuthorsBatchTest1() IdentifyRepoAuthorsBatchTestCase {
 		authorCommitList: []AuthorCommitTuple{
 			{
 				Author:     "abc123@email.com",
-				CommitHash: "commitHash",
+				CommitHash: "65062be663cc004b77ca8a3b13255bc5efa42f25",
+			},
+			{
+				Author:     "abc123@email.com",
+				CommitHash: "65062be663cc004b77ca8a3b13255bc5efa42f25",
 			},
 		},
 		authorized:     true,

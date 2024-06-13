@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	env := setup.ExtractAndVerifyEnvironment("../.env")
+	env := setup.ExtractAndVerifyEnvironment("../../.env")
 
 	database, conn, err := setup.GetDatbase(env.DbUrl)
 	if err != nil {
@@ -37,7 +37,7 @@ func main() {
 			os.Exit(0)
 		default:
 			logger.LogBlue("beginning user syncing...")
-			usersync.StartSyncingUser(database, "repos", randomToken, 10, "https://api.github.com/graphql")
+			usersync.StartUserSyncing(database, "repos", randomToken, 10, "https://api.github.com/graphql")
 			time.Sleep(time.Duration(env.UserSyncInterval) * time.Second)
 		}
 	}

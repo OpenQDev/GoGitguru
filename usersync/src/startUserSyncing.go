@@ -15,7 +15,7 @@ type UserSync struct {
 	RepoUrl     string
 }
 
-func StartSyncingUser(
+func StartUserSyncing(
 	db *database.Queries,
 	prefixPath string,
 	ghAccessToken string,

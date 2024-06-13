@@ -21,7 +21,7 @@ func insertGithubUserTestCase1() InsertGithubUserTestCase {
 	user := GithubGraphQLUser{
 		GithubRestID:    93455288,
 		GithubGraphqlID: "U_kgDOBZIDuA",
-		Login:           "FlacoJones",
+		Login:           "flacojones",
 		Name:            "AndrewOBrien",
 		Email:           "",
 		AvatarURL:       "https://avatars.githubusercontent.com/u/93455288?u=fd1fb04b6ff2bf397f8353eafffc3bfb4bd66e84\u0026v=4",
