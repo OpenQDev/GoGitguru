@@ -19,22 +19,24 @@ FROM repos_to_dependencies rd
 LEFT JOIN commits c ON c.repo_url = rd.url
 LEFT JOIN github_user_rest_id_author_emails guriae ON guriae.email = c.author_email
 LEFT JOIN github_users gu ON gu.github_rest_id = guriae.rest_id
+WHERE (rd.updated_at > $1 OR rd.updated_at IS NULL  ) AND
+ gu.internal_id > 0
 GROUP BY gu.internal_id, rd.dependency_id, rd.url
 ) s
 LEFT JOIN user_to_dependencies ud ON s.internal_id = ud.user_id AND s.dependency_id = ud.dependency_id
-WHERE (first_use_date_result <> ud.first_use_date or last_use_date_result <> ud.last_use_date OR first_use_date = null)
- OR (ud.first_use_date IS NULL AND ud.last_use_date IS NULL)
+
    
 GROUP BY s.internal_id, s.dependency_id;
 
 
 -- name: BulkInsertUserDependencies :exec
-INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_date, last_use_date) VALUES (  
-  unnest($1::int[]),  
-  unnest($2::int[]),  
-  unnest($3::bigint[]),  
-  unnest($4::bigint[])
-)
+INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_date, last_use_date, updated_at) VALUES (  
+  unnest(sqlc.arg(user_id)::int[]),  
+  unnest(sqlc.arg(dependency_id)::int[]),  
+  unnest(sqlc.arg(first_use_date)::bigint[]),  
+  unnest(sqlc.arg(last_use_date)::bigint[]),
+  sqlc.arg(updated_at)::bigint)
+
 ON CONFLICT (user_id, dependency_id) DO UPDATE
 SET last_use_date = excluded.last_use_date,
 first_use_date = excluded.first_use_date

@@ -143,12 +143,11 @@ type RepoUrl struct {
 }
 
 type ReposToDependency struct {
-	Url          string         `json:"url"`
-	DependencyID int32          `json:"dependency_id"`
-	FirstUseDate sql.NullInt64  `json:"first_use_date"`
-	LastUseDate  sql.NullInt64  `json:"last_use_date"`
-	UpdatedAt    sql.NullInt64  `json:"updated_at"`
-	Status       sql.NullString `json:"status"`
+	Url          string        `json:"url"`
+	DependencyID int32         `json:"dependency_id"`
+	FirstUseDate sql.NullInt64 `json:"first_use_date"`
+	LastUseDate  sql.NullInt64 `json:"last_use_date"`
+	UpdatedAt    sql.NullInt64 `json:"updated_at"`
 }
 
 type UserToDependency struct {
@@ -156,4 +155,5 @@ type UserToDependency struct {
 	UserID       int32         `json:"user_id"`
 	FirstUseDate sql.NullInt64 `json:"first_use_date"`
 	LastUseDate  sql.NullInt64 `json:"last_use_date"`
+	UpdatedAt    sql.NullInt64 `json:"updated_at"`
 }

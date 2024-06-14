@@ -19,12 +19,14 @@ all_dependencies AS (
 ),
 dependency_ids AS (
   SELECT
+    s.updated_at::bigint as updated_at,
     d.internal_id AS dependency_id,
     s.url,
     s.firstUseDates AS first_use_date,
     s.lastUseDates AS last_use_date
   FROM (
     SELECT
+  $1 as updated_at,
       sqlc.arg(url) AS url,
       unnest(sqlc.arg(filenames)::text[]) AS dependency_file,
       unnest(sqlc.arg(dependencyNames)::text[]) AS dependency_name,
@@ -34,13 +36,15 @@ unnest(COALESCE(sqlc.arg(lastUseDates)::bigint[], ARRAY[]::bigint[])) AS lastUse
   JOIN all_dependencies d ON d.dependency_file = s.dependency_file AND d.dependency_name = s.dependency_name
 )
 INSERT INTO repos_to_dependencies (
-  url, 
+  url,
+  updated_at,
   dependency_id, 
   first_use_date,
   last_use_date
 ) 
 SELECT DISTINCT
-  url, 
+  url,
+  updated_at,
   dependency_id,  
   first_use_date,
   last_use_date

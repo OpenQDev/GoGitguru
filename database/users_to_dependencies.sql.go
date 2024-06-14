@@ -13,12 +13,13 @@ import (
 )
 
 const bulkInsertUserDependencies = `-- name: BulkInsertUserDependencies :exec
-INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_date, last_use_date) VALUES (  
+INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_date, last_use_date, updated_at) VALUES (  
   unnest($1::int[]),  
   unnest($2::int[]),  
   unnest($3::bigint[]),  
-  unnest($4::bigint[])
-)
+  unnest($4::bigint[]),
+  $5::bigint)
+
 ON CONFLICT (user_id, dependency_id) DO UPDATE
 SET last_use_date = excluded.last_use_date,
 first_use_date = excluded.first_use_date
@@ -26,18 +27,20 @@ RETURNING user_id, dependency_id
 `
 
 type BulkInsertUserDependenciesParams struct {
-	Column1 []int32 `json:"column_1"`
-	Column2 []int32 `json:"column_2"`
-	Column3 []int64 `json:"column_3"`
-	Column4 []int64 `json:"column_4"`
+	UserID       []int32 `json:"user_id"`
+	DependencyID []int32 `json:"dependency_id"`
+	FirstUseDate []int64 `json:"first_use_date"`
+	LastUseDate  []int64 `json:"last_use_date"`
+	UpdatedAt    int64   `json:"updated_at"`
 }
 
 func (q *Queries) BulkInsertUserDependencies(ctx context.Context, arg BulkInsertUserDependenciesParams) error {
 	_, err := q.exec(ctx, q.bulkInsertUserDependenciesStmt, bulkInsertUserDependencies,
-		pq.Array(arg.Column1),
-		pq.Array(arg.Column2),
-		pq.Array(arg.Column3),
-		pq.Array(arg.Column4),
+		pq.Array(arg.UserID),
+		pq.Array(arg.DependencyID),
+		pq.Array(arg.FirstUseDate),
+		pq.Array(arg.LastUseDate),
+		arg.UpdatedAt,
 	)
 	return err
 }
@@ -63,11 +66,12 @@ FROM repos_to_dependencies rd
 LEFT JOIN commits c ON c.repo_url = rd.url
 LEFT JOIN github_user_rest_id_author_emails guriae ON guriae.email = c.author_email
 LEFT JOIN github_users gu ON gu.github_rest_id = guriae.rest_id
+WHERE (rd.updated_at > $1 OR rd.updated_at IS NULL  ) AND
+ gu.internal_id > 0
 GROUP BY gu.internal_id, rd.dependency_id, rd.url
 ) s
 LEFT JOIN user_to_dependencies ud ON s.internal_id = ud.user_id AND s.dependency_id = ud.dependency_id
-WHERE (first_use_date_result <> ud.first_use_date or last_use_date_result <> ud.last_use_date OR first_use_date = null)
- OR (ud.first_use_date IS NULL AND ud.last_use_date IS NULL)
+
    
 GROUP BY s.internal_id, s.dependency_id
 `
@@ -79,8 +83,8 @@ type GetUserDependenciesByUpdatedAtRow struct {
 	DependencyID int32         `json:"dependency_id"`
 }
 
-func (q *Queries) GetUserDependenciesByUpdatedAt(ctx context.Context) ([]GetUserDependenciesByUpdatedAtRow, error) {
-	rows, err := q.query(ctx, q.getUserDependenciesByUpdatedAtStmt, getUserDependenciesByUpdatedAt)
+func (q *Queries) GetUserDependenciesByUpdatedAt(ctx context.Context, updatedAt sql.NullInt64) ([]GetUserDependenciesByUpdatedAtRow, error) {
+	rows, err := q.query(ctx, q.getUserDependenciesByUpdatedAtStmt, getUserDependenciesByUpdatedAt, updatedAt)
 	if err != nil {
 		return nil, err
 	}

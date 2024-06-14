@@ -20,8 +20,8 @@ WITH new_dependencies AS (
     dependency_name
   FROM (
     SELECT
-      unnest($1::text[]) AS dependency_file,
-      unnest($2::text[]) AS dependency_name
+      unnest($2::text[]) AS dependency_file,
+      unnest($3::text[]) AS dependency_name
   ) AS subquery
   ON CONFLICT (dependency_file, dependency_name) DO NOTHING
   RETURNING internal_id, dependency_file, dependency_name
@@ -33,28 +33,32 @@ all_dependencies AS (
 ),
 dependency_ids AS (
   SELECT
+    s.updated_at::bigint as updated_at,
     d.internal_id AS dependency_id,
     s.url,
     s.firstUseDates AS first_use_date,
     s.lastUseDates AS last_use_date
   FROM (
     SELECT
-      $3 AS url,
-      unnest($1::text[]) AS dependency_file,
-      unnest($2::text[]) AS dependency_name,
-unnest(COALESCE($4::bigint[], ARRAY[]::bigint[]))AS firstUseDates,
-unnest(COALESCE($5::bigint[], ARRAY[]::bigint[])) AS lastUseDates
+  $1 as updated_at,
+      $4 AS url,
+      unnest($2::text[]) AS dependency_file,
+      unnest($3::text[]) AS dependency_name,
+unnest(COALESCE($5::bigint[], ARRAY[]::bigint[]))AS firstUseDates,
+unnest(COALESCE($6::bigint[], ARRAY[]::bigint[])) AS lastUseDates
   ) s
   JOIN all_dependencies d ON d.dependency_file = s.dependency_file AND d.dependency_name = s.dependency_name
 )
 INSERT INTO repos_to_dependencies (
-  url, 
+  url,
+  updated_at,
   dependency_id, 
   first_use_date,
   last_use_date
 ) 
 SELECT DISTINCT
-  url, 
+  url,
+  updated_at,
   dependency_id,  
   first_use_date,
   last_use_date
@@ -67,15 +71,17 @@ SET
 `
 
 type BatchInsertRepoDependenciesParams struct {
-	Filenames       []string `json:"filenames"`
-	Dependencynames []string `json:"dependencynames"`
-	Url             string   `json:"url"`
-	Firstusedates   []int64  `json:"firstusedates"`
-	Lastusedates    []int64  `json:"lastusedates"`
+	UpdatedAt       sql.NullInt64 `json:"updated_at"`
+	Filenames       []string      `json:"filenames"`
+	Dependencynames []string      `json:"dependencynames"`
+	Url             string        `json:"url"`
+	Firstusedates   []int64       `json:"firstusedates"`
+	Lastusedates    []int64       `json:"lastusedates"`
 }
 
 func (q *Queries) BatchInsertRepoDependencies(ctx context.Context, arg BatchInsertRepoDependenciesParams) error {
 	_, err := q.exec(ctx, q.batchInsertRepoDependenciesStmt, batchInsertRepoDependencies,
+		arg.UpdatedAt,
 		pq.Array(arg.Filenames),
 		pq.Array(arg.Dependencynames),
 		arg.Url,

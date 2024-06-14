@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	env := setup.ExtractAndVerifyEnvironment("../../.env")
+	env := setup.ExtractAndVerifyEnvironment("../.env")
 
 	database, conn, err := setup.GetDatbase(env.DbUrl)
 	if err != nil {

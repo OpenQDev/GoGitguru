@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	env := setup.ExtractAndVerifyEnvironment("../../.env")
+	env := setup.ExtractAndVerifyEnvironment("../.env")
 
 	conn, apiCfg := server.PrepareServerSingleton(env.DbUrl)
 	defer conn.Close()

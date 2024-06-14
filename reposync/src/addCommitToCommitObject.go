@@ -20,7 +20,7 @@ func AddCommitToCommitObject(c *object.Commit, commitObject *database.BulkInsert
 	commitObject.Messages = append(commitObject.Messages, strings.TrimRight(c.Message, "\n"))
 	commitObject.Fileschanged = append(commitObject.Fileschanged, 0)
 	if commitCount != 0 && commitCount%100 == 0 {
-		logger.LogGreenDebug("process %d commits for %s", commitCount)
+		logger.LogGreenDebug("process %d commits", commitCount)
 	}
 	commitCount++
 	return commitCount
