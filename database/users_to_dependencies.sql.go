@@ -110,3 +110,53 @@ func (q *Queries) GetUserDependenciesByUpdatedAt(ctx context.Context, updatedAt 
 	}
 	return items, nil
 }
+
+const getUserDependenciesByUser = `-- name: GetUserDependenciesByUser :many
+SELECT ud.first_use_date,
+ud.last_use_date,
+ud.dependency_id,
+ud.user_id
+FROM user_to_dependencies ud
+WHERE (ud.user_id, ud.dependency_id) IN
+(SELECT unnest($1::int[]), unnest($2::int[]))
+`
+
+type GetUserDependenciesByUserParams struct {
+	UserIds       []int32 `json:"user_ids"`
+	DependencyIds []int32 `json:"dependency_ids"`
+}
+
+type GetUserDependenciesByUserRow struct {
+	FirstUseDate sql.NullInt64 `json:"first_use_date"`
+	LastUseDate  sql.NullInt64 `json:"last_use_date"`
+	DependencyID int32         `json:"dependency_id"`
+	UserID       int32         `json:"user_id"`
+}
+
+func (q *Queries) GetUserDependenciesByUser(ctx context.Context, arg GetUserDependenciesByUserParams) ([]GetUserDependenciesByUserRow, error) {
+	rows, err := q.query(ctx, q.getUserDependenciesByUserStmt, getUserDependenciesByUser, pq.Array(arg.UserIds), pq.Array(arg.DependencyIds))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserDependenciesByUserRow
+	for rows.Next() {
+		var i GetUserDependenciesByUserRow
+		if err := rows.Scan(
+			&i.FirstUseDate,
+			&i.LastUseDate,
+			&i.DependencyID,
+			&i.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

@@ -108,6 +108,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getUserDependenciesByUpdatedAtStmt, err = db.PrepareContext(ctx, getUserDependenciesByUpdatedAt); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUserDependenciesByUpdatedAt: %w", err)
 	}
+	if q.getUserDependenciesByUserStmt, err = db.PrepareContext(ctx, getUserDependenciesByUser); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserDependenciesByUser: %w", err)
+	}
 	if q.initializeRepoDependenciesStmt, err = db.PrepareContext(ctx, initializeRepoDependencies); err != nil {
 		return nil, fmt.Errorf("error preparing query InitializeRepoDependencies: %w", err)
 	}
@@ -271,6 +274,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getUserDependenciesByUpdatedAtStmt: %w", cerr)
 		}
 	}
+	if q.getUserDependenciesByUserStmt != nil {
+		if cerr := q.getUserDependenciesByUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserDependenciesByUserStmt: %w", cerr)
+		}
+	}
 	if q.initializeRepoDependenciesStmt != nil {
 		if cerr := q.initializeRepoDependenciesStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing initializeRepoDependenciesStmt: %w", cerr)
@@ -368,6 +376,7 @@ type Queries struct {
 	getReposStatusStmt                         *sql.Stmt
 	getUserCommitsForReposStmt                 *sql.Stmt
 	getUserDependenciesByUpdatedAtStmt         *sql.Stmt
+	getUserDependenciesByUserStmt              *sql.Stmt
 	initializeRepoDependenciesStmt             *sql.Stmt
 	insertGithubRepoStmt                       *sql.Stmt
 	insertRestIdToEmailStmt                    *sql.Stmt
@@ -408,6 +417,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getReposStatusStmt:                         q.getReposStatusStmt,
 		getUserCommitsForReposStmt:                 q.getUserCommitsForReposStmt,
 		getUserDependenciesByUpdatedAtStmt:         q.getUserDependenciesByUpdatedAtStmt,
+		getUserDependenciesByUserStmt:              q.getUserDependenciesByUserStmt,
 		initializeRepoDependenciesStmt:             q.initializeRepoDependenciesStmt,
 		insertGithubRepoStmt:                       q.insertGithubRepoStmt,
 		insertRestIdToEmailStmt:                    q.insertRestIdToEmailStmt,

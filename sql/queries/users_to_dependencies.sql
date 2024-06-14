@@ -29,6 +29,16 @@ LEFT JOIN user_to_dependencies ud ON s.internal_id = ud.user_id AND s.dependency
 GROUP BY s.internal_id, s.dependency_id;
 
 
+-- name: GetUserDependenciesByUser :many
+SELECT ud.first_use_date,
+ud.last_use_date,
+ud.dependency_id,
+ud.user_id
+FROM user_to_dependencies ud
+WHERE (ud.user_id, ud.dependency_id) IN
+(SELECT unnest(sqlc.arg(user_ids)::int[]), unnest(sqlc.arg(dependency_ids)::int[]));
+
+
 -- name: BulkInsertUserDependencies :exec
 INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_date, last_use_date, updated_at) VALUES (  
   unnest(sqlc.arg(user_id)::int[]),  
