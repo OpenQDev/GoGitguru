@@ -29,5 +29,5 @@ cd ../..
 lsof -ti tcp:8000 | xargs kill
 
 # To install go air, a Go runtime with live reloads on code changes,
-# run the following command: go get -u github.com/cosmtrek/air
+# run the following command: go get -u github.com/air-verse/air
 cd $APP && air -c .air.toml

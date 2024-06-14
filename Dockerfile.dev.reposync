@@ -7,7 +7,7 @@ WORKDIR /app
 # Copy everything from the current directory to the PWD(Present Working Directory) inside the container
 COPY . .
 
-RUN go install github.com/cosmtrek/air@latest
+RUN go install github.com/air-verse/air@latest
 
 RUN git config --global pull.rebase false
 

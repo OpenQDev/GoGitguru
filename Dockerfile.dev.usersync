@@ -7,7 +7,7 @@ WORKDIR /app
 # Copy everything from the current directory to the PWD(Present Working Directory) inside the container
 COPY . .
 
-RUN go install github.com/cosmtrek/air@latest
+RUN go install github.com/air-verse/air@latest
 
 # Set the Current Working Directory inside the container to reposync directory
 WORKDIR /app/usersync

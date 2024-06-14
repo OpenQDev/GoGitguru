@@ -40,5 +40,5 @@ goto :end
 taskkill /F /PID %PID%
 :end
 echo %APP%
-REM Run the following command to install go air: go get -u github.com/cosmtrek/air
+REM Run the following command to install go air: go get -u github.com/air-verse/air
 cd %APP% && air -c .air.toml

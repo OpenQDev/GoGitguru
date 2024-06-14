@@ -15,7 +15,7 @@ RUN git config --system --add safe.directory '*'
 RUN git config --global user.email info@openq.dev
 RUN git config --global user.name "OpenQ Default"
 
-RUN go install github.com/cosmtrek/air@latest
+RUN go install github.com/air-verse/air@latest
 
 # Set the Current Working Directory inside the container to reposync directory
 WORKDIR /app/server
