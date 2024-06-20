@@ -14,3 +14,5 @@ CREATE TABLE repos_to_dependencies (
 
 );
 
+-- +goose Down
+DROP TABLE repos_to_dependencies;

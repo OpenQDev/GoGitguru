@@ -23,7 +23,7 @@ WHERE (rd.updated_at > $1 OR rd.updated_at IS NULL  ) AND
  gu.internal_id > 0
 GROUP BY gu.internal_id, rd.dependency_id, rd.url
 ) s
-LEFT JOIN user_to_dependencies ud ON s.internal_id = ud.user_id AND s.dependency_id = ud.dependency_id
+LEFT JOIN users_to_dependencies ud ON s.internal_id = ud.user_id AND s.dependency_id = ud.dependency_id
 
    
 GROUP BY s.internal_id, s.dependency_id;
@@ -34,13 +34,13 @@ SELECT ud.first_use_date,
 ud.last_use_date,
 ud.dependency_id,
 ud.user_id
-FROM user_to_dependencies ud
+FROM users_to_dependencies ud
 WHERE (ud.user_id, ud.dependency_id) IN
 (SELECT unnest(sqlc.arg(user_ids)::int[]), unnest(sqlc.arg(dependency_ids)::int[]));
 
 
 -- name: BulkInsertUserDependencies :exec
-INSERT INTO user_to_dependencies (user_id, dependency_id, first_use_date, last_use_date, updated_at) VALUES (  
+INSERT INTO users_to_dependencies (user_id, dependency_id, first_use_date, last_use_date, updated_at) VALUES (  
   unnest(sqlc.arg(user_id)::int[]),  
   unnest(sqlc.arg(dependency_id)::int[]),  
   unnest(sqlc.arg(first_use_date)::bigint[]),  

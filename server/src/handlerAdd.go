@@ -7,14 +7,11 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
 type HandlerAddRequest struct {
-	RepoUrls     []string `json:"repo_urls"`
-	Dependencies []string `json:"dependencies"`
-	FileNames    []string `json:"file_names"`
+	RepoUrls []string `json:"repo_urls"`
 }
 
 type HandlerAddResponse struct {
@@ -42,18 +39,7 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 	}
 
 	accepted := []string{}
-	depsResults := make([][]int32, len(request.Dependencies))
-	for index, dependency := range request.Dependencies {
-		dependencyParams := database.BulkInsertDependenciesParams{
-			DependencyName: dependency,
-			Column2:        request.FileNames,
-		}
-		insertDepsResult, err := apiCfg.DB.BulkInsertDependencies(r.Context(), dependencyParams)
-		depsResults[index] = insertDepsResult
-		if err != nil {
-			RespondWithError(w, 500, fmt.Sprintf("error inserting dependencies: %s", err))
-		}
-	}
+
 	for _, repoUrl := range request.RepoUrls {
 
 		err = addToList(apiCfg, r, repoUrl)
@@ -65,18 +51,7 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 		}
 
 		accepted = append(accepted, repoUrl)
-		for index := range request.Dependencies {
-			repoDependencyParams := database.InitializeRepoDependenciesParams{
-				Url:     repoUrl,
-				Column2: depsResults[index],
-			}
 
-			err = apiCfg.DB.InitializeRepoDependencies(r.Context(), repoDependencyParams)
-			if err != nil {
-				RespondWithError(w, 500, fmt.Sprintf("error initializing repo dependencies: %s", err))
-			}
-
-		}
 	}
 
 	response := HandlerAddResponse{

@@ -23,13 +23,13 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 
 	login := chi.URLParam(r, "login")
 
-	userExists, err := apiConfig.DB.CheckGithubUserExists(context.Background(), login)
+	internal_id, err := apiConfig.DB.CheckGithubUserExists(context.Background(), login)
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	if userExists {
+	if internal_id != 0 {
 		user, err := apiConfig.DB.GetGithubUser(context.Background(), login)
 		if err != nil {
 			RespondWithError(w, http.StatusInternalServerError, err.Error())

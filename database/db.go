@@ -69,14 +69,23 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getDependencyStmt, err = db.PrepareContext(ctx, getDependency); err != nil {
 		return nil, fmt.Errorf("error preparing query GetDependency: %w", err)
 	}
+	if q.getFirstAndLastCommitStmt, err = db.PrepareContext(ctx, getFirstAndLastCommit); err != nil {
+		return nil, fmt.Errorf("error preparing query GetFirstAndLastCommit: %w", err)
+	}
 	if q.getFirstCommitStmt, err = db.PrepareContext(ctx, getFirstCommit); err != nil {
 		return nil, fmt.Errorf("error preparing query GetFirstCommit: %w", err)
 	}
 	if q.getGithubRepoStmt, err = db.PrepareContext(ctx, getGithubRepo); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGithubRepo: %w", err)
 	}
+	if q.getGithubRepoByUrlStmt, err = db.PrepareContext(ctx, getGithubRepoByUrl); err != nil {
+		return nil, fmt.Errorf("error preparing query GetGithubRepoByUrl: %w", err)
+	}
 	if q.getGithubUserStmt, err = db.PrepareContext(ctx, getGithubUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGithubUser: %w", err)
+	}
+	if q.getGithubUserByCommitEmailStmt, err = db.PrepareContext(ctx, getGithubUserByCommitEmail); err != nil {
+		return nil, fmt.Errorf("error preparing query GetGithubUserByCommitEmail: %w", err)
 	}
 	if q.getGroupOfEmailsStmt, err = db.PrepareContext(ctx, getGroupOfEmails); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGroupOfEmails: %w", err)
@@ -125,6 +134,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.updateStatusAndUpdatedAtStmt, err = db.PrepareContext(ctx, updateStatusAndUpdatedAt); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateStatusAndUpdatedAt: %w", err)
+	}
+	if q.upsertRepoToUserByIdStmt, err = db.PrepareContext(ctx, upsertRepoToUserById); err != nil {
+		return nil, fmt.Errorf("error preparing query UpsertRepoToUserById: %w", err)
 	}
 	if q.upsertRepoURLStmt, err = db.PrepareContext(ctx, upsertRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query UpsertRepoURL: %w", err)
@@ -209,6 +221,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getDependencyStmt: %w", cerr)
 		}
 	}
+	if q.getFirstAndLastCommitStmt != nil {
+		if cerr := q.getFirstAndLastCommitStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getFirstAndLastCommitStmt: %w", cerr)
+		}
+	}
 	if q.getFirstCommitStmt != nil {
 		if cerr := q.getFirstCommitStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getFirstCommitStmt: %w", cerr)
@@ -219,9 +236,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getGithubRepoStmt: %w", cerr)
 		}
 	}
+	if q.getGithubRepoByUrlStmt != nil {
+		if cerr := q.getGithubRepoByUrlStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getGithubRepoByUrlStmt: %w", cerr)
+		}
+	}
 	if q.getGithubUserStmt != nil {
 		if cerr := q.getGithubUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getGithubUserStmt: %w", cerr)
+		}
+	}
+	if q.getGithubUserByCommitEmailStmt != nil {
+		if cerr := q.getGithubUserByCommitEmailStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getGithubUserByCommitEmailStmt: %w", cerr)
 		}
 	}
 	if q.getGroupOfEmailsStmt != nil {
@@ -304,6 +331,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updateStatusAndUpdatedAtStmt: %w", cerr)
 		}
 	}
+	if q.upsertRepoToUserByIdStmt != nil {
+		if cerr := q.upsertRepoToUserByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing upsertRepoToUserByIdStmt: %w", cerr)
+		}
+	}
 	if q.upsertRepoURLStmt != nil {
 		if cerr := q.upsertRepoURLStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing upsertRepoURLStmt: %w", cerr)
@@ -363,9 +395,12 @@ type Queries struct {
 	getDependenciesStmt                        *sql.Stmt
 	getDependenciesByNamesStmt                 *sql.Stmt
 	getDependencyStmt                          *sql.Stmt
+	getFirstAndLastCommitStmt                  *sql.Stmt
 	getFirstCommitStmt                         *sql.Stmt
 	getGithubRepoStmt                          *sql.Stmt
+	getGithubRepoByUrlStmt                     *sql.Stmt
 	getGithubUserStmt                          *sql.Stmt
+	getGithubUserByCommitEmailStmt             *sql.Stmt
 	getGroupOfEmailsStmt                       *sql.Stmt
 	getLatestCommitterDateStmt                 *sql.Stmt
 	getLatestUncheckedCommitPerAuthorStmt      *sql.Stmt
@@ -382,6 +417,7 @@ type Queries struct {
 	insertRestIdToEmailStmt                    *sql.Stmt
 	insertUserStmt                             *sql.Stmt
 	updateStatusAndUpdatedAtStmt               *sql.Stmt
+	upsertRepoToUserByIdStmt                   *sql.Stmt
 	upsertRepoURLStmt                          *sql.Stmt
 }
 
@@ -404,9 +440,12 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getDependenciesStmt:                        q.getDependenciesStmt,
 		getDependenciesByNamesStmt:                 q.getDependenciesByNamesStmt,
 		getDependencyStmt:                          q.getDependencyStmt,
+		getFirstAndLastCommitStmt:                  q.getFirstAndLastCommitStmt,
 		getFirstCommitStmt:                         q.getFirstCommitStmt,
 		getGithubRepoStmt:                          q.getGithubRepoStmt,
+		getGithubRepoByUrlStmt:                     q.getGithubRepoByUrlStmt,
 		getGithubUserStmt:                          q.getGithubUserStmt,
+		getGithubUserByCommitEmailStmt:             q.getGithubUserByCommitEmailStmt,
 		getGroupOfEmailsStmt:                       q.getGroupOfEmailsStmt,
 		getLatestCommitterDateStmt:                 q.getLatestCommitterDateStmt,
 		getLatestUncheckedCommitPerAuthorStmt:      q.getLatestUncheckedCommitPerAuthorStmt,
@@ -423,6 +462,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		insertRestIdToEmailStmt:                    q.insertRestIdToEmailStmt,
 		insertUserStmt:                             q.insertUserStmt,
 		updateStatusAndUpdatedAtStmt:               q.updateStatusAndUpdatedAtStmt,
+		upsertRepoToUserByIdStmt:                   q.upsertRepoToUserByIdStmt,
 		upsertRepoURLStmt:                          q.upsertRepoURLStmt,
 	}
 }

@@ -45,6 +45,7 @@ ON CONFLICT (commit_hash, repo_url) DO NOTHING;
 SELECT DISTINCT ON (c.author_email)
 c.commit_hash,
 c.author_email,
+c.author_date,
 c.repo_url
 FROM commits c
 LEFT JOIN github_user_rest_id_author_emails g
@@ -83,3 +84,10 @@ WHERE c.repo_url = $1
 AND gu.login ILIKE $2
 ORDER BY c.author_date ASC
 LIMIT 1;
+
+-- name: GetFirstAndLastCommit :one
+SELECT 
+    MIN(author_date) as first_commit_date,
+    MAX(author_date) as last_commit_date
+FROM commits
+WHERE author_email = $1;

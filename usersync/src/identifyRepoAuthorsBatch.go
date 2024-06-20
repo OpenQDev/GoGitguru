@@ -32,7 +32,9 @@ func identifyRepoAuthorsBatch(repoUrl string, authorCommitList []AuthorCommitTup
 
 	commits := make(map[string]GithubGraphQLCommit, 0)
 	for key, value := range result.Data.Repository {
-		commits[key] = value
+		commits[key] = GithubGraphQLCommit{
+			Author: value.Author,
+		}
 	}
 
 	return commits, nil

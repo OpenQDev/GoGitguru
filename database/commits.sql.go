@@ -232,6 +232,26 @@ func (q *Queries) GetCommitsWithAuthorInfo(ctx context.Context, arg GetCommitsWi
 	return items, nil
 }
 
+const getFirstAndLastCommit = `-- name: GetFirstAndLastCommit :one
+SELECT 
+    MIN(author_date) as first_commit_date,
+    MAX(author_date) as last_commit_date
+FROM commits
+WHERE author_email = $1
+`
+
+type GetFirstAndLastCommitRow struct {
+	FirstCommitDate interface{} `json:"first_commit_date"`
+	LastCommitDate  interface{} `json:"last_commit_date"`
+}
+
+func (q *Queries) GetFirstAndLastCommit(ctx context.Context, authorEmail sql.NullString) (GetFirstAndLastCommitRow, error) {
+	row := q.queryRow(ctx, q.getFirstAndLastCommitStmt, getFirstAndLastCommit, authorEmail)
+	var i GetFirstAndLastCommitRow
+	err := row.Scan(&i.FirstCommitDate, &i.LastCommitDate)
+	return i, err
+}
+
 const getFirstCommit = `-- name: GetFirstCommit :one
 SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at FROM commits c
 INNER JOIN github_user_rest_id_author_emails gure
@@ -341,6 +361,7 @@ const getLatestUncheckedCommitPerAuthor = `-- name: GetLatestUncheckedCommitPerA
 SELECT DISTINCT ON (c.author_email)
 c.commit_hash,
 c.author_email,
+c.author_date,
 c.repo_url
 FROM commits c
 LEFT JOIN github_user_rest_id_author_emails g
@@ -352,6 +373,7 @@ ORDER BY c.author_email, c.author_date DESC
 type GetLatestUncheckedCommitPerAuthorRow struct {
 	CommitHash  string         `json:"commit_hash"`
 	AuthorEmail sql.NullString `json:"author_email"`
+	AuthorDate  sql.NullInt64  `json:"author_date"`
 	RepoUrl     sql.NullString `json:"repo_url"`
 }
 
@@ -364,7 +386,12 @@ func (q *Queries) GetLatestUncheckedCommitPerAuthor(ctx context.Context) ([]GetL
 	var items []GetLatestUncheckedCommitPerAuthorRow
 	for rows.Next() {
 		var i GetLatestUncheckedCommitPerAuthorRow
-		if err := rows.Scan(&i.CommitHash, &i.AuthorEmail, &i.RepoUrl); err != nil {
+		if err := rows.Scan(
+			&i.CommitHash,
+			&i.AuthorEmail,
+			&i.AuthorDate,
+			&i.RepoUrl,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
