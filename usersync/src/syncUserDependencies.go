@@ -3,7 +3,6 @@ package usersync
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
 )
@@ -11,7 +10,7 @@ import (
 func SyncUserDependencies(db *database.Queries) error {
 
 	// get all recent repoDependencies  @flacojones, do you want a smaller time window?
-	tenMinutesAgo := time.Now().Add(-10 * time.Minute).Unix()
+	tenMinutesAgo := 0 // time.Now().Add(-10 * time.Minute).Unix()
 	// find user deps based off recent repos
 	usersDependenciesToSync, err := db.GetUserDependenciesByUpdatedAt(context.Background(), sql.NullInt64{Int64: tenMinutesAgo, Valid: true})
 	if err != nil {
