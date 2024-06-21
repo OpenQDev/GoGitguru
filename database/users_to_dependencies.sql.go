@@ -49,11 +49,7 @@ const getUserDependenciesByUpdatedAt = `-- name: GetUserDependenciesByUpdatedAt 
 
 SELECT s.internal_id as user_id, 
 MIN(s.first_use_date_result) as first_use_date,
-
- CASE
-            WHEN MIN(s.last_use_date_result) = 0 THEN NULL
-            ELSE MAX(s.last_use_date_result)
-        END AS last_use_date,
+MAX(s.last_use_date_result) as last_use_date,
  s.dependency_id
 
  FROM (

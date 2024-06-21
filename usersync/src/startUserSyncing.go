@@ -124,6 +124,12 @@ func StartUserSyncing(
 				FirstCommitDates: firstCommitDates,
 				LastCommitDates:  lastCommitDates,
 			}
+
+			err = SyncUserDependencies(db)
+			if err != nil {
+				logger.LogFatalRedAndExit("error syncing dependencies: %s", err)
+				return
+			}
 			err = db.UpsertRepoToUserById(context.Background(), UpsertRepoToUserByIdParams)
 			if err != nil {
 				logger.LogError("error occured while upserting repo to user by id: %s", err)

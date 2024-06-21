@@ -11,7 +11,3 @@ CREATE TABLE users_to_dependencies (
     FOREIGN KEY (user_id) REFERENCES github_users (internal_id) ON DELETE CASCADE,
     UNIQUE (dependency_id, user_id)
 );
-
--- +goose Down
-
-DROP TABLE users_to_dependencies;

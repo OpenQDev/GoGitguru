@@ -13,6 +13,3 @@ CREATE TABLE repos_to_dependencies (
     UNIQUE (url, dependency_id)
 
 );
-
--- +goose Down
-DROP TABLE repos_to_dependencies;
