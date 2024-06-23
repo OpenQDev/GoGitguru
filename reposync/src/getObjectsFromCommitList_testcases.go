@@ -47,7 +47,7 @@ func validGetObjectsFromCommitListTest() GetObjectsFromCommitListTestCase {
 		commitList: []*object.Commit{
 			makeCommitByReference("09442fceb096a56226fb528368ddf971e776057f", "DRM-Test-User", "150183211+DRM-Test-User@users.noreply.github.com"),
 			makeCommitByReference("a7ce99317e5347735ec5349f303c7036cd007d94", "DRM-Test-User", "150183211+DRM-Test-User@users.noreply.github.com"),
-			makeCommitByReference("9141d952c3b15d1ad8121527f1f4bfb65f9000c0", "DRM-Test-User", "150183211+DRM-Test-User@users.noreply.github.com"),
+			makeCommitByReference("32f8b288406652840a600e18d562a51661d64d99", "DRM-Test-User", "info@openq.dev"),
 		},
 		numberOfCommits: 2,
 		currentDependencies: []database.GetRepoDependenciesByURLRow{
@@ -59,6 +59,10 @@ func validGetObjectsFromCommitListTest() GetObjectsFromCommitListTestCase {
 			Dependencynames: []string{"eslint"},
 			Firstusedates:   []int64{1620000000},
 			Lastusedates:    []int64{0},
+			UpdatedAt: sql.NullInt64{
+				Int64: 1609459200,
+				Valid: true,
+			},
 		},
 		bulkInsertCommitsParams: database.BulkInsertCommitsParams{
 			Commithashes: []string{

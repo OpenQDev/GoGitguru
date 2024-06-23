@@ -30,10 +30,10 @@ func validCreateCommitListTest() CreateCommitListTestCase {
 		name:         VALID_GIT_LOGS,
 		organization: organization,
 		repo:         repo,
-		expectedResult: []object.Commit{
-			makeCommit("09442fceb096a56226fb528368ddf971e776057f", "DRM-Test-User", "150183211+DRM-Test-User@users.noreply.github.com"),
-			makeCommit("a7ce99317e5347735ec5349f303c7036cd007d94", "DRM-Test-User", "150183211+DRM-Test-User@users.noreply.github.com"),
-			makeCommit("9141d952c3b15d1ad8121527f1f4bfb65f9000c0", "DRM-Test-User", "150183211+DRM-Test-User@users.noreply.github.com"),
+		expectedResult: []object.Commit{makeCommit("32f8b288406652840a600e18d562a51661d64d99", "DRM-Test-User", "info@openq.dev"),
+
+			makeCommit("a4b132ba0fac0380bc7479730a4216218c39b716", "DRM-Test-User", "150183211+DRM-Test-User@users.noreply.github.com"),
+			makeCommit("70488e2cc8ef84edaab39aafda542b0ac2cee092", "DRM-Test-User", "150183211+DRM-Test-User@users.noreply.github.com"),
 		}}
 
 	return goodCreateCommitListTestCase

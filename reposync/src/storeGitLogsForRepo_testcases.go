@@ -156,7 +156,7 @@ func sucessfulGitLog() StoreGitLogsAndDepsHistoryForRepoTestCase {
 			dependencies := []string{"web3", "base", "ton", "ergo", "base", "ton", "ergo", "base", "ton", "ergo"}
 			firstUseDates := []int64{1699383684, 1699385002, 1699385002, 1699385002, 1699385069, 1699385069, 1699385069, 1699385139, 1699385139, 1699385139}
 			lastUseDates := []int64{1699386034, 1699386034, 1699386034, 1699386034, 1699386034, 1699386034, 1699386034, 1699386034, 1699386034, 1699386034}
-
+			mock.ExpectExec("^-- name: UpsertRepoToUserById : exec.*").WithArgs(pq.Array([]int{3}), pq.Array(lastUseDates), pq.Array(firstUseDates), repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
 			mock.ExpectExec("^-- name: BatchInsertRepoDependencies :exec.*").WithArgs(pq.Array(files), pq.Array(dependencies), repoUrl, pq.Array(firstUseDates), pq.Array(lastUseDates)).WillReturnResult(sqlmock.NewResult(1, 1))
 
 			// BULK INSERT COMMITS

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"slices"
-	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -26,7 +25,7 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 		Lastusedates:    []int64{},
 		Dependencynames: []string{},
 		Filenames:       []string{},
-		UpdatedAt:       sql.NullInt64{Int64: time.Now().Unix(), Valid: true},
+		UpdatedAt:       sql.NullInt64{Int64: now().Unix(), Valid: true},
 	}
 	for _, dep := range currentDependencies {
 		dependencyHistoryObject.Dependencynames = append(dependencyHistoryObject.Dependencynames, dep.DependencyName)
