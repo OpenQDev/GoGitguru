@@ -28,6 +28,7 @@ func TestGetObjectsFromCommitList(t *testing.T) {
 				t.Errorf("there was an error storing this commit: %v - the error was: %s", bulkInsertCommitParams, err)
 			}
 			fmt.Println(usersToRepoUrls)
+
 			assert.Equal(t, tt.bulkInsertCommitsParams, bulkInsertCommitParams)
 			assert.Equal(t, tt.bulkInsertDependencyParams, bulkInsertDependencyParams)
 		})

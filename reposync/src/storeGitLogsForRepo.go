@@ -109,13 +109,12 @@ func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams) (int, error) {
 	dependencyHistoryObjects, commitObject, usersToReposObject, numberOfCommitsToSync, err := GetObjectsFromCommitList(params, commitList, numberOfCommitsToSync, currentDependencies)
 
 	if err != nil {
-		return 0, fmt.Errorf("error storing users to repo for %s: %s", params.repoUrl, err)
+		return 0, fmt.Errorf("error getting structs from commit list %s: %s", params.repoUrl, err)
 	}
 
 	insertByIdParams := getUpsertRepoByIdsParams(params, usersToReposObject)
 
 	err = params.db.UpsertRepoToUserById(context.Background(), insertByIdParams)
-	fmt.Println(insertByIdParams.FirstCommitDates, insertByIdParams.LastCommitDates, "first, last")
 	if err != nil {
 		return 0, fmt.Errorf("error storing users to repo for %s: %s", params.repoUrl, err)
 	}

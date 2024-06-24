@@ -28,46 +28,35 @@ func validProcessRepoTest() ProcessRepoTestCase {
 		repoUrl:        "https://github.com/OpenQ-Dev/OpenQ-DRM-TestRepo",
 		fromCommitDate: time.Unix(1696277204, 0),
 		gitLogs: []GitLog{
+
 			{
-				CommitHash:    "09442fceb096a56226fb528368ddf971e776057f",
+				CommitHash:    "32f8b288406652840a600e18d562a51661d64d99",
 				AuthorName:    "DRM-Test-User",
-				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
-				AuthorDate:    1699383601,
-				CommitDate:    1699383601,
-				CommitMessage: "Initial commit",
+				AuthorEmail:   "info@openq.dev",
+				AuthorDate:    1699386034,
+				CommitDate:    1699386034,
+				CommitMessage: "updates",
 				FilesChanged:  0,
 				Insertions:    0,
 				Deletions:     0,
 			},
 			{
-				CommitHash:    "a7ce99317e5347735ec5349f303c7036cd007d94",
+				CommitHash:    "a4b132ba0fac0380bc7479730a4216218c39b716",
 				AuthorName:    "DRM-Test-User",
 				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
-				AuthorDate:    1699383684,
-				CommitDate:    1699383684,
-				CommitMessage: "Create package.json",
+				AuthorDate:    1699385139,
+				CommitDate:    1699385139,
+				CommitMessage: "Add files via upload",
 				FilesChanged:  0,
 				Insertions:    0,
 				Deletions:     0,
-			},
-			{
-				CommitHash:    "9141d952c3b15d1ad8121527f1f4bfb65f9000c0",
+			}, {
+				CommitHash:    "70488e2cc8ef84edaab39aafda542b0ac2cee092",
 				AuthorName:    "DRM-Test-User",
 				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
-				AuthorDate:    1699384512,
-				CommitDate:    1699384512,
-				CommitMessage: "Create BigFile.json",
-				FilesChanged:  0,
-				Insertions:    0,
-				Deletions:     0,
-			},
-			{
-				CommitHash:    "a8b0336d4e05acfa79d46beb2442c56c0fb23017",
-				AuthorName:    "DRM-Test-User",
-				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
-				AuthorDate:    1699384731,
-				CommitDate:    1699384731,
-				CommitMessage: "Create BigFile2.json",
+				AuthorDate:    1699385069,
+				CommitDate:    1699385069,
+				CommitMessage: "Add files via upload",
 				FilesChanged:  0,
 				Insertions:    0,
 				Deletions:     0,
@@ -84,34 +73,42 @@ func validProcessRepoTest() ProcessRepoTestCase {
 				Deletions:     0,
 			},
 			{
-				CommitHash:    "70488e2cc8ef84edaab39aafda542b0ac2cee092",
+				CommitHash:    "a8b0336d4e05acfa79d46beb2442c56c0fb23017",
 				AuthorName:    "DRM-Test-User",
 				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
-				AuthorDate:    1699385069,
-				CommitDate:    1699385069,
-				CommitMessage: "Add files via upload",
+				AuthorDate:    1699384731,
+				CommitDate:    1699384731,
+				CommitMessage: "Create BigFile2.json",
 				FilesChanged:  0,
 				Insertions:    0,
 				Deletions:     0,
-			},
-			{
-				CommitHash:    "a4b132ba0fac0380bc7479730a4216218c39b716",
+			}, {
+				CommitHash:    "9141d952c3b15d1ad8121527f1f4bfb65f9000c0",
 				AuthorName:    "DRM-Test-User",
 				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
-				AuthorDate:    1699385139,
-				CommitDate:    1699385139,
-				CommitMessage: "Add files via upload",
+				AuthorDate:    1699384512,
+				CommitDate:    1699384512,
+				CommitMessage: "Create BigFile.json",
 				FilesChanged:  0,
 				Insertions:    0,
 				Deletions:     0,
-			},
-			{
-				CommitHash:    "32f8b288406652840a600e18d562a51661d64d99",
+			}, {
+				CommitHash:    "a7ce99317e5347735ec5349f303c7036cd007d94",
 				AuthorName:    "DRM-Test-User",
-				AuthorEmail:   "info@openq.dev",
-				AuthorDate:    1699386034,
-				CommitDate:    1699386034,
-				CommitMessage: "updates",
+				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
+				AuthorDate:    1699383684,
+				CommitDate:    1699383684,
+				CommitMessage: "Create package.json",
+				FilesChanged:  0,
+				Insertions:    0,
+				Deletions:     0,
+			}, {
+				CommitHash:    "09442fceb096a56226fb528368ddf971e776057f",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
+				AuthorDate:    1699383601,
+				CommitDate:    1699383601,
+				CommitMessage: "Initial commit",
 				FilesChanged:  0,
 				Insertions:    0,
 				Deletions:     0,
@@ -160,9 +157,17 @@ func validProcessRepoTest() ProcessRepoTestCase {
 				"usersync/go.mod"}
 			dependencies := []string{"web3", "base", "ton", "ergo", "base", "ton", "ergo", "base", "ton", "ergo"}
 			firstUseDates := []int64{1699383684, 1699385002, 1699385002, 1699385002, 1699385069, 1699385069, 1699385069, 1699385139, 1699385139, 1699385139}
-			lastUseDates := []int64{1699386034, 1699386034, 1699386034, 1699386034, 1699386034, 1699386034, 1699386034, 1699386034, 1699386034, 1699386034}
-
-			mock.ExpectExec("^-- name: BatchInsertRepoDependencies :exec.*").WithArgs(pq.Array(files), pq.Array(dependencies), repoUrl, pq.Array(firstUseDates), pq.Array(lastUseDates)).WillReturnResult(sqlmock.NewResult(1, 1))
+			lastUseDates := []int64{1699385139, 1699385139, 1699385139, 1699385139, 1699385139, 1699385139, 1699385139, 1699385139, 1699385139, 1699385139}
+			mock.ExpectQuery("^-- name: GetGithubUserByCommitEmail :many.*").WithArgs(pq.Array([]string{
+				"info@openq.dev", "150183211+DRM-Test-User@users.noreply.github.com"},
+			)).WillReturnRows(sqlmock.NewRows([]string{"email"}))
+			mock.ExpectExec("^-- name: UpsertRepoToUserById	:exec.*").WithArgs(
+				"https://github.com/OpenQ-Dev/OpenQ-DRM-TestRepo",
+				pq.Array([]int32{}),
+				pq.Array([]int64{}),
+				pq.Array([]int64{}),
+			).WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectExec("^-- name: BatchInsertRepoDependencies :exec.*").WithArgs(1609459200, pq.Array(files), pq.Array(dependencies), repoUrl, pq.Array(firstUseDates), pq.Array(lastUseDates)).WillReturnResult(sqlmock.NewResult(1, 1))
 			// Define expected SQL statement
 			// go-sqlmock CANNOT accept slices as arguments. Must convert to pq.Array first as is done in databse.BulkInsertCommits
 			mock.ExpectExec("^-- name: BulkInsertCommits :exec.*").WithArgs(
