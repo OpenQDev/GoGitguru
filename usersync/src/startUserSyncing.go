@@ -92,6 +92,7 @@ func StartUserSyncing(
 					}
 				}
 				userCommits, err := db.GetFirstAndLastCommit(context.Background(), sql.NullString{String: author.Email, Valid: true})
+
 				if err != nil {
 					logger.LogError("error occured while getting first and last commit for user %s: %s", author.Email, err)
 				}

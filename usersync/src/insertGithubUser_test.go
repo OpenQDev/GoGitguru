@@ -1,6 +1,7 @@
 package usersync
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/OpenQDev/GoGitguru/util/setup"
@@ -26,8 +27,9 @@ func TestInsertGithubUser(t *testing.T) {
 			tt.setupMock(mock, tt.author)
 
 			// ACT
-			err := insertGithubUser(tt.author, queries)
+			userId, err := insertGithubUser(tt.author, queries)
 
+			fmt.Println(userId, "user id")
 			// ASSERT
 			if tt.shouldError {
 				assert.Error(t, err)

@@ -62,10 +62,9 @@ func TestIdentifyRepoAuthorsBatch(t *testing.T) {
 			resp, err := identifyRepoAuthorsBatch(tt.repoUrl, tt.authorCommitList, env.GhAccessTokens, serverUrl)
 			if err != nil {
 				t.Fatalf("error in identifyRepoAuthorsBatch test: %s", err)
-			}
-
+			} // print keys of the response
 			if !reflect.DeepEqual(resp, tt.expectedOutput) {
-				t.Errorf("Expected output does not match the response. Expected: %v, Got: %v", tt.expectedOutput, resp)
+				t.Errorf("Expected output does not match the response. Expected: %v, Got: %v", tt.expectedOutput["commit_1"].Author.User, resp["commit_1"].Author.User)
 			}
 
 		})

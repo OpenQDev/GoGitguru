@@ -88,6 +88,8 @@ LIMIT 1;
 -- name: GetFirstAndLastCommit :one
 SELECT 
     MIN(author_date) as first_commit_date,
-    MAX(author_date) as last_commit_date
+    MAX(author_date) as last_commit_date,
+    author_date,
+    commit_hash
 FROM commits
 WHERE author_email = $1;

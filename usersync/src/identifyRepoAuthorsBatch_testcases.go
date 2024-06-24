@@ -1,5 +1,7 @@
 package usersync
 
+import "fmt"
+
 type IdentifyRepoAuthorsBatchTestCase struct {
 	title            string
 	repoUrl          string
@@ -19,7 +21,7 @@ func identifyRepoAuthorsBatchTest1() IdentifyRepoAuthorsBatchTestCase {
 		Login:           "FlacoJones",
 		Name:            "AndrewOBrien",
 		Email:           "",
-		AvatarURL:       "https://avatars.githubusercontent.com/u/93455288?u=fd1fb04b6ff2bf397f8353eafffc3bfb4bd66e84\u0026v=4",
+		AvatarURL:       "https://avatars.githubusercontent.com/u/93455288?u=fd1fb04b6ff2bf397f8353eafffc3bfb4bd66e84&v=4",
 		Company:         "",
 		Location:        "",
 		Hireable:        false,
@@ -37,7 +39,7 @@ func identifyRepoAuthorsBatchTest1() IdentifyRepoAuthorsBatchTestCase {
 			TotalCount: 0,
 		},
 		CreatedAt: "2021-10-30T23:43:10Z",
-		UpdatedAt: "2024-04-17T19:30:12Z",
+		UpdatedAt: "2024-06-19T19:22:09Z",
 	}
 
 	author := GithubGraphQLAuthor{
@@ -49,6 +51,7 @@ func identifyRepoAuthorsBatchTest1() IdentifyRepoAuthorsBatchTestCase {
 	expectedOutput := make(map[string]GithubGraphQLCommit)
 	expectedOutput["commit_0"] = GithubGraphQLCommit{Author: author}
 	expectedOutput["commit_1"] = GithubGraphQLCommit{Author: author}
+	fmt.Println(expectedOutput["commit_0"])
 
 	return IdentifyRepoAuthorsBatchTestCase{
 		title:   AUTHOR_BATCH,

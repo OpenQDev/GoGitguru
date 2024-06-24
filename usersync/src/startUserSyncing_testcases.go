@@ -45,7 +45,7 @@ func startUserSyncingTest1() StartUserSyncingTestCase {
 			TotalCount: 0,
 		},
 		CreatedAt: "2021-10-30T23:43:10Z",
-		UpdatedAt: "2024-04-17T19:30:12Z",
+		UpdatedAt: "2024-06-19T19:22:09Z",
 	}
 
 	author := GithubGraphQLAuthor{
@@ -59,9 +59,12 @@ func startUserSyncingTest1() StartUserSyncingTestCase {
 		author:      author,
 		shouldError: false,
 		setupMock: func(mock sqlmock.Sqlmock, author GithubGraphQLAuthor) {
+
+			mockTime := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
+			now = func() time.Time { return mockTime }
 			// EXPECT - GetLatestUncheckedCommitPerAuthor
-			rows := sqlmock.NewRows([]string{"commit_hash", "author_email", "repo_url"}).
-				AddRow("65062be663cc004b77ca8a3b13255bc5efa42f25", "andrew@openq.dev", "https://github.com/OpenQDev/OpenQ-Workflows")
+			rows := sqlmock.NewRows([]string{"commit_hash", "author_email", "author_date", "repo_url"}).
+				AddRow("65062be663cc004b77ca8a3b13255bc5efa42f25", "andrew@openq.dev", 0, "https://github.com/OpenQDev/OpenQ-Workflows")
 			mock.ExpectQuery("^-- name: GetLatestUncheckedCommitPerAuthor :many.*").WillReturnRows(rows)
 
 			// EXPECT - InsertRestIdToEmail
@@ -73,86 +76,57 @@ func startUserSyncingTest1() StartUserSyncingTestCase {
 				logger.LogError("error parsing time: %s", err)
 			}
 
-			updatedAt, err := time.Parse(time.RFC3339, author.User.UpdatedAt)
 			if err != nil && !createdAt.IsZero() {
 				logger.LogError("error parsing time: %s", err)
 			}
-			mock.ExpectQuery("^-- name: CheckGithubUserExists :one.*").WithArgs(author.User.Login).WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(false))
+			mock.ExpectQuery("^-- name: CheckGithubUserExists :one.*").WithArgs(author.User.Login).WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(1))
 			// NOTE - this INTERNALID is generated upon insertion - so it will only appear in the return row
 			// it will NOT appear in the call to InsertUser
 			rows = sqlmock.NewRows([]string{
-				"internal_id",
-				"github_rest_id",
-				"github_graphql_id",
-				"login",
-				"name",
-				"email",
-				"avatar_url",
-				"company",
-				"location",
-				"bio",
-				"blog",
-				"hireable",
-				"twitter_username",
-				"followers",
-				"following",
-				"type",
-				"created_at",
-				"updated_at",
-			}).AddRow(
-				0,
-				author.User.GithubRestID,
-				author.User.GithubGraphqlID,
-				author.User.Login,
-				author.User.Name,
-				author.User.Email,
-				author.User.AvatarURL,
-				author.User.Company,
-				author.User.Location,
-				author.User.Bio,
-				author.User.Blog,
-				author.User.Hireable,
-				author.User.TwitterUsername,
-				author.User.Followers.TotalCount,
-				author.User.Following.TotalCount,
-				"User",
-				createdAt,
-				updatedAt,
-			)
-			mock.ExpectQuery("^-- name: InsertUser :one.*").WithArgs(
-				author.User.GithubRestID,
-				author.User.GithubGraphqlID,
-				author.User.Login,
-				author.User.Name,
-				author.User.Email,
-				author.User.AvatarURL,
-				author.User.Company,
-				author.User.Location,
-				author.User.Bio,
-				author.User.Blog,
-				author.User.Hireable,
-				author.User.TwitterUsername,
-				author.User.Followers.TotalCount,
-				author.User.Following.TotalCount,
-				"User",
-				createdAt,
-				updatedAt,
-			).WillReturnRows(rows)
-			column1 := []int{1}
-			column2 := []int{1}
-			column3 := []uint64{2}
-			column4 := []uint64{2}
-			depRows := sqlmock.NewRows([]string{
 				"user_id", "first_use_date", "last_use_date", "dependency_id"})
-			depRows.AddRow(1, 2, 2, 1)
-			mock.ExpectQuery("^-- name: GetUserDependenciesByUpdatedAt :many.*").WithArgs().WillReturnRows(depRows)
+			rows.AddRow(1, 2, 2, 1)
+			mock.ExpectQuery(("^-- name: GetFirstAndLastCommit :one.*")).WithArgs().WillReturnRows(rows)
+			rows = sqlmock.NewRows([]string{"first_commit_date", "last_commit_date", "user_id", "dependency_id"}).AddRow(1, 2, 1, 2)
+			mock.ExpectQuery("^-- name: GetUserDependenciesByUpdatedAt :many.*").WithArgs(1609458600).WillReturnRows(rows)
+
+			rows = sqlmock.NewRows([]string{
+				"first_use_date", "last_use_date", "dependency_id", "user_id"}).AddRow(0, 1, 2, 3)
+			mock.ExpectQuery("^-- name: GetUserDependenciesByUser :many.*").WithArgs(pq.Array([]int{1}), pq.Array([]int{2})).WillReturnRows(rows)
+
+			column1 := []int{1}
+			column2 := []int{2}
+			column3 := []uint64{2}
+			column4 := []uint64{1}
 
 			mock.ExpectExec("^-- name: BulkInsertUserDependencies.").WithArgs(
 				pq.Array(column1),
 				pq.Array(column2),
 				pq.Array(column3),
 				pq.Array(column4),
+				1609458600,
 			).WillReturnResult(sqlmock.NewResult(1, 1))
+			rows = sqlmock.NewRows([]string{
+				"internal_id"}).AddRow(0)
+			mock.ExpectExec("^-- name: UpsertRepoToUserById :exec.*").WithArgs("https://github.com/OpenQDev/OpenQ-Workflows", "{1}", "{1}", "{2}").WillReturnResult(sqlmock.NewResult(1, 1))
+			/*	mock.ExpectQuery("^-- name: InsertUser :one.*").WithArgs(
+				author.User.GithubRestID,
+				author.User.GithubGraphqlID,
+				author.User.Login,
+				author.User.Name,
+				author.User.Email,
+				author.User.AvatarURL,
+				author.User.Company,
+				author.User.Location,
+				author.User.Bio,
+				author.User.Blog,
+				author.User.Hireable,
+				author.User.TwitterUsername,
+				author.User.Followers.TotalCount,
+				author.User.Following.TotalCount,
+				"User",
+				createdAt,
+				updatedAt,
+			).WillReturnRows(rows)*/
 		},
 	}
 }
