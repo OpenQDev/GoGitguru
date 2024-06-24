@@ -121,7 +121,7 @@ func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams) (int, error) {
 
 	err = params.db.BatchInsertRepoDependencies(context.Background(), dependencyHistoryObjects)
 	if err != nil {
-		return 0, fmt.Errorf("error storing dependency history for %s: %s", params.repoUrl, err)
+		fmt.Println("error storing dependency history for %s: %s", params.repoUrl, err)
 	}
 	err = params.db.BulkInsertCommits(context.Background(), commitObject)
 
