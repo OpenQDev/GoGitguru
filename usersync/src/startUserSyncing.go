@@ -2,8 +2,6 @@ package usersync
 
 import (
 	"context"
-	"database/sql"
-	"slices"
 	"strings"
 
 	"github.com/OpenQDev/GoGitguru/database"
@@ -65,9 +63,10 @@ func StartUserSyncing(
 			for _, commitAuthor := range githubGraphQLCommitAuthorsMap {
 				githubGraphQLCommitAuthors = append(githubGraphQLCommitAuthors, commitAuthor)
 			}
-			internalIds := []int32{}
-			lastCommitDates := []int64{}
-			firstCommitDates := []int64{}
+
+			UpsertRepoToUserByIdParams := database.UpsertRepoToUserByIdParams{
+				Url: repoToAuthorBatch.RepoURL,
+			}
 
 			for _, commitAuthor := range githubGraphQLCommitAuthors {
 				author := commitAuthor.Author
@@ -91,46 +90,16 @@ func StartUserSyncing(
 						logger.LogGreen("user %s inserted!", author.Name)
 					}
 				}
-				userCommits, err := db.GetFirstAndLastCommit(context.Background(), sql.NullString{String: author.Email, Valid: true})
 
+				err = GetReposToUsers(db, &UpsertRepoToUserByIdParams, internal_id, author)
 				if err != nil {
-					logger.LogError("error occured while getting first and last commit for user %s: %s", author.Email, err)
+					logger.LogError("error occured while getting repos to users: %s", err)
 				}
-				alreadySet := slices.Contains(internalIds, internal_id)
-				if alreadySet {
-
-					//change the first and last commit dates if the current commit is earlier or later than the current first and last commit dates
-					for index, id := range internalIds {
-						if id == internal_id {
-							if userCommits.FirstCommitDate.(int64) < firstCommitDates[index] {
-								firstCommitDates[index] = userCommits.FirstCommitDate.(int64)
-							}
-							if userCommits.LastCommitDate.(int64) > lastCommitDates[index] {
-								lastCommitDates[index] = userCommits.LastCommitDate.(int64)
-							}
-						}
-					}
-				}
-
-				if !alreadySet {
-					internalIds = append(internalIds, internal_id)
-					lastCommitDates = append(lastCommitDates, userCommits.LastCommitDate.(int64))
-					firstCommitDates = append(firstCommitDates, userCommits.FirstCommitDate.(int64))
-				}
-
 			}
-			UpsertRepoToUserByIdParams := database.UpsertRepoToUserByIdParams{
-				Url:              repoToAuthorBatch.RepoURL,
-				InternalIds:      internalIds,
-				FirstCommitDates: firstCommitDates,
-				LastCommitDates:  lastCommitDates,
-			}
-
-			err = SyncUserDependencies(db)
 			if err != nil {
-				logger.LogFatalRedAndExit("error syncing dependencies: %s", err)
-				return
+				logger.LogError("error occured while getting repos to users: %s", err)
 			}
+
 			err = db.UpsertRepoToUserById(context.Background(), UpsertRepoToUserByIdParams)
 			if err != nil {
 				logger.LogError("error occured while upserting repo to user by id: %s", err)

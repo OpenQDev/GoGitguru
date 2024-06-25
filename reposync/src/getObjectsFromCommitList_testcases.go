@@ -17,6 +17,7 @@ type GetObjectsFromCommitListTestCase struct {
 	currentDependencies        []database.GetRepoDependenciesByURLRow
 	bulkInsertCommitsParams    database.BulkInsertCommitsParams
 	bulkInsertDependencyParams database.BatchInsertRepoDependenciesParams
+	usersToRepoUrl             UsersToRepoUrl
 }
 
 func makeCommitByReference(hashString string, author string, authorEmail string) *object.Commit {
@@ -85,6 +86,11 @@ func validGetObjectsFromCommitListTest() GetObjectsFromCommitListTestCase {
 				String: "",
 				Valid:  true,
 			},
+		},
+		usersToRepoUrl: UsersToRepoUrl{
+			AuthorEmails:     []string{"150183211+DRM-Test-User@users.noreply.github.com"},
+			FirstCommitDates: []int64{12312381240},
+			LastCommitDates:  []int64{12312381240},
 		},
 	}
 

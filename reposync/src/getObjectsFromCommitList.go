@@ -2,9 +2,7 @@ package reposync
 
 import (
 	"database/sql"
-	"fmt"
 	"path/filepath"
-	"slices"
 
 	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -67,34 +65,13 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 				}
 			}
 			AddCommitToCommitObject(commit, &commitObject, commitCount)
-			alreadyHasEmail := slices.Contains(usersToRepoUrl.AuthorEmails, commit.Author.Email)
-			if alreadyHasEmail {
-
-				for index, email := range usersToRepoUrl.AuthorEmails {
-					if email == commit.Author.Email {
-
-						if commit.Author.When.Unix() < usersToRepoUrl.FirstCommitDates[index] {
-							usersToRepoUrl.FirstCommitDates[index] = commit.Author.When.Unix()
-						}
-						if commit.Author.When.Unix() > usersToRepoUrl.LastCommitDates[index] {
-							usersToRepoUrl.LastCommitDates[index] = commit.Author.When.Unix()
-						}
-						break
-					}
-				}
-			}
-			if !alreadyHasEmail {
-				println("adding email to users to repo url", commit.Author.When.Unix())
-				usersToRepoUrl.AuthorEmails = append(usersToRepoUrl.AuthorEmails, commit.Author.Email)
-				usersToRepoUrl.FirstCommitDates = append(usersToRepoUrl.FirstCommitDates, commit.Author.When.Unix())
-				usersToRepoUrl.LastCommitDates = append(usersToRepoUrl.LastCommitDates, commit.Author.When.Unix())
-			}
+			AddFirstLastCommitDateByEmail(&usersToRepoUrl, commit)
 		}
 
 	}
 	c := commitList[len(commitList)-1]
 	// always check last commit last
-	fmt.Printf("Commit number %d: %s\n", len(commitList)-1, c.Hash)
 	err = CheckCommitForDependencies(c, repoDir, &dependencyHistoryObject)
+
 	return dependencyHistoryObject, commitObject, usersToRepoUrl, numberOfCommits, err
 }

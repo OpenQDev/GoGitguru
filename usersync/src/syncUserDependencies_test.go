@@ -3,17 +3,23 @@ package usersync
 import (
 	"testing"
 
+	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/setup"
 	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInsertGithubUser(t *testing.T) {
+func TestStartUserDepsSync(t *testing.T) {
 	// ARRANGE - GLOBAL
-	tests := InsertGithubUserTestCases()
+	env := setup.ExtractAndVerifyEnvironment("../../.env")
+	debugMode := env.Debug
 
-	for _, tt := range tests {
+	logger.SetDebugMode(debugMode)
+
+	testcases := StartUserDepsSyncingTestCases()
+
+	for _, tt := range testcases {
 		t.Run(tt.name, func(t *testing.T) {
 			testhelpers.CheckTestSkip(t, testhelpers.Targets(
 				testhelpers.RUN_ALL_TESTS,
@@ -23,20 +29,17 @@ func TestInsertGithubUser(t *testing.T) {
 			mock, queries := setup.GetMockDatabase()
 
 			// ARRANGE - LOCAL
-			tt.setupMock(mock, tt.author)
+			tt.setupMock(mock)
 
 			// ACT
-			userId, err := insertGithubUser(tt.author, queries)
+
+			err := SyncUserDependencies(queries)
 
 			// ASSERT
 			if tt.shouldError {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-			}
-
-			if userId != 0 {
-				t.Errorf("Expected %v, got %v", 0, userId)
 			}
 
 			if err := mock.ExpectationsWereMet(); err != nil {

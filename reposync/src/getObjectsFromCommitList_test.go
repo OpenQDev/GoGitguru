@@ -1,7 +1,6 @@
 package reposync
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -27,10 +26,10 @@ func TestGetObjectsFromCommitList(t *testing.T) {
 			if err != nil {
 				t.Errorf("there was an error storing this commit: %v - the error was: %s", bulkInsertCommitParams, err)
 			}
-			fmt.Println(usersToRepoUrls)
 
 			assert.Equal(t, tt.bulkInsertCommitsParams, bulkInsertCommitParams)
 			assert.Equal(t, tt.bulkInsertDependencyParams, bulkInsertDependencyParams)
+			assert.Equal(t, tt.usersToRepoUrl, usersToRepoUrls)
 		})
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
+	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
 func SyncUserDependencies(db *database.Queries) error {
@@ -17,6 +18,7 @@ func SyncUserDependencies(db *database.Queries) error {
 	fmt.Println("Getting user dependencies to sync", tenMinutesAgo)
 	usersDependenciesToSync, err := db.GetUserDependenciesByUpdatedAt(context.Background(), sql.NullInt64{Int64: tenMinutesAgo, Valid: true})
 	if err != nil {
+		logger.LogError("error getting user dependencies to sync since: %s", err)
 		return err
 	}
 
@@ -32,45 +34,16 @@ func SyncUserDependencies(db *database.Queries) error {
 	}
 	// get associated user dependencies based that have already been synced
 	alreadySyncedUserDependencies, err := db.GetUserDependenciesByUser(context.Background(), getPreviousUserDeps)
-
 	if err != nil {
+		logger.LogError("error getting already synced user dependencies: %s", err)
 		return err
 	}
 
-	bulkInsertUserDependenciesParams := database.BulkInsertUserDependenciesParams{
-		UpdatedAt: tenMinutesAgo,
-	}
-
-	for _, userDependency := range usersDependenciesToSync {
-		firstUseDate, _ok := userDependency.FirstUseDate.(int64)
-		if !_ok {
-			firstUseDate = 0
-		}
-		lastUseDate, _ok := userDependency.LastUseDate.(int64)
-		if !_ok {
-			lastUseDate = 0
-		}
-		// reset to already synced vals if necessary
-		for _, alreadySynced := range alreadySyncedUserDependencies {
-			if userDependency.UserID.Int32 == alreadySynced.UserID && userDependency.DependencyID == alreadySynced.DependencyID {
-				if alreadySynced.FirstUseDate.Int64 < firstUseDate && alreadySynced.FirstUseDate.Int64 != 0 {
-					firstUseDate = alreadySynced.FirstUseDate.Int64
-				}
-				if alreadySynced.LastUseDate.Int64 > lastUseDate && alreadySynced.LastUseDate.Int64 != 0 {
-					lastUseDate = alreadySynced.LastUseDate.Int64
-				}
-			}
-		}
-		bulkInsertUserDependenciesParams.UserID = append(bulkInsertUserDependenciesParams.UserID, userDependency.UserID.Int32)
-		bulkInsertUserDependenciesParams.DependencyID = append(bulkInsertUserDependenciesParams.DependencyID, userDependency.DependencyID)
-
-		bulkInsertUserDependenciesParams.FirstUseDate = append(bulkInsertUserDependenciesParams.FirstUseDate, firstUseDate)
-		bulkInsertUserDependenciesParams.LastUseDate = append(bulkInsertUserDependenciesParams.LastUseDate, lastUseDate)
-
-	}
+	bulkInsertUserDependenciesParams := PrepareUserDependencies(usersDependenciesToSync, alreadySyncedUserDependencies)
 
 	err = db.BulkInsertUserDependencies(context.Background(), bulkInsertUserDependenciesParams)
 	if err != nil {
+		logger.LogError("error inserting user dependencies: %s", err)
 		return err
 	}
 	return nil

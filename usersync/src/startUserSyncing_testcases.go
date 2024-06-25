@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
-	"github.com/lib/pq"
 
 	"github.com/DATA-DOG/go-sqlmock"
 )
@@ -83,50 +82,12 @@ func startUserSyncingTest1() StartUserSyncingTestCase {
 			// NOTE - this INTERNALID is generated upon insertion - so it will only appear in the return row
 			// it will NOT appear in the call to InsertUser
 			rows = sqlmock.NewRows([]string{
-				"user_id", "first_use_date", "last_use_date", "dependency_id"})
-			rows.AddRow(1, 2, 2, 1)
+				"user_id", "first_use_date"})
+			rows.AddRow(1, 2)
 			mock.ExpectQuery(("^-- name: GetFirstAndLastCommit :one.*")).WithArgs().WillReturnRows(rows)
-			rows = sqlmock.NewRows([]string{"first_commit_date", "last_commit_date", "user_id", "dependency_id"}).AddRow(1, 2, 1, 2)
-			mock.ExpectQuery("^-- name: GetUserDependenciesByUpdatedAt :many.*").WithArgs(1609458600).WillReturnRows(rows)
 
-			rows = sqlmock.NewRows([]string{
-				"first_use_date", "last_use_date", "dependency_id", "user_id"}).AddRow(0, 1, 2, 3)
-			mock.ExpectQuery("^-- name: GetUserDependenciesByUser :many.*").WithArgs(pq.Array([]int{1}), pq.Array([]int{2})).WillReturnRows(rows)
-
-			column1 := []int{1}
-			column2 := []int{2}
-			column3 := []uint64{2}
-			column4 := []uint64{1}
-
-			mock.ExpectExec("^-- name: BulkInsertUserDependencies.").WithArgs(
-				pq.Array(column1),
-				pq.Array(column2),
-				pq.Array(column3),
-				pq.Array(column4),
-				1609458600,
-			).WillReturnResult(sqlmock.NewResult(1, 1))
-			rows = sqlmock.NewRows([]string{
-				"internal_id"}).AddRow(0)
 			mock.ExpectExec("^-- name: UpsertRepoToUserById :exec.*").WithArgs("https://github.com/OpenQDev/OpenQ-Workflows", "{1}", "{1}", "{2}").WillReturnResult(sqlmock.NewResult(1, 1))
-			/*	mock.ExpectQuery("^-- name: InsertUser :one.*").WithArgs(
-				author.User.GithubRestID,
-				author.User.GithubGraphqlID,
-				author.User.Login,
-				author.User.Name,
-				author.User.Email,
-				author.User.AvatarURL,
-				author.User.Company,
-				author.User.Location,
-				author.User.Bio,
-				author.User.Blog,
-				author.User.Hireable,
-				author.User.TwitterUsername,
-				author.User.Followers.TotalCount,
-				author.User.Following.TotalCount,
-				"User",
-				createdAt,
-				updatedAt,
-			).WillReturnRows(rows)*/
+
 		},
 	}
 }
