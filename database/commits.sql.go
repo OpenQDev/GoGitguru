@@ -235,29 +235,20 @@ func (q *Queries) GetCommitsWithAuthorInfo(ctx context.Context, arg GetCommitsWi
 const getFirstAndLastCommit = `-- name: GetFirstAndLastCommit :one
 SELECT 
     MIN(author_date) as first_commit_date,
-    MAX(author_date) as last_commit_date,
-    author_date,
-    commit_hash
+    MAX(author_date) as last_commit_date
 FROM commits
 WHERE author_email = $1
 `
 
 type GetFirstAndLastCommitRow struct {
-	FirstCommitDate interface{}   `json:"first_commit_date"`
-	LastCommitDate  interface{}   `json:"last_commit_date"`
-	AuthorDate      sql.NullInt64 `json:"author_date"`
-	CommitHash      string        `json:"commit_hash"`
+	FirstCommitDate interface{} `json:"first_commit_date"`
+	LastCommitDate  interface{} `json:"last_commit_date"`
 }
 
 func (q *Queries) GetFirstAndLastCommit(ctx context.Context, authorEmail sql.NullString) (GetFirstAndLastCommitRow, error) {
 	row := q.queryRow(ctx, q.getFirstAndLastCommitStmt, getFirstAndLastCommit, authorEmail)
 	var i GetFirstAndLastCommitRow
-	err := row.Scan(
-		&i.FirstCommitDate,
-		&i.LastCommitDate,
-		&i.AuthorDate,
-		&i.CommitHash,
-	)
+	err := row.Scan(&i.FirstCommitDate, &i.LastCommitDate)
 	return i, err
 }
 
