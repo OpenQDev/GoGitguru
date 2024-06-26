@@ -2,6 +2,7 @@ package reposync
 
 import (
 	"slices"
+	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/OpenQDev/GoGitguru/util/gitutil"
@@ -41,7 +42,9 @@ func CheckCommitForDependencies(c *object.Commit, repoDir string, dependencyHist
 		if file == nil {
 			continue
 		}
+		time := time.Now().Unix()
 		dependencies := ParseFile(file)
+		printExecutionTime(time, "ParseFile", dependencyFileName+" "+repoDir)
 
 		// only handle matching file name
 		if slices.Contains(dependencyHistoryObject.Filenames, dependencyFileName) {

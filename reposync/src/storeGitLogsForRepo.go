@@ -94,9 +94,7 @@ func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams) (int, error) {
 
 	repoDir := filepath.Join(params.prefixPath, params.organization, params.repo)
 
-	startTime := time.Now().Unix()
 	commitList, err := CreateCommitList(repoDir)
-	printExecutionTime(startTime, "CreateCommitList", params.repoUrl)
 
 	if err != nil {
 		return 0, fmt.Errorf("error getting commit list %s: %s", params.repoUrl, err)
@@ -107,44 +105,34 @@ func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams) (int, error) {
 		return 0, fmt.Errorf("error getting number of commits for %s: %s", params.repoUrl, err)
 	}
 
-	startTime = time.Now().Unix()
 	currentDependencies, err := params.db.GetRepoDependenciesByURL(context.Background(), params.repoUrl)
-	printExecutionTime(startTime, "GetRepoDependenciesByURL", params.repoUrl)
 
 	if err != nil {
 		return 0, fmt.Errorf("error getting current dependencies for %s: %s", params.repoUrl, err)
 	}
 
-	startTime = time.Now().Unix()
 	dependencyHistoryObjects, commitObject, usersToReposObject, numberOfCommitsToSync, err := GetObjectsFromCommitList(params, commitList, numberOfCommitsToSync, currentDependencies)
-	printExecutionTime(startTime, "GetObjectsFromCommitList", params.repoUrl)
 
 	if err != nil {
 		return 0, fmt.Errorf("error getting structs from commit list %s: %s", params.repoUrl, err)
 	}
 
-	startTime = time.Now().Unix()
 	insertByIdParams := getUpsertRepoByIdsParams(params, usersToReposObject)
-	printExecutionTime(startTime, "getUpsertRepoByIdsParams", params.repoUrl)
 
-	startTime = time.Now().Unix()
 	err = params.db.UpsertRepoToUserById(context.Background(), insertByIdParams)
-	printExecutionTime(startTime, "UpsertRepoToUserById", params.repoUrl)
+
 	if err != nil {
 		return 0, fmt.Errorf("error storing users to repo for %s: %s", params.repoUrl, err)
 	}
 
-	startTime = time.Now().Unix()
 	err = params.db.BatchInsertRepoDependencies(context.Background(), dependencyHistoryObjects)
-	printExecutionTime(startTime, "BatchInsertRepoDependencies", params.repoUrl)
 
 	if err != nil {
 		fmt.Printf("error storing dependency history for %s: %s", params.repoUrl, err)
 		fmt.Println("dependencyHistoryObjects", dependencyHistoryObjects)
 	}
-	startTime = time.Now().Unix()
+
 	err = params.db.BulkInsertCommits(context.Background(), commitObject)
-	printExecutionTime(startTime, "BulkInsertCommits", params.repoUrl)
 
 	if err != nil {
 		return 0, fmt.Errorf("error storing commits for %s: %s", params.repoUrl, err)
