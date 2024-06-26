@@ -59,13 +59,23 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 		}
 		if commitCount < numberOfCommits {
 			if commitCount%commitWindow == 0 {
+				startTime := now().Unix()
 				err = CheckCommitForDependencies(commit, repoDir, &dependencyHistoryObject)
 				if err != nil {
 					return dependencyHistoryObject, commitObject, usersToRepoUrl, 0, err
 				}
+				printExecutionTime(startTime, "CheckCommitForDependencies", params.repoUrl)
 			}
-			AddCommitToCommitObject(commit, &commitObject, commitCount)
-			AddFirstLastCommitDateByEmail(&usersToRepoUrl, commit)
+			startTime := now().Unix()
+			if commitCount%commitWindow == 0 {
+				AddCommitToCommitObject(commit, &commitObject, commitCount)
+				printExecutionTime(startTime, "AddCommitToCommitObject", params.repoUrl)
+			}
+			if commitCount%commitWindow == 0 {
+				startTime := now().Unix()
+				AddFirstLastCommitDateByEmail(&usersToRepoUrl, commit)
+				printExecutionTime(startTime, "AddFirstLastCommitDateByEmail", params.repoUrl)
+			}
 		}
 
 	}
