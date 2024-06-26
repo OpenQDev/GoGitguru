@@ -28,11 +28,13 @@ func CheckCommitForDependencies(c *object.Commit, repoDir string, dependencyHist
 		"deployments",
 		"foundry.toml",
 	}
-
+	startTime := time.Now().Unix()
 	dependencyFiles, err := gitutil.GitDependencyFiles(repoDir, rawDependencyFiles)
 	if err != nil {
 		return err
 	}
+	printExecutionTime(startTime, "GitDependencyFiles", repoDir)
+
 	for _, dependencyFileName := range dependencyFiles {
 		currentCommitDate := c.Committer.When.Unix()
 		file, err := c.File(dependencyFileName)
