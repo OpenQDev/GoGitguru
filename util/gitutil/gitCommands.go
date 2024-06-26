@@ -4,11 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
-	"regexp"
 	"time"
-
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 /*
@@ -32,56 +28,16 @@ git pull
 */
 func GitPullCommand(pullDestination string) *exec.Cmd {
 	return exec.Command("git", "-C", pullDestination, "pull", "--strategy-option=theirs")
+
 }
 
 /*
 git -C . ls-files | grep -E 'go.mod'
 git -C <repoDir> ls-files | grep -E '<gitGrepExists>'
 */
-func LogDependencyFiles(repoDir string, gitGrepExists string) ([]string, error) {
-	// Open the repository
-	repo, err := git.PlainOpen(repoDir)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open repository: %w", err)
-	}
-
-	// Get the HEAD reference
-	ref, err := repo.Head()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get HEAD reference: %w", err)
-	}
-
-	// Get the commit object
-	commit, err := repo.CommitObject(ref.Hash())
-	if err != nil {
-		return nil, fmt.Errorf("failed to get commit object: %w", err)
-	}
-
-	// Get the file tree from the commit
-	tree, err := commit.Tree()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get file tree: %w", err)
-	}
-
-	// Compile the regular expression
-	re, err := regexp.Compile(gitGrepExists)
-	if err != nil {
-		return nil, fmt.Errorf("invalid regex: %w", err)
-	}
-
-	// List the files and filter them based on the regular expression
-	var files []string
-	err = tree.Files().ForEach(func(f *object.File) error {
-		if re.MatchString(f.Name) {
-			files = append(files, f.Name)
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to list files: %w", err)
-	}
-
-	return files, nil
+func LogDependencyFiles(repoDir string, gitGrepExists string) *exec.Cmd {
+	cmd := fmt.Sprintf("git -C %s ls-files | grep -E '%s'", repoDir, gitGrepExists)
+	return exec.Command("/bin/sh", "-c", cmd)
 }
 
 /*
