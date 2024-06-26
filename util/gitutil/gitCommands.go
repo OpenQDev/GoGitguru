@@ -36,7 +36,7 @@ git -C . ls-files | grep -E 'go.mod'
 git -C <repoDir> ls-files | grep -E '<gitGrepExists>'
 */
 func LogDependencyFiles(repoDir string, gitGrepExists string) *exec.Cmd {
-	cmd := fmt.Sprintf("git -C %s ls-files | grep -E '%s'", repoDir, gitGrepExists)
+	cmd := fmt.Sprintf("git -C %s ls-files | grep -E '%s' | grep -v 'node_modules'", repoDir, gitGrepExists)
 	return exec.Command("/bin/sh", "-c", cmd)
 }
 

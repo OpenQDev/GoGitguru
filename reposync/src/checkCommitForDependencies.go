@@ -24,8 +24,8 @@ func CheckCommitForDependencies(c *object.Commit, repoDir string, dependencyHist
 
 		"hardhat.config",
 		"truffle",
-		"network",
-		"deployments",
+		`\/network\/`,
+		`\/deployments\/`,
 		"foundry.toml",
 	}
 	startTime := time.Now().Unix()
