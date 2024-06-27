@@ -77,6 +77,13 @@ type Dependency struct {
 	DependencyFile string `json:"dependency_file"`
 }
 
+type FilePattern struct {
+	ID        int32  `json:"id"`
+	Pattern   string `json:"pattern"`
+	UpdatedAt int32  `json:"updated_at"`
+	Creator   string `json:"creator"`
+}
+
 type GithubRepo struct {
 	InternalID      int32          `json:"internal_id"`
 	GithubRestID    int32          `json:"github_rest_id"`

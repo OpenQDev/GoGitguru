@@ -36,6 +36,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.bulkInsertUserDependenciesStmt, err = db.PrepareContext(ctx, bulkInsertUserDependencies); err != nil {
 		return nil, fmt.Errorf("error preparing query BulkInsertUserDependencies: %w", err)
 	}
+	if q.bulkUpsertFilePatternsStmt, err = db.PrepareContext(ctx, bulkUpsertFilePatterns); err != nil {
+		return nil, fmt.Errorf("error preparing query BulkUpsertFilePatterns: %w", err)
+	}
 	if q.checkGithubRepoExistsStmt, err = db.PrepareContext(ctx, checkGithubRepoExists); err != nil {
 		return nil, fmt.Errorf("error preparing query CheckGithubRepoExists: %w", err)
 	}
@@ -47,6 +50,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.deleteRepoURLStmt, err = db.PrepareContext(ctx, deleteRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteRepoURL: %w", err)
+	}
+	if q.getAllFilePatternsStmt, err = db.PrepareContext(ctx, getAllFilePatterns); err != nil {
+		return nil, fmt.Errorf("error preparing query GetAllFilePatterns: %w", err)
 	}
 	if q.getAndUpdateRepoURLStmt, err = db.PrepareContext(ctx, getAndUpdateRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAndUpdateRepoURL: %w", err)
@@ -166,6 +172,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing bulkInsertUserDependenciesStmt: %w", cerr)
 		}
 	}
+	if q.bulkUpsertFilePatternsStmt != nil {
+		if cerr := q.bulkUpsertFilePatternsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing bulkUpsertFilePatternsStmt: %w", cerr)
+		}
+	}
 	if q.checkGithubRepoExistsStmt != nil {
 		if cerr := q.checkGithubRepoExistsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing checkGithubRepoExistsStmt: %w", cerr)
@@ -184,6 +195,11 @@ func (q *Queries) Close() error {
 	if q.deleteRepoURLStmt != nil {
 		if cerr := q.deleteRepoURLStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteRepoURLStmt: %w", cerr)
+		}
+	}
+	if q.getAllFilePatternsStmt != nil {
+		if cerr := q.getAllFilePatternsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getAllFilePatternsStmt: %w", cerr)
 		}
 	}
 	if q.getAndUpdateRepoURLStmt != nil {
@@ -384,10 +400,12 @@ type Queries struct {
 	bulkInsertCommitsStmt                      *sql.Stmt
 	bulkInsertDependenciesStmt                 *sql.Stmt
 	bulkInsertUserDependenciesStmt             *sql.Stmt
+	bulkUpsertFilePatternsStmt                 *sql.Stmt
 	checkGithubRepoExistsStmt                  *sql.Stmt
 	checkGithubUserExistsStmt                  *sql.Stmt
 	checkGithubUserRestIdAuthorEmailExistsStmt *sql.Stmt
 	deleteRepoURLStmt                          *sql.Stmt
+	getAllFilePatternsStmt                     *sql.Stmt
 	getAndUpdateRepoURLStmt                    *sql.Stmt
 	getCommitStmt                              *sql.Stmt
 	getCommitsStmt                             *sql.Stmt
@@ -429,10 +447,12 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		bulkInsertCommitsStmt:           q.bulkInsertCommitsStmt,
 		bulkInsertDependenciesStmt:      q.bulkInsertDependenciesStmt,
 		bulkInsertUserDependenciesStmt:  q.bulkInsertUserDependenciesStmt,
+		bulkUpsertFilePatternsStmt:      q.bulkUpsertFilePatternsStmt,
 		checkGithubRepoExistsStmt:       q.checkGithubRepoExistsStmt,
 		checkGithubUserExistsStmt:       q.checkGithubUserExistsStmt,
 		checkGithubUserRestIdAuthorEmailExistsStmt: q.checkGithubUserRestIdAuthorEmailExistsStmt,
 		deleteRepoURLStmt:                          q.deleteRepoURLStmt,
+		getAllFilePatternsStmt:                     q.getAllFilePatternsStmt,
 		getAndUpdateRepoURLStmt:                    q.getAndUpdateRepoURLStmt,
 		getCommitStmt:                              q.getCommitStmt,
 		getCommitsStmt:                             q.getCommitsStmt,
