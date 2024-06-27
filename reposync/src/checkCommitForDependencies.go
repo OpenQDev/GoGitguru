@@ -2,7 +2,6 @@ package reposync
 
 import (
 	"slices"
-	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/OpenQDev/GoGitguru/util/gitutil"
@@ -28,12 +27,10 @@ func CheckCommitForDependencies(c *object.Commit, repoDir string, dependencyHist
 		`\/deployments\/`,
 		"foundry.toml",
 	}
-	startTime := time.Now().Unix()
 	dependencyFiles, err := gitutil.GitDependencyFiles(repoDir, rawDependencyFiles)
 	if err != nil {
 		return err
 	}
-	printExecutionTime(startTime, "GitDependencyFiles", repoDir)
 
 	for _, dependencyFileName := range dependencyFiles {
 		currentCommitDate := c.Committer.When.Unix()
@@ -44,9 +41,8 @@ func CheckCommitForDependencies(c *object.Commit, repoDir string, dependencyHist
 		if file == nil {
 			continue
 		}
-		time := time.Now().Unix()
+
 		dependencies := ParseFile(file)
-		printExecutionTime(time, "ParseFile", dependencyFileName+" "+repoDir)
 
 		// only handle matching file name
 		if slices.Contains(dependencyHistoryObject.Filenames, dependencyFileName) {

@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/OpenQDev/GoGitguru/database"
+	"github.com/OpenQDev/GoGitguru/util/lib"
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
@@ -23,7 +24,7 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 		Lastusedates:    []int64{},
 		Dependencynames: []string{},
 		Filenames:       []string{},
-		UpdatedAt:       sql.NullInt64{Int64: now().Unix(), Valid: true},
+		UpdatedAt:       sql.NullInt64{Int64: lib.Now().Unix(), Valid: true},
 	}
 	for _, dep := range currentDependencies {
 		dependencyHistoryObject.Dependencynames = append(dependencyHistoryObject.Dependencynames, dep.DependencyName)
@@ -59,22 +60,18 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 		}
 		if commitCount < numberOfCommits {
 			if commitCount%commitWindow == 0 {
-				startTime := now().Unix()
 				err = CheckCommitForDependencies(commit, repoDir, &dependencyHistoryObject)
 				if err != nil {
 					return dependencyHistoryObject, commitObject, usersToRepoUrl, 0, err
 				}
-				printExecutionTime(startTime, "CheckCommitForDependencies", params.repoUrl)
 			}
-			startTime := now().Unix()
+
 			if commitCount%commitWindow == 0 {
 				AddCommitToCommitObject(commit, &commitObject, commitCount)
-				printExecutionTime(startTime, "AddCommitToCommitObject", params.repoUrl)
 			}
+
 			if commitCount%commitWindow == 0 {
-				startTime := now().Unix()
 				AddFirstLastCommitDateByEmail(&usersToRepoUrl, commit)
-				printExecutionTime(startTime, "AddFirstLastCommitDateByEmail", params.repoUrl)
 			}
 		}
 

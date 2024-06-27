@@ -20,10 +20,6 @@ type GitLogParams struct {
 	db             *database.Queries
 }
 
-func printExecutionTime(startTime int64, functionName string, repoUrl string) {
-	fmt.Println("Execution time for", functionName, ":", time.Now().Unix()-startTime, "for", repoUrl)
-}
-
 func getFirstAndLastUserCommitByEmail(usersToReposObject UsersToRepoUrl, emails []string, firstCommitDate int64, lastCommitDate int64) (int64, int64) {
 	for index, userEmail := range usersToReposObject.AuthorEmails {
 		if slices.Contains(emails, userEmail) {

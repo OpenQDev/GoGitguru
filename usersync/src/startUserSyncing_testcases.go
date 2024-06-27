@@ -3,6 +3,7 @@ package usersync
 import (
 	"time"
 
+	"github.com/OpenQDev/GoGitguru/util/lib"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -60,7 +61,7 @@ func startUserSyncingTest1() StartUserSyncingTestCase {
 		setupMock: func(mock sqlmock.Sqlmock, author GithubGraphQLAuthor) {
 
 			mockTime := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
-			now = func() time.Time { return mockTime }
+			lib.Now = func() time.Time { return mockTime }
 			// EXPECT - GetLatestUncheckedCommitPerAuthor
 			rows := sqlmock.NewRows([]string{"commit_hash", "author_email", "author_date", "repo_url"}).
 				AddRow("65062be663cc004b77ca8a3b13255bc5efa42f25", "andrew@openq.dev", 0, "https://github.com/OpenQDev/OpenQ-Workflows")

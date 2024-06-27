@@ -5,6 +5,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/OpenQDev/GoGitguru/database"
+	"github.com/OpenQDev/GoGitguru/util/lib"
 )
 
 type GetReposToUsersTestCase struct {
@@ -69,7 +70,7 @@ func getReposToUsersTest1() GetReposToUsersTestCase {
 		setupMock: func(mock sqlmock.Sqlmock, author GithubGraphQLAuthor) {
 
 			mockTime := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
-			now = func() time.Time { return mockTime }
+			lib.Now = func() time.Time { return mockTime }
 
 			rows := sqlmock.NewRows([]string{
 				"first_commit_date", "last_commit_date"})

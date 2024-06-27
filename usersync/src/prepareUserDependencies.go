@@ -5,12 +5,13 @@ import (
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
+	"github.com/OpenQDev/GoGitguru/util/lib"
 )
 
 func PrepareUserDependencies(usersDependenciesToSync []database.GetUserDependenciesByUpdatedAtRow, alreadySyncedUserDependencies []database.GetUserDependenciesByUserRow) database.BulkInsertUserDependenciesParams {
 	fmt.Println("Preparing user dependencies")
 
-	tenMinutesAgo := now().Add(-10 * time.Minute).Unix()
+	tenMinutesAgo := lib.Now().Add(-10 * time.Minute).Unix()
 	bulkInsertUserDependenciesParams := database.BulkInsertUserDependenciesParams{
 		UpdatedAt: tenMinutesAgo,
 	}

@@ -7,13 +7,14 @@ import (
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
+	"github.com/OpenQDev/GoGitguru/util/lib"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
 func SyncUserDependencies(db *database.Queries) error {
 
 	// get all recent repoDependencies  @flacojones, do you want a smaller time window?
-	tenMinutesAgo := now().Add(-10 * time.Minute).Unix()
+	tenMinutesAgo := lib.Now().Add(-10 * time.Minute).Unix()
 	// find user deps based off recent repos
 	fmt.Println("Getting user dependencies to sync", tenMinutesAgo)
 	usersDependenciesToSync, err := db.GetUserDependenciesByUpdatedAt(context.Background(), sql.NullInt64{Int64: tenMinutesAgo, Valid: true})

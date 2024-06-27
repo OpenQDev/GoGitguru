@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/OpenQDev/GoGitguru/util/lib"
 	"github.com/OpenQDev/GoGitguru/util/testhelpers"
 	"github.com/stretchr/testify/assert"
 )
@@ -20,7 +21,7 @@ func TestGetObjectsFromCommitList(t *testing.T) {
 				testhelpers.RUN_ALL_TESTS,
 			), tt.name)
 			mockTime := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
-			now = func() time.Time { return mockTime }
+			lib.Now = func() time.Time { return mockTime }
 			// ACT
 			bulkInsertDependencyParams, bulkInsertCommitParams, usersToRepoUrls, _, err := GetObjectsFromCommitList(tt.params, tt.commitList, tt.numberOfCommits, tt.currentDependencies)
 			if err != nil {
