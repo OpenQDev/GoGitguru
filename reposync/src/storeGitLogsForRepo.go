@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
-	"slices"
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
@@ -18,70 +17,6 @@ type GitLogParams struct {
 	repoUrl        string
 	fromCommitDate time.Time
 	db             *database.Queries
-}
-
-func getFirstAndLastUserCommitByEmail(usersToReposObject UsersToRepoUrl, emails []string, firstCommitDate int64, lastCommitDate int64) (int64, int64) {
-	for index, userEmail := range usersToReposObject.AuthorEmails {
-		if slices.Contains(emails, userEmail) {
-
-			resultFirstCommitDate := firstCommitDate
-			resultLastCommitDate := lastCommitDate
-
-			if firstCommitDate > usersToReposObject.FirstCommitDates[index] || firstCommitDate == 0 {
-				resultFirstCommitDate = usersToReposObject.FirstCommitDates[index]
-			}
-			if lastCommitDate < usersToReposObject.LastCommitDates[index] || lastCommitDate == 0 {
-				resultLastCommitDate = usersToReposObject.LastCommitDates[index]
-			}
-			return resultFirstCommitDate, resultLastCommitDate
-		}
-	}
-	return firstCommitDate, lastCommitDate
-}
-
-func getUpsertRepoByIdsParams(params GitLogParams, usersToReposObject UsersToRepoUrl) database.UpsertRepoToUserByIdParams {
-
-	internalIdsWithEmails, err := params.db.GetGithubUserByCommitEmail(context.Background(), usersToReposObject.AuthorEmails)
-	if err != nil {
-		fmt.Println("Error getting internal ids with emails", err)
-	}
-
-	insertByIdParams := database.UpsertRepoToUserByIdParams{
-		InternalIds:      []int32{},
-		Url:              params.repoUrl,
-		FirstCommitDates: []int64{},
-		LastCommitDates:  []int64{},
-	}
-
-	for _, internalIdWithEmail := range internalIdsWithEmails {
-
-		emails := internalIdWithEmail.Emails
-
-		if err != nil {
-			fmt.Println("Error getting emails from internal id", err)
-		}
-
-		alreadyHas := slices.Contains(insertByIdParams.InternalIds, internalIdWithEmail.InternalID)
-		if alreadyHas {
-			for insertByIdParamIndex, insertByIdParam := range insertByIdParams.InternalIds {
-				if insertByIdParam == internalIdWithEmail.InternalID {
-					currentFirstCommit := insertByIdParams.FirstCommitDates[insertByIdParamIndex]
-					currentLastCommit := insertByIdParams.LastCommitDates[insertByIdParamIndex]
-					firstCommit, lastCommit := getFirstAndLastUserCommitByEmail(usersToReposObject, emails, currentFirstCommit, currentLastCommit)
-					insertByIdParams.FirstCommitDates[insertByIdParamIndex] = firstCommit
-					insertByIdParams.LastCommitDates[insertByIdParamIndex] = lastCommit
-				}
-			}
-
-		} else {
-			insertByIdParams.InternalIds = append(insertByIdParams.InternalIds, internalIdWithEmail.InternalID)
-			firstCommitDate, lastCommitDate := getFirstAndLastUserCommitByEmail(usersToReposObject, emails, 0, 0)
-			insertByIdParams.FirstCommitDates = append(insertByIdParams.FirstCommitDates, firstCommitDate)
-			insertByIdParams.LastCommitDates = append(insertByIdParams.LastCommitDates, lastCommitDate)
-		}
-	}
-	return insertByIdParams
-
 }
 
 // from commitDate should be the date of the last commit that was synced for the repository or any of the dependencies.
@@ -107,13 +42,24 @@ func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams) (int, error) {
 		return 0, fmt.Errorf("error getting current dependencies for %s: %s", params.repoUrl, err)
 	}
 
-	dependencyHistoryObjects, commitObject, usersToReposObject, numberOfCommitsToSync, err := GetObjectsFromCommitList(params, commitList, numberOfCommitsToSync, currentDependencies)
+	dependencyFileRecords, err := params.db.GetAllFilePatterns(context.Background())
+
+	if err != nil {
+		return 0, fmt.Errorf("error getting all file patterns for %s: %s", params.repoUrl, err)
+	}
+
+	dependencyFiles := []string{}
+	for _, dep := range dependencyFileRecords {
+		dependencyFiles = append(dependencyFiles, dep.Pattern)
+	}
+
+	dependencyHistoryObjects, commitObject, usersToReposObject, numberOfCommitsToSync, err := GetObjectsFromCommitList(params, commitList, numberOfCommitsToSync, currentDependencies, dependencyFiles)
 
 	if err != nil {
 		return 0, fmt.Errorf("error getting structs from commit list %s: %s", params.repoUrl, err)
 	}
 
-	insertByIdParams := getUpsertRepoByIdsParams(params, usersToReposObject)
+	insertByIdParams := GetUpsertRepoByIdsParams(params, usersToReposObject)
 
 	err = params.db.UpsertRepoToUserById(context.Background(), insertByIdParams)
 

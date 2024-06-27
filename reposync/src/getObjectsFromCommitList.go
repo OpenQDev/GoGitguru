@@ -15,8 +15,9 @@ type UsersToRepoUrl struct {
 	LastCommitDates  []int64
 }
 
-func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, numberOfCommits int, currentDependencies []database.GetRepoDependenciesByURLRow) (database.BatchInsertRepoDependenciesParams, database.BulkInsertCommitsParams, UsersToRepoUrl, int, error) {
+func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, numberOfCommits int, currentDependencies []database.GetRepoDependenciesByURLRow, dependencyFiles []string) (database.BatchInsertRepoDependenciesParams, database.BulkInsertCommitsParams, UsersToRepoUrl, int, error) {
 	// sync this from the db
+
 	repoDir := filepath.Join(params.prefixPath, params.organization, params.repo)
 	dependencyHistoryObject := database.BatchInsertRepoDependenciesParams{
 		Url:             params.repoUrl,
@@ -51,6 +52,7 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 		Messages:       []string{},
 		Fileschanged:   []int32{},
 	}
+
 	var err error
 	// start from first commit that hasn't been synced
 	for commitCount, commit := range commitList {
@@ -60,7 +62,7 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 		}
 		if commitCount < numberOfCommits {
 			if commitCount%commitWindow == 0 {
-				err = CheckCommitForDependencies(commit, repoDir, &dependencyHistoryObject)
+				err = CheckCommitForDependencies(commit, repoDir, &dependencyHistoryObject, dependencyFiles)
 				if err != nil {
 					return dependencyHistoryObject, commitObject, usersToRepoUrl, 0, err
 				}
@@ -78,7 +80,7 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 	}
 	c := commitList[len(commitList)-1]
 	// always check last commit last
-	err = CheckCommitForDependencies(c, repoDir, &dependencyHistoryObject)
+	err = CheckCommitForDependencies(c, repoDir, &dependencyHistoryObject, dependencyFiles)
 
 	return dependencyHistoryObject, commitObject, usersToRepoUrl, numberOfCommits, err
 }

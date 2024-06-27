@@ -12,6 +12,7 @@ import (
 type GetObjectsFromCommitListTestCase struct {
 	name                       string
 	params                     GitLogParams
+	dependencyFiles            []string
 	commitList                 []*object.Commit
 	numberOfCommits            int
 	currentDependencies        []database.GetRepoDependenciesByURLRow
@@ -53,6 +54,24 @@ func validGetObjectsFromCommitListTest() GetObjectsFromCommitListTestCase {
 		numberOfCommits: 2,
 		currentDependencies: []database.GetRepoDependenciesByURLRow{
 			currentDependency,
+		},
+		dependencyFiles: []string{
+			"package.json",
+			"requirements.txt",
+			"pom.xml",
+			"Pipfile",
+			"go.mod",
+			"build.gradle",
+			"Gemfile",
+			"Cargo.toml",
+			".cabal",
+			"composer.json",
+
+			"hardhat.config",
+			"truffle",
+			`\/network\/`,
+			`\/deployments\/`,
+			"foundry.toml",
 		},
 		bulkInsertDependencyParams: database.BatchInsertRepoDependenciesParams{
 			Url:             "",

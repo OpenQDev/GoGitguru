@@ -8,26 +8,10 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
-func CheckCommitForDependencies(c *object.Commit, repoDir string, dependencyHistoryObject *database.BatchInsertRepoDependenciesParams) error {
-	rawDependencyFiles := []string{
-		"package.json",
-		"requirements.txt",
-		"pom.xml",
-		"Pipfile",
-		"go.mod",
-		"build.gradle",
-		"Gemfile",
-		"Cargo.toml",
-		".cabal",
-		"composer.json",
+func CheckCommitForDependencies(c *object.Commit, repoDir string, dependencyHistoryObject *database.BatchInsertRepoDependenciesParams, rawDependencyFiles []string) error {
 
-		"hardhat.config",
-		"truffle",
-		`\/network\/`,
-		`\/deployments\/`,
-		"foundry.toml",
-	}
 	dependencyFiles, err := gitutil.GitDependencyFiles(repoDir, rawDependencyFiles)
+
 	if err != nil {
 		return err
 	}

@@ -154,7 +154,29 @@ func sucessfulGitLog() StoreGitLogsAndDepsHistoryForRepoTestCase {
 
 			firstUseDates := []int64{1699383684, 1699385002, 1699385002, 1699385002, 1699385069, 1699385069, 1699385069, 1699385139, 1699385139, 1699385139}
 			lastUseDates := []int64{1699385139, 1699385139, 1699385139, 1699385139, 1699385139, 1699385139, 1699385139, 1699385139, 1699385139, 1699385139}
+			rows := sqlmock.NewRows([]string{"id", "pattern", "updated_at", "creator"})
+			dependencyFiles := []string{
+				"package.json",
+				"requirements.txt",
+				"pom.xml",
+				"Pipfile",
+				"go.mod",
+				"build.gradle",
+				"Gemfile",
+				"Cargo.toml",
+				".cabal",
+				"composer.json",
 
+				"hardhat.config",
+				"truffle",
+				`\/network\/`,
+				`\/deployments\/`,
+				"foundry.toml",
+			}
+			for index, file := range dependencyFiles {
+				rows.AddRow(index, file, 1609459200, "GoGitguru")
+			}
+			mock.ExpectQuery("^-- name: GetAllFilePatterns :many.*").WillReturnRows(rows)
 			mock.ExpectQuery("^-- name: GetGithubUserByCommitEmail :many.*").WithArgs(pq.Array([]string{"info@openq.dev", "150183211+DRM-Test-User@users.noreply.github.com"})).WillReturnRows(sqlmock.NewRows([]string{"internal_id", "emails"}))
 			mock.ExpectExec("^-- name: UpsertRepoToUserById :exec.*").WithArgs("https://github.com/OpenQDev/OpenQ-DRM-TestRepo", pq.Array([]string{}), pq.Array([]string{}), "{}").WillReturnResult(sqlmock.NewResult(1, 1))
 			mock.ExpectExec("^-- name: BatchInsertRepoDependencies :exec.*").WithArgs(1609459200, pq.Array(files), pq.Array(dependencies), repoUrl, pq.Array(firstUseDates), pq.Array(lastUseDates)).WillReturnResult(sqlmock.NewResult(1, 1))

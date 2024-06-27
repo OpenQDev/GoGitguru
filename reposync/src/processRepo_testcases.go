@@ -118,6 +118,25 @@ func validProcessRepoTest() ProcessRepoTestCase {
 
 			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs(database.RepoStatusSyncingRepo, repoUrl).WillReturnResult(sqlmock.NewResult(1, 2))
 			mock.ExpectQuery("^-- name: GetRepoDependenciesByURL :many.*").WithArgs(repoUrl).WillReturnRows(sqlmock.NewRows([]string{"url"}))
+			dependencyFiles := []string{
+				"package.json",
+				"requirements.txt",
+				"pom.xml",
+				"Pipfile",
+				"go.mod",
+				"build.gradle",
+				"Gemfile",
+				"Cargo.toml",
+				".cabal",
+				"composer.json",
+
+				"hardhat.config",
+				"truffle",
+				`\/network\/`,
+				`\/deployments\/`,
+				"foundry.toml",
+			}
+
 			// Define test data
 			commitCount := 8
 			commitHash := make([]string, commitCount)
@@ -158,6 +177,12 @@ func validProcessRepoTest() ProcessRepoTestCase {
 			dependencies := []string{"web3", "base", "ton", "ergo", "base", "ton", "ergo", "base", "ton", "ergo"}
 			firstUseDates := []int64{1699383684, 1699385002, 1699385002, 1699385002, 1699385069, 1699385069, 1699385069, 1699385139, 1699385139, 1699385139}
 			lastUseDates := []int64{1699385139, 1699385139, 1699385139, 1699385139, 1699385139, 1699385139, 1699385139, 1699385139, 1699385139, 1699385139}
+			rows := sqlmock.NewRows([]string{"id", "pattern", "updated_at", "creator"})
+			for index, file := range dependencyFiles {
+				rows.AddRow(index, file, 1609459200, "GoGitguru")
+			}
+			mock.ExpectQuery("^-- name: GetAllFilePatterns :many.*").WillReturnRows(rows)
+
 			mock.ExpectQuery("^-- name: GetGithubUserByCommitEmail :many.*").WithArgs(pq.Array([]string{
 				"info@openq.dev", "150183211+DRM-Test-User@users.noreply.github.com"},
 			)).WillReturnRows(sqlmock.NewRows([]string{"email"}))
