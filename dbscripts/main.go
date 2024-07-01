@@ -5,13 +5,11 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-
-	dbscripts "github.com/OpenQDev/GoGitguru/dbscripts/src"
 )
 
 func main() {
 	fmt.Println("starting db script")
-	dbscripts.ConsolidateFileName()
+	fmt.Println("no db scripts to run")
 }
 
 func setupSignalHandler(stopChan chan<- struct{}) {

@@ -77,7 +77,7 @@ func StartSyncingCommits(
 			latestCommitterDateTime := time.Unix(int64(latestCommitterDate), 0)
 			// Unsure why but sometimes commits before JAN_1_2020 were being stored after initia clone-sync, causing issues
 			if latestCommitterDateTime.After(JAN_1_2020) {
-				startDate = latestCommitterDateTime
+				//		startDate = latestCommitterDateTime
 				fmt.Println("temporarily reverting to getting all commits")
 			}
 
