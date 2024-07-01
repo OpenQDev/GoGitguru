@@ -51,6 +51,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deleteRepoURLStmt, err = db.PrepareContext(ctx, deleteRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteRepoURL: %w", err)
 	}
+	if q.deleteUnusedDependenciesStmt, err = db.PrepareContext(ctx, deleteUnusedDependencies); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteUnusedDependencies: %w", err)
+	}
 	if q.getAllFilePatternsStmt, err = db.PrepareContext(ctx, getAllFilePatterns); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAllFilePatterns: %w", err)
 	}
@@ -68,6 +71,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getDependenciesStmt, err = db.PrepareContext(ctx, getDependencies); err != nil {
 		return nil, fmt.Errorf("error preparing query GetDependencies: %w", err)
+	}
+	if q.getDependenciesByFilesStmt, err = db.PrepareContext(ctx, getDependenciesByFiles); err != nil {
+		return nil, fmt.Errorf("error preparing query GetDependenciesByFiles: %w", err)
 	}
 	if q.getDependenciesByNamesStmt, err = db.PrepareContext(ctx, getDependenciesByNames); err != nil {
 		return nil, fmt.Errorf("error preparing query GetDependenciesByNames: %w", err)
@@ -138,8 +144,17 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.insertUserStmt, err = db.PrepareContext(ctx, insertUser); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertUser: %w", err)
 	}
+	if q.switchReposRelationToSimpleStmt, err = db.PrepareContext(ctx, switchReposRelationToSimple); err != nil {
+		return nil, fmt.Errorf("error preparing query SwitchReposRelationToSimple: %w", err)
+	}
+	if q.switchUsersRelationToSimpleStmt, err = db.PrepareContext(ctx, switchUsersRelationToSimple); err != nil {
+		return nil, fmt.Errorf("error preparing query SwitchUsersRelationToSimple: %w", err)
+	}
 	if q.updateStatusAndUpdatedAtStmt, err = db.PrepareContext(ctx, updateStatusAndUpdatedAt); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateStatusAndUpdatedAt: %w", err)
+	}
+	if q.upsertMissingDependenciesStmt, err = db.PrepareContext(ctx, upsertMissingDependencies); err != nil {
+		return nil, fmt.Errorf("error preparing query UpsertMissingDependencies: %w", err)
 	}
 	if q.upsertRepoToUserByIdStmt, err = db.PrepareContext(ctx, upsertRepoToUserById); err != nil {
 		return nil, fmt.Errorf("error preparing query UpsertRepoToUserById: %w", err)
@@ -197,6 +212,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing deleteRepoURLStmt: %w", cerr)
 		}
 	}
+	if q.deleteUnusedDependenciesStmt != nil {
+		if cerr := q.deleteUnusedDependenciesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteUnusedDependenciesStmt: %w", cerr)
+		}
+	}
 	if q.getAllFilePatternsStmt != nil {
 		if cerr := q.getAllFilePatternsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getAllFilePatternsStmt: %w", cerr)
@@ -225,6 +245,11 @@ func (q *Queries) Close() error {
 	if q.getDependenciesStmt != nil {
 		if cerr := q.getDependenciesStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getDependenciesStmt: %w", cerr)
+		}
+	}
+	if q.getDependenciesByFilesStmt != nil {
+		if cerr := q.getDependenciesByFilesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getDependenciesByFilesStmt: %w", cerr)
 		}
 	}
 	if q.getDependenciesByNamesStmt != nil {
@@ -342,9 +367,24 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing insertUserStmt: %w", cerr)
 		}
 	}
+	if q.switchReposRelationToSimpleStmt != nil {
+		if cerr := q.switchReposRelationToSimpleStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing switchReposRelationToSimpleStmt: %w", cerr)
+		}
+	}
+	if q.switchUsersRelationToSimpleStmt != nil {
+		if cerr := q.switchUsersRelationToSimpleStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing switchUsersRelationToSimpleStmt: %w", cerr)
+		}
+	}
 	if q.updateStatusAndUpdatedAtStmt != nil {
 		if cerr := q.updateStatusAndUpdatedAtStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateStatusAndUpdatedAtStmt: %w", cerr)
+		}
+	}
+	if q.upsertMissingDependenciesStmt != nil {
+		if cerr := q.upsertMissingDependenciesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing upsertMissingDependenciesStmt: %w", cerr)
 		}
 	}
 	if q.upsertRepoToUserByIdStmt != nil {
@@ -405,12 +445,14 @@ type Queries struct {
 	checkGithubUserExistsStmt                  *sql.Stmt
 	checkGithubUserRestIdAuthorEmailExistsStmt *sql.Stmt
 	deleteRepoURLStmt                          *sql.Stmt
+	deleteUnusedDependenciesStmt               *sql.Stmt
 	getAllFilePatternsStmt                     *sql.Stmt
 	getAndUpdateRepoURLStmt                    *sql.Stmt
 	getCommitStmt                              *sql.Stmt
 	getCommitsStmt                             *sql.Stmt
 	getCommitsWithAuthorInfoStmt               *sql.Stmt
 	getDependenciesStmt                        *sql.Stmt
+	getDependenciesByFilesStmt                 *sql.Stmt
 	getDependenciesByNamesStmt                 *sql.Stmt
 	getDependencyStmt                          *sql.Stmt
 	getFirstAndLastCommitStmt                  *sql.Stmt
@@ -434,7 +476,10 @@ type Queries struct {
 	insertGithubRepoStmt                       *sql.Stmt
 	insertRestIdToEmailStmt                    *sql.Stmt
 	insertUserStmt                             *sql.Stmt
+	switchReposRelationToSimpleStmt            *sql.Stmt
+	switchUsersRelationToSimpleStmt            *sql.Stmt
 	updateStatusAndUpdatedAtStmt               *sql.Stmt
+	upsertMissingDependenciesStmt              *sql.Stmt
 	upsertRepoToUserByIdStmt                   *sql.Stmt
 	upsertRepoURLStmt                          *sql.Stmt
 }
@@ -452,12 +497,14 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		checkGithubUserExistsStmt:       q.checkGithubUserExistsStmt,
 		checkGithubUserRestIdAuthorEmailExistsStmt: q.checkGithubUserRestIdAuthorEmailExistsStmt,
 		deleteRepoURLStmt:                          q.deleteRepoURLStmt,
+		deleteUnusedDependenciesStmt:               q.deleteUnusedDependenciesStmt,
 		getAllFilePatternsStmt:                     q.getAllFilePatternsStmt,
 		getAndUpdateRepoURLStmt:                    q.getAndUpdateRepoURLStmt,
 		getCommitStmt:                              q.getCommitStmt,
 		getCommitsStmt:                             q.getCommitsStmt,
 		getCommitsWithAuthorInfoStmt:               q.getCommitsWithAuthorInfoStmt,
 		getDependenciesStmt:                        q.getDependenciesStmt,
+		getDependenciesByFilesStmt:                 q.getDependenciesByFilesStmt,
 		getDependenciesByNamesStmt:                 q.getDependenciesByNamesStmt,
 		getDependencyStmt:                          q.getDependencyStmt,
 		getFirstAndLastCommitStmt:                  q.getFirstAndLastCommitStmt,
@@ -481,7 +528,10 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		insertGithubRepoStmt:                       q.insertGithubRepoStmt,
 		insertRestIdToEmailStmt:                    q.insertRestIdToEmailStmt,
 		insertUserStmt:                             q.insertUserStmt,
+		switchReposRelationToSimpleStmt:            q.switchReposRelationToSimpleStmt,
+		switchUsersRelationToSimpleStmt:            q.switchUsersRelationToSimpleStmt,
 		updateStatusAndUpdatedAtStmt:               q.updateStatusAndUpdatedAtStmt,
+		upsertMissingDependenciesStmt:              q.upsertMissingDependenciesStmt,
 		upsertRepoToUserByIdStmt:                   q.upsertRepoToUserByIdStmt,
 		upsertRepoURLStmt:                          q.upsertRepoURLStmt,
 	}

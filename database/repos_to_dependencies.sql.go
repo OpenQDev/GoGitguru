@@ -199,3 +199,26 @@ func (q *Queries) InitializeRepoDependencies(ctx context.Context, arg Initialize
 	_, err := q.exec(ctx, q.initializeRepoDependenciesStmt, initializeRepoDependencies, arg.Url, pq.Array(arg.Column2))
 	return err
 }
+
+const switchReposRelationToSimple = `-- name: SwitchReposRelationToSimple :exec
+UPDATE users_to_dependencies
+SET dependency_id =  (
+  SELECT internal_id FROM dependencies d1
+WHERE d1.dependency_name  = $1
+)
+WHERE dependency_id IN (
+  SELECT internal_id FROM dependencies d2
+WHERE d2.dependency_name  LIKE $2
+
+)
+`
+
+type SwitchReposRelationToSimpleParams struct {
+	DependencyFile     string `json:"dependency_file"`
+	DependencyFileLike string `json:"dependency_file_like"`
+}
+
+func (q *Queries) SwitchReposRelationToSimple(ctx context.Context, arg SwitchReposRelationToSimpleParams) error {
+	_, err := q.exec(ctx, q.switchReposRelationToSimpleStmt, switchReposRelationToSimple, arg.DependencyFile, arg.DependencyFileLike)
+	return err
+}

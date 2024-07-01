@@ -156,3 +156,26 @@ func (q *Queries) GetUserDependenciesByUser(ctx context.Context, arg GetUserDepe
 	}
 	return items, nil
 }
+
+const switchUsersRelationToSimple = `-- name: SwitchUsersRelationToSimple :exec
+UPDATE users_to_dependencies
+SET dependency_id =  (
+  SELECT internal_id FROM  dependencies  d
+WHERE d.dependency_name  = $1
+)
+WHERE dependency_id IN (
+  SELECT internal_id FROM dependencies  d2
+WHERE d2.dependency_name  LIKE $2
+
+)
+`
+
+type SwitchUsersRelationToSimpleParams struct {
+	DependencyFile     string `json:"dependency_file"`
+	DependencyFileLike string `json:"dependency_file_like"`
+}
+
+func (q *Queries) SwitchUsersRelationToSimple(ctx context.Context, arg SwitchUsersRelationToSimpleParams) error {
+	_, err := q.exec(ctx, q.switchUsersRelationToSimpleStmt, switchUsersRelationToSimple, arg.DependencyFile, arg.DependencyFileLike)
+	return err
+}

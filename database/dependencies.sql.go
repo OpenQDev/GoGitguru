@@ -52,6 +52,20 @@ func (q *Queries) BulkInsertDependencies(ctx context.Context, arg BulkInsertDepe
 	return items, nil
 }
 
+const deleteUnusedDependencies = `-- name: DeleteUnusedDependencies :exec
+DELETE FROM dependencies WHERE dependency_file LIKE $1 AND dependency_file != $2
+`
+
+type DeleteUnusedDependenciesParams struct {
+	DependencyFileLike string `json:"dependency_file_like"`
+	DependencyFile     string `json:"dependency_file"`
+}
+
+func (q *Queries) DeleteUnusedDependencies(ctx context.Context, arg DeleteUnusedDependenciesParams) error {
+	_, err := q.exec(ctx, q.deleteUnusedDependenciesStmt, deleteUnusedDependencies, arg.DependencyFileLike, arg.DependencyFile)
+	return err
+}
+
 const getDependencies = `-- name: GetDependencies :many
 SELECT d.dependency_name,
 d.dependency_file,
@@ -87,6 +101,43 @@ func (q *Queries) GetDependencies(ctx context.Context, url string) ([]GetDepende
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getDependenciesByFiles = `-- name: GetDependenciesByFiles :many
+
+SELECT dependency_name
+FROM dependencies
+WHERE dependency_file LIKE $1
+  AND dependency_file != $2
+GROUP BY dependency_name
+`
+
+type GetDependenciesByFilesParams struct {
+	DependencyFileLike string `json:"dependency_file_like"`
+	DependencyFile     string `json:"dependency_file"`
+}
+
+func (q *Queries) GetDependenciesByFiles(ctx context.Context, arg GetDependenciesByFilesParams) ([]string, error) {
+	rows, err := q.query(ctx, q.getDependenciesByFilesStmt, getDependenciesByFiles, arg.DependencyFileLike, arg.DependencyFile)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var dependency_name string
+		if err := rows.Scan(&dependency_name); err != nil {
+			return nil, err
+		}
+		items = append(items, dependency_name)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err
@@ -138,4 +189,26 @@ func (q *Queries) GetDependency(ctx context.Context, arg GetDependencyParams) (D
 	var i Dependency
 	err := row.Scan(&i.InternalID, &i.DependencyName, &i.DependencyFile)
 	return i, err
+}
+
+const upsertMissingDependencies = `-- name: UpsertMissingDependencies :exec
+
+INSERT INTO dependencies (
+    dependency_name,
+    dependency_file
+) VALUES (
+    unnest($2::text[]), $1
+)
+ON CONFLICT DO NOTHING
+RETURNING internal_id
+`
+
+type UpsertMissingDependenciesParams struct {
+	DependencyFile  string   `json:"dependency_file"`
+	DependencyNames []string `json:"dependency_names"`
+}
+
+func (q *Queries) UpsertMissingDependencies(ctx context.Context, arg UpsertMissingDependenciesParams) error {
+	_, err := q.exec(ctx, q.upsertMissingDependenciesStmt, upsertMissingDependencies, arg.DependencyFile, pq.Array(arg.DependencyNames))
+	return err
 }

@@ -47,3 +47,17 @@ ON CONFLICT (user_id, dependency_id) DO UPDATE
 SET last_use_date = excluded.last_use_date,
 first_use_date = excluded.first_use_date
 RETURNING user_id, dependency_id;
+
+
+-- name: SwitchUsersRelationToSimple :exec
+UPDATE users_to_dependencies
+SET dependency_id =  (
+  SELECT internal_id FROM  dependencies  d
+WHERE d.dependency_name  = sqlc.arg(dependency_file)
+)
+WHERE dependency_id IN (
+  SELECT internal_id FROM dependencies  d2
+WHERE d2.dependency_name  LIKE sqlc.arg(dependency_file_like)
+
+) 
+;

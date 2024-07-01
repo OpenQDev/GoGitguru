@@ -1,0 +1,35 @@
+# .air.toml
+[build]
+# Just plain old shell command. You could use `make` as well.
+cmd = "go build -o ./tmp/main.exe -buildvcs=false ."
+# Binary file yields from `cmd`.
+bin = "tmp/main.exe"
+# Send Interrupt signal before killing process
+send_interrupt = true
+# Give the main goroutine time to shut down gracefully
+kill_delay = 5000
+
+# Excluding these files or directories
+exclude_dir = ["tmp", "repos"]
+
+# These are the default values
+[watch]
+# Directories to watch
+includes = ["."]
+# Watching these filename suffixes
+suffixes = [".go"]
+
+[log]
+# Show log time
+time = false
+
+[color]
+# Customize each part's color. If no color is found, use the default color
+main = "magenta"
+watcher = "cyan"
+build = "yellow"
+runner = "green"
+
+[misc]
+# Delete binary after Air ends
+clean = true

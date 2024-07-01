@@ -90,3 +90,14 @@ WHERE rd.url = $1;
 
 
 
+-- name: SwitchReposRelationToSimple :exec
+UPDATE users_to_dependencies
+SET dependency_id =  (
+  SELECT internal_id FROM dependencies d1
+WHERE d1.dependency_name  = sqlc.arg(dependency_file)
+)
+WHERE dependency_id IN (
+  SELECT internal_id FROM dependencies d2
+WHERE d2.dependency_name  LIKE sqlc.arg(dependency_file_like)
+
+) ;
