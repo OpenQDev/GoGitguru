@@ -84,6 +84,5 @@ func (apiCfg *ApiConfig) HandlerStatus(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 	}
-
 	RespondWithJSON(w, 202, response)
 }

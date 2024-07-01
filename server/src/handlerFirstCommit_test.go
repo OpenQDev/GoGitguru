@@ -21,7 +21,7 @@ func TestHandlerFirstCommit(t *testing.T) {
 	// ARRANGE - GLOBAL
 	env := setup.ExtractAndVerifyEnvironment("../../.env")
 	debugMode := env.Debug
-	ghAccessToken := env.GhAccessToken
+	ghAccessToken := env.GhAccessTokens
 
 	logger.SetDebugMode(debugMode)
 

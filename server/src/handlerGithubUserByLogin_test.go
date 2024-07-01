@@ -22,7 +22,7 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 	// ARRANGE - GLOBAL
 	env := setup.ExtractAndVerifyEnvironment("../../.env")
 	debugMode := env.Debug
-	ghAccessToken := env.GhAccessToken
+	ghAccessToken := env.GhAccessTokens
 	targetLiveGithub := env.TargetLiveGithub
 
 	logger.SetDebugMode(debugMode)

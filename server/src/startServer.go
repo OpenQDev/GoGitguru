@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
-
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 )
@@ -33,6 +32,7 @@ func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
 
 	// REPOSITORY
 	v1Router.Post("/add", apiCfg.HandlerAdd)
+	v1Router.Post("/add-dependency-pattern", apiCfg.HandlerAddDependencyPattern)
 	v1Router.Get("/repos/github/{owner}/{name}", apiCfg.HandlerGithubRepoByOwnerAndName)
 	v1Router.Get("/repos/github/{owner}", apiCfg.HandlerGithubReposByOwner)
 	v1Router.Post("/repos/commits", apiCfg.HandlerRepoCommits)

@@ -17,21 +17,22 @@ RETURNING *;
 UPDATE repo_urls SET status = $1, updated_at = NOW() WHERE url = $2;
 
 -- name: GetReposStatus :many
-SELECT
+SELECT 
     r.url,
     r.status,
     r.updated_at,
     COUNT(DISTINCT c.author_email) FILTER (WHERE g.email IS NULL) AS pending_authors
+
 FROM
     repo_urls r
 LEFT JOIN commits c ON c.repo_url = r.url
 LEFT JOIN github_user_rest_id_author_emails g ON c.author_email = g.email
+
 WHERE
     r.url = ANY($1::text[])
 GROUP BY
-    r.url, r.status
-ORDER BY
-    r.status, r.updated_at DESC;
+    r.url, r.status, r.updated_at
+ORDER BY r.status, r.updated_at DESC;
 
 -- name: GetAndUpdateRepoURL :one
 BEGIN;

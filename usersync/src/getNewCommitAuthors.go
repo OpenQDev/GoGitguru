@@ -8,6 +8,7 @@ import (
 
 func getNewCommitAuthors(db *database.Queries) ([]database.GetLatestUncheckedCommitPerAuthorRow, error) {
 	newCommitAuthorsRaw, err := db.GetLatestUncheckedCommitPerAuthor(context.Background())
+
 	if err != nil {
 		return nil, err
 	}

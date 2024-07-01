@@ -9,7 +9,7 @@ import (
 	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
-func insertGithubUser(author GithubGraphQLAuthor, db *database.Queries) error {
+func insertGithubUser(author GithubGraphQLAuthor, db *database.Queries) (int32, error) {
 	createdAt, err := time.Parse(time.RFC3339, author.User.CreatedAt)
 	if err != nil && !createdAt.IsZero() {
 		logger.LogError("error parsing time: %s", err)
@@ -22,6 +22,5 @@ func insertGithubUser(author GithubGraphQLAuthor, db *database.Queries) error {
 
 	authorParams := convertAuthorToInsertUserParams(author, createdAt, updatedAt)
 
-	_, err = db.InsertUser(context.Background(), authorParams)
-	return err
+	return db.InsertUser(context.Background(), authorParams)
 }

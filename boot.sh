@@ -6,7 +6,7 @@ docker stop gitguru-postgres >/dev/null 2>/dev/null
 docker rm gitguru-postgres >/dev/null 2>/dev/null
 
 POSTGRES_PORT=5432
-APP=${1:-"reposync"}
+APP=${1:-"server"}
 
 # echo "Starting new container: $(docker run --name gitguru-postgres -d -e POSTGRES_HOST_AUTH_METHOD=trust -p $POSTGRES_PORT:5432 -v ./data:/var/lib/postgresql/data postgres)"
 echo "Starting new container: $(docker run --name gitguru-postgres -d -e POSTGRES_HOST_AUTH_METHOD=trust -p $POSTGRES_PORT:5432 postgres)"
@@ -29,5 +29,5 @@ cd ../..
 lsof -ti tcp:8000 | xargs kill
 
 # To install go air, a Go runtime with live reloads on code changes,
-# run the following command: go get -u github.com/cosmtrek/air
+# run the following command: go get -u github.com/air-verse/air
 cd $APP && air -c .air.toml

@@ -4,10 +4,6 @@ SELECT * FROM commits WHERE commit_hash = $1;
 -- name: GetCommits :many
 SELECT * FROM commits;
 
--- name: InsertCommit :one
-INSERT INTO commits (commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, files_changed, repo_url) 
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-RETURNING *;
 
 -- name: GetCommitsWithAuthorInfo :many
 SELECT *
@@ -30,38 +26,26 @@ INSERT INTO commits (
     author_email, 
     author_date, 
     committer_date, 
-    message, 
-    insertions, 
-    deletions, 
+    message,
     files_changed, 
     repo_url
-) VALUES (  
-    unnest($1::varchar[]),  
-    unnest($2::varchar[]),  
-    unnest($3::varchar[]),  
-    unnest($4::bigint[]),  
-    unnest($5::bigint[]),  
-    unnest($6::text[]),  
-    unnest($7::int[]),  
-    unnest($8::int[]),  
-    unnest($9::int[]),  
-    unnest($10::varchar[])  
-) ON CONFLICT (commit_hash, repo_url) DO UPDATE 
-SET 
-    author = EXCLUDED.author,
-    author_email = EXCLUDED.author_email,
-    author_date = EXCLUDED.author_date,
-    committer_date = EXCLUDED.committer_date,
-    message = EXCLUDED.message,
-    insertions = EXCLUDED.insertions,
-    deletions = EXCLUDED.deletions,
-    files_changed = EXCLUDED.files_changed,
-    repo_url = EXCLUDED.repo_url;
+) 
+SELECT
+    unnest(sqlc.arg(commitHashes)::varchar[]),  
+    unnest(sqlc.arg(authors)::varchar[]),  
+    unnest(sqlc.arg(authorEmails)::varchar[]),  
+    unnest(sqlc.arg(authorDates)::bigint[]),  
+    unnest(sqlc.arg(committerDates)::bigint[]),  
+    unnest(sqlc.arg(messages)::text[]),
+    unnest(sqlc.arg(filesChanged)::int[]),  
+    sqlc.arg(repoUrl)
+ON CONFLICT (commit_hash, repo_url) DO NOTHING;
 
 -- name: GetLatestUncheckedCommitPerAuthor :many
 SELECT DISTINCT ON (c.author_email)
 c.commit_hash,
 c.author_email,
+c.author_date,
 c.repo_url
 FROM commits c
 LEFT JOIN github_user_rest_id_author_emails g
@@ -69,19 +53,6 @@ ON c.author_email = g.email
 WHERE g.email IS NULL
 ORDER BY c.author_email, c.author_date DESC;
 
--- name: MultiRowInsertCommits :exec
-INSERT INTO commits (commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, files_changed, repo_url) VALUES (  
-  unnest($1::varchar[]),  
-  unnest($2::varchar[]),  
-  unnest($3::varchar[]),  
-  unnest($4::bigint[]),  
-  unnest($5::bigint[]),  
-  unnest($6::text[]),  
-  unnest($7::int[]),  
-  unnest($8::int[]),  
-  unnest($9::int[]),  
-  unnest($10::varchar[])  
-);
 
 -- name: GetUserCommitsForRepos :many
 WITH commits_cte AS (
@@ -113,3 +84,10 @@ WHERE c.repo_url = $1
 AND gu.login ILIKE $2
 ORDER BY c.author_date ASC
 LIMIT 1;
+
+-- name: GetFirstAndLastCommit :one
+SELECT 
+    MIN(author_date) as first_commit_date,
+    MAX(author_date) as last_commit_date
+FROM commits
+WHERE author_email = $1;

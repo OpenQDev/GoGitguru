@@ -2,11 +2,9 @@
 [build]
 # Just plain old shell command. You could use `make` as well.
 poll = true
-cmd = "go build -o -buildvcs=false ./tmp/main ."
+cmd = "go build -o -buildvcs=false ./tmp/main.exe ."
 # Binary file yields from `cmd`.
-bin = "tmp/main"
-# Customize binary.
-full_bin = "APP_ENV=development APP_USER=air ./tmp/main"
+bin = "tmp/main.exe"
 
 # Excluding these files or directories
 exclude_dir = ["tmp", "repos"]

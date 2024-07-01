@@ -24,3 +24,13 @@ type CommitObject struct {
 	FilesChanged  []int32
 	RepoUrls      []string
 }
+
+type DependencyWithUpdatedTime struct {
+	DependencyName string
+	DependencyFile string
+	UpdatedAt      int64
+	InternalID     int32
+}
+
+const organization = "openqdev"
+const repo = "openq-drm-testrepo"

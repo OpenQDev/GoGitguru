@@ -15,8 +15,8 @@ func getNewCommitAuthorsTestCase1() GetNewCommitAuthorsTestCase {
 		name:        "Test Case 1",
 		shouldError: false,
 		setupMock: func(mock sqlmock.Sqlmock) {
-			rows := sqlmock.NewRows([]string{"author_email", "commit_hash", "repo_url"}).
-				AddRow("andrew@openq.dev", "abc123", "https://github.com/OpenQDev/OpenQ-Workflows")
+			rows := sqlmock.NewRows([]string{"author_email", "commit_hash", "repo_url", "author_date"}).
+				AddRow("andrew@openq.dev", "abc123", 0, "https://github.com/OpenQDev/OpenQ-Workflows")
 			mock.ExpectQuery("^-- name: GetLatestUncheckedCommitPerAuthor :many.*").WillReturnRows(rows)
 		},
 	}

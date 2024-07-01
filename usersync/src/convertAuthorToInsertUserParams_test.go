@@ -51,7 +51,7 @@ func TestConvertAuthorToInsertUserParams(t *testing.T) {
 	// ASSERT
 	assert.Equal(t, int32(93455288), result.GithubRestID)
 	assert.Equal(t, "U_kgDOBZIDuA", result.GithubGraphqlID)
-	assert.Equal(t, "FlacoJones", result.Login)
+	assert.Equal(t, "flacojones", result.Login)
 	assert.Equal(t, "AndrewOBrien", result.Name.String)
 	assert.Equal(t, "", result.Email.String)
 	assert.Equal(t, "https://avatars.githubusercontent.com/u/93455288?u=fd1fb04b6ff2bf397f8353eafffc3bfb4bd66e84\u0026v=4", result.AvatarUrl.String)

@@ -12,7 +12,6 @@ type AuthorCommitTuple struct {
 // Create a map with repoUrl as key and array of authors as value
 func getRepoToAuthorsMap(repoAuthorCommits []UserSync) RepoToAuthorCommitTuples {
 	repoToAuthorCommitTuples := RepoToAuthorCommitTuples{Repos: make(map[string][]AuthorCommitTuple)}
-
 	for _, repoAuthorCommit := range repoAuthorCommits {
 		if repoAuthorCommit.RepoUrl != "" {
 			authorCommitTuple := AuthorCommitTuple{

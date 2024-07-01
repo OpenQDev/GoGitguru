@@ -7,13 +7,17 @@ WORKDIR /app
 # Copy everything from the current directory to the PWD(Present Working Directory) inside the container
 COPY . .
 
-RUN go install github.com/cosmtrek/air@latest
+RUN go install github.com/air-verse/air@latest
 
 RUN git config --global pull.rebase false
 
 RUN git config --global --add safe.directory '*'
 
 RUN git config --system --add safe.directory '*'
+
+# adds default user for git
+RUN git config --global user.email info@openq.dev
+RUN git config --global user.name "OpenQ Default"
 
 # Set the Current Working Directory inside the container to reposync directory
 WORKDIR /app/reposync

@@ -30,7 +30,9 @@ type GithubGraphQLAuthor struct {
 }
 
 type GithubGraphQLCommit struct {
-	Author GithubGraphQLAuthor `json:"author"`
+	Author          GithubGraphQLAuthor `json:"author"`
+	FirstCommitDate int                 `json:"firstCommitDate"`
+	LastCommitDate  int                 `json:"lastCommitDate"`
 }
 
 type GithubGraphQLCommitAuthorsResponse struct {

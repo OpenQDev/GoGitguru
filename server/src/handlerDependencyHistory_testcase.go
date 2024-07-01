@@ -1,6 +1,11 @@
 package server
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/lib/pq"
+)
 
 type HandlerDependencyHistoryTestCase struct {
 	name                              string
@@ -8,6 +13,7 @@ type HandlerDependencyHistoryTestCase struct {
 	expectedStatus                    int
 	requestBody                       DependencyHistoryRequest
 	expectedDependencyHistroyResponse DependencyHistoryResponse
+	setupMock                         func(mock sqlmock.Sqlmock)
 }
 
 func isNotAGitRepository() HandlerDependencyHistoryTestCase {
@@ -16,15 +22,27 @@ func isNotAGitRepository() HandlerDependencyHistoryTestCase {
 	NOT_A_GIT_REPOSITORY := "NOT_A_GIT_REPOSITORY"
 
 	return HandlerDependencyHistoryTestCase{
+
 		name:           NOT_A_GIT_REPOSITORY,
-		shouldError:    true,
-		expectedStatus: http.StatusNotFound,
+		shouldError:    false,
+		expectedStatus: http.StatusOK,
 		requestBody: DependencyHistoryRequest{
 			RepoUrl:            nonExistentRepoUrl,
 			FilePaths:          []string{},
 			DependencySearched: "foo",
 		},
-		expectedDependencyHistroyResponse: DependencyHistoryResponse{},
+		expectedDependencyHistroyResponse: DependencyHistoryResponse{
+			DatesAdded:   []string{},
+			DatesRemoved: []string{},
+		},
+		setupMock: func(mock sqlmock.Sqlmock) {
+			mock.ExpectQuery("-- name: GetRepoDependencies :many").WithArgs("foo", nonExistentRepoUrl, pq.Array([]string{})).WillReturnRows(sqlmock.NewRows([]string{
+				"dependency_name",
+				"first_use_date",
+				"last_use_date",
+			}).AddRow("foo", nil, nil),
+			)
+		},
 	}
 }
 
@@ -43,8 +61,20 @@ func largeFrontend() HandlerDependencyHistoryTestCase {
 			DependencySearched: "ethers",
 		},
 		expectedDependencyHistroyResponse: DependencyHistoryResponse{
-			DatesAdded:   []string{"2021-08-25T13:39:56-05:00"},
+			DatesAdded:   []string{"2021-08-25T19:19:56Z"},
 			DatesRemoved: []string{},
+		},
+		setupMock: func(mock sqlmock.Sqlmock) {
+			// TODO: Changed the date format to BIGINT since that's what it is in the schema first_use_date BIGINT DEFAULT NULL,
+			mockRows := sqlmock.NewRows([]string{
+				"dependency_name",
+				"first_use_date",
+				"last_use_date",
+			}).AddRow("ethers", 1629919196, nil)
+
+			mock.ExpectQuery("^-- name: GetRepoDependencies :many*").
+				WithArgs("ethers", openqFrontend, pq.Array([]string{"package.json", ".config.", ".yaml", ".yml", "truffle", ".toml", "network", "hardhat", "deploy", "go.mod", "composer.json"})).
+				WillReturnRows(mockRows)
 		},
 	}
 }
@@ -64,8 +94,16 @@ func linea() HandlerDependencyHistoryTestCase {
 			DependencySearched: "linea",
 		},
 		expectedDependencyHistroyResponse: DependencyHistoryResponse{
-			DatesAdded:   []string{"2024-04-10T18:40:37-05:00"},
+			DatesAdded:   []string{"2024-05-13T10:20:37Z"},
 			DatesRemoved: []string{},
+		},
+		setupMock: func(mock sqlmock.Sqlmock) {
+			mock.ExpectQuery("^-- name: GetRepoDependencies :many*").WithArgs("linea", linea, pq.Array([]string{"hardhat.config"})).WillReturnRows(sqlmock.NewRows([]string{
+				"dependency_name",
+				"first_use_date",
+				"last_use_date",
+			}).AddRow("linea", 1715595637, nil),
+			)
 		},
 	}
 }
