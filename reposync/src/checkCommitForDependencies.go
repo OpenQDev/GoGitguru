@@ -2,6 +2,7 @@ package reposync
 
 import (
 	"slices"
+	"strings"
 
 	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/OpenQDev/GoGitguru/util/gitutil"
@@ -17,6 +18,15 @@ func CheckCommitForDependencies(c *object.Commit, repoDir string, dependencyHist
 	}
 
 	for _, dependencyFileName := range dependencyFiles {
+
+		// set rawDependencyFileName to the name corresponding to the dependencyFileName
+		rawDependencyFileName := ""
+		for _, rawDependencyFileName = range rawDependencyFiles {
+			if strings.Contains(dependencyFileName, rawDependencyFileName) {
+				break
+			}
+		}
+
 		currentCommitDate := c.Committer.When.Unix()
 		file, err := c.File(dependencyFileName)
 		if err != nil {
@@ -29,18 +39,18 @@ func CheckCommitForDependencies(c *object.Commit, repoDir string, dependencyHist
 		dependencies := ParseFile(file)
 
 		// only handle matching file name
-		if slices.Contains(dependencyHistoryObject.Filenames, dependencyFileName) {
+		if slices.Contains(dependencyHistoryObject.Filenames, rawDependencyFileName) {
 			// should only be package.json
 			dependenciesThatDoExistCurrentlyIndexes := []int{}
 			// iterate over dependencies that exist in this file and commit within this loop we are looking at actual individual dependencies
 			for _, dependency := range dependencies {
 
-				dependencySavedIndex, dependenciesThatDoExistCurrentlyIndexesResult := getPreviousDependenciesInfo(dependencyHistoryObject, dependency, dependencyFileName, *c)
+				dependencySavedIndex, dependenciesThatDoExistCurrentlyIndexesResult := getPreviousDependenciesInfo(dependencyHistoryObject, dependency, rawDependencyFileName, *c)
 				dependenciesThatDoExistCurrentlyIndexes = append(dependenciesThatDoExistCurrentlyIndexes, dependenciesThatDoExistCurrentlyIndexesResult...)
 
 				// handle dependency that doesn't currently exit
 				if dependencySavedIndex == -1 {
-					addRowToDependencyHistoryObject(dependencyHistoryObject, dependency, dependencyFileName, c.Committer.When.Unix())
+					addRowToDependencyHistoryObject(dependencyHistoryObject, dependency, rawDependencyFileName, c.Committer.When.Unix())
 				} else {
 					setDateFirstUsed(dependencyHistoryObject, dependencySavedIndex, *c)
 				}
@@ -51,7 +61,7 @@ func CheckCommitForDependencies(c *object.Commit, repoDir string, dependencyHist
 
 		} else {
 			for _, dependency := range dependencies {
-				addRowToDependencyHistoryObject(dependencyHistoryObject, dependency, dependencyFileName, c.Committer.When.Unix())
+				addRowToDependencyHistoryObject(dependencyHistoryObject, dependency, rawDependencyFileName, c.Committer.When.Unix())
 
 			}
 		}
