@@ -113,6 +113,9 @@ func parseGoMod(file *object.File) ([]string, error) {
 	for _, line := range lines {
 		if strings.HasPrefix(line, "require ") {
 			dep := strings.Fields(line)[1]
+			if dep != `(` && dep != `)` {
+				dependencies = append(dependencies, dep)
+			}
 			dependencies = append(dependencies, dep)
 		}
 	}
