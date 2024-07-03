@@ -125,13 +125,12 @@ func SetDateRemovedTestCases() []SetDateRemovedTestCase {
 }
 
 type GetPreviousDependenciesInfoTestCase struct {
-	name                                    string
-	dependencyHistoryObject                 database.BatchInsertRepoDependenciesParams
-	dependencyName                          string
-	dependencyFileName                      string
-	commit                                  object.Commit
-	dependencySavedIndex                    int
-	dependenciesThatDoExistCurrentlyIndexes []int
+	name                    string
+	dependencyHistoryObject database.BatchInsertRepoDependenciesParams
+	dependencyName          string
+	dependencyFileName      string
+	commit                  object.Commit
+	dependencySavedIndex    int
 }
 
 func dependencyNotExistGetPreviousDependenciesInfoTest() GetPreviousDependenciesInfoTestCase {
@@ -150,10 +149,9 @@ func dependencyNotExistGetPreviousDependenciesInfoTest() GetPreviousDependencies
 				When: time.Unix(1420000000, 0),
 			},
 		},
-		dependencyName:                          "bslint",
-		dependencyFileName:                      "package.json",
-		dependencySavedIndex:                    -1,
-		dependenciesThatDoExistCurrentlyIndexes: []int{},
+		dependencyName:       "bslint",
+		dependencyFileName:   "package.json",
+		dependencySavedIndex: -1,
 	}
 
 	return goodGetPreviousDependenciesInfoTestCase
@@ -175,11 +173,10 @@ func dependencyExistsGetPreviousDependenciesInfoTest() GetPreviousDependenciesIn
 				When: time.Unix(1420000000, 0),
 			},
 		},
-		dependencyName:                          "eslint",
-		dependencyFileName:                      "package.json",
-		dependencySavedIndex:                    0,
-		dependenciesThatDoExistCurrentlyIndexes: []int{0}}
-
+		dependencyName:       "eslint",
+		dependencyFileName:   "package.json",
+		dependencySavedIndex: 0,
+	}
 	return dependencyExistsGetPreviousDependenciesInfoTestCase
 }
 

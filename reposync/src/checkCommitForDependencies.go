@@ -11,57 +11,56 @@ import (
 
 func CheckCommitForDependencies(c *object.Commit, repoDir string, dependencyHistoryObject *database.BatchInsertRepoDependenciesParams, rawDependencyFiles []string) error {
 
-	dependencyFiles, err := gitutil.GitDependencyFiles(repoDir, rawDependencyFiles)
-
+	dependencyFileNamesWithPath, err := gitutil.GitDependencyFiles(repoDir, rawDependencyFiles)
 	if err != nil {
 		return err
 	}
+	// set date removed at start and unset later if necessary
+	setDateRemoved(dependencyHistoryObject, c.Committer.When.Unix())
 
-	for _, dependencyFileName := range dependencyFiles {
+	for _, dependencyFileNameWithPath := range dependencyFileNamesWithPath {
 
-		// set rawDependencyFileName to the name corresponding to the dependencyFileName
-		rawDependencyFileName := ""
-		for _, rawDependencyFileName = range rawDependencyFiles {
-			if strings.Contains(dependencyFileName, rawDependencyFileName) {
+		// set indexableDependencyFileName to the name corresponding to the dependencyFileNameWithPath
+		indexableDependencyFileName := ""
+		for _, indexableDependencyFileName = range rawDependencyFiles {
+			if strings.Contains(dependencyFileNameWithPath, indexableDependencyFileName) {
 				break
 			}
 		}
 
-		currentCommitDate := c.Committer.When.Unix()
-		file, err := c.File(dependencyFileName)
+		file, err := c.File(dependencyFileNameWithPath)
+
 		if err != nil {
 			continue
 		}
 		if file == nil {
 			continue
 		}
-
-		dependencies := ParseFile(file)
+		dependencies := ParseFile(file, indexableDependencyFileName)
 
 		// only handle matching file name
-		if slices.Contains(dependencyHistoryObject.Filenames, rawDependencyFileName) {
-			// should only be package.json
-			dependenciesThatDoExistCurrentlyIndexes := []int{}
+		if slices.Contains(dependencyHistoryObject.Filenames, indexableDependencyFileName) {
+
 			// iterate over dependencies that exist in this file and commit within this loop we are looking at actual individual dependencies
 			for _, dependency := range dependencies {
 
-				dependencySavedIndex, dependenciesThatDoExistCurrentlyIndexesResult := getPreviousDependenciesInfo(dependencyHistoryObject, dependency, rawDependencyFileName, *c)
-				dependenciesThatDoExistCurrentlyIndexes = append(dependenciesThatDoExistCurrentlyIndexes, dependenciesThatDoExistCurrentlyIndexesResult...)
+				dependencySavedIndex := getPreviousDependenciesInfo(dependencyHistoryObject, dependency, indexableDependencyFileName, *c)
 
 				// handle dependency that doesn't currently exit
 				if dependencySavedIndex == -1 {
-					addRowToDependencyHistoryObject(dependencyHistoryObject, dependency, rawDependencyFileName, c.Committer.When.Unix())
+					addRowToDependencyHistoryObject(dependencyHistoryObject, dependency, indexableDependencyFileName, c.Committer.When.Unix())
 				} else {
 					setDateFirstUsed(dependencyHistoryObject, dependencySavedIndex, *c)
+
+					dependencyHistoryObject.Lastusedates[dependencySavedIndex] = 0
 				}
 
 			}
 
-			setDateRemoved(dependencyHistoryObject, dependenciesThatDoExistCurrentlyIndexes, currentCommitDate)
-
 		} else {
+			// handle new file
 			for _, dependency := range dependencies {
-				addRowToDependencyHistoryObject(dependencyHistoryObject, dependency, rawDependencyFileName, c.Committer.When.Unix())
+				addRowToDependencyHistoryObject(dependencyHistoryObject, dependency, indexableDependencyFileName, c.Committer.When.Unix())
 
 			}
 		}

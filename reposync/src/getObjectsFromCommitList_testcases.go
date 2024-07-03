@@ -2,7 +2,7 @@ package reposync
 
 import (
 	"database/sql"
-	"time"
+	"path/filepath"
 
 	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -21,19 +21,19 @@ type GetObjectsFromCommitListTestCase struct {
 	usersToRepoUrl             UsersToRepoUrl
 }
 
-func makeCommitByReference(hashString string, author string, authorEmail string) *object.Commit {
-	hash := plumbing.NewHash(hashString)
-	return &object.Commit{
-		Hash: hash,
-		Author: object.Signature{
-			Name:  author,
-			Email: authorEmail,
-			When:  time.Unix(12312381240, 0),
-		},
-		Committer: object.Signature{
-			When: time.Unix(12318351240, 0),
-		},
+func makeCommitByReference(hashString string, author string, authorEmail string, index int) *object.Commit {
+
+	repoDir := filepath.Join("mock", organization, repo)
+	commitList, err := CreateCommitList(repoDir)
+	if err != nil {
+		panic(err)
 	}
+	commit := commitList[index]
+	commit.Hash = plumbing.NewHash(hashString)
+	commit.Author.Name = author
+	commit.Author.Email = authorEmail
+	return commit
+
 }
 
 func validGetObjectsFromCommitListTest() GetObjectsFromCommitListTestCase {
@@ -45,11 +45,18 @@ func validGetObjectsFromCommitListTest() GetObjectsFromCommitListTestCase {
 		LastUseDate:    sql.NullInt64{Int64: 0, Valid: true},
 	}
 	goodGetObjectsFromCommitListTestCase := GetObjectsFromCommitListTestCase{
+
 		name: THREE_COMMITS,
+		params: GitLogParams{
+			prefixPath:   "mock",
+			organization: organization,
+			repo:         repo,
+			repoUrl:      "repoUrl",
+		},
 		commitList: []*object.Commit{
-			makeCommitByReference("09442fceb096a56226fb528368ddf971e776057f", "DRM-Test-User", "150183211+DRM-Test-User@users.noreply.github.com"),
-			makeCommitByReference("a7ce99317e5347735ec5349f303c7036cd007d94", "DRM-Test-User", "150183211+DRM-Test-User@users.noreply.github.com"),
-			makeCommitByReference("32f8b288406652840a600e18d562a51661d64d99", "DRM-Test-User", "info@openq.dev"),
+			makeCommitByReference("09442fceb096a56226fb528368ddf971e776057f", "DRM-Test-User", "150183211+DRM-Test-User@users.noreply.github.com", 0),
+			makeCommitByReference("a7ce99317e5347735ec5349f303c7036cd007d94", "DRM-Test-User", "150183211+DRM-Test-User@users.noreply.github.com", 1),
+			makeCommitByReference("32f8b288406652840a600e18d562a51661d64d99", "DRM-Test-User", "info@openq.dev", 2),
 		},
 		numberOfCommits: 2,
 		currentDependencies: []database.GetRepoDependenciesByURLRow{
@@ -74,11 +81,11 @@ func validGetObjectsFromCommitListTest() GetObjectsFromCommitListTestCase {
 			"foundry.toml",
 		},
 		bulkInsertDependencyParams: database.BatchInsertRepoDependenciesParams{
-			Url:             "",
-			Filenames:       []string{"package.json"},
-			Dependencynames: []string{"eslint"},
-			Firstusedates:   []int64{1620000000},
-			Lastusedates:    []int64{0},
+			Url:             "repoUrl",
+			Filenames:       []string{"package.json", "package.json"},
+			Dependencynames: []string{"eslint", "web3"},
+			Firstusedates:   []int64{1620000000, 1699383684},
+			Lastusedates:    []int64{1699384512, 0},
 			UpdatedAt: sql.NullInt64{
 				Int64: 1609459200,
 				Valid: true,
@@ -86,8 +93,8 @@ func validGetObjectsFromCommitListTest() GetObjectsFromCommitListTestCase {
 		},
 		bulkInsertCommitsParams: database.BulkInsertCommitsParams{
 			Commithashes: []string{
-				"09442fceb096a56226fb528368ddf971e776057f",
 				"a7ce99317e5347735ec5349f303c7036cd007d94",
+				"32f8b288406652840a600e18d562a51661d64d99",
 			},
 			Authors: []string{
 				"DRM-Test-User",
@@ -95,21 +102,21 @@ func validGetObjectsFromCommitListTest() GetObjectsFromCommitListTestCase {
 			},
 			Authoremails: []string{
 				"150183211+DRM-Test-User@users.noreply.github.com",
-				"150183211+DRM-Test-User@users.noreply.github.com",
+				"info@openq.dev",
 			},
-			Authordates:    []int64{12312381240, 12312381240},
-			Committerdates: []int64{12318351240, 12318351240},
-			Messages:       []string{"", ""},
+			Authordates:    []int64{1699383684, 1699384512},
+			Committerdates: []int64{1699383684, 1699384512},
+			Messages:       []string{"Create package.json", "Create BigFile.json"},
 			Fileschanged:   []int32{0, 0},
 			Repourl: sql.NullString{
-				String: "",
+				String: "repoUrl",
 				Valid:  true,
 			},
 		},
 		usersToRepoUrl: UsersToRepoUrl{
-			AuthorEmails:     []string{"150183211+DRM-Test-User@users.noreply.github.com"},
-			FirstCommitDates: []int64{12312381240},
-			LastCommitDates:  []int64{12312381240},
+			AuthorEmails:     []string{"150183211+DRM-Test-User@users.noreply.github.com", "info@openq.dev"},
+			FirstCommitDates: []int64{1699383684, 1699384512},
+			LastCommitDates:  []int64{1699383684, 1699384512},
 		},
 	}
 

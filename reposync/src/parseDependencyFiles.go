@@ -382,10 +382,10 @@ func parseBlockChains(file *object.File) ([]string, error) {
 
 }
 
-func ParseFile(file *object.File) []string {
+func ParseFile(file *object.File, dependencyFileName string) []string {
 	dependencies := []string{}
 	errors := []error{}
-	switch file.Name {
+	switch dependencyFileName {
 	case "Pipfile":
 		myDependencies, err := parsePipfile(file)
 		dependencies = append(dependencies, myDependencies...)

@@ -65,7 +65,7 @@ func TestSetDateRemoved(t *testing.T) {
 			), tt.name)
 
 			// ACT
-			setDateRemoved(&tt.dependencyHistoryObject, tt.dependenciesThatDoExistCurrentlyIndexes, tt.commit.Committer.When.Unix())
+			setDateRemoved(&tt.dependencyHistoryObject, tt.commit.Committer.When.Unix())
 
 			assert.Equal(t, tt.expectedResult, tt.dependencyHistoryObject)
 
@@ -86,10 +86,9 @@ func TestGetPreviousDependenciesInfo(t *testing.T) {
 			), tt.name)
 
 			// ACT
-			dependencySavedIndex, dependenciesThatDoExistCurrentlyIndexes := getPreviousDependenciesInfo(&tt.dependencyHistoryObject, tt.dependencyName, tt.dependencyFileName, tt.commit)
+			dependencySavedIndex := getPreviousDependenciesInfo(&tt.dependencyHistoryObject, tt.dependencyName, tt.dependencyFileName, tt.commit)
 
 			assert.Equal(t, tt.dependencySavedIndex, dependencySavedIndex)
-			assert.Equal(t, tt.dependenciesThatDoExistCurrentlyIndexes, dependenciesThatDoExistCurrentlyIndexes)
 
 		})
 	}

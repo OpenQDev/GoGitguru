@@ -1,8 +1,6 @@
 package reposync
 
 import (
-	"slices"
-
 	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
@@ -16,10 +14,10 @@ type DependencyToAdd struct {
 
 // a file of helpers that mutate dependencyHistoryObject within checkCommitForDependencies.go
 
-func getPreviousDependenciesInfo(dependencyHistoryObject *database.BatchInsertRepoDependenciesParams, currentDependency string, currentDependencyFile string, commit object.Commit) (int, []int) {
+// finds where current dependencies sit in the dependencyHistoryObject
+func getPreviousDependenciesInfo(dependencyHistoryObject *database.BatchInsertRepoDependenciesParams, currentDependency string, currentDependencyFile string, commit object.Commit) int {
 	dependencySavedIndex := -1
 
-	dependenciesThatDoExistCurrentlyIndexes := []int{}
 	for savedDependencyNameIndex, savedDependencyName := range dependencyHistoryObject.Dependencynames {
 		// only filename at matching index
 		for savedDependencyFileNameIndex, savedDependencyFileName := range dependencyHistoryObject.Filenames {
@@ -28,17 +26,13 @@ func getPreviousDependenciesInfo(dependencyHistoryObject *database.BatchInsertRe
 			indexIsCorrect := savedDependencyNameIndex == savedDependencyFileNameIndex
 			if fileNameIsCorrect && dependencyNameIsCorrect && indexIsCorrect {
 				// set for outside of loop
-				dependenciesThatDoExistCurrentlyIndexes = append(dependenciesThatDoExistCurrentlyIndexes, savedDependencyNameIndex)
-				dependencySavedIndex = savedDependencyNameIndex
-				//also clear lastRemovedDate
-				if commit.Committer.When.Unix() > dependencyHistoryObject.Lastusedates[savedDependencyNameIndex] {
 
-					dependencyHistoryObject.Lastusedates[savedDependencyNameIndex] = 0
-				}
+				dependencySavedIndex = savedDependencyNameIndex
+
 			}
 		}
 	}
-	return dependencySavedIndex, dependenciesThatDoExistCurrentlyIndexes
+	return dependencySavedIndex
 }
 func addRowToDependencyHistoryObject(dependencyHistoryObject *database.BatchInsertRepoDependenciesParams, currentDependency string, currentDependencyFile string, firstUseDate int64) {
 	dependencyHistoryObject.Filenames = append(dependencyHistoryObject.Filenames, currentDependencyFile)
@@ -47,14 +41,12 @@ func addRowToDependencyHistoryObject(dependencyHistoryObject *database.BatchInse
 	dependencyHistoryObject.Lastusedates = append(dependencyHistoryObject.Lastusedates, 0)
 }
 
-func setDateRemoved(dependencyHistoryObject *database.BatchInsertRepoDependenciesParams, dependenciesThatDoExistCurrentlyIndexes []int, currentCommitDate int64) {
-	for savedDependencyIndex := range dependencyHistoryObject.Dependencynames {
-		if !slices.Contains(dependenciesThatDoExistCurrentlyIndexes, savedDependencyIndex) {
-			currentRemovedDate := dependencyHistoryObject.Lastusedates[savedDependencyIndex]
+func setDateRemoved(dependencyHistoryObject *database.BatchInsertRepoDependenciesParams, currentCommitDate int64) {
 
-			if currentRemovedDate < currentCommitDate || currentRemovedDate == 0 {
-				dependencyHistoryObject.Lastusedates[savedDependencyIndex] = currentCommitDate
-			}
+	for savedDependencyIndex := range dependencyHistoryObject.Dependencynames {
+		currentRemovedDate := dependencyHistoryObject.Lastusedates[savedDependencyIndex]
+		if currentRemovedDate < currentCommitDate || currentRemovedDate == 0 {
+			dependencyHistoryObject.Lastusedates[savedDependencyIndex] = currentCommitDate
 		}
 
 	}

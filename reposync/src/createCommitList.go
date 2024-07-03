@@ -1,6 +1,8 @@
 package reposync
 
 import (
+	"slices"
+
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
@@ -19,6 +21,8 @@ func CreateCommitList(repoDir string) ([]*object.Commit, error) {
 		commitList = append(commitList, c)
 		return nil
 	})
-	// we want to look at commits from newest to oldest
+
+	// we want to look at commits from oldest  to newest
+	slices.Reverse(commitList)
 	return commitList, err
 }

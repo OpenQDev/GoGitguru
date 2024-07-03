@@ -2,6 +2,7 @@ package reposync
 
 import (
 	"database/sql"
+	"fmt"
 	"path/filepath"
 
 	"github.com/OpenQDev/GoGitguru/database"
@@ -19,6 +20,7 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 	// sync this from the db
 
 	repoDir := filepath.Join(params.prefixPath, params.organization, params.repo)
+	fmt.Println("GetObjectsFromCommitList", repoDir)
 	dependencyHistoryObject := database.BatchInsertRepoDependenciesParams{
 		Url:             params.repoUrl,
 		Firstusedates:   []int64{},
@@ -55,20 +57,18 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 
 	var err error
 	// start from first commit that hasn't been synced
-	for commitCount, commit := range commitList {
-		if commitCount >= numberOfCommits {
-			println("commit count is greater than or equal to number of commits check", commitCount, numberOfCommits)
-			break
-		}
-		if commitCount < numberOfCommits {
-			if commitCount%commitWindow == 0 {
+	firstViewableCommitIndex := len(commitList) - numberOfCommits
+	for commitIndex, commit := range commitList {
+
+		if commitIndex >= firstViewableCommitIndex {
+			if commitIndex%commitWindow == 0 {
 				err = CheckCommitForDependencies(commit, repoDir, &dependencyHistoryObject, dependencyFiles)
 				if err != nil {
 					return dependencyHistoryObject, commitObject, usersToRepoUrl, 0, err
 				}
 			}
 
-			AddCommitToCommitObject(commit, &commitObject, commitCount)
+			AddCommitToCommitObject(commit, &commitObject, commitIndex)
 
 			AddFirstLastCommitDateByEmail(&usersToRepoUrl, commit)
 
