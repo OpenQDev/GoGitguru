@@ -45,8 +45,8 @@ func (apiCfg *ApiConfig) HandlerStatus(w http.ResponseWriter, r *http.Request) {
 	for _, repoStatus := range repoStatuses {
 		if slices.Contains(body.RepoUrls, repoStatus.Url) {
 			// check if updatedAt is more than 1 day ago
-			oneDayAgo := time.Now().AddDate(0, 0, -1)
-			if repoStatus.UpdatedAt.Time.Before(oneDayAgo) {
+			twelveHoursAgo := time.Now().Add(-12 * time.Hour)
+			if repoStatus.UpdatedAt.Time.Before(twelveHoursAgo) {
 				response = append(response, HandlerStatusResponse{
 					Url:            repoStatus.Url,
 					Status:         "outdated",
