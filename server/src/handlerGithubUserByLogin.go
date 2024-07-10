@@ -23,19 +23,9 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 
 	login := chi.URLParam(r, "login")
 
-	internal_id, err := apiConfig.DB.CheckGithubUserExists(context.Background(), login)
-	if err != nil {
-		RespondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if internal_id != 0 {
-		user, err := apiConfig.DB.GetGithubUser(context.Background(), login)
-		if err != nil {
-			RespondWithError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		RespondWithJSON(w, http.StatusOK, ConvertToReturnUser(ConvertDatabaseInsertUserParamsToServerUser(user)))
+	dbUser, err := apiConfig.DB.GetGithubUser(context.Background(), login)
+	if err == nil {
+		RespondWithJSON(w, http.StatusOK, ConvertToReturnUser(ConvertDatabaseInsertUserParamsToServerUser(dbUser)))
 		return
 	}
 
