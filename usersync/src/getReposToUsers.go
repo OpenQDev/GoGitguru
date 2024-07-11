@@ -34,8 +34,18 @@ func GetReposToUsers(db *database.Queries, UpsertRepoToUserByIdParams *database.
 
 	if !alreadySet {
 		UpsertRepoToUserByIdParams.InternalIds = append(UpsertRepoToUserByIdParams.InternalIds, internal_id)
-		UpsertRepoToUserByIdParams.LastCommitDates = append(UpsertRepoToUserByIdParams.LastCommitDates, userCommits.LastCommitDate.(int64))
-		UpsertRepoToUserByIdParams.FirstCommitDates = append(UpsertRepoToUserByIdParams.FirstCommitDates, userCommits.FirstCommitDate.(int64))
+
+		newLastCommitDate, ok := userCommits.LastCommitDate.(int64)
+		if !ok {
+			newLastCommitDate = 0
+		}
+
+		newFirstCommitDate, ok := userCommits.FirstCommitDate.(int64)
+		if !ok {
+			newFirstCommitDate = 0
+		}
+		UpsertRepoToUserByIdParams.LastCommitDates = append(UpsertRepoToUserByIdParams.LastCommitDates, newLastCommitDate)
+		UpsertRepoToUserByIdParams.FirstCommitDates = append(UpsertRepoToUserByIdParams.FirstCommitDates, newFirstCommitDate)
 	}
 	return err
 }
