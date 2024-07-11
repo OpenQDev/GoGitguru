@@ -49,7 +49,7 @@ func TestHandlerDependencyHistory(t *testing.T) {
 			apiCfg.HandlerDependencyHistory(rr, req)
 
 			// ARRANGE - EXPECT
-			var actualDependencyHistroyResponse DependencyHistoryResponse
+			var actualDependencyHistroyResponse []DependencyHistoryResponseMember
 			err := json.NewDecoder(rr.Body).Decode(&actualDependencyHistroyResponse)
 			if err != nil {
 				t.Errorf("Failed to decode rr.Body into DependencyHistoryResponse: %s", err)
@@ -62,7 +62,7 @@ func TestHandlerDependencyHistory(t *testing.T) {
 				return
 			}
 
-			assert.Equal(t, tt.expectedDependencyHistroyResponse, actualDependencyHistroyResponse)
+			assert.Equal(t, tt.expectedDependencyHistroyResponse, actualDependencyHistroyResponse[0])
 		})
 	}
 }

@@ -2,7 +2,6 @@ package reposync
 
 import (
 	"database/sql"
-	"fmt"
 	"path/filepath"
 
 	"github.com/OpenQDev/GoGitguru/database"
@@ -20,7 +19,6 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 	// sync this from the db
 
 	repoDir := filepath.Join(params.prefixPath, params.organization, params.repo)
-	fmt.Println("GetObjectsFromCommitList", repoDir)
 	dependencyHistoryObject := database.BatchInsertRepoDependenciesParams{
 		Url:             params.repoUrl,
 		Firstusedates:   []int64{},
