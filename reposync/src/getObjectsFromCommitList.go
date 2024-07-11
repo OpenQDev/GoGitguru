@@ -27,13 +27,13 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 		Filenames:       []string{},
 		UpdatedAt:       sql.NullInt64{Int64: lib.Now().Unix(), Valid: true},
 	}
-	/*
-		for _, dep := range currentDependencies {
-			dependencyHistoryObject.Dependencynames = append(dependencyHistoryObject.Dependencynames, dep.DependencyName)
-			dependencyHistoryObject.Filenames = append(dependencyHistoryObject.Filenames, dep.DependencyFile)
-			dependencyHistoryObject.Firstusedates = append(dependencyHistoryObject.Firstusedates, dep.FirstUseDate.Int64)
-			dependencyHistoryObject.Lastusedates = append(dependencyHistoryObject.Lastusedates, dep.LastUseDate.Int64)
-		}*/
+
+	for _, dep := range currentDependencies {
+		dependencyHistoryObject.Dependencynames = append(dependencyHistoryObject.Dependencynames, dep.DependencyName)
+		dependencyHistoryObject.Filenames = append(dependencyHistoryObject.Filenames, dep.DependencyFile)
+		dependencyHistoryObject.Firstusedates = append(dependencyHistoryObject.Firstusedates, dep.FirstUseDate.Int64)
+		dependencyHistoryObject.Lastusedates = append(dependencyHistoryObject.Lastusedates, dep.LastUseDate.Int64)
+	}
 	commitWindow := GetCommitWindow(len(commitList))
 
 	usersToRepoUrl := UsersToRepoUrl{

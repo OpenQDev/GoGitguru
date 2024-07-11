@@ -3,7 +3,6 @@ package reposync
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"strings"
 	"time"
 
@@ -77,8 +76,7 @@ func StartSyncingCommits(
 			latestCommitterDateTime := time.Unix(int64(latestCommitterDate), 0)
 			// Unsure why but sometimes commits before JAN_1_2020 were being stored after initia clone-sync, causing issues
 			if latestCommitterDateTime.After(JAN_1_2020) {
-				//		startDate = latestCommitterDateTime
-				fmt.Println("temporarily reverting to getting all commits")
+				startDate = latestCommitterDateTime
 			}
 
 			err = ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db)
