@@ -50,6 +50,7 @@ func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
 	// MISCELLANEOUS
 	v1Router.Get("/get-next-repo-url", apiCfg.HandlerGetNextRepoUrl)
 	v1Router.Post("/first-commit", apiCfg.HandlerFirstCommit)
+	v1Router.Post("/repo-latest-commit", apiCfg.HandlerGetRepoLatestCommit)
 
 	// Mounting sub-router "v1Router" to the primary router "router" so CORS applies to all routes
 	router.Mount("/", v1Router)

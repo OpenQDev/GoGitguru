@@ -142,6 +142,11 @@ type GithubUserRestIDAuthorEmail struct {
 	Email  string `json:"email"`
 }
 
+type RepoLatestCommit struct {
+	RepoName          string    `json:"repo_name"`
+	LastPushEventTime time.Time `json:"last_push_event_time"`
+}
+
 type RepoUrl struct {
 	Url       string       `json:"url"`
 	Status    RepoStatus   `json:"status"`
