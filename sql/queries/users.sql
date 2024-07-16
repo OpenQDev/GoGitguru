@@ -23,9 +23,12 @@ INSERT INTO github_users (
 )
 RETURNING internal_id;
 
--- name: CheckGithubUserExists :one
+-- name: CheckGithubUserId :one
 SELECT internal_id FROM github_users WHERE login = $1
 LIMIT 1;
+
+-- name: CheckGithubUserExists :one
+SELECT EXISTS(SELECT 1 FROM github_users WHERE login = $1);
 
 -- name: GetGithubUserByCommitEmail :many
 SELECT gu.internal_id, array_agg(DISTINCT gure.email)::text[] AS emails FROM github_users gu

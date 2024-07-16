@@ -45,6 +45,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.checkGithubUserExistsStmt, err = db.PrepareContext(ctx, checkGithubUserExists); err != nil {
 		return nil, fmt.Errorf("error preparing query CheckGithubUserExists: %w", err)
 	}
+	if q.checkGithubUserIdStmt, err = db.PrepareContext(ctx, checkGithubUserId); err != nil {
+		return nil, fmt.Errorf("error preparing query CheckGithubUserId: %w", err)
+	}
 	if q.checkGithubUserRestIdAuthorEmailExistsStmt, err = db.PrepareContext(ctx, checkGithubUserRestIdAuthorEmailExists); err != nil {
 		return nil, fmt.Errorf("error preparing query CheckGithubUserRestIdAuthorEmailExists: %w", err)
 	}
@@ -200,6 +203,11 @@ func (q *Queries) Close() error {
 	if q.checkGithubUserExistsStmt != nil {
 		if cerr := q.checkGithubUserExistsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing checkGithubUserExistsStmt: %w", cerr)
+		}
+	}
+	if q.checkGithubUserIdStmt != nil {
+		if cerr := q.checkGithubUserIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing checkGithubUserIdStmt: %w", cerr)
 		}
 	}
 	if q.checkGithubUserRestIdAuthorEmailExistsStmt != nil {
@@ -443,6 +451,7 @@ type Queries struct {
 	bulkUpsertFilePatternsStmt                 *sql.Stmt
 	checkGithubRepoExistsStmt                  *sql.Stmt
 	checkGithubUserExistsStmt                  *sql.Stmt
+	checkGithubUserIdStmt                      *sql.Stmt
 	checkGithubUserRestIdAuthorEmailExistsStmt *sql.Stmt
 	deleteRepoURLStmt                          *sql.Stmt
 	deleteUnusedDependenciesStmt               *sql.Stmt
@@ -495,6 +504,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		bulkUpsertFilePatternsStmt:      q.bulkUpsertFilePatternsStmt,
 		checkGithubRepoExistsStmt:       q.checkGithubRepoExistsStmt,
 		checkGithubUserExistsStmt:       q.checkGithubUserExistsStmt,
+		checkGithubUserIdStmt:           q.checkGithubUserIdStmt,
 		checkGithubUserRestIdAuthorEmailExistsStmt: q.checkGithubUserRestIdAuthorEmailExistsStmt,
 		deleteRepoURLStmt:                          q.deleteRepoURLStmt,
 		deleteUnusedDependenciesStmt:               q.deleteUnusedDependenciesStmt,

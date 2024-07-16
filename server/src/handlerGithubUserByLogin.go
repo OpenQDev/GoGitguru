@@ -64,7 +64,7 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 	RespondWithJSON(w, http.StatusOK, ConvertToReturnUser(user))
 }
 func ConvertToReturnUser(user User) ReturnUser {
-	return ReturnUser{
+	returnUser := ReturnUser{
 		InternalID:      user.InternalID,
 		GithubRestID:    user.GithubRestID,
 		GithubGraphqlID: user.GithubGraphqlID,
@@ -84,4 +84,5 @@ func ConvertToReturnUser(user User) ReturnUser {
 		CreatedAt:       user.CreatedAt,
 		UpdatedAt:       user.UpdatedAt,
 	}
+	return returnUser
 }

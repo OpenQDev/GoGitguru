@@ -13,12 +13,23 @@ import (
 )
 
 const checkGithubUserExists = `-- name: CheckGithubUserExists :one
+SELECT EXISTS(SELECT 1 FROM github_users WHERE login = $1)
+`
+
+func (q *Queries) CheckGithubUserExists(ctx context.Context, login string) (bool, error) {
+	row := q.queryRow(ctx, q.checkGithubUserExistsStmt, checkGithubUserExists, login)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const checkGithubUserId = `-- name: CheckGithubUserId :one
 SELECT internal_id FROM github_users WHERE login = $1
 LIMIT 1
 `
 
-func (q *Queries) CheckGithubUserExists(ctx context.Context, login string) (int32, error) {
-	row := q.queryRow(ctx, q.checkGithubUserExistsStmt, checkGithubUserExists, login)
+func (q *Queries) CheckGithubUserId(ctx context.Context, login string) (int32, error) {
+	row := q.queryRow(ctx, q.checkGithubUserIdStmt, checkGithubUserId, login)
 	var internal_id int32
 	err := row.Scan(&internal_id)
 	return internal_id, err
