@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
 
@@ -21,11 +22,21 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 		return
 	}
 
-	login := chi.URLParam(r, "login")
+	login := strings.ToLower(chi.URLParam(r, "login"))
 
-	dbUser, err := apiConfig.DB.GetGithubUser(context.Background(), login)
-	if err == nil {
-		RespondWithJSON(w, http.StatusOK, ConvertToReturnUser(ConvertDatabaseInsertUserParamsToServerUser(dbUser)))
+	userExists, err := apiConfig.DB.CheckGithubUserExists(context.Background(), login)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if userExists {
+		user, err := apiConfig.DB.GetGithubUser(context.Background(), login)
+		if err != nil {
+			RespondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		RespondWithJSON(w, http.StatusOK, ConvertToReturnUser(ConvertDatabaseInsertUserParamsToServerUser(user)))
 		return
 	}
 
@@ -46,10 +57,15 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusNotFound {
+		RespondWithError(w, http.StatusNotFound, "GitHub user not found.")
+		return
+	}
+
 	var user User
 	err = marshaller.ReaderToType(resp.Body, &user)
 	if err != nil {
-		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to decode response.: %s", err))
+		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to decode response: %s", err))
 		return
 	}
 
@@ -64,7 +80,7 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 	RespondWithJSON(w, http.StatusOK, ConvertToReturnUser(user))
 }
 func ConvertToReturnUser(user User) ReturnUser {
-	returnUser := ReturnUser{
+	return ReturnUser{
 		InternalID:      user.InternalID,
 		GithubRestID:    user.GithubRestID,
 		GithubGraphqlID: user.GithubGraphqlID,
@@ -84,5 +100,4 @@ func ConvertToReturnUser(user User) ReturnUser {
 		CreatedAt:       user.CreatedAt,
 		UpdatedAt:       user.UpdatedAt,
 	}
-	return returnUser
 }
