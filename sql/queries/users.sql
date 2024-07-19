@@ -22,7 +22,7 @@ INSERT INTO github_users (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
 )
 RETURNING internal_id
-ON CONFLICT (login) DO UPDATE
+ON CONFLICT (github_rest_id) DO UPDATE
 SET
     github_rest_id = $1,
     github_graphql_id = $2,
