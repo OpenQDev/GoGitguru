@@ -23,16 +23,15 @@ func (q *Queries) CheckGithubUserExists(ctx context.Context, login string) (bool
 	return exists, err
 }
 
-const checkGithubUserId = `-- name: CheckGithubUserId :one
-SELECT internal_id FROM github_users WHERE login = $1
-LIMIT 1
+const checkGithubUserIdExists = `-- name: CheckGithubUserIdExists :one
+SELECT EXISTS(SELECT 1 FROM github_users WHERE github_rest_id = $1)
 `
 
-func (q *Queries) CheckGithubUserId(ctx context.Context, login string) (int32, error) {
-	row := q.queryRow(ctx, q.checkGithubUserIdStmt, checkGithubUserId, login)
-	var internal_id int32
-	err := row.Scan(&internal_id)
-	return internal_id, err
+func (q *Queries) CheckGithubUserIdExists(ctx context.Context, githubRestID int32) (bool, error) {
+	row := q.queryRow(ctx, q.checkGithubUserIdExistsStmt, checkGithubUserIdExists, githubRestID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }
 
 const getGithubUser = `-- name: GetGithubUser :one
@@ -112,7 +111,7 @@ func (q *Queries) GetGroupOfEmails(ctx context.Context, dollar_1 []int32) (int32
 	return github_rest_id, err
 }
 
-const insertUser = `-- name: InsertUser :one
+const insertUser = `-- name: InsertUser :exec
 
 INSERT INTO github_users (
     github_rest_id,
@@ -135,7 +134,24 @@ INSERT INTO github_users (
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
 )
-RETURNING internal_id
+ON CONFLICT (github_rest_id) DO UPDATE
+SET
+    github_graphql_id = EXCLUDED.github_graphql_id,
+    login = EXCLUDED.login,
+    name = EXCLUDED.name,
+    email = EXCLUDED.email,
+    avatar_url = EXCLUDED.avatar_url,
+    company = EXCLUDED.company,
+    location = EXCLUDED.location,
+    bio = EXCLUDED.bio,
+    blog = EXCLUDED.blog,
+    hireable = EXCLUDED.hireable,
+    twitter_username = EXCLUDED.twitter_username,
+    followers = EXCLUDED.followers,
+    following = EXCLUDED.following,
+    type = EXCLUDED.type,
+    created_at = EXCLUDED.created_at,
+    updated_at = EXCLUDED.updated_at
 `
 
 type InsertUserParams struct {
@@ -158,8 +174,8 @@ type InsertUserParams struct {
 	UpdatedAt       sql.NullTime   `json:"updated_at"`
 }
 
-func (q *Queries) InsertUser(ctx context.Context, arg InsertUserParams) (int32, error) {
-	row := q.queryRow(ctx, q.insertUserStmt, insertUser,
+func (q *Queries) InsertUser(ctx context.Context, arg InsertUserParams) error {
+	_, err := q.exec(ctx, q.insertUserStmt, insertUser,
 		arg.GithubRestID,
 		arg.GithubGraphqlID,
 		arg.Login,
@@ -178,7 +194,5 @@ func (q *Queries) InsertUser(ctx context.Context, arg InsertUserParams) (int32, 
 		arg.CreatedAt,
 		arg.UpdatedAt,
 	)
-	var internal_id int32
-	err := row.Scan(&internal_id)
-	return internal_id, err
+	return err
 }

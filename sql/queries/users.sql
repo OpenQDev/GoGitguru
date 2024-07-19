@@ -1,4 +1,4 @@
--- name: InsertUser :one
+-- name: InsertUser :exec
 
 INSERT INTO github_users (
     github_rest_id,
@@ -21,30 +21,28 @@ INSERT INTO github_users (
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
 )
-RETURNING internal_id
 ON CONFLICT (github_rest_id) DO UPDATE
 SET
-    github_rest_id = $1,
-    github_graphql_id = $2,
-    login = $3,
-    name = $4,
-    email = $5,
-    avatar_url = $6,
-    company = $7,
-    location = $8,
-    bio = $9,
-    blog = $10,
-    hireable = $11,
-    twitter_username = $12,
-    followers = $13,
-    following = $14,
-    type = $15,
-    created_at = $16,
-    updated_at = $17
+    github_graphql_id = EXCLUDED.github_graphql_id,
+    login = EXCLUDED.login,
+    name = EXCLUDED.name,
+    email = EXCLUDED.email,
+    avatar_url = EXCLUDED.avatar_url,
+    company = EXCLUDED.company,
+    location = EXCLUDED.location,
+    bio = EXCLUDED.bio,
+    blog = EXCLUDED.blog,
+    hireable = EXCLUDED.hireable,
+    twitter_username = EXCLUDED.twitter_username,
+    followers = EXCLUDED.followers,
+    following = EXCLUDED.following,
+    type = EXCLUDED.type,
+    created_at = EXCLUDED.created_at,
+    updated_at = EXCLUDED.updated_at;
 
--- name: CheckGithubUserId :one
-SELECT internal_id FROM github_users WHERE login = $1
-LIMIT 1;
+-- name: CheckGithubUserIdExists :one
+SELECT EXISTS(SELECT 1 FROM github_users WHERE github_rest_id = $1);
+
 
 -- name: CheckGithubUserExists :one
 SELECT EXISTS(SELECT 1 FROM github_users WHERE login = $1);

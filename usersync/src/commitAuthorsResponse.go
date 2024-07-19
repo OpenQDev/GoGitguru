@@ -1,7 +1,7 @@
 package usersync
 
 type GithubGraphQLUser struct {
-	GithubRestID    int    `json:"github_rest_id"`
+	GithubRestID    int32  `json:"github_rest_id"`
 	GithubGraphqlID string `json:"github_graphql_id"`
 	Login           string `json:"login"`
 	Name            string `json:"name"`

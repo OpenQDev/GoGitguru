@@ -71,7 +71,7 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 
 	params := ConvertServerUserToInsertUserParams(user)
 
-	_, err = apiConfig.DB.InsertUser(context.Background(), params)
+	err = apiConfig.DB.InsertUser(context.Background(), params)
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to insert user into database: %s", err))
 		return
