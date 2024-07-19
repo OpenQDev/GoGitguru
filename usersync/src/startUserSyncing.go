@@ -2,7 +2,6 @@ package usersync
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/OpenQDev/GoGitguru/database"
 
@@ -91,8 +90,9 @@ func StartUserSyncing(
 					}
 
 				}
-				fmt.Println("UpsertRepoToUserByIdParams: ", author.User.GithubRestID, author)
-				err = GetReposToUsers(db, &UpsertRepoToUserByIdParams, author.User.GithubRestID, author)
+				internal_id, err := db.GetGithubUserByRestId(context.Background(), author.User.GithubRestID)
+				err = GetReposToUsers(db, &UpsertRepoToUserByIdParams, internal_id, author)
+
 				if err != nil {
 					logger.LogError("error occured while getting repos to users: %s", err)
 				}

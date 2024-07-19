@@ -102,6 +102,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getGithubUserByCommitEmailStmt, err = db.PrepareContext(ctx, getGithubUserByCommitEmail); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGithubUserByCommitEmail: %w", err)
 	}
+	if q.getGithubUserByRestIdStmt, err = db.PrepareContext(ctx, getGithubUserByRestId); err != nil {
+		return nil, fmt.Errorf("error preparing query GetGithubUserByRestId: %w", err)
+	}
 	if q.getGroupOfEmailsStmt, err = db.PrepareContext(ctx, getGroupOfEmails); err != nil {
 		return nil, fmt.Errorf("error preparing query GetGroupOfEmails: %w", err)
 	}
@@ -300,6 +303,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getGithubUserByCommitEmailStmt: %w", cerr)
 		}
 	}
+	if q.getGithubUserByRestIdStmt != nil {
+		if cerr := q.getGithubUserByRestIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getGithubUserByRestIdStmt: %w", cerr)
+		}
+	}
 	if q.getGroupOfEmailsStmt != nil {
 		if cerr := q.getGroupOfEmailsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getGroupOfEmailsStmt: %w", cerr)
@@ -470,6 +478,7 @@ type Queries struct {
 	getGithubRepoByUrlStmt                     *sql.Stmt
 	getGithubUserStmt                          *sql.Stmt
 	getGithubUserByCommitEmailStmt             *sql.Stmt
+	getGithubUserByRestIdStmt                  *sql.Stmt
 	getGroupOfEmailsStmt                       *sql.Stmt
 	getLatestCommitterDateStmt                 *sql.Stmt
 	getLatestUncheckedCommitPerAuthorStmt      *sql.Stmt
@@ -523,6 +532,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getGithubRepoByUrlStmt:                     q.getGithubRepoByUrlStmt,
 		getGithubUserStmt:                          q.getGithubUserStmt,
 		getGithubUserByCommitEmailStmt:             q.getGithubUserByCommitEmailStmt,
+		getGithubUserByRestIdStmt:                  q.getGithubUserByRestIdStmt,
 		getGroupOfEmailsStmt:                       q.getGroupOfEmailsStmt,
 		getLatestCommitterDateStmt:                 q.getLatestCommitterDateStmt,
 		getLatestUncheckedCommitPerAuthorStmt:      q.getLatestUncheckedCommitPerAuthorStmt,

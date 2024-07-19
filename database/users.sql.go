@@ -100,6 +100,17 @@ func (q *Queries) GetGithubUserByCommitEmail(ctx context.Context, userEmails []s
 	return items, nil
 }
 
+const getGithubUserByRestId = `-- name: GetGithubUserByRestId :one
+SELECT 1 FROM github_users WHERE github_rest_id = $1
+`
+
+func (q *Queries) GetGithubUserByRestId(ctx context.Context, githubRestID int32) (int32, error) {
+	row := q.queryRow(ctx, q.getGithubUserByRestIdStmt, getGithubUserByRestId, githubRestID)
+	var column_1 int32
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
 const getGroupOfEmails = `-- name: GetGroupOfEmails :one
 SELECT github_rest_id FROM github_users WHERE github_rest_id = ANY($1::INT[])
 `

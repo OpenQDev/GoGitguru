@@ -42,6 +42,8 @@ SET
 
 -- name: CheckGithubUserIdExists :one
 SELECT EXISTS(SELECT 1 FROM github_users WHERE github_rest_id = $1);
+-- name: GetGithubUserByRestId :one
+SELECT 1 FROM github_users WHERE github_rest_id = $1;
 
 
 -- name: CheckGithubUserExists :one
