@@ -21,7 +21,26 @@ INSERT INTO github_users (
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
 )
-RETURNING internal_id;
+RETURNING internal_id
+ON CONFLICT (login) DO UPDATE
+SET
+    github_rest_id = $1,
+    github_graphql_id = $2,
+    login = $3,
+    name = $4,
+    email = $5,
+    avatar_url = $6,
+    company = $7,
+    location = $8,
+    bio = $9,
+    blog = $10,
+    hireable = $11,
+    twitter_username = $12,
+    followers = $13,
+    following = $14,
+    type = $15,
+    created_at = $16,
+    updated_at = $17
 
 -- name: CheckGithubUserId :one
 SELECT internal_id FROM github_users WHERE login = $1
