@@ -1,7 +1,7 @@
 -- +goose Up
 
 CREATE TABLE repos_to_dependencies (
-    url VARCHAR(150),
+    url VARCHAR(255),
     dependency_id INT NOT NULL,
     first_use_date BIGINT DEFAULT NULL,
     last_use_date BIGINT DEFAULT NULL,
