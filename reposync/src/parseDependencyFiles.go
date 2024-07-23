@@ -273,6 +273,7 @@ func parseBlockChains(file *object.File) ([]string, error) {
 
 	blockChains := []string{
 		"Ethereum",
+		"Gnosis",
 		"Polkadot",
 		"Polygon",
 		"Cosmos",
@@ -379,8 +380,13 @@ func parseBlockChains(file *object.File) ([]string, error) {
 		if strings.Contains(lowerContents, lowerBlockChain) {
 			blockChainsContained = append(blockChainsContained, lowerBlockChain)
 		}
-
 	}
+
+	// special cases
+	if strings.Contains(lowerContents, "eth-mainnet") {
+		blockChainsContained = append(blockChainsContained, "ethereum")
+	}
+
 	return blockChainsContained, nil
 
 }
