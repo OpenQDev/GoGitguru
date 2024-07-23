@@ -142,13 +142,6 @@ type GithubUserRestIDAuthorEmail struct {
 	Email  string `json:"email"`
 }
 
-type RepoUrl struct {
-	Url       string       `json:"url"`
-	Status    RepoStatus   `json:"status"`
-	CreatedAt time.Time    `json:"created_at"`
-	UpdatedAt sql.NullTime `json:"updated_at"`
-}
-
 type RepoUrlsV2 struct {
 	Url       string       `json:"url"`
 	Status    RepoStatus   `json:"status"`

@@ -2,5 +2,5 @@
 
 ALTER TABLE github_repos
     ALTER COLUMN url TYPE VARCHAR(255);
-ALTER TABLE repo_urls
+ALTER TABLE repo_urls_v2
     ALTER COLUMN url TYPE VARCHAR(255);
