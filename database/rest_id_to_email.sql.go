@@ -33,6 +33,7 @@ INSERT INTO github_user_rest_id_author_emails (
 ) VALUES (
     $1, $2
 )
+ON CONFLICT DO NOTHING
 RETURNING rest_id, email
 `
 
