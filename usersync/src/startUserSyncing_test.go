@@ -16,7 +16,7 @@ import (
 
 func TestStartUserSync(t *testing.T) {
 	// ARRANGE - GLOBAL
-	env := setup.ExtractAndVerifyEnvironment("../.env")
+	env := setup.ExtractAndVerifyEnvironment("../../.env")
 	debugMode := env.Debug
 	targetLiveGithub := env.TargetLiveGithub
 
@@ -59,10 +59,10 @@ func TestStartUserSync(t *testing.T) {
 			tt.setupMock(mock, tt.author)
 
 			// ACT
-			StartSyncingUser(
+			StartUserSyncing(
 				queries,
 				"mock",
-				"",
+				env.GhAccessTokens,
 				10,
 				serverUrl)
 

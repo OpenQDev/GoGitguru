@@ -10,7 +10,7 @@ import (
 
 func TestGithubGetCommitAuthors(t *testing.T) {
 	env := setup.ExtractAndVerifyEnvironment("../../.env")
-	ghAccessToken := env.GhAccessToken
+	ghAccessToken := env.GhAccessTokens
 	targetLiveGithub := env.TargetLiveGithub
 
 	var serverUrl string

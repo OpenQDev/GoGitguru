@@ -63,6 +63,7 @@ func (apiConfig *ApiConfig) HandlerGithubUserCommits(w http.ResponseWriter, r *h
 	commits, err = apiConfig.DB.GetUserCommitsForRepos(context.Background(), params)
 
 	if err != nil {
+		fmt.Println("Error in fetching commits from database: ", err)
 		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("failed to fetch commits from database: %s", err))
 		return
 	}

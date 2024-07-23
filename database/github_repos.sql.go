@@ -62,6 +62,17 @@ func (q *Queries) GetGithubRepo(ctx context.Context, fullName string) (GithubRep
 	return i, err
 }
 
+const getGithubRepoByUrl = `-- name: GetGithubRepoByUrl :one
+SELECT internal_id FROM github_repos WHERE url = $1
+`
+
+func (q *Queries) GetGithubRepoByUrl(ctx context.Context, url string) (int32, error) {
+	row := q.queryRow(ctx, q.getGithubRepoByUrlStmt, getGithubRepoByUrl, url)
+	var internal_id int32
+	err := row.Scan(&internal_id)
+	return internal_id, err
+}
+
 const insertGithubRepo = `-- name: InsertGithubRepo :one
 
 INSERT INTO github_repos (

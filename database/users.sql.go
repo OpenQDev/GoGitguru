@@ -23,6 +23,17 @@ func (q *Queries) CheckGithubUserExists(ctx context.Context, login string) (bool
 	return exists, err
 }
 
+const checkGithubUserIdExists = `-- name: CheckGithubUserIdExists :one
+SELECT EXISTS(SELECT 1 FROM github_users WHERE github_rest_id = $1)
+`
+
+func (q *Queries) CheckGithubUserIdExists(ctx context.Context, githubRestID int32) (bool, error) {
+	row := q.queryRow(ctx, q.checkGithubUserIdExistsStmt, checkGithubUserIdExists, githubRestID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const getGithubUser = `-- name: GetGithubUser :one
 SELECT internal_id, github_rest_id, github_graphql_id, login, name, email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at FROM github_users WHERE login = $1
 `
@@ -53,6 +64,53 @@ func (q *Queries) GetGithubUser(ctx context.Context, login string) (GithubUser, 
 	return i, err
 }
 
+const getGithubUserByCommitEmail = `-- name: GetGithubUserByCommitEmail :many
+SELECT gu.internal_id, array_agg(DISTINCT gure.email)::text[] AS emails FROM github_users gu
+INNER JOIN github_user_rest_id_author_emails gure
+ON gu.github_rest_id = gure.rest_id
+WHERE gure.email = ANY($1::TEXT[])
+GROUP BY gu.internal_id
+`
+
+type GetGithubUserByCommitEmailRow struct {
+	InternalID int32    `json:"internal_id"`
+	Emails     []string `json:"emails"`
+}
+
+func (q *Queries) GetGithubUserByCommitEmail(ctx context.Context, userEmails []string) ([]GetGithubUserByCommitEmailRow, error) {
+	rows, err := q.query(ctx, q.getGithubUserByCommitEmailStmt, getGithubUserByCommitEmail, pq.Array(userEmails))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetGithubUserByCommitEmailRow
+	for rows.Next() {
+		var i GetGithubUserByCommitEmailRow
+		if err := rows.Scan(&i.InternalID, pq.Array(&i.Emails)); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getGithubUserByRestId = `-- name: GetGithubUserByRestId :one
+SELECT 1 FROM github_users WHERE github_rest_id = $1
+`
+
+func (q *Queries) GetGithubUserByRestId(ctx context.Context, githubRestID int32) (int32, error) {
+	row := q.queryRow(ctx, q.getGithubUserByRestIdStmt, getGithubUserByRestId, githubRestID)
+	var column_1 int32
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
 const getGroupOfEmails = `-- name: GetGroupOfEmails :one
 SELECT github_rest_id FROM github_users WHERE github_rest_id = ANY($1::INT[])
 `
@@ -64,7 +122,7 @@ func (q *Queries) GetGroupOfEmails(ctx context.Context, dollar_1 []int32) (int32
 	return github_rest_id, err
 }
 
-const insertUser = `-- name: InsertUser :one
+const insertUser = `-- name: InsertUser :exec
 
 INSERT INTO github_users (
     github_rest_id,
@@ -87,7 +145,24 @@ INSERT INTO github_users (
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
 )
-RETURNING internal_id, github_rest_id, github_graphql_id, login, name, email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at
+ON CONFLICT (github_rest_id) DO UPDATE
+SET
+    github_graphql_id = EXCLUDED.github_graphql_id,
+    login = EXCLUDED.login,
+    name = EXCLUDED.name,
+    email = EXCLUDED.email,
+    avatar_url = EXCLUDED.avatar_url,
+    company = EXCLUDED.company,
+    location = EXCLUDED.location,
+    bio = EXCLUDED.bio,
+    blog = EXCLUDED.blog,
+    hireable = EXCLUDED.hireable,
+    twitter_username = EXCLUDED.twitter_username,
+    followers = EXCLUDED.followers,
+    following = EXCLUDED.following,
+    type = EXCLUDED.type,
+    created_at = EXCLUDED.created_at,
+    updated_at = EXCLUDED.updated_at
 `
 
 type InsertUserParams struct {
@@ -110,8 +185,8 @@ type InsertUserParams struct {
 	UpdatedAt       sql.NullTime   `json:"updated_at"`
 }
 
-func (q *Queries) InsertUser(ctx context.Context, arg InsertUserParams) (GithubUser, error) {
-	row := q.queryRow(ctx, q.insertUserStmt, insertUser,
+func (q *Queries) InsertUser(ctx context.Context, arg InsertUserParams) error {
+	_, err := q.exec(ctx, q.insertUserStmt, insertUser,
 		arg.GithubRestID,
 		arg.GithubGraphqlID,
 		arg.Login,
@@ -130,26 +205,5 @@ func (q *Queries) InsertUser(ctx context.Context, arg InsertUserParams) (GithubU
 		arg.CreatedAt,
 		arg.UpdatedAt,
 	)
-	var i GithubUser
-	err := row.Scan(
-		&i.InternalID,
-		&i.GithubRestID,
-		&i.GithubGraphqlID,
-		&i.Login,
-		&i.Name,
-		&i.Email,
-		&i.AvatarUrl,
-		&i.Company,
-		&i.Location,
-		&i.Bio,
-		&i.Blog,
-		&i.Hireable,
-		&i.TwitterUsername,
-		&i.Followers,
-		&i.Following,
-		&i.Type,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+	return err
 }

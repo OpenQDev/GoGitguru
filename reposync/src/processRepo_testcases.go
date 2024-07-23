@@ -18,9 +18,6 @@ type ProcessRepoTestCase struct {
 	setupMock      func(mock sqlmock.Sqlmock, gitLogs []GitLog, repoUrl string)
 }
 
-const organization = "openqdev"
-const repo = "openq-drm-testrepo"
-
 func validProcessRepoTest() ProcessRepoTestCase {
 	const VALID_GIT_LOGS = "VALID_GIT_LOGS"
 
@@ -31,34 +28,116 @@ func validProcessRepoTest() ProcessRepoTestCase {
 		repoUrl:        "https://github.com/OpenQ-Dev/OpenQ-DRM-TestRepo",
 		fromCommitDate: time.Unix(1696277204, 0),
 		gitLogs: []GitLog{
+
 			{
-				CommitHash:    "06a12f9c203112a149707ff73e4298749744c358",
-				AuthorName:    "FlacoJones",
-				AuthorEmail:   "andrew@openq.dev",
-				AuthorDate:    1696277247,
-				CommitDate:    1696277247,
-				CommitMessage: "updates README",
+				CommitHash:    "09442fceb096a56226fb528368ddf971e776057f",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
+				AuthorDate:    1699383601,
+				CommitDate:    1699383601,
+				CommitMessage: "Initial commit",
+				FilesChanged:  0,
+				Insertions:    0,
+				Deletions:     0,
+			}, {
+				CommitHash:    "a7ce99317e5347735ec5349f303c7036cd007d94",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
+				AuthorDate:    1699383684,
+				CommitDate:    1699383684,
+				CommitMessage: "Create package.json",
+				FilesChanged:  0,
+				Insertions:    0,
+				Deletions:     0,
+			}, {
+				CommitHash:    "9141d952c3b15d1ad8121527f1f4bfb65f9000c0",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
+				AuthorDate:    1699384512,
+				CommitDate:    1699384512,
+				CommitMessage: "Create BigFile.json",
+				FilesChanged:  0,
+				Insertions:    0,
+				Deletions:     0,
+			}, {
+				CommitHash:    "a8b0336d4e05acfa79d46beb2442c56c0fb23017",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
+				AuthorDate:    1699384731,
+				CommitDate:    1699384731,
+				CommitMessage: "Create BigFile2.json",
+				FilesChanged:  0,
+				Insertions:    0,
+				Deletions:     0,
+			}, {
+				CommitHash:    "0cc787dfb7f6a5808c54b5654e7bf871f004b890",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
+				AuthorDate:    1699385002,
+				CommitDate:    1699385002,
+				CommitMessage: "Add files via upload",
 				FilesChanged:  0,
 				Insertions:    0,
 				Deletions:     0,
 			},
 			{
-				CommitHash:    "9fae86bc8e89895b961d81bd7e9e4e897501c8bb",
-				AuthorName:    "FlacoJones",
-				AuthorEmail:   "andrew@openq.dev",
-				AuthorDate:    1696277205,
-				CommitDate:    1696277205,
-				CommitMessage: "initial commit",
+				CommitHash:    "70488e2cc8ef84edaab39aafda542b0ac2cee092",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
+				AuthorDate:    1699385069,
+				CommitDate:    1699385069,
+				CommitMessage: "Add files via upload",
+				FilesChanged:  0,
+				Insertions:    0,
+				Deletions:     0,
+			}, {
+				CommitHash:    "a4b132ba0fac0380bc7479730a4216218c39b716",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "150183211+DRM-Test-User@users.noreply.github.com",
+				AuthorDate:    1699385139,
+				CommitDate:    1699385139,
+				CommitMessage: "Add files via upload",
+				FilesChanged:  0,
+				Insertions:    0,
+				Deletions:     0,
+			},
+			{
+				CommitHash:    "32f8b288406652840a600e18d562a51661d64d99",
+				AuthorName:    "DRM-Test-User",
+				AuthorEmail:   "info@openq.dev",
+				AuthorDate:    1699386034,
+				CommitDate:    1699386034,
+				CommitMessage: "updates",
 				FilesChanged:  0,
 				Insertions:    0,
 				Deletions:     0,
 			},
 		},
 		setupMock: func(mock sqlmock.Sqlmock, gitLogs []GitLog, repoUrl string) {
-			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs(database.RepoStatusSyncingRepo, repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))
+
+			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs(database.RepoStatusSyncingRepo, repoUrl).WillReturnResult(sqlmock.NewResult(1, 2))
+			mock.ExpectQuery("^-- name: GetRepoDependenciesByURL :many.*").WithArgs(repoUrl).WillReturnRows(sqlmock.NewRows([]string{"url"}))
+			dependencyFiles := []string{
+				"package.json",
+				"requirements.txt",
+				"pom.xml",
+				"Pipfile",
+				"go.mod",
+				"build.gradle",
+				"Gemfile",
+				"Cargo.toml",
+				".cabal",
+				"composer.json",
+
+				"hardhat.config",
+				"truffle",
+				`\/network\/`,
+				`\/deployments\/`,
+				"foundry.toml",
+			}
 
 			// Define test data
-			commitCount := 2
+			commitCount := 8
 			commitHash := make([]string, commitCount)
 			author := make([]string, commitCount)
 			authorEmail := make([]string, commitCount)
@@ -84,6 +163,27 @@ func validProcessRepoTest() ProcessRepoTestCase {
 				repoUrls[i] = repoUrl
 			}
 
+			files := []string{"package.json",
+				"go.mod"}
+			dependencies := []string{"web3", "("}
+			firstUseDates := []int64{1699383684, 1699385002}
+			lastUseDates := []int64{0, 0}
+			rows := sqlmock.NewRows([]string{"id", "pattern", "updated_at", "creator"})
+			for index, file := range dependencyFiles {
+				rows.AddRow(index, file, 1609459200, "GoGitguru")
+			}
+			mock.ExpectQuery("^-- name: GetAllFilePatterns :many.*").WillReturnRows(rows)
+
+			mock.ExpectQuery("^-- name: GetGithubUserByCommitEmail :many.*").WithArgs(pq.Array([]string{
+				"150183211+DRM-Test-User@users.noreply.github.com", "info@openq.dev"},
+			)).WillReturnRows(sqlmock.NewRows([]string{"email"}))
+			mock.ExpectExec("^-- name: UpsertRepoToUserById	:exec.*").WithArgs(
+				"https://github.com/OpenQ-Dev/OpenQ-DRM-TestRepo",
+				pq.Array([]int32{}),
+				pq.Array([]int64{}),
+				pq.Array([]int64{}),
+			).WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectExec("^-- name: BatchInsertRepoDependencies :exec.*").WithArgs(1609459200, pq.Array(files), pq.Array(dependencies), repoUrl, pq.Array(firstUseDates), pq.Array(lastUseDates)).WillReturnResult(sqlmock.NewResult(1, 1))
 			// Define expected SQL statement
 			// go-sqlmock CANNOT accept slices as arguments. Must convert to pq.Array first as is done in databse.BulkInsertCommits
 			mock.ExpectExec("^-- name: BulkInsertCommits :exec.*").WithArgs(
@@ -93,10 +193,8 @@ func validProcessRepoTest() ProcessRepoTestCase {
 				pq.Array(authorDate),
 				pq.Array(committerDate),
 				pq.Array(message),
-				pq.Array(insertions),
-				pq.Array(deletions),
 				pq.Array(filesChanged),
-				pq.Array(repoUrls),
+				repoUrl,
 			).WillReturnResult(sqlmock.NewResult(1, 1))
 
 			mock.ExpectExec("^-- name: UpdateStatusAndUpdatedAt :exec.*").WithArgs(database.RepoStatusSynced, repoUrl).WillReturnResult(sqlmock.NewResult(1, 1))

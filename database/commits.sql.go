@@ -19,60 +19,43 @@ INSERT INTO commits (
     author_email, 
     author_date, 
     committer_date, 
-    message, 
-    insertions, 
-    deletions, 
+    message,
     files_changed, 
     repo_url
-) VALUES (  
+) 
+SELECT
     unnest($1::varchar[]),  
     unnest($2::varchar[]),  
     unnest($3::varchar[]),  
     unnest($4::bigint[]),  
     unnest($5::bigint[]),  
-    unnest($6::text[]),  
+    unnest($6::text[]),
     unnest($7::int[]),  
-    unnest($8::int[]),  
-    unnest($9::int[]),  
-    unnest($10::varchar[])  
-) ON CONFLICT (commit_hash, repo_url) DO UPDATE 
-SET 
-    author = EXCLUDED.author,
-    author_email = EXCLUDED.author_email,
-    author_date = EXCLUDED.author_date,
-    committer_date = EXCLUDED.committer_date,
-    message = EXCLUDED.message,
-    insertions = EXCLUDED.insertions,
-    deletions = EXCLUDED.deletions,
-    files_changed = EXCLUDED.files_changed,
-    repo_url = EXCLUDED.repo_url
+    $8
+ON CONFLICT (commit_hash, repo_url) DO NOTHING
 `
 
 type BulkInsertCommitsParams struct {
-	Column1  []string `json:"column_1"`
-	Column2  []string `json:"column_2"`
-	Column3  []string `json:"column_3"`
-	Column4  []int64  `json:"column_4"`
-	Column5  []int64  `json:"column_5"`
-	Column6  []string `json:"column_6"`
-	Column7  []int32  `json:"column_7"`
-	Column8  []int32  `json:"column_8"`
-	Column9  []int32  `json:"column_9"`
-	Column10 []string `json:"column_10"`
+	Commithashes   []string       `json:"commithashes"`
+	Authors        []string       `json:"authors"`
+	Authoremails   []string       `json:"authoremails"`
+	Authordates    []int64        `json:"authordates"`
+	Committerdates []int64        `json:"committerdates"`
+	Messages       []string       `json:"messages"`
+	Fileschanged   []int32        `json:"fileschanged"`
+	Repourl        sql.NullString `json:"repourl"`
 }
 
 func (q *Queries) BulkInsertCommits(ctx context.Context, arg BulkInsertCommitsParams) error {
 	_, err := q.exec(ctx, q.bulkInsertCommitsStmt, bulkInsertCommits,
-		pq.Array(arg.Column1),
-		pq.Array(arg.Column2),
-		pq.Array(arg.Column3),
-		pq.Array(arg.Column4),
-		pq.Array(arg.Column5),
-		pq.Array(arg.Column6),
-		pq.Array(arg.Column7),
-		pq.Array(arg.Column8),
-		pq.Array(arg.Column9),
-		pq.Array(arg.Column10),
+		pq.Array(arg.Commithashes),
+		pq.Array(arg.Authors),
+		pq.Array(arg.Authoremails),
+		pq.Array(arg.Authordates),
+		pq.Array(arg.Committerdates),
+		pq.Array(arg.Messages),
+		pq.Array(arg.Fileschanged),
+		arg.Repourl,
 	)
 	return err
 }
@@ -249,6 +232,26 @@ func (q *Queries) GetCommitsWithAuthorInfo(ctx context.Context, arg GetCommitsWi
 	return items, nil
 }
 
+const getFirstAndLastCommit = `-- name: GetFirstAndLastCommit :one
+SELECT 
+    MIN(author_date) as first_commit_date,
+    MAX(author_date) as last_commit_date
+FROM commits
+WHERE author_email = $1
+`
+
+type GetFirstAndLastCommitRow struct {
+	FirstCommitDate interface{} `json:"first_commit_date"`
+	LastCommitDate  interface{} `json:"last_commit_date"`
+}
+
+func (q *Queries) GetFirstAndLastCommit(ctx context.Context, authorEmail sql.NullString) (GetFirstAndLastCommitRow, error) {
+	row := q.queryRow(ctx, q.getFirstAndLastCommitStmt, getFirstAndLastCommit, authorEmail)
+	var i GetFirstAndLastCommitRow
+	err := row.Scan(&i.FirstCommitDate, &i.LastCommitDate)
+	return i, err
+}
+
 const getFirstCommit = `-- name: GetFirstCommit :one
 SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at FROM commits c
 INNER JOIN github_user_rest_id_author_emails gure
@@ -358,6 +361,7 @@ const getLatestUncheckedCommitPerAuthor = `-- name: GetLatestUncheckedCommitPerA
 SELECT DISTINCT ON (c.author_email)
 c.commit_hash,
 c.author_email,
+c.author_date,
 c.repo_url
 FROM commits c
 LEFT JOIN github_user_rest_id_author_emails g
@@ -369,6 +373,7 @@ ORDER BY c.author_email, c.author_date DESC
 type GetLatestUncheckedCommitPerAuthorRow struct {
 	CommitHash  string         `json:"commit_hash"`
 	AuthorEmail sql.NullString `json:"author_email"`
+	AuthorDate  sql.NullInt64  `json:"author_date"`
 	RepoUrl     sql.NullString `json:"repo_url"`
 }
 
@@ -381,7 +386,12 @@ func (q *Queries) GetLatestUncheckedCommitPerAuthor(ctx context.Context) ([]GetL
 	var items []GetLatestUncheckedCommitPerAuthorRow
 	for rows.Next() {
 		var i GetLatestUncheckedCommitPerAuthorRow
-		if err := rows.Scan(&i.CommitHash, &i.AuthorEmail, &i.RepoUrl); err != nil {
+		if err := rows.Scan(
+			&i.CommitHash,
+			&i.AuthorEmail,
+			&i.AuthorDate,
+			&i.RepoUrl,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -508,97 +518,4 @@ func (q *Queries) GetUserCommitsForRepos(ctx context.Context, arg GetUserCommits
 		return nil, err
 	}
 	return items, nil
-}
-
-const insertCommit = `-- name: InsertCommit :one
-INSERT INTO commits (commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, files_changed, repo_url) 
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-RETURNING commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url
-`
-
-type InsertCommitParams struct {
-	CommitHash    string         `json:"commit_hash"`
-	Author        sql.NullString `json:"author"`
-	AuthorEmail   sql.NullString `json:"author_email"`
-	AuthorDate    sql.NullInt64  `json:"author_date"`
-	CommitterDate sql.NullInt64  `json:"committer_date"`
-	Message       sql.NullString `json:"message"`
-	Insertions    sql.NullInt32  `json:"insertions"`
-	Deletions     sql.NullInt32  `json:"deletions"`
-	FilesChanged  sql.NullInt32  `json:"files_changed"`
-	RepoUrl       sql.NullString `json:"repo_url"`
-}
-
-func (q *Queries) InsertCommit(ctx context.Context, arg InsertCommitParams) (Commit, error) {
-	row := q.queryRow(ctx, q.insertCommitStmt, insertCommit,
-		arg.CommitHash,
-		arg.Author,
-		arg.AuthorEmail,
-		arg.AuthorDate,
-		arg.CommitterDate,
-		arg.Message,
-		arg.Insertions,
-		arg.Deletions,
-		arg.FilesChanged,
-		arg.RepoUrl,
-	)
-	var i Commit
-	err := row.Scan(
-		&i.CommitHash,
-		&i.Author,
-		&i.AuthorEmail,
-		&i.AuthorDate,
-		&i.CommitterDate,
-		&i.Message,
-		&i.Insertions,
-		&i.Deletions,
-		&i.LinesChanged,
-		&i.FilesChanged,
-		&i.RepoUrl,
-	)
-	return i, err
-}
-
-const multiRowInsertCommits = `-- name: MultiRowInsertCommits :exec
-INSERT INTO commits (commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, files_changed, repo_url) VALUES (  
-  unnest($1::varchar[]),  
-  unnest($2::varchar[]),  
-  unnest($3::varchar[]),  
-  unnest($4::bigint[]),  
-  unnest($5::bigint[]),  
-  unnest($6::text[]),  
-  unnest($7::int[]),  
-  unnest($8::int[]),  
-  unnest($9::int[]),  
-  unnest($10::varchar[])  
-)
-`
-
-type MultiRowInsertCommitsParams struct {
-	Column1  []string `json:"column_1"`
-	Column2  []string `json:"column_2"`
-	Column3  []string `json:"column_3"`
-	Column4  []int64  `json:"column_4"`
-	Column5  []int64  `json:"column_5"`
-	Column6  []string `json:"column_6"`
-	Column7  []int32  `json:"column_7"`
-	Column8  []int32  `json:"column_8"`
-	Column9  []int32  `json:"column_9"`
-	Column10 []string `json:"column_10"`
-}
-
-func (q *Queries) MultiRowInsertCommits(ctx context.Context, arg MultiRowInsertCommitsParams) error {
-	_, err := q.exec(ctx, q.multiRowInsertCommitsStmt, multiRowInsertCommits,
-		pq.Array(arg.Column1),
-		pq.Array(arg.Column2),
-		pq.Array(arg.Column3),
-		pq.Array(arg.Column4),
-		pq.Array(arg.Column5),
-		pq.Array(arg.Column6),
-		pq.Array(arg.Column7),
-		pq.Array(arg.Column8),
-		pq.Array(arg.Column9),
-		pq.Array(arg.Column10),
-	)
-	return err
 }

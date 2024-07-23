@@ -3,28 +3,26 @@ package server
 import (
 	"fmt"
 	"net/http"
-	"path/filepath"
-	"strings"
-	"time"
+	"slices"
 
-	"github.com/OpenQDev/GoGitguru/util/gitutil"
+	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/OpenQDev/GoGitguru/util/marshaller"
 )
 
 type DependencyHistoryRequest struct {
-	RepoUrl            string   `json:"repo_url"`
+	RepoUrls           []string `json:"repo_urls"`
 	FilePaths          []string `json:"files_paths"`
 	DependencySearched string   `json:"dependency_searched"`
 }
 
-type DependencyHistoryResponse struct {
-	DatesAdded   []string `json:"dates_added"`
-	DatesRemoved []string `json:"dates_removed"`
+type DependencyHistoryResponseMember struct {
+	DatesAdded   int64  `json:"date_added"`
+	DatesRemoved int64  `json:"date_removed"`
+	RepoUrl      string `json:"repo_url"`
 }
 
 func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http.Request) {
-	var dependencyHistoryResponse DependencyHistoryResponse
-
+	var dependencyHistoryResponse []DependencyHistoryResponseMember
 	var body DependencyHistoryRequest
 	err := marshaller.ReaderToType(r.Body, &body)
 	if err != nil {
@@ -32,51 +30,46 @@ func (apiCfg *ApiConfig) HandlerDependencyHistory(w http.ResponseWriter, r *http
 		return
 	}
 
-	prefixPath := "./repos"
-	organization, repo := gitutil.ExtractOrganizationAndRepositoryFromUrl(body.RepoUrl)
+	repoDependencyParams := database.GetRepoDependenciesParams{
+		DependencyName: body.DependencySearched,
+		Column2:        body.RepoUrls,
+		Column3:        body.FilePaths,
+	}
 
-	organization = strings.ToLower(organization)
-	repo = strings.ToLower(repo)
+	dependencyResult, err := apiCfg.DB.GetRepoDependencies(r.Context(), repoDependencyParams)
 
-	repoDir := filepath.Join(prefixPath, organization, repo)
+	if err != nil {
+		fmt.Println(err)
+		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error getting dependencies: %s", err))
+		return
+	}
+	for _, dependency := range dependencyResult {
+		hasRepoUrl := slices.ContainsFunc(dependencyHistoryResponse, func(dependencyHistoryResponse DependencyHistoryResponseMember) bool {
+			return dependencyHistoryResponse.RepoUrl == dependency.Url.String
+		})
 
-	fmt.Println("is git repo for ", repoDir, gitutil.IsGitRepository(prefixPath, organization, repo))
+		if !hasRepoUrl {
+			dependencyHistoryResponse = append(dependencyHistoryResponse, DependencyHistoryResponseMember{
+				DatesAdded:   dependency.FirstUseDate.Int64,
+				DatesRemoved: dependency.LastUseDate.Int64,
+				RepoUrl:      dependency.Url.String,
+			})
+		} else {
+			correctSliceIndex := slices.IndexFunc(dependencyHistoryResponse, func(dependencyHistoryResponse DependencyHistoryResponseMember) bool {
+				return dependencyHistoryResponse.RepoUrl == dependency.Url.String
+			})
+			dependencyUsedBefore := dependency.FirstUseDate.Int64 != 0
+			dependencyAlreadyCurrentlyUsed := dependencyHistoryResponse[correctSliceIndex].DatesAdded != 0
 
-	if !gitutil.IsGitRepository(prefixPath, organization, repo) {
-		err := gitutil.CloneRepo(prefixPath, organization, repo)
-		if err != nil {
-			RespondWithError(w, http.StatusNotFound, fmt.Sprintf("directory %s is not a git repository", repoDir))
-			return
+			if dependencyUsedBefore && (dependency.FirstUseDate.Int64 < dependencyHistoryResponse[correctSliceIndex].DatesAdded || dependencyHistoryResponse[correctSliceIndex].DatesAdded == 0) {
+				dependencyHistoryResponse[correctSliceIndex].DatesAdded = dependency.FirstUseDate.Int64
+			}
+			newDependencyDateMoreRelevant := dependency.LastUseDate.Int64 > dependencyHistoryResponse[correctSliceIndex].DatesRemoved
+			if dependencyUsedBefore && !dependencyAlreadyCurrentlyUsed && newDependencyDateMoreRelevant {
+				dependencyHistoryResponse[correctSliceIndex].DatesRemoved = dependency.LastUseDate.Int64
+			}
 		}
-	}
 
-	// "package.json" -> ["util/package.json", "app/package.json"]
-	allFilePaths, err := gitutil.GitDependencyFiles(repoDir, body.FilePaths)
-	if err != nil {
-		RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to determine if file paths exist dependency-history: %s", err))
-		return
-	}
-
-	datesAddedCommits, datesRemovedCommits, err := gitutil.GitDependencyHistory(repoDir, body.DependencySearched, allFilePaths)
-	if err != nil {
-		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error getting dependency history: %s", err))
-		return
-	}
-
-	// Convert Unix time to ISO strings
-	datesAddedISO := make([]string, len(datesAddedCommits))
-	for i, v := range datesAddedCommits {
-		datesAddedISO[i] = time.Unix(v, 0).Format(time.RFC3339)
-	}
-
-	datesRemovedISO := make([]string, len(datesRemovedCommits))
-	for i, v := range datesRemovedCommits {
-		datesRemovedISO[i] = time.Unix(v, 0).Format(time.RFC3339)
-	}
-
-	dependencyHistoryResponse = DependencyHistoryResponse{
-		DatesAdded:   datesAddedISO,
-		DatesRemoved: datesRemovedISO,
 	}
 
 	RespondWithJSON(w, http.StatusOK, dependencyHistoryResponse)

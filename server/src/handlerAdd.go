@@ -29,10 +29,10 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(bytes.NewReader(bodyBytes))
 
 	// Make struct repoUrls to decode the body into
-	repoUrls := HandlerAddRequest{}
+	request := HandlerAddRequest{}
 
-	err := decoder.Decode(&repoUrls)
-	if err != nil || len(repoUrls.RepoUrls) == 0 {
+	err := decoder.Decode(&request)
+	if err != nil || len(request.RepoUrls) == 0 {
 		msg := fmt.Sprintf("error parsing JSON for: %s", string(bodyBytes))
 		RespondWithError(w, 400, msg)
 		return
@@ -40,7 +40,7 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 
 	accepted := []string{}
 
-	for _, repoUrl := range repoUrls.RepoUrls {
+	for _, repoUrl := range request.RepoUrls {
 
 		err = addToList(apiCfg, r, repoUrl)
 		if err != nil {
@@ -49,7 +49,9 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 			RespondWithError(w, 500, msg)
 			return
 		}
+
 		accepted = append(accepted, repoUrl)
+
 	}
 
 	response := HandlerAddResponse{

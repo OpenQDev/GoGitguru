@@ -2,7 +2,7 @@ package usersync
 
 import (
 	"context"
-	"strings"
+	"fmt"
 
 	"github.com/OpenQDev/GoGitguru/database"
 
@@ -15,7 +15,7 @@ type UserSync struct {
 	RepoUrl     string
 }
 
-func StartSyncingUser(
+func StartUserSyncing(
 	db *database.Queries,
 	prefixPath string,
 	ghAccessToken string,
@@ -23,75 +23,99 @@ func StartSyncingUser(
 	githubGraphQLUrl string,
 ) {
 	newCommitAuthorsRaw, err := getNewCommitAuthors(db)
+	fmt.Println(newCommitAuthorsRaw)
 
 	if err != nil {
 		logger.LogFatalRedAndExit("error getting new commit authors to process: %s", err)
 		return
 	}
-	if newCommitAuthorsRaw == nil {
-		logger.LogBlue("no new authors to sync")
-		return
-	}
 
-	logger.LogBlue("identifying %d new authors", len(newCommitAuthorsRaw))
+	if newCommitAuthorsRaw != nil {
+		logger.LogBlue("identifying %d new authors", len(newCommitAuthorsRaw))
 
-	// Convert to database object to local type
-	newCommitAuthors := convertDatabaseObjectToUserSync(newCommitAuthorsRaw)
+		// Convert to database object to local type
+		newCommitAuthors := convertDatabaseObjectToUserSync(newCommitAuthorsRaw)
 
-	// Create map of repoUrl -> []authors
-	repoUrlToAuthorsMap := getRepoToAuthorsMap(newCommitAuthors)
+		// Create map of repoUrl -> []authors
+		repoUrlToAuthorsMap := getRepoToAuthorsMap(newCommitAuthors)
 
-	// Create batches of repos for GraphQL query
-	repoToAuthorBatches := generateBatchAuthors(repoUrlToAuthorsMap, batchSize)
+		// Create batches of repos for GraphQL query
+		repoToAuthorBatches := generateBatchAuthors(repoUrlToAuthorsMap, batchSize)
 
-	// Get info for each batch
-	for _, repoToAuthorBatch := range repoToAuthorBatches {
+		// Get info for each batch
+		for _, repoToAuthorBatch := range repoToAuthorBatches {
 
-		githubGraphQLCommitAuthorsMap, err := identifyRepoAuthorsBatch(repoToAuthorBatch.RepoURL, repoToAuthorBatch.AuthorCommitTuples, ghAccessToken, githubGraphQLUrl)
-		if err != nil {
-			logger.LogError("error occured while identifying authors: %s", err)
-		}
+			githubGraphQLCommitAuthorsMap, err := identifyRepoAuthorsBatch(repoToAuthorBatch.RepoURL, repoToAuthorBatch.AuthorCommitTuples, ghAccessToken, githubGraphQLUrl)
 
-		logger.LogGreenDebug("successfully fetched info for batch %s", repoToAuthorBatch.RepoURL)
-
-		if githubGraphQLCommitAuthorsMap == nil {
-			logger.LogError("commits is nil")
-			continue
-		}
-
-		githubGraphQLCommitAuthors := make([]GithubGraphQLCommit, 0, len(githubGraphQLCommitAuthorsMap))
-
-		for _, commitAuthor := range githubGraphQLCommitAuthorsMap {
-			githubGraphQLCommitAuthors = append(githubGraphQLCommitAuthors, commitAuthor)
-		}
-
-		for _, commitAuthor := range githubGraphQLCommitAuthors {
-			author := commitAuthor.Author
-
-			err := insertIntoRestIdToUser(author, db)
 			if err != nil {
-				logger.LogError("error occured while inserting author RestID %s to Email %s: %s", author.User.GithubRestID, author.Email, err)
+				logger.LogError("error occured while identifying authors: %s", err)
 			}
 
-			exists, err := db.CheckGithubUserExists(context.Background(), strings.ToLower(author.User.Login))
-			if err != nil {
-				logger.LogError("error checking if github user exists: %s", err)
-			}
+			logger.LogGreenDebug("successfully fetched info for batch %s", repoToAuthorBatch.RepoURL)
 
-			if !exists {
-				logger.LogBlue("inserting github user %s", author.Name)
-				err = insertGithubUser(author, db)
-				if err != nil {
-					logger.LogError("error occured while inserting github user %s with RestId %s: %s", author.User.Login, author.User.GithubRestID, err)
-				} else {
-					logger.LogGreen("user %s inserted!", author.Name)
-				}
-			}
-
-			if exists {
+			if githubGraphQLCommitAuthorsMap == nil {
+				logger.LogError("commits is nil")
 				continue
 			}
 
+			githubGraphQLCommitAuthors := make([]GithubGraphQLCommit, 0, len(githubGraphQLCommitAuthorsMap))
+
+			for _, commitAuthor := range githubGraphQLCommitAuthorsMap {
+				githubGraphQLCommitAuthors = append(githubGraphQLCommitAuthors, commitAuthor)
+			}
+
+			upsertRepoToUserByIdParams := database.UpsertRepoToUserByIdParams{
+				Url: repoToAuthorBatch.RepoURL,
+			}
+
+			for _, commitAuthor := range githubGraphQLCommitAuthors {
+				author := commitAuthor.Author
+
+				err := insertIntoRestIdToUser(author, db)
+				if err != nil {
+					logger.LogError("error occured while inserting author RestID %s to Email %s: %s", author.User.GithubRestID, author.Email, err)
+				}
+
+				result, err := db.CheckGithubUserIdExists(context.Background(), author.User.GithubRestID)
+				if err != nil {
+					logger.LogError("error checking if github user exists: %s", err)
+				}
+				// TODO update their for that specific repo.
+				if !result {
+					logger.LogBlue("inserting github user %s", author.Name)
+					err := insertGithubUser(author, db)
+					if err != nil {
+						logger.LogError("error occured while inserting github user %s with RestId %s: %s", author.User.Login, author.User.GithubRestID, err)
+					} else {
+						logger.LogGreen("user %s inserted!", author.Name)
+					}
+
+				}
+
+				internal_id, err := db.GetGithubUserByRestId(context.Background(), author.User.GithubRestID)
+
+				if err != nil {
+					logger.LogError("error occured while getting GetGithubUserByRestId: %s", err)
+				}
+
+				err = GetReposToUsers(db, &upsertRepoToUserByIdParams, internal_id, author)
+
+				if err != nil {
+					logger.LogError("error occured while getting repos to users: %s", err)
+				}
+			}
+
+			if err != nil {
+				logger.LogError("error occured while getting repos to users: %s", err)
+			}
+
+			err = db.UpsertRepoToUserById(context.Background(), upsertRepoToUserByIdParams)
+			if err != nil {
+				logger.LogError("error occured while upserting repo to user by id: %s", err)
+			}
 		}
+	} else {
+		fmt.Println("no new commits to sync")
+		return
 	}
 }

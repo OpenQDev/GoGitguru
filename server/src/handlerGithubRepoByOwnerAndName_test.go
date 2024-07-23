@@ -20,7 +20,7 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 	// ARRANGE - GLOBAL
 	env := setup.ExtractAndVerifyEnvironment("../../.env")
 	debugMode := env.Debug
-	ghAccessToken := env.GhAccessToken
+	ghAccessToken := env.GhAccessTokens
 	targetLiveGithub := env.TargetLiveGithub
 
 	logger.SetDebugMode(debugMode)
@@ -75,7 +75,6 @@ func TestHandlerGithubRepoByOwnerAndName(t *testing.T) {
 			// Add {owner} and {name} to the httptest.ResponseRecorder context since we are NOT calling this via Chi router
 			req = AppendPathParamToChiContext(req, "name", tt.name)
 			req = AppendPathParamToChiContext(req, "owner", tt.owner)
-
 			if tt.authorized {
 				req.Header.Add("GH-Authorization", ghAccessToken)
 			}

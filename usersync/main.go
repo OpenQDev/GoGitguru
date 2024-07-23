@@ -37,7 +37,15 @@ func main() {
 			os.Exit(0)
 		default:
 			logger.LogBlue("beginning user syncing...")
-			usersync.StartSyncingUser(database, "repos", randomToken, 10, "https://api.github.com/graphql")
+
+			logger.LogBlue("syncing commits...")
+			usersync.StartUserSyncing(database, "repos", randomToken, 10, "https://api.github.com/graphql")
+			logger.LogBlue("commits synced!")
+
+			logger.LogBlue("syncing user dependencies...")
+			usersync.SyncUserDependencies(database)
+			logger.LogBlue("user dependencies synced!")
+
 			time.Sleep(time.Duration(env.UserSyncInterval) * time.Second)
 		}
 	}

@@ -19,7 +19,7 @@ func GetDueURL(db *sql.DB) (string, error) {
 	defer tx.Rollback()
 
 	// Prepare the SQL statement
-	query := "SELECT url FROM repo_urls WHERE status = 'pending' ORDER BY RANDOM() LIMIT 1 FOR UPDATE"
+	query := "SELECT url FROM repo_urls_v2 WHERE status = 'pending' ORDER BY RANDOM() LIMIT 1 FOR UPDATE"
 	row := tx.QueryRowContext(context.Background(), query)
 
 	// Execute the query and scan the result

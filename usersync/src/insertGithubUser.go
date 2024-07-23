@@ -22,6 +22,5 @@ func insertGithubUser(author GithubGraphQLAuthor, db *database.Queries) error {
 
 	authorParams := convertAuthorToInsertUserParams(author, createdAt, updatedAt)
 
-	_, err = db.InsertUser(context.Background(), authorParams)
-	return err
+	return db.InsertUser(context.Background(), authorParams)
 }

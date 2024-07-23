@@ -2,11 +2,9 @@
 [build]
 # Just plain old shell command. You could use `make` as well.
 poll = true
-cmd = "go build -o ./tmp/main -buildvcs=false ."
+cmd = "go build -o ./tmp/main.exe -buildvcs=false ."
 # Binary file yields from `cmd`.
-bin = "tmp/main"
-# Customize binary.
-full_bin = "APP_ENV=development APP_USER=air ./tmp/main"
+bin = "tmp/main.exe"
 # Send Interrupt signal before killing process
 send_interrupt = true
 

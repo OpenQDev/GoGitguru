@@ -71,6 +71,19 @@ type Commit struct {
 	RepoUrl       sql.NullString `json:"repo_url"`
 }
 
+type Dependency struct {
+	InternalID     int32  `json:"internal_id"`
+	DependencyName string `json:"dependency_name"`
+	DependencyFile string `json:"dependency_file"`
+}
+
+type FilePattern struct {
+	ID        int32  `json:"id"`
+	Pattern   string `json:"pattern"`
+	UpdatedAt int32  `json:"updated_at"`
+	Creator   string `json:"creator"`
+}
+
 type GithubRepo struct {
 	InternalID      int32          `json:"internal_id"`
 	GithubRestID    int32          `json:"github_rest_id"`
@@ -134,4 +147,36 @@ type RepoUrl struct {
 	Status    RepoStatus   `json:"status"`
 	CreatedAt time.Time    `json:"created_at"`
 	UpdatedAt sql.NullTime `json:"updated_at"`
+}
+
+type RepoUrlsV2 struct {
+	Url       string       `json:"url"`
+	Status    RepoStatus   `json:"status"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
+}
+
+type ReposToDependency struct {
+	Url          string         `json:"url"`
+	DependencyID int32          `json:"dependency_id"`
+	FirstUseDate sql.NullInt64  `json:"first_use_date"`
+	LastUseDate  sql.NullInt64  `json:"last_use_date"`
+	UpdatedAt    sql.NullInt64  `json:"updated_at"`
+	Status       sql.NullString `json:"status"`
+}
+
+type UsersToDependency struct {
+	DependencyID int32         `json:"dependency_id"`
+	UserID       int32         `json:"user_id"`
+	FirstUseDate sql.NullInt64 `json:"first_use_date"`
+	LastUseDate  sql.NullInt64 `json:"last_use_date"`
+	UpdatedAt    sql.NullInt64 `json:"updated_at"`
+}
+
+type UsersToRepoUrl struct {
+	UserID          int32         `json:"user_id"`
+	Url             string        `json:"url"`
+	FirstCommitDate sql.NullInt64 `json:"first_commit_date"`
+	LastCommitDate  sql.NullInt64 `json:"last_commit_date"`
+	UpdatedAt       sql.NullInt64 `json:"updated_at"`
 }

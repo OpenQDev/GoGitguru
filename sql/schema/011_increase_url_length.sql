@@ -1,0 +1,6 @@
+-- +goose Up
+
+ALTER TABLE github_repos
+    ALTER COLUMN url TYPE VARCHAR(255);
+ALTER TABLE repo_urls
+    ALTER COLUMN url TYPE VARCHAR(255);
