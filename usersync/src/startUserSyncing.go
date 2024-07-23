@@ -2,6 +2,7 @@ package usersync
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OpenQDev/GoGitguru/database"
 
@@ -28,8 +29,8 @@ func StartUserSyncing(
 		logger.LogFatalRedAndExit("error getting new commit authors to process: %s", err)
 		return
 	}
-	if newCommitAuthorsRaw != nil {
 
+	if newCommitAuthorsRaw != nil {
 		logger.LogBlue("identifying %d new authors", len(newCommitAuthorsRaw))
 
 		// Convert to database object to local type
@@ -106,7 +107,8 @@ func StartUserSyncing(
 				logger.LogError("error occured while upserting repo to user by id: %s", err)
 			}
 		}
-
+	} else {
+		fmt.Println("no new commits to sync")
+		return
 	}
-
 }
