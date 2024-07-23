@@ -3,7 +3,6 @@ package reposync
 import (
 	"context"
 	"database/sql"
-	"strings"
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
@@ -66,18 +65,18 @@ func StartSyncingCommits(
 			logger.LogBlue("repository %s pulled!", repoUrl)
 			// there are cases where the repository may exist in local, but hasn't been synced
 			// no rows in result set just means it didn't have any commit entries for that repo
-			latestCommitterDate, err := db.GetLatestCommitterDate(context.Background(), repoUrl)
-			if err != nil {
-				if !strings.Contains(err.Error(), "sql: no rows in result set") {
-					logger.LogFatalRedAndExit("error getting latest committer date: %s ", err)
-				}
-			}
+			// latestCommitterDate, err := db.GetLatestCommitterDate(context.Background(), repoUrl)
+			// if err != nil {
+			// 	if !strings.Contains(err.Error(), "sql: no rows in result set") {
+			// 		logger.LogFatalRedAndExit("error getting latest committer date: %s ", err)
+			// 	}
+			// }
 
-			latestCommitterDateTime := time.Unix(int64(latestCommitterDate), 0)
+			// latestCommitterDateTime := time.Unix(int64(latestCommitterDate), 0)
 			// Unsure why but sometimes commits before JAN_1_2020 were being stored after initia clone-sync, causing issues
-			if latestCommitterDateTime.After(JAN_1_2020) {
-				startDate = latestCommitterDateTime
-			}
+			// if latestCommitterDateTime.After(JAN_1_2020) {
+			// 	startDate = latestCommitterDateTime
+			// }
 
 			err = ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db)
 			if err != nil {
