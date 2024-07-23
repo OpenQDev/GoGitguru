@@ -41,7 +41,7 @@ jobs:
     needs: build
     uses: OpenQDev/OpenQ-Workflows/.github/workflows/tag.yml@main
     with:
-      APP: gitguru_repos
+      APP: gitguru_repos_v2
       VERSION: ${{ inputs.environment }}-${{ inputs.version }}
       ENVIRONMENT: ${{ inputs.environment }}
     secrets:
