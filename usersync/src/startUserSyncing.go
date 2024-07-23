@@ -22,7 +22,6 @@ func StartUserSyncing(
 	batchSize int,
 	githubGraphQLUrl string,
 ) {
-
 	newCommitAuthorsRaw, err := getNewCommitAuthors(db)
 	fmt.Println(newCommitAuthorsRaw)
 
