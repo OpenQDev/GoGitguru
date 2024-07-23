@@ -149,6 +149,13 @@ type RepoUrl struct {
 	UpdatedAt sql.NullTime `json:"updated_at"`
 }
 
+type RepoUrlsV2 struct {
+	Url       string       `json:"url"`
+	Status    RepoStatus   `json:"status"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
+}
+
 type ReposToDependency struct {
 	Url          string         `json:"url"`
 	DependencyID int32          `json:"dependency_id"`
