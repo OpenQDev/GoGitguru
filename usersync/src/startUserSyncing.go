@@ -24,6 +24,7 @@ func StartUserSyncing(
 ) {
 
 	newCommitAuthorsRaw, err := getNewCommitAuthors(db)
+	fmt.Println(newCommitAuthorsRaw)
 
 	if err != nil {
 		logger.LogFatalRedAndExit("error getting new commit authors to process: %s", err)
@@ -64,7 +65,7 @@ func StartUserSyncing(
 				githubGraphQLCommitAuthors = append(githubGraphQLCommitAuthors, commitAuthor)
 			}
 
-			UpsertRepoToUserByIdParams := database.UpsertRepoToUserByIdParams{
+			upsertRepoToUserByIdParams := database.UpsertRepoToUserByIdParams{
 				Url: repoToAuthorBatch.RepoURL,
 			}
 
@@ -91,18 +92,25 @@ func StartUserSyncing(
 					}
 
 				}
+
 				internal_id, err := db.GetGithubUserByRestId(context.Background(), author.User.GithubRestID)
-				err = GetReposToUsers(db, &UpsertRepoToUserByIdParams, internal_id, author)
+
+				if err != nil {
+					logger.LogError("error occured while getting GetGithubUserByRestId: %s", err)
+				}
+
+				err = GetReposToUsers(db, &upsertRepoToUserByIdParams, internal_id, author)
 
 				if err != nil {
 					logger.LogError("error occured while getting repos to users: %s", err)
 				}
 			}
+
 			if err != nil {
 				logger.LogError("error occured while getting repos to users: %s", err)
 			}
 
-			err = db.UpsertRepoToUserById(context.Background(), UpsertRepoToUserByIdParams)
+			err = db.UpsertRepoToUserById(context.Background(), upsertRepoToUserByIdParams)
 			if err != nil {
 				logger.LogError("error occured while upserting repo to user by id: %s", err)
 			}
