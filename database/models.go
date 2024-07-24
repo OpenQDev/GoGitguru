@@ -58,17 +58,18 @@ func (ns NullRepoStatus) Value() (driver.Value, error) {
 }
 
 type Commit struct {
-	CommitHash    string         `json:"commit_hash"`
-	Author        sql.NullString `json:"author"`
-	AuthorEmail   sql.NullString `json:"author_email"`
-	AuthorDate    sql.NullInt64  `json:"author_date"`
-	CommitterDate sql.NullInt64  `json:"committer_date"`
-	Message       sql.NullString `json:"message"`
-	Insertions    sql.NullInt32  `json:"insertions"`
-	Deletions     sql.NullInt32  `json:"deletions"`
-	LinesChanged  sql.NullInt32  `json:"lines_changed"`
-	FilesChanged  sql.NullInt32  `json:"files_changed"`
-	RepoUrl       sql.NullString `json:"repo_url"`
+	CommitHash     string         `json:"commit_hash"`
+	Author         sql.NullString `json:"author"`
+	AuthorEmail    sql.NullString `json:"author_email"`
+	AuthorDate     sql.NullInt64  `json:"author_date"`
+	CommitterDate  sql.NullInt64  `json:"committer_date"`
+	Message        sql.NullString `json:"message"`
+	Insertions     sql.NullInt32  `json:"insertions"`
+	Deletions      sql.NullInt32  `json:"deletions"`
+	LinesChanged   sql.NullInt32  `json:"lines_changed"`
+	FilesChanged   sql.NullInt32  `json:"files_changed"`
+	RepoUrl        sql.NullString `json:"repo_url"`
+	HasCheckedUser sql.NullBool   `json:"has_checked_user"`
 }
 
 type Dependency struct {

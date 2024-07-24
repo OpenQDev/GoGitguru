@@ -150,6 +150,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.insertUserStmt, err = db.PrepareContext(ctx, insertUser); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertUser: %w", err)
 	}
+	if q.setAllCommitsToCheckedStmt, err = db.PrepareContext(ctx, setAllCommitsToChecked); err != nil {
+		return nil, fmt.Errorf("error preparing query SetAllCommitsToChecked: %w", err)
+	}
 	if q.switchReposRelationToSimpleStmt, err = db.PrepareContext(ctx, switchReposRelationToSimple); err != nil {
 		return nil, fmt.Errorf("error preparing query SwitchReposRelationToSimple: %w", err)
 	}
@@ -383,6 +386,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing insertUserStmt: %w", cerr)
 		}
 	}
+	if q.setAllCommitsToCheckedStmt != nil {
+		if cerr := q.setAllCommitsToCheckedStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setAllCommitsToCheckedStmt: %w", cerr)
+		}
+	}
 	if q.switchReposRelationToSimpleStmt != nil {
 		if cerr := q.switchReposRelationToSimpleStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing switchReposRelationToSimpleStmt: %w", cerr)
@@ -494,6 +502,7 @@ type Queries struct {
 	insertGithubRepoStmt                       *sql.Stmt
 	insertRestIdToEmailStmt                    *sql.Stmt
 	insertUserStmt                             *sql.Stmt
+	setAllCommitsToCheckedStmt                 *sql.Stmt
 	switchReposRelationToSimpleStmt            *sql.Stmt
 	switchUsersRelationToSimpleStmt            *sql.Stmt
 	updateStatusAndUpdatedAtStmt               *sql.Stmt
@@ -548,6 +557,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		insertGithubRepoStmt:                       q.insertGithubRepoStmt,
 		insertRestIdToEmailStmt:                    q.insertRestIdToEmailStmt,
 		insertUserStmt:                             q.insertUserStmt,
+		setAllCommitsToCheckedStmt:                 q.setAllCommitsToCheckedStmt,
 		switchReposRelationToSimpleStmt:            q.switchReposRelationToSimpleStmt,
 		switchUsersRelationToSimpleStmt:            q.switchUsersRelationToSimpleStmt,
 		updateStatusAndUpdatedAtStmt:               q.updateStatusAndUpdatedAtStmt,

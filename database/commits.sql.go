@@ -61,7 +61,7 @@ func (q *Queries) BulkInsertCommits(ctx context.Context, arg BulkInsertCommitsPa
 }
 
 const getCommit = `-- name: GetCommit :one
-SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url FROM commits WHERE commit_hash = $1
+SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, has_checked_user FROM commits WHERE commit_hash = $1
 `
 
 func (q *Queries) GetCommit(ctx context.Context, commitHash string) (Commit, error) {
@@ -79,12 +79,13 @@ func (q *Queries) GetCommit(ctx context.Context, commitHash string) (Commit, err
 		&i.LinesChanged,
 		&i.FilesChanged,
 		&i.RepoUrl,
+		&i.HasCheckedUser,
 	)
 	return i, err
 }
 
 const getCommits = `-- name: GetCommits :many
-SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url FROM commits
+SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, has_checked_user FROM commits
 `
 
 func (q *Queries) GetCommits(ctx context.Context) ([]Commit, error) {
@@ -108,6 +109,7 @@ func (q *Queries) GetCommits(ctx context.Context) ([]Commit, error) {
 			&i.LinesChanged,
 			&i.FilesChanged,
 			&i.RepoUrl,
+			&i.HasCheckedUser,
 		); err != nil {
 			return nil, err
 		}
@@ -123,9 +125,9 @@ func (q *Queries) GetCommits(ctx context.Context) ([]Commit, error) {
 }
 
 const getCommitsWithAuthorInfo = `-- name: GetCommitsWithAuthorInfo :many
-SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at
+SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, has_checked_user, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at
 FROM (
-    SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url
+    SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, has_checked_user
     FROM commits
     WHERE repo_url = $1
     AND author_date BETWEEN $2 AND $3
@@ -155,6 +157,7 @@ type GetCommitsWithAuthorInfoRow struct {
 	LinesChanged    sql.NullInt32  `json:"lines_changed"`
 	FilesChanged    sql.NullInt32  `json:"files_changed"`
 	RepoUrl         sql.NullString `json:"repo_url"`
+	HasCheckedUser  sql.NullBool   `json:"has_checked_user"`
 	RestID          int32          `json:"rest_id"`
 	Email           string         `json:"email"`
 	InternalID      int32          `json:"internal_id"`
@@ -198,6 +201,7 @@ func (q *Queries) GetCommitsWithAuthorInfo(ctx context.Context, arg GetCommitsWi
 			&i.LinesChanged,
 			&i.FilesChanged,
 			&i.RepoUrl,
+			&i.HasCheckedUser,
 			&i.RestID,
 			&i.Email,
 			&i.InternalID,
@@ -253,7 +257,7 @@ func (q *Queries) GetFirstAndLastCommit(ctx context.Context, authorEmail sql.Nul
 }
 
 const getFirstCommit = `-- name: GetFirstCommit :one
-SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at FROM commits c
+SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, has_checked_user, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at FROM commits c
 INNER JOIN github_user_rest_id_author_emails gure
 ON c.author_email = gure.email
 INNER JOIN github_users gu
@@ -281,6 +285,7 @@ type GetFirstCommitRow struct {
 	LinesChanged    sql.NullInt32  `json:"lines_changed"`
 	FilesChanged    sql.NullInt32  `json:"files_changed"`
 	RepoUrl         sql.NullString `json:"repo_url"`
+	HasCheckedUser  sql.NullBool   `json:"has_checked_user"`
 	RestID          int32          `json:"rest_id"`
 	Email           string         `json:"email"`
 	InternalID      int32          `json:"internal_id"`
@@ -318,6 +323,7 @@ func (q *Queries) GetFirstCommit(ctx context.Context, arg GetFirstCommitParams) 
 		&i.LinesChanged,
 		&i.FilesChanged,
 		&i.RepoUrl,
+		&i.HasCheckedUser,
 		&i.RestID,
 		&i.Email,
 		&i.InternalID,
@@ -363,7 +369,9 @@ c.commit_hash,
 c.author_email,
 c.author_date,
 c.repo_url
-FROM commits c
+FROM (
+    SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, has_checked_user FROM commits WHERE has_checked_user = FALSE
+) c
 LEFT JOIN github_user_rest_id_author_emails g
 ON c.author_email = g.email
 WHERE g.email IS NULL
@@ -407,9 +415,9 @@ func (q *Queries) GetLatestUncheckedCommitPerAuthor(ctx context.Context) ([]GetL
 
 const getUserCommitsForRepos = `-- name: GetUserCommitsForRepos :many
 WITH commits_cte AS (
-    SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url FROM commits WHERE author_date BETWEEN $1 AND $2
+    SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, has_checked_user FROM commits WHERE author_date BETWEEN $1 AND $2
 )
-SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at FROM commits_cte c
+SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, has_checked_user, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at FROM commits_cte c
 INNER JOIN github_user_rest_id_author_emails gure
 ON c.author_email = gure.email
 INNER JOIN github_users gu
@@ -438,6 +446,7 @@ type GetUserCommitsForReposRow struct {
 	LinesChanged    sql.NullInt32  `json:"lines_changed"`
 	FilesChanged    sql.NullInt32  `json:"files_changed"`
 	RepoUrl         sql.NullString `json:"repo_url"`
+	HasCheckedUser  sql.NullBool   `json:"has_checked_user"`
 	RestID          int32          `json:"rest_id"`
 	Email           string         `json:"email"`
 	InternalID      int32          `json:"internal_id"`
@@ -486,6 +495,7 @@ func (q *Queries) GetUserCommitsForRepos(ctx context.Context, arg GetUserCommits
 			&i.LinesChanged,
 			&i.FilesChanged,
 			&i.RepoUrl,
+			&i.HasCheckedUser,
 			&i.RestID,
 			&i.Email,
 			&i.InternalID,
@@ -518,4 +528,15 @@ func (q *Queries) GetUserCommitsForRepos(ctx context.Context, arg GetUserCommits
 		return nil, err
 	}
 	return items, nil
+}
+
+const setAllCommitsToChecked = `-- name: SetAllCommitsToChecked :exec
+UPDATE commits
+SET has_checked_user = TRUE
+WHERE commits.author_email = ANY($1::VARCHAR[])
+`
+
+func (q *Queries) SetAllCommitsToChecked(ctx context.Context, dollar_1 []string) error {
+	_, err := q.exec(ctx, q.setAllCommitsToCheckedStmt, setAllCommitsToChecked, pq.Array(dollar_1))
+	return err
 }

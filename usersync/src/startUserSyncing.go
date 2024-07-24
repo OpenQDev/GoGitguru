@@ -31,6 +31,7 @@ func StartUserSyncing(
 	}
 
 	if newCommitAuthorsRaw != nil {
+		fmt.Println(newCommitAuthorsRaw[0].AuthorEmail)
 		logger.LogBlue("identifying %d new authors", len(newCommitAuthorsRaw))
 
 		// Convert to database object to local type
@@ -114,6 +115,19 @@ func StartUserSyncing(
 				logger.LogError("error occured while upserting repo to user by id: %s", err)
 			}
 		}
+
+		// update to hasSynced
+		newCommitEmails := make([]string, 0, len(newCommitAuthorsRaw))
+		for _, commitAuthor := range newCommitAuthorsRaw {
+
+			newCommitEmails = append(newCommitEmails, commitAuthor.AuthorEmail.String)
+		}
+		err = db.SetAllCommitsToChecked(context.Background(), newCommitEmails)
+		if err != nil {
+			logger.LogError("error occured while setting all commits to checked: %s", err)
+			return
+		}
+
 	} else {
 		fmt.Println("no new commits to sync")
 		return
