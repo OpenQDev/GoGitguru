@@ -24,7 +24,7 @@ func insertIntoRestIdToUser(author GithubGraphQLAuthor, db *database.Queries) er
 		}
 	}
 
-	_, err := db.InsertRestIdToEmail(context.Background(), params)
+	err := db.InsertRestIdToEmail(context.Background(), params)
 	if err != nil {
 		return err
 	}

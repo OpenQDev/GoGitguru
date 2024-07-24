@@ -25,8 +25,7 @@ func (q *Queries) CheckGithubUserRestIdAuthorEmailExists(ctx context.Context, ar
 	return exists, err
 }
 
-const insertRestIdToEmail = `-- name: InsertRestIdToEmail :one
-
+const insertRestIdToEmail = `-- name: InsertRestIdToEmail :exec
 INSERT INTO github_user_rest_id_author_emails (
     rest_id,
     email
@@ -34,7 +33,6 @@ INSERT INTO github_user_rest_id_author_emails (
     $1, $2
 )
 ON CONFLICT DO NOTHING
-RETURNING rest_id, email
 `
 
 type InsertRestIdToEmailParams struct {
@@ -42,9 +40,7 @@ type InsertRestIdToEmailParams struct {
 	Email  string `json:"email"`
 }
 
-func (q *Queries) InsertRestIdToEmail(ctx context.Context, arg InsertRestIdToEmailParams) (GithubUserRestIDAuthorEmail, error) {
-	row := q.queryRow(ctx, q.insertRestIdToEmailStmt, insertRestIdToEmail, arg.RestID, arg.Email)
-	var i GithubUserRestIDAuthorEmail
-	err := row.Scan(&i.RestID, &i.Email)
-	return i, err
+func (q *Queries) InsertRestIdToEmail(ctx context.Context, arg InsertRestIdToEmailParams) error {
+	_, err := q.exec(ctx, q.insertRestIdToEmailStmt, insertRestIdToEmail, arg.RestID, arg.Email)
+	return err
 }
