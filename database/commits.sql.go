@@ -368,21 +368,22 @@ SELECT DISTINCT ON (c.author_email)
 c.commit_hash,
 c.author_email,
 c.author_date,
-c.repo_url
+c.repo_url,
+g.email as github_user_email
 FROM (
     SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, has_checked_user FROM commits WHERE has_checked_user = FALSE
 ) c
 LEFT JOIN github_user_rest_id_author_emails g
 ON c.author_email = g.email
-WHERE g.email IS NULL
 ORDER BY c.author_email, c.author_date DESC
 `
 
 type GetLatestUncheckedCommitPerAuthorRow struct {
-	CommitHash  string         `json:"commit_hash"`
-	AuthorEmail sql.NullString `json:"author_email"`
-	AuthorDate  sql.NullInt64  `json:"author_date"`
-	RepoUrl     sql.NullString `json:"repo_url"`
+	CommitHash      string         `json:"commit_hash"`
+	AuthorEmail     sql.NullString `json:"author_email"`
+	AuthorDate      sql.NullInt64  `json:"author_date"`
+	RepoUrl         sql.NullString `json:"repo_url"`
+	GithubUserEmail sql.NullString `json:"github_user_email"`
 }
 
 func (q *Queries) GetLatestUncheckedCommitPerAuthor(ctx context.Context) ([]GetLatestUncheckedCommitPerAuthorRow, error) {
@@ -399,6 +400,7 @@ func (q *Queries) GetLatestUncheckedCommitPerAuthor(ctx context.Context) ([]GetL
 			&i.AuthorEmail,
 			&i.AuthorDate,
 			&i.RepoUrl,
+			&i.GithubUserEmail,
 		); err != nil {
 			return nil, err
 		}
