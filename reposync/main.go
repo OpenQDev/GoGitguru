@@ -27,7 +27,7 @@ func main() {
 	stopChan := make(chan struct{})
 	setupSignalHandler(stopChan)
 
-	const MAX_CONCURRENT_INSTANCES = 10
+	const MAX_CONCURRENT_INSTANCES = 25
 	sem := make(chan bool, MAX_CONCURRENT_INSTANCES)
 
 	for {
