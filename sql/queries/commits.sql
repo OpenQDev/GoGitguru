@@ -46,13 +46,13 @@ SELECT DISTINCT ON (c.author_email)
 c.commit_hash,
 c.author_email,
 c.author_date,
-c.repo_url
+c.repo_url,
+g.email as github_user_email
 FROM (
     SELECT * FROM commits WHERE has_checked_user = FALSE
 ) c
 LEFT JOIN github_user_rest_id_author_emails g
 ON c.author_email = g.email
-WHERE g.email IS NULL
 ORDER BY c.author_email, c.author_date DESC;
 
 

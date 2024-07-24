@@ -15,12 +15,13 @@ func convertDatabaseObjectToUserSync(newCommitAuthorsRaw []database.GetLatestUnc
 		if author.RepoUrl.Valid {
 			repoUrl = author.RepoUrl.String
 		}
-
-		newCommitAuthors = append(newCommitAuthors, UserSync{
-			CommitHash:  author.CommitHash,
-			AuthorEmail: authorEmail,
-			RepoUrl:     repoUrl,
-		})
+		if !author.GithubUserEmail.Valid {
+			newCommitAuthors = append(newCommitAuthors, UserSync{
+				CommitHash:  author.CommitHash,
+				AuthorEmail: authorEmail,
+				RepoUrl:     repoUrl,
+			})
+		}
 	}
 
 	return newCommitAuthors
