@@ -13,7 +13,7 @@ import (
 )
 
 const deleteRepoURL = `-- name: DeleteRepoURL :exec
-DELETE FROM repo_urls_v2 WHERE url = $1
+DELETE FROM repo_urls WHERE url = $1
 `
 
 func (q *Queries) DeleteRepoURL(ctx context.Context, url string) error {
@@ -36,12 +36,12 @@ func (q *Queries) GetAndUpdateRepoURL(ctx context.Context) (GetAndUpdateRepoURLR
 }
 
 const getRepoURL = `-- name: GetRepoURL :one
-SELECT url, status, created_at, updated_at FROM repo_urls_v2 WHERE url = $1
+SELECT url, status, created_at, updated_at FROM repo_urls WHERE url = $1
 `
 
-func (q *Queries) GetRepoURL(ctx context.Context, url string) (RepoUrlsV2, error) {
+func (q *Queries) GetRepoURL(ctx context.Context, url string) (RepoUrl, error) {
 	row := q.queryRow(ctx, q.getRepoURLStmt, getRepoURL, url)
-	var i RepoUrlsV2
+	var i RepoUrl
 	err := row.Scan(
 		&i.Url,
 		&i.Status,
@@ -52,18 +52,18 @@ func (q *Queries) GetRepoURL(ctx context.Context, url string) (RepoUrlsV2, error
 }
 
 const getRepoURLs = `-- name: GetRepoURLs :many
-SELECT url, status, created_at, updated_at FROM repo_urls_v2
+SELECT url, status, created_at, updated_at FROM repo_urls
 `
 
-func (q *Queries) GetRepoURLs(ctx context.Context) ([]RepoUrlsV2, error) {
+func (q *Queries) GetRepoURLs(ctx context.Context) ([]RepoUrl, error) {
 	rows, err := q.query(ctx, q.getRepoURLsStmt, getRepoURLs)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []RepoUrlsV2
+	var items []RepoUrl
 	for rows.Next() {
-		var i RepoUrlsV2
+		var i RepoUrl
 		if err := rows.Scan(
 			&i.Url,
 			&i.Status,
@@ -91,7 +91,7 @@ SELECT
     COUNT(DISTINCT c.author_email) FILTER (WHERE g.email IS NULL) AS pending_authors
 
 FROM
-    repo_urls_v2 r
+    repo_urls r
 LEFT JOIN commits c ON c.repo_url = r.url
 LEFT JOIN github_user_rest_id_author_emails g ON c.author_email = g.email
 
@@ -138,7 +138,7 @@ func (q *Queries) GetReposStatus(ctx context.Context, dollar_1 []string) ([]GetR
 }
 
 const updateStatusAndUpdatedAt = `-- name: UpdateStatusAndUpdatedAt :exec
-UPDATE repo_urls_v2 SET status = $1, updated_at = NOW() WHERE url = $2
+UPDATE repo_urls SET status = $1, updated_at = NOW() WHERE url = $2
 `
 
 type UpdateStatusAndUpdatedAtParams struct {
@@ -152,7 +152,7 @@ func (q *Queries) UpdateStatusAndUpdatedAt(ctx context.Context, arg UpdateStatus
 }
 
 const upsertRepoURL = `-- name: UpsertRepoURL :exec
-INSERT INTO repo_urls_v2 (url, created_at, updated_at) 
+INSERT INTO repo_urls (url, created_at, updated_at) 
 VALUES ($1, NOW(), NOW())
 ON CONFLICT (url) DO UPDATE SET updated_at = NOW(), status = 'pending'::repo_status
 RETURNING url, status, created_at, updated_at
