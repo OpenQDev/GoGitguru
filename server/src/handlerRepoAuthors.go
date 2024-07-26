@@ -22,7 +22,7 @@ type HandlerRepoAuthorsResponse struct{}
 
 func (apiConfig *ApiConfig) HandlerRepoAuthors(w http.ResponseWriter, r *http.Request) {
 
-	var body HandlerGithubUserCommitsRequest
+	var body HandlerRepoAuthorsRequest
 	err := marshaller.ReaderToType(r.Body, &body)
 	if err != nil {
 		RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed to read body of request: %s", err))
