@@ -14,24 +14,24 @@ type GithubRestRepo struct {
 		GravatarID string `json:"gravatar_id"`
 		URL        string `json:"url"`
 	} `json:"owner"`
-	Description     *string `json:"description"`
-	Fork            bool    `json:"fork"`
-	URL             string  `json:"url"`
-	CreatedAt       string  `json:"created_at"`
-	UpdatedAt       string  `json:"updated_at"`
-	PushedAt        string  `json:"pushed_at"`
-	Homepage        string  `json:"homepage"`
-	Size            int     `json:"size"`
-	StargazersCount int     `json:"stargazers_count"`
-	WatchersCount   int     `json:"watchers_count"`
-	Language        string  `json:"language"`
-	HasIssues       bool    `json:"has_issues"`
-	HasProjects     bool    `json:"has_projects"`
-	HasDiscussions  bool    `json:"has_discussions"`
-	ForksCount      int     `json:"forks_count"`
-	Archived        bool    `json:"archived"`
-	Disabled        bool    `json:"disabled"`
-	OpenIssuesCount int     `json:"open_issues_count"`
+	Description     string `json:"description,omitempty"`
+	Fork            bool   `json:"fork"`
+	URL             string `json:"url"`
+	CreatedAt       string `json:"created_at"`
+	UpdatedAt       string `json:"updated_at"`
+	PushedAt        string `json:"pushed_at"`
+	Homepage        string `json:"homepage"`
+	Size            int    `json:"size"`
+	StargazersCount int    `json:"stargazers_count"`
+	WatchersCount   int    `json:"watchers_count"`
+	Language        string `json:"language"`
+	HasIssues       bool   `json:"has_issues"`
+	HasProjects     bool   `json:"has_projects"`
+	HasDiscussions  bool   `json:"has_discussions"`
+	ForksCount      int    `json:"forks_count"`
+	Archived        bool   `json:"archived"`
+	Disabled        bool   `json:"disabled"`
+	OpenIssuesCount int    `json:"open_issues_count"`
 	License         struct {
 		Key  string `json:"key"`
 		Name string `json:"name"`
