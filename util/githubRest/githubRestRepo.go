@@ -14,7 +14,7 @@ type GithubRestRepo struct {
 		GravatarID string `json:"gravatar_id"`
 		URL        string `json:"url"`
 	} `json:"owner"`
-	Description     string `json:"description"`
+	Description     string `json:"description,omitempty"`
 	Fork            bool   `json:"fork"`
 	URL             string `json:"url"`
 	CreatedAt       string `json:"created_at"`
