@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -64,8 +65,9 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 				assert.Equal(t, tt.expectedStatus, rr.Code)
 				return
 			}
-
 			// ARRANGE - EXPECT
+
+			fmt.Println(rr.Body, "my body")
 			var actualRepoCommitsReturn []CommitWithAuthorInfo
 			err := marshaller.ReaderToType(rr.Body, &actualRepoCommitsReturn)
 			if err != nil {
