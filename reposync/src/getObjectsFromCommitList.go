@@ -67,7 +67,7 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 				}
 			}
 
-			//		AddCommitToCommitObject(commit, &commitObject, commitIndex)
+			AddCommitToCommitObject(commit, &commitObject, commitIndex)
 
 			AddFirstLastCommitDateByEmail(&usersToRepoUrl, commit)
 

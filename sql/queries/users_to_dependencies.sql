@@ -7,8 +7,8 @@ MAX(s.last_use_date_result) as last_use_date,
 
  FROM (
 
-SELECT GREATEST(rd.first_use_date , MAX(c.committer_date)) as first_use_date_result, 
-	 LEAST(rd.last_use_date, MAX(c.committer_date)) as last_use_date_result, 
+SELECT LEAST(rd.first_use_date , MIN(c.committer_date)) as first_use_date_result, 
+	 GREATEST(rd.last_use_date, MAX(c.committer_date)) as last_use_date_result, 
 	 rd.url, 
 	 gu.internal_id, rd.dependency_id
 FROM repos_to_dependencies rd
@@ -59,5 +59,10 @@ WHERE dependency_id IN (
   SELECT internal_id FROM dependencies  d2
 WHERE d2.dependency_name  LIKE sqlc.arg(dependency_file_like)
 
-) 
-;
+);
+
+-- name: GetAllUserDependenciesByUser :many
+SELECT gu.internal_id, gu.login, ud.first_use_date, ud.last_use_date, d.dependency_file, d.dependency_name  FROM (SELECT internal_id, login FROM github_users WHERE login = $1) gu
+JOIN users_to_dependencies ud ON internal_id = ud.user_id
+JOIN dependencies d ON d.internal_id = ud.dependency_id;
+

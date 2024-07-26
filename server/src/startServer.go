@@ -46,6 +46,7 @@ func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
 
 	// DEPENDENCY HISTORY
 	v1Router.Post("/status", apiCfg.HandlerStatus)
+	v1Router.Get("/user-dependency-history/{login}", apiCfg.HandlerUserDependencies)
 
 	// MISCELLANEOUS
 	v1Router.Get("/get-next-repo-url", apiCfg.HandlerGetNextRepoUrl)

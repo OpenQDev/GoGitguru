@@ -68,7 +68,7 @@ func StartUserSyncing(
 			upsertRepoToUserByIdParams := database.UpsertRepoToUserByIdParams{
 				Url: repoToAuthorBatch.RepoURL,
 			}
-
+			fmt.Println(len(githubGraphQLCommitAuthors))
 			for _, commitAuthor := range githubGraphQLCommitAuthors {
 				author := commitAuthor.Author
 
