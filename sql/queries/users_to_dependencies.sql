@@ -7,7 +7,7 @@ MAX(s.last_use_date_result) as last_use_date,
 
  FROM (
 
-SELECT LEAST(rd.first_use_date , MIN(c.committer_date)) as first_use_date_result, 
+SELECT GREATEST(rd.first_use_date , MIN(c.committer_date)) as first_use_date_result, 
 	 LEAST(rd.last_use_date, MAX(c.committer_date)) as last_use_date_result, 
 	 rd.url, 
 	 gu.internal_id, rd.dependency_id
