@@ -60,6 +60,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getAllFilePatternsStmt, err = db.PrepareContext(ctx, getAllFilePatterns); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAllFilePatterns: %w", err)
 	}
+	if q.getAllUserDependenciesByUserStmt, err = db.PrepareContext(ctx, getAllUserDependenciesByUser); err != nil {
+		return nil, fmt.Errorf("error preparing query GetAllUserDependenciesByUser: %w", err)
+	}
 	if q.getAndUpdateRepoURLStmt, err = db.PrepareContext(ctx, getAndUpdateRepoURL); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAndUpdateRepoURL: %w", err)
 	}
@@ -237,6 +240,11 @@ func (q *Queries) Close() error {
 	if q.getAllFilePatternsStmt != nil {
 		if cerr := q.getAllFilePatternsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getAllFilePatternsStmt: %w", cerr)
+		}
+	}
+	if q.getAllUserDependenciesByUserStmt != nil {
+		if cerr := q.getAllUserDependenciesByUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getAllUserDependenciesByUserStmt: %w", cerr)
 		}
 	}
 	if q.getAndUpdateRepoURLStmt != nil {
@@ -480,6 +488,7 @@ type Queries struct {
 	deleteRepoURLStmt                          *sql.Stmt
 	deleteUnusedDependenciesStmt               *sql.Stmt
 	getAllFilePatternsStmt                     *sql.Stmt
+	getAllUserDependenciesByUserStmt           *sql.Stmt
 	getAndUpdateRepoURLStmt                    *sql.Stmt
 	getCommitStmt                              *sql.Stmt
 	getCommitsStmt                             *sql.Stmt
@@ -536,6 +545,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		deleteRepoURLStmt:                          q.deleteRepoURLStmt,
 		deleteUnusedDependenciesStmt:               q.deleteUnusedDependenciesStmt,
 		getAllFilePatternsStmt:                     q.getAllFilePatternsStmt,
+		getAllUserDependenciesByUserStmt:           q.getAllUserDependenciesByUserStmt,
 		getAndUpdateRepoURLStmt:                    q.getAndUpdateRepoURLStmt,
 		getCommitStmt:                              q.getCommitStmt,
 		getCommitsStmt:                             q.getCommitsStmt,

@@ -45,6 +45,51 @@ func (q *Queries) BulkInsertUserDependencies(ctx context.Context, arg BulkInsert
 	return err
 }
 
+const getAllUserDependenciesByUser = `-- name: GetAllUserDependenciesByUser :many
+SELECT gu.internal_id, gu.login, ud.first_use_date, ud.last_use_date, d.dependency_file, d.dependency_name  FROM (SELECT internal_id, login FROM github_users WHERE login = $1) gu
+JOIN users_to_dependencies ud ON internal_id = ud.user_id
+JOIN dependencies d ON d.internal_id = ud.dependency_id
+`
+
+type GetAllUserDependenciesByUserRow struct {
+	InternalID     int32         `json:"internal_id"`
+	Login          string        `json:"login"`
+	FirstUseDate   sql.NullInt64 `json:"first_use_date"`
+	LastUseDate    sql.NullInt64 `json:"last_use_date"`
+	DependencyFile string        `json:"dependency_file"`
+	DependencyName string        `json:"dependency_name"`
+}
+
+func (q *Queries) GetAllUserDependenciesByUser(ctx context.Context, login string) ([]GetAllUserDependenciesByUserRow, error) {
+	rows, err := q.query(ctx, q.getAllUserDependenciesByUserStmt, getAllUserDependenciesByUser, login)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllUserDependenciesByUserRow
+	for rows.Next() {
+		var i GetAllUserDependenciesByUserRow
+		if err := rows.Scan(
+			&i.InternalID,
+			&i.Login,
+			&i.FirstUseDate,
+			&i.LastUseDate,
+			&i.DependencyFile,
+			&i.DependencyName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserDependenciesByUpdatedAt = `-- name: GetUserDependenciesByUpdatedAt :many
 
 SELECT s.internal_id as user_id, 
@@ -54,7 +99,7 @@ MAX(s.last_use_date_result) as last_use_date,
 
  FROM (
 
-SELECT GREATEST(rd.first_use_date , MAX(c.committer_date)) as first_use_date_result, 
+SELECT GREATEST(rd.first_use_date , MIN(c.committer_date)) as first_use_date_result, 
 	 LEAST(rd.last_use_date, MAX(c.committer_date)) as last_use_date_result, 
 	 rd.url, 
 	 gu.internal_id, rd.dependency_id
