@@ -83,7 +83,7 @@ ORDER BY committer_date DESC
 LIMIT 1;
 
 -- name: GetFirstCommit :one
-SELECT * FROM commits c
+SELECT author_date FROM commits c
 INNER JOIN github_user_rest_id_author_emails gure
 ON c.author_email = gure.email
 INNER JOIN github_users gu

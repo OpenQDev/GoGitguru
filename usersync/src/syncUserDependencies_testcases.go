@@ -20,7 +20,7 @@ func startUserDepsSyncingTest1() StartUserDepsSyncingTestCase {
 		shouldError: false,
 		setupMock: func(mock sqlmock.Sqlmock) {
 			rows := sqlmock.NewRows([]string{"first_commit_date", "last_commit_date", "user_id", "dependency_id"}).AddRow(1, 2, 1, 2)
-			mock.ExpectQuery("^-- name: GetUserDependenciesByUpdatedAt :many.*").WithArgs(1609458600).WillReturnRows(rows)
+			mock.ExpectQuery("^-- name: GetUserDependenciesByUpdatedAt :many.*").WithArgs(1609399200).WillReturnRows(rows)
 
 			rows = sqlmock.NewRows([]string{
 				"first_use_date", "last_use_date", "dependency_id", "user_id"}).AddRow(0, 1, 2, 3)

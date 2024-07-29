@@ -28,8 +28,8 @@ func fooo() InsertIntoRestIdToUserTestCase {
 		author:      author,
 		shouldError: false,
 		setupMock: func(mock sqlmock.Sqlmock, author GithubGraphQLAuthor) {
-			rows := sqlmock.NewRows([]string{"rest_id", "email"}).AddRow(restId, email)
-			mock.ExpectQuery("^-- name: InsertRestIdToEmail :one.*").WithArgs(restId, email).WillReturnRows(rows)
+
+			mock.ExpectExec("^-- name: InsertRestIdToEmail :exec.*").WithArgs(restId, email).WillReturnResult(sqlmock.NewResult(1, 1))
 		},
 	}
 }

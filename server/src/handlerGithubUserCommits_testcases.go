@@ -85,20 +85,20 @@ func getAllUserCommits() HandlerGithubUserCommitsTestCase {
 
 			// Define the mock rows
 			mockRows := sqlmock.NewRows([]string{
-				"commit_hash", "author", "author_email", "author_date", "committer_date", "message", "insertions", "deletions", "lines_changed", "files_changed", "repo_url",
+				"commit_hash", "author", "author_email", "author_date", "committer_date", "message", "insertions", "deletions", "lines_changed", "files_changed", "repo_url", "hasCheckedUser",
 				"rest_id", "email", "internal_id", "github_rest_id", "github_graphql_id", "login", "name", "email_2", "avatar_url", "company", "location", "bio", "blog", "hireable", "twitter_username", "followers", "following", "type", "created_at", "updated_at",
 			})
 
 			// Add rows to the mock rows
 			c1 := twoCommitsResponse[0]
 			row1 := mockRows.AddRow(
-				c1.CommitHash, c1.Author, c1.AuthorEmail, c1.AuthorDate, c1.CommitterDate, c1.Message, c1.Insertions, c1.Deletions, c1.LinesChanged, c1.FilesChanged, c1.RepoUrl,
+				c1.CommitHash, c1.Author, c1.AuthorEmail, c1.AuthorDate, c1.CommitterDate, c1.Message, c1.Insertions, c1.Deletions, c1.LinesChanged, c1.FilesChanged, c1.RepoUrl, c1.HasCheckedUser,
 				c1.RestID, c1.Email, c1.InternalID, c1.GithubRestID, c1.GithubGraphqlID, c1.Login, c1.Name, c1.Email_2, c1.AvatarUrl, c1.Company, c1.Location, c1.Bio, c1.Blog, c1.Hireable, c1.TwitterUsername, c1.Followers, c1.Following, c1.Type, c1.CreatedAt, c1.UpdatedAt,
 			)
 
 			c2 := twoCommitsResponse[1]
 			row2 := mockRows.AddRow(
-				c2.CommitHash, c2.Author, c2.AuthorEmail, c2.AuthorDate, c2.CommitterDate, c2.Message, c2.Insertions, c2.Deletions, c2.LinesChanged, c2.FilesChanged, c2.RepoUrl,
+				c2.CommitHash, c2.Author, c2.AuthorEmail, c2.AuthorDate, c2.CommitterDate, c2.Message, c2.Insertions, c2.Deletions, c2.LinesChanged, c2.FilesChanged, c2.RepoUrl, c2.HasCheckedUser,
 				c2.RestID, c2.Email, c2.InternalID, c2.GithubRestID, c2.GithubGraphqlID, c2.Login, c2.Name, c2.Email_2, c2.AvatarUrl, c2.Company, c2.Location, c2.Bio, c2.Blog, c2.Hireable, c2.TwitterUsername, c2.Followers, c2.Following, c2.Type, c2.CreatedAt, c2.UpdatedAt,
 			)
 

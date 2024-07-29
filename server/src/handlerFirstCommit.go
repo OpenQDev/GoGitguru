@@ -32,7 +32,7 @@ func (apiCfg *ApiConfig) HandlerFirstCommit(w http.ResponseWriter, r *http.Reque
 		RepoUrl: sql.NullString{String: body.RepoUrl, Valid: true},
 	}
 
-	commit, err := apiCfg.DB.GetFirstCommit(r.Context(), params)
+	commitAuthorDate, err := apiCfg.DB.GetFirstCommit(r.Context(), params)
 	if err != nil {
 		if strings.Contains(err.Error(), "sql: no rows in result set") {
 			RespondWithJSON(w, 200, nil)
@@ -42,7 +42,7 @@ func (apiCfg *ApiConfig) HandlerFirstCommit(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	response := HandlerFirstCommitResponse{AuthorDate: int(commit.AuthorDate.Int64)}
+	response := HandlerFirstCommitResponse{AuthorDate: int(commitAuthorDate.Int64)}
 
 	RespondWithJSON(w, 200, response)
 }

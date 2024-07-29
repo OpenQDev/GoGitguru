@@ -61,14 +61,12 @@ func (apiConfig *ApiConfig) HandlerGithubUserByLogin(w http.ResponseWriter, r *h
 		RespondWithError(w, http.StatusNotFound, "GitHub user not found.")
 		return
 	}
-
 	var user User
 	err = marshaller.ReaderToType(resp.Body, &user)
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to decode response: %s", err))
 		return
 	}
-
 	params := ConvertServerUserToInsertUserParams(user)
 
 	err = apiConfig.DB.InsertUser(context.Background(), params)
@@ -84,7 +82,7 @@ func ConvertToReturnUser(user User) ReturnUser {
 		InternalID:      user.InternalID,
 		GithubRestID:    user.GithubRestID,
 		GithubGraphqlID: user.GithubGraphqlID,
-		Login:           user.Login,
+		Login:           strings.ToLower(user.Login),
 		Name:            user.Name,
 		Email:           user.Email,
 		AvatarURL:       user.AvatarURL,

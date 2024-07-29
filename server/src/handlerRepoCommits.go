@@ -77,6 +77,7 @@ func ConvertGetCommitsWithAuthorInfoRowToAuthorsToCommitWithAuthorInfo(rows []da
 			LinesChanged:    row.LinesChanged.Int32,
 			FilesChanged:    row.FilesChanged.Int32,
 			RepoUrl:         row.RepoUrl.String,
+			HasCheckedUser:  row.HasCheckedUser.Bool,
 			RestID:          row.RestID,
 			Email:           row.Email,
 			InternalID:      row.InternalID,
@@ -115,6 +116,7 @@ type CommitWithAuthorInfo struct {
 	LinesChanged    int32     `json:"lines_changed"`
 	FilesChanged    int32     `json:"files_changed"`
 	RepoUrl         string    `json:"repo_url"`
+	HasCheckedUser  bool      `json:"hasCheckedUser"`
 	RestID          int32     `json:"rest_id"`
 	Email           string    `json:"email"`
 	InternalID      int32     `json:"internal_id"`

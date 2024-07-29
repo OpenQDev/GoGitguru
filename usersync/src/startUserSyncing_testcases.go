@@ -1,6 +1,7 @@
 package usersync
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/util/lib"
@@ -63,14 +64,17 @@ func startUserSyncingTest1() StartUserSyncingTestCase {
 			mockTime := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
 			lib.Now = func() time.Time { return mockTime }
 			// EXPECT - GetLatestUncheckedCommitPerAuthor
-			rows := sqlmock.NewRows([]string{"commit_hash", "author_email", "author_date", "repo_url"}).
-				AddRow("65062be663cc004b77ca8a3b13255bc5efa42f25", "andrew@openq.dev", 0, "https://github.com/OpenQDev/OpenQ-Workflows")
+			rows := sqlmock.NewRows([]string{"commit_hash", "author_email", "author_date", "repo_url", "github_user_email"}).
+				AddRow("65062be663cc004b77ca8a3b13255bc5efa42f25", "andrew@openq.dev", 0, "https://github.com/OpenQDev/OpenQ-Workflows", sql.NullString{Valid: false})
 			mock.ExpectQuery("^-- name: GetLatestUncheckedCommitPerAuthor :many.*").WillReturnRows(rows)
+			// NOTE - this INTERNALID is generated upon insertion - so it will only appear in the return row
+			// it will NOT appear in the call to InsertUser
+			// EXPECT - InsertRestIdToEmail			//
+			mock.ExpectExec("^-- name: InsertRestIdToEmail :exec.*").WithArgs(restId, email).WillReturnResult(sqlmock.NewResult(1, 1))
 
-			// EXPECT - InsertRestIdToEmail
-			rows = sqlmock.NewRows([]string{"rest_id", "email"}).AddRow(restId, email)
-			mock.ExpectQuery("^-- name: InsertRestIdToEmail :one.*").WithArgs(restId, email).WillReturnRows(rows)
+			mock.ExpectQuery("^-- name: CheckGithubUserIdExists :one.*").WithArgs(93455288).WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(1))
 
+			mock.ExpectQuery("^-- name: GetGithubUserByRestId :one.*").WithArgs(93455288).WillReturnRows(sqlmock.NewRows([]string{"internal_id"}).AddRow(1))
 			createdAt, err := time.Parse(time.RFC3339, author.User.CreatedAt)
 			if err != nil && !createdAt.IsZero() {
 				logger.LogError("error parsing time: %s", err)
@@ -79,15 +83,15 @@ func startUserSyncingTest1() StartUserSyncingTestCase {
 			if err != nil && !createdAt.IsZero() {
 				logger.LogError("error parsing time: %s", err)
 			}
-			mock.ExpectQuery("^-- name: CheckGithubUserExists :one.*").WithArgs(author.User.Login).WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(1))
-			// NOTE - this INTERNALID is generated upon insertion - so it will only appear in the return row
-			// it will NOT appear in the call to InsertUser
 			rows = sqlmock.NewRows([]string{
 				"user_id", "first_use_date"})
 			rows.AddRow(1, 2)
 			mock.ExpectQuery(("^-- name: GetFirstAndLastCommit :one.*")).WithArgs().WillReturnRows(rows)
 
 			mock.ExpectExec("^-- name: UpsertRepoToUserById :exec.*").WithArgs("https://github.com/OpenQDev/OpenQ-Workflows", "{1}", "{1}", "{2}").WillReturnResult(sqlmock.NewResult(1, 1))
+
+			// Expect - SetAllCommitsToChecked
+			mock.ExpectExec("^-- name: SetAllCommitsToChecked :exec.*").WillReturnResult(sqlmock.NewResult(1, 1))
 
 		},
 	}

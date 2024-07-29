@@ -64,8 +64,8 @@ func TestHandlerGithubUserCommits(t *testing.T) {
 				assert.Equal(t, tt.expectedStatus, rr.Code)
 				return
 			}
-
 			// ARRANGE - EXPECT
+
 			var actualRepoCommitsReturn []CommitWithAuthorInfo
 			err := marshaller.ReaderToType(rr.Body, &actualRepoCommitsReturn)
 			if err != nil {

@@ -96,8 +96,6 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 				return
 			}
 
-			require.Equal(t, tt.expectedStatus, rr.Code)
-
 			// ARRANGE - EXPECT
 			var actualUserResponse ReturnUser
 			err := json.NewDecoder(rr.Body).Decode(&actualUserResponse)
@@ -107,10 +105,11 @@ func TestHandlerGithubUserByLogin(t *testing.T) {
 			}
 
 			require.Equal(t, ConvertToReturnUser(user), actualUserResponse)
-
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
 			}
+			require.Equal(t, tt.expectedStatus, rr.Code)
+
 		})
 	}
 }
