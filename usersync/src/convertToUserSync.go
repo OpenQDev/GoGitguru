@@ -1,6 +1,8 @@
 package usersync
 
-import "github.com/OpenQDev/GoGitguru/database"
+import (
+	"github.com/OpenQDev/GoGitguru/database"
+)
 
 func convertDatabaseObjectToUserSync(newCommitAuthorsRaw []database.GetLatestUncheckedCommitPerAuthorRow) []UserSync {
 	var newCommitAuthors []UserSync

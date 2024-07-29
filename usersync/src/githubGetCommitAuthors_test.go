@@ -57,7 +57,7 @@ func TestGithubGetCommitAuthors(t *testing.T) {
 
 			actualRestId := resp.Data.Repository["commit_1"].Author.User.GithubRestID
 			expectedRestId := 93455288
-			if actualRestId != expectedRestId {
+			if actualRestId != int32(expectedRestId) {
 				t.Errorf("GithubGetCommitAuthors() unexpected return. expect rest ID of %d but got %d", expectedRestId, actualRestId)
 			}
 		})

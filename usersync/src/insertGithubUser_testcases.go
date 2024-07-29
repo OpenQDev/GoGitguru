@@ -68,9 +68,8 @@ func insertGithubUserTestCase1() InsertGithubUserTestCase {
 
 			// NOTE - this INTERNALID is generated upon insertion - so it will only appear in the return row
 			// it will NOT appear in the call to InsertUser
-			rows := sqlmock.NewRows([]string{
-				"internal_id"}).AddRow(0)
-			mock.ExpectQuery("^-- name: InsertUser :one.*").WithArgs(
+
+			mock.ExpectExec("^-- name: InsertUser :exec.*").WithArgs(
 				author.User.GithubRestID,
 				author.User.GithubGraphqlID,
 				author.User.Login,
@@ -88,7 +87,7 @@ func insertGithubUserTestCase1() InsertGithubUserTestCase {
 				"User",
 				createdAt,
 				updatedAt,
-			).WillReturnRows(rows)
+			).WillReturnResult(sqlmock.NewResult(1, 1))
 		},
 	}
 }

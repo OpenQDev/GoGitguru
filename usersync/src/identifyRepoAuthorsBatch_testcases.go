@@ -31,7 +31,7 @@ func identifyRepoAuthorsBatchTest1() IdentifyRepoAuthorsBatchTestCase {
 		Followers: struct {
 			TotalCount int `json:"totalCount"`
 		}{
-			TotalCount: 12,
+			TotalCount: 13,
 		},
 		Following: struct {
 			TotalCount int `json:"totalCount"`
@@ -39,7 +39,7 @@ func identifyRepoAuthorsBatchTest1() IdentifyRepoAuthorsBatchTestCase {
 			TotalCount: 0,
 		},
 		CreatedAt: "2021-10-30T23:43:10Z",
-		UpdatedAt: "2024-06-19T19:22:09Z",
+		UpdatedAt: "2024-07-17T15:21:38Z",
 	}
 
 	author := GithubGraphQLAuthor{

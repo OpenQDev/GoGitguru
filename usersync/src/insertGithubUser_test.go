@@ -26,17 +26,13 @@ func TestInsertGithubUser(t *testing.T) {
 			tt.setupMock(mock, tt.author)
 
 			// ACT
-			userId, err := insertGithubUser(tt.author, queries)
+			err := insertGithubUser(tt.author, queries)
 
 			// ASSERT
 			if tt.shouldError {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-			}
-
-			if userId != 0 {
-				t.Errorf("Expected %v, got %v", 0, userId)
 			}
 
 			if err := mock.ExpectationsWereMet(); err != nil {

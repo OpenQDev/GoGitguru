@@ -23,7 +23,6 @@ func StartUserSyncing(
 	githubGraphQLUrl string,
 ) {
 	newCommitAuthorsRaw, err := getNewCommitAuthors(db)
-	fmt.Println(newCommitAuthorsRaw)
 
 	if err != nil {
 		logger.LogFatalRedAndExit("error getting new commit authors to process: %s", err)
@@ -31,7 +30,7 @@ func StartUserSyncing(
 	}
 
 	if newCommitAuthorsRaw != nil {
-		fmt.Println(newCommitAuthorsRaw[0].AuthorEmail)
+
 		logger.LogBlue("identifying %d new authors", len(newCommitAuthorsRaw))
 
 		// Convert to database object to local type
@@ -68,7 +67,6 @@ func StartUserSyncing(
 			upsertRepoToUserByIdParams := database.UpsertRepoToUserByIdParams{
 				Url: repoToAuthorBatch.RepoURL,
 			}
-			fmt.Println(len(githubGraphQLCommitAuthors))
 			for _, commitAuthor := range githubGraphQLCommitAuthors {
 				author := commitAuthor.Author
 

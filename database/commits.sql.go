@@ -257,7 +257,7 @@ func (q *Queries) GetFirstAndLastCommit(ctx context.Context, authorEmail sql.Nul
 }
 
 const getFirstCommit = `-- name: GetFirstCommit :one
-SELECT commit_hash, author, author_email, author_date, committer_date, message, insertions, deletions, lines_changed, files_changed, repo_url, has_checked_user, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at FROM commits c
+SELECT author_date FROM commits c
 INNER JOIN github_user_rest_id_author_emails gure
 ON c.author_email = gure.email
 INNER JOIN github_users gu
@@ -273,79 +273,11 @@ type GetFirstCommitParams struct {
 	Login   string         `json:"login"`
 }
 
-type GetFirstCommitRow struct {
-	CommitHash      string         `json:"commit_hash"`
-	Author          sql.NullString `json:"author"`
-	AuthorEmail     sql.NullString `json:"author_email"`
-	AuthorDate      sql.NullInt64  `json:"author_date"`
-	CommitterDate   sql.NullInt64  `json:"committer_date"`
-	Message         sql.NullString `json:"message"`
-	Insertions      sql.NullInt32  `json:"insertions"`
-	Deletions       sql.NullInt32  `json:"deletions"`
-	LinesChanged    sql.NullInt32  `json:"lines_changed"`
-	FilesChanged    sql.NullInt32  `json:"files_changed"`
-	RepoUrl         sql.NullString `json:"repo_url"`
-	HasCheckedUser  sql.NullBool   `json:"has_checked_user"`
-	RestID          int32          `json:"rest_id"`
-	Email           string         `json:"email"`
-	InternalID      int32          `json:"internal_id"`
-	GithubRestID    int32          `json:"github_rest_id"`
-	GithubGraphqlID string         `json:"github_graphql_id"`
-	Login           string         `json:"login"`
-	Name            sql.NullString `json:"name"`
-	Email_2         sql.NullString `json:"email_2"`
-	AvatarUrl       sql.NullString `json:"avatar_url"`
-	Company         sql.NullString `json:"company"`
-	Location        sql.NullString `json:"location"`
-	Bio             sql.NullString `json:"bio"`
-	Blog            sql.NullString `json:"blog"`
-	Hireable        sql.NullBool   `json:"hireable"`
-	TwitterUsername sql.NullString `json:"twitter_username"`
-	Followers       sql.NullInt32  `json:"followers"`
-	Following       sql.NullInt32  `json:"following"`
-	Type            string         `json:"type"`
-	CreatedAt       sql.NullTime   `json:"created_at"`
-	UpdatedAt       sql.NullTime   `json:"updated_at"`
-}
-
-func (q *Queries) GetFirstCommit(ctx context.Context, arg GetFirstCommitParams) (GetFirstCommitRow, error) {
+func (q *Queries) GetFirstCommit(ctx context.Context, arg GetFirstCommitParams) (sql.NullInt64, error) {
 	row := q.queryRow(ctx, q.getFirstCommitStmt, getFirstCommit, arg.RepoUrl, arg.Login)
-	var i GetFirstCommitRow
-	err := row.Scan(
-		&i.CommitHash,
-		&i.Author,
-		&i.AuthorEmail,
-		&i.AuthorDate,
-		&i.CommitterDate,
-		&i.Message,
-		&i.Insertions,
-		&i.Deletions,
-		&i.LinesChanged,
-		&i.FilesChanged,
-		&i.RepoUrl,
-		&i.HasCheckedUser,
-		&i.RestID,
-		&i.Email,
-		&i.InternalID,
-		&i.GithubRestID,
-		&i.GithubGraphqlID,
-		&i.Login,
-		&i.Name,
-		&i.Email_2,
-		&i.AvatarUrl,
-		&i.Company,
-		&i.Location,
-		&i.Bio,
-		&i.Blog,
-		&i.Hireable,
-		&i.TwitterUsername,
-		&i.Followers,
-		&i.Following,
-		&i.Type,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+	var author_date sql.NullInt64
+	err := row.Scan(&author_date)
+	return author_date, err
 }
 
 const getLatestCommitterDate = `-- name: GetLatestCommitterDate :one
