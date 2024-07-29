@@ -243,11 +243,13 @@ FROM (
     FROM commits
     WHERE repo_url = ANY($1::VARCHAR[])
     AND author_date BETWEEN $2 AND $3
+	AND author NOT LIKE '%[bot]%'
 ) c
 INNER JOIN github_user_rest_id_author_emails gure
 ON c.author_email = gure.email
 INNER JOIN github_users gu
 ON gure.rest_id = gu.github_rest_id
+WHERE github_graphql_id IS NOT NULL AND github_graphql_id != ''
 `
 
 type GetRepoAuthorsInfoParams struct {
