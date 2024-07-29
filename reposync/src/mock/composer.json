@@ -1,0 +1,30 @@
+{
+    "name": "example/example",
+    "description": "An example PHP package",
+    "version": "1.0.0",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.2.0",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-dom": "*",
+        "ext-curl": "*",
+        "ext-zip": "*",
+        "ext-simplexml": "*",
+        "ext-xml": "*",
+        "ext-xmlwriter": "*",
+    
+        "symfony/console": "^5.0",
+        "symfony/finder": "^5.0",   
+        "symfony/filesystem": "^5.0",
+        "symfony/process": "^5.0",
+        "symfony/yaml": "^5.0",
+        "symfony/dependency-injection": "^5.0",
+        "symfony/config": "^5.0",
+        "symfony/translation": "^5.0",
+        "symfony/validator": "^5.0",
+        "symfony/property-access": "^5.0",
+        "symfony/property-info": "^5.0"
+    }
+}

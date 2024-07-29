@@ -1,0 +1,11 @@
+[package]
+name = "example"
+version = "0.1.0"
+authors = ["Your Name <your@email.com>"]
+edition = "2018"
+
+[dependencies]
+serde = { version = "1.0.125", features = ["derive"] }
+serde_json = "1.0.64"
+reqwest = "0.11.10"
+tokio = { version = "1.18.2", features = ["full"] }
