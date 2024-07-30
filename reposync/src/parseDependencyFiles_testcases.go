@@ -39,11 +39,19 @@ func validParseFileTest() []ParseFileTestCase {
 
 	// ... just iterates over the commits, printing it
 	head, err := thisRepository.Head()
-
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(head.Hash())
 	commit, err := thisRepository.CommitObject(head.Hash())
 	if err != nil {
 		panic(err)
 	}
+	testFiles, err := commit.Files()
+	testFiles.ForEach(func(file *object.File) error {
+		fmt.Println(file.Name)
+		return nil
+	})
 	newFiles := make([]ParseFileTestCase, 0)
 	for _, fileName := range FILE_LIST {
 		path := fmt.Sprintf("reposync/src/mock/%s", fileName)
