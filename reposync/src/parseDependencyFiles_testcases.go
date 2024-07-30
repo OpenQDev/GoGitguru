@@ -8,23 +8,26 @@ import (
 )
 
 type ParseFileTestCase struct {
-	file     *object.File
-	fileName string
+	file         *object.File
+	fileName     string
+	dependencies []string
 }
 
 // const list of files to test
 func validParseFileTest() []ParseFileTestCase {
-	FILE_LIST := []string{
-		"package.json",
-		".cabal",
-		"requirements.txt",
-		"pom.xml",
-		"build.gradle",
-		"composer.json",
-		"go.mod",
-		"Pipfile",
-		"Gemfile",
-		"Cargo.toml",
+
+	NO_FILE_LIST := []ParseFileTestCase{
+		{
+			file:     nil,
+			fileName: "package.json",
+			dependencies: []string{
+				"find-config",
+				"hardhat",
+				"@nomiclabs/hardhat-ethers",
+				"prettier-plugin-solidity",
+				"prettier",
+			},
+		},
 	}
 
 	// get blob from file
@@ -53,8 +56,8 @@ func validParseFileTest() []ParseFileTestCase {
 		return nil
 	})
 	newFiles := make([]ParseFileTestCase, 0)
-	for _, fileName := range FILE_LIST {
-		path := fmt.Sprintf("reposync/src/mock/%s", fileName)
+	for _, mockFile := range NO_FILE_LIST {
+		path := fmt.Sprintf("reposync/src/mock/%s", mockFile.fileName)
 		fmt.Println(path)
 		file, err := commit.File(path)
 		if err != nil {
@@ -62,8 +65,9 @@ func validParseFileTest() []ParseFileTestCase {
 		}
 		newFiles = append(newFiles,
 			ParseFileTestCase{
-				file:     file,
-				fileName: file.Name,
+				file:         file,
+				fileName:     file.Name,
+				dependencies: mockFile.dependencies,
 			})
 	}
 	if err != nil {

@@ -22,6 +22,7 @@ func TestParseDependencyFiles(t *testing.T) {
 			// BEFORE EACH
 
 			// ACT
+			fmt.Println(tt.file.Contents())
 			result := ParseFile(tt.file, tt.fileName)
 			fmt.Println(result)
 
