@@ -24,8 +24,91 @@ func validParseFileTest() []ParseFileTestCase {
 				"find-config",
 				"hardhat",
 				"@nomiclabs/hardhat-ethers",
-				"prettier-plugin-solidity",
+				"aurora",
 				"prettier",
+				"prettier-plugin-solidity",
+			},
+		},
+		{
+			file:     nil,
+			fileName: ".cabal",
+			dependencies: []string{
+				"base",
+				"containers",
+				"mtl",
+				"transformers",
+			},
+		}, {
+			file:     nil,
+			fileName: "build.gradle",
+			dependencies: []string{
+				"org.apache.commons:commons-math",
+				"junit:junit",
+				"com.google.guava:guava",
+				"org.slf4j:slf4j-api",
+				"org.apache.commons:commons-lang",
+				"com.fasterxml.jackson.core:jackson-databind",
+			},
+		},
+		{
+			file:     nil,
+			fileName: "Cargo.toml",
+			dependencies: []string{
+				"serde",
+				"serde_json",
+				"reqwest",
+				"tokio",
+			},
+		},
+		{
+			file:     nil,
+			fileName: "composer.json",
+			dependencies: []string{
+				"symfony/property-info",
+				"php",
+				"ext-json",
+			},
+		},
+		{
+			file:     nil,
+			fileName: "Gemfile",
+			dependencies: []string{
+				"sqlite3",
+				"puma",
+				"sass-rails",
+			},
+		},
+		{
+			file:     nil,
+			fileName: "go.mod",
+			dependencies: []string{
+				"github.com/stretchr/testify",
+				"github.com/OpenQDev/GoGitguru",
+			},
+		},
+		{
+			file:     nil,
+			fileName: "Pipfile",
+			dependencies: []string{
+				"pip-review-req-multi",
+				"pip-sync-req-multi",
+				"setuptools",
+			},
+		}, {
+			file:     nil,
+			fileName: "requirements.txt",
+			dependencies: []string{
+				"example",
+				"example2",
+				"example3",
+			},
+		}, {
+			file:     nil,
+			fileName: "pom.xml",
+			dependencies: []string{
+				"junit:junit",
+				"org.apache.commons:commons-math",
+				"org.apache.maven.plugins:maven-compiler-plugin",
 			},
 		},
 	}
@@ -45,28 +128,26 @@ func validParseFileTest() []ParseFileTestCase {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(head.Hash())
 	commit, err := thisRepository.CommitObject(head.Hash())
 	if err != nil {
 		panic(err)
 	}
 	testFiles, err := commit.Files()
 	testFiles.ForEach(func(file *object.File) error {
-		fmt.Println(file.Name)
 		return nil
 	})
 	newFiles := make([]ParseFileTestCase, 0)
 	for _, mockFile := range NO_FILE_LIST {
 		path := fmt.Sprintf("reposync/src/mock/%s", mockFile.fileName)
-		fmt.Println(path)
 		file, err := commit.File(path)
 		if err != nil {
 			panic(err)
 		}
+
 		newFiles = append(newFiles,
 			ParseFileTestCase{
 				file:         file,
-				fileName:     file.Name,
+				fileName:     mockFile.fileName,
 				dependencies: mockFile.dependencies,
 			})
 	}

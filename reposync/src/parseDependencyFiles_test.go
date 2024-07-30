@@ -1,10 +1,10 @@
 package reposync
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/OpenQDev/GoGitguru/util/testhelpers"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseDependencyFiles(t *testing.T) {
@@ -22,11 +22,12 @@ func TestParseDependencyFiles(t *testing.T) {
 			// BEFORE EACH
 
 			// ACT
-			fmt.Println(tt.file.Contents())
+
 			result := ParseFile(tt.file, tt.fileName)
-			fmt.Println(result)
 
 			// ASSERT
+
+			assert.ElementsMatch(t, tt.dependencies, result)
 
 		})
 	}
