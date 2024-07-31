@@ -62,7 +62,6 @@ func parsePipfile(file *object.File) ([]string, error) {
 			continue
 		}
 		if workingOnDependencies {
-			fmt.Println(line)
 			dep := strings.Split(line, " = ")[0]
 			dependencies = append(dependencies, strings.TrimSpace(dep))
 		}

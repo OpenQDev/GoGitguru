@@ -11,7 +11,7 @@ import (
 
 func TestCreateCommitList(t *testing.T) {
 	// BEFORE ALL
-	prefixPath := "mock"
+	prefixPath := "../mock"
 
 	// ARRANGE - TESTS
 	tests := CreateCommitListTestCases()

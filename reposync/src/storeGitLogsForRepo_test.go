@@ -13,7 +13,7 @@ import (
 
 func TestStoreGitLogsAndDepsHistoryForRepo(t *testing.T) {
 	// ARRANGE - GLOBAL
-	prefixPath := "mock"
+	prefixPath := "../mock"
 	repo := "OpenQ-DRM-TestRepo"
 
 	// ARRANGE - TESTS
