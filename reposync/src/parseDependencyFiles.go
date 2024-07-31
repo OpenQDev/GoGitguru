@@ -15,6 +15,7 @@ import (
 type PackageJSON struct {
 	Dependencies    map[string]string `json:"dependencies"`
 	DevDependencies map[string]string `json:"devDependencies"`
+	Keywords        []string          `json:"keywords"`
 }
 
 // Dependency structure for pom.xml
@@ -49,12 +50,23 @@ func parsePipfile(file *object.File) ([]string, error) {
 		return nil, err
 	}
 
-	var dependencies []string
+	dependencies := []string{}
+	workingOnDependencies := false
+
 	for _, line := range lines {
-		if strings.HasPrefix(line, "    ") && strings.Contains(line, " = ") {
+		if strings.HasPrefix(line, "[packages]") || strings.HasPrefix(line, "[dev-packages]") {
+			workingOnDependencies = true
+			continue
+		} else if strings.Contains(line, "[") {
+			workingOnDependencies = false
+			continue
+		}
+		if workingOnDependencies {
+			fmt.Println(line)
 			dep := strings.Split(line, " = ")[0]
 			dependencies = append(dependencies, strings.TrimSpace(dep))
 		}
+
 	}
 	return dependencies, nil
 }
@@ -68,7 +80,10 @@ func parseRequirementsTxt(file *object.File) ([]string, error) {
 
 	var dependencies []string
 	for _, line := range lines {
-		dependencies = append(dependencies, strings.TrimSpace(line))
+		dep := strings.Split(line, " ")[0]
+		if strings.TrimSpace(dep) != "" {
+			dependencies = append(dependencies, strings.TrimSpace(dep))
+		}
 	}
 	return dependencies, nil
 }
@@ -96,6 +111,8 @@ func parsePackageJSON(file *object.File) ([]string, error) {
 	for dep := range pkg.Dependencies {
 		dependencies = append(dependencies, dep)
 	}
+	dependencies = append(dependencies, pkg.Keywords...)
+
 	for devDep := range pkg.DevDependencies {
 		dependencies = append(dependencies, devDep)
 	}
@@ -108,15 +125,21 @@ func parseGoMod(file *object.File) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	var dependencies []string
+	dependencies := []string{}
+	workingOnDependencies := false
 	for _, line := range lines {
-		if strings.HasPrefix(line, "require ") {
-			dep := strings.Fields(line)[1]
-			if dep != `(` && dep != `)` {
-				dependencies = append(dependencies, dep)
+		if strings.HasPrefix(line, "require") {
+			workingOnDependencies = true
+			continue
+		} else if strings.HasPrefix(line, ")") {
+			workingOnDependencies = false
+			continue
+		}
+		if workingOnDependencies && !strings.HasSuffix(line, " // indirect") {
+			dep := strings.Split(line, " ")[0]
+			if strings.TrimSpace(dep) != "" {
+				dependencies = append(dependencies, strings.TrimSpace(dep))
 			}
-			dependencies = append(dependencies, dep)
 		}
 	}
 	return dependencies, nil
@@ -144,7 +167,7 @@ func parsePomXML(file *object.File) ([]string, error) {
 
 	var dependencies []string
 	for _, dep := range pom.Dependencies {
-		dependencies = append(dependencies, fmt.Sprintf("%s:%s:%s", dep.GroupID, dep.ArtifactID, dep.Version))
+		dependencies = append(dependencies, fmt.Sprintf("%s:%s", dep.GroupID, dep.ArtifactID))
 	}
 	return dependencies, nil
 }
@@ -169,7 +192,8 @@ func parseBuildGradle(file *object.File) ([]string, error) {
 				inDependenciesBlock = false
 				break
 			}
-			dependencies = append(dependencies, line)
+			componentArray := strings.Split(strings.Split(line, " '")[1], ":")
+			dependencies = append(dependencies, componentArray[0]+":"+componentArray[1])
 		}
 	}
 	return dependencies, nil
@@ -186,7 +210,7 @@ func parseGemfile(file *object.File) ([]string, error) {
 	for _, line := range lines {
 		if strings.HasPrefix(line, "gem ") {
 			dep := strings.Fields(line)[1]
-			dependencies = append(dependencies, strings.Trim(dep, `"'`))
+			dependencies = append(dependencies, strings.Trim(dep, `"',`))
 		}
 	}
 	return dependencies, nil
@@ -200,11 +224,16 @@ func parseCargoToml(file *object.File) ([]string, error) {
 	}
 
 	var dependencies []string
+	workingOnDependencies := false
 	for _, line := range lines {
 		if strings.HasPrefix(line, "[dependencies]") || strings.HasPrefix(line, "[dev-dependencies]") {
+			workingOnDependencies = true
+			continue
+		} else if strings.HasPrefix(line, "[") {
+			workingOnDependencies = false
 			continue
 		}
-		if line != "" && !strings.HasPrefix(line, "[") {
+		if line != "" && workingOnDependencies {
 			dep := strings.Split(line, "=")[0]
 			dependencies = append(dependencies, strings.TrimSpace(dep))
 		}
@@ -221,11 +250,15 @@ func parseCabal(file *object.File) ([]string, error) {
 
 	var dependencies []string
 	for _, line := range lines {
-		if strings.HasPrefix(line, "build-depends:") {
-			deps := strings.Split(line, ":")[1]
-			for _, dep := range strings.Split(deps, ",") {
-				dependencies = append(dependencies, strings.TrimSpace(dep))
+		if strings.Contains(line, "build-depends:") {
+			allDeps := strings.Split(line, ":")[1]
+			deps := strings.Split(allDeps, ",")
+			for _, dep := range deps {
+				depParts := strings.Split(strings.TrimSpace(dep), " ")
+				depName := strings.TrimSpace(depParts[0])
+				dependencies = append(dependencies, depName)
 			}
+
 		}
 	}
 	return dependencies, nil

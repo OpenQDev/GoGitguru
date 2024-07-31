@@ -1,0 +1,12 @@
+{
+    "name": "example/example",
+    "description": "An example PHP package",
+    "version": "1.0.0",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.2.0",
+        "ext-json": "*",
+        "symfony/property-info": "^5.0"
+    }
+}

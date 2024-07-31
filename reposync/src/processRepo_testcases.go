@@ -163,11 +163,10 @@ func validProcessRepoTest() ProcessRepoTestCase {
 				repoUrls[i] = repoUrl
 			}
 
-			files := []string{"package.json",
-				"go.mod"}
-			dependencies := []string{"web3", "("}
-			firstUseDates := []int64{1699383684, 1699385002}
-			lastUseDates := []int64{0, 0}
+			files := []string{"package.json", "go.mod", "go.mod", "go.mod", "go.mod", "go.mod", "go.mod", "go.mod", "go.mod"}
+			dependencies := []string{"web3", "github.com/DATA-DOG/go-sqlmock", "github.com/OpenQDev/GoGitguru/database", "github.com/OpenQDev/GoGitguru/util", "github.com/go-git/go-git/v5", "github.com/lib/pq", "github.com/stretchr/testify", "github.com/go-chi/chi", "github.com/go-chi/cors"}
+			firstUseDates := []int64{1699383684, 1699385002, 1699385002, 1699385002, 1699385002, 1699385002, 1699385002, 1699385069, 1699385069}
+			lastUseDates := []int64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 			rows := sqlmock.NewRows([]string{"id", "pattern", "updated_at", "creator"})
 			for index, file := range dependencyFiles {
 				rows.AddRow(index, file, 1609459200, "GoGitguru")
