@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -12,40 +10,13 @@ import (
 	"syscall"
 
 	"github.com/IBM/sarama"
-	"github.com/OpenQDev/GoGitguru/database"
-	reposync "github.com/OpenQDev/GoGitguru/reposync/src"
-	"github.com/OpenQDev/GoGitguru/util/logger"
-	"github.com/OpenQDev/GoGitguru/util/setup"
 )
 
-// Message represents the JSON structure of messages consumed from Kafka
-type Message struct {
-	RepoURL string `json:"repo_url"`
-}
-
 type Consumer struct {
-	ready    chan bool
-	database *database.Queries // Replace with your actual database type
-	conn     *sql.DB           // Replace with your actual connection type
-	env      setup.EnvConfig   // Replace with your actual connection type
+	ready chan bool
 }
 
 func main() {
-	env := setup.ExtractAndVerifyEnvironment("../.env")
-
-	database, conn, err := setup.GetDatbase(env.DbUrl)
-	if err != nil {
-		logger.LogError("Failed to connect to database:", err)
-		return
-	}
-	defer conn.Close()
-
-	logger.SetDebugMode(env.Debug)
-	logger.LogBlue("beginning repo syncing...")
-
-	stopChan := make(chan struct{})
-	setupSignalHandler(stopChan)
-
 	// Set up the Sarama configuration
 	config := sarama.NewConfig()
 	config.Version = sarama.V2_5_0_0 // Set the version to match your Kafka cluster
@@ -61,34 +32,36 @@ func main() {
 	// Create a wait group to manage goroutines
 	var wg sync.WaitGroup
 
-	// Spawn consumers
-	numConsumers := 5 // Set the number of concurrent consumer instances
+	// Set up signal handling for graceful shutdown
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sigterm := make(chan os.Signal, 1)
+	signal.Notify(sigterm, syscall.SIGINT, syscall.SIGTERM)
+
+	// Spawn 5 consumers
+	numConsumers := 5
 	for i := 0; i < numConsumers; i++ {
 		wg.Add(1)
 		go func(consumerID int) {
 			defer wg.Done()
 			consumer := Consumer{
-				ready:    make(chan bool),
-				database: database,
-				conn:     conn,
+				ready: make(chan bool),
 			}
 
 			client, err := sarama.NewConsumerGroup(brokers, group, config)
 			if err != nil {
-				logger.LogError(fmt.Sprintf("Error creating consumer group client for consumer %d", consumerID), err)
-				return
+				log.Fatalf("Error creating consumer group client for consumer %d: %v\n", consumerID, err)
 			}
 			defer func() {
 				if err := client.Close(); err != nil {
-					logger.LogError(fmt.Sprintf("Error closing client for consumer %d", consumerID), err)
+					log.Printf("Error closing client for consumer %d: %v\n", consumerID, err)
 				}
 			}()
 
-			ctx := context.Background()
-
 			for {
 				if err := client.Consume(ctx, topics, &consumer); err != nil {
-					logger.LogError(fmt.Sprintf("Error from consumer %d", consumerID), err)
+					log.Printf("Error from consumer %d: %v\n", consumerID, err)
 				}
 				// Check if context was canceled, signaling that the consumer should stop
 				if ctx.Err() != nil {
@@ -100,20 +73,11 @@ func main() {
 	}
 
 	log.Println("All consumers are up and running!")
-	<-stopChan
+	<-sigterm
 	log.Println("Terminating: via signal")
+	cancel()
 	wg.Wait()
 	log.Println("All consumers have been shut down.")
-}
-
-func setupSignalHandler(stopChan chan<- struct{}) {
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT)
-
-	go func() {
-		<-sigChan
-		close(stopChan)
-	}()
 }
 
 // Setup is run at the beginning of a new session, before ConsumeClaim
@@ -131,16 +95,7 @@ func (consumer *Consumer) Cleanup(sarama.ConsumerGroupSession) error {
 // ConsumeClaim must start a consumer loop of ConsumerGroupClaim's Messages().
 func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for message := range claim.Messages() {
-		var msg Message
-		// Parse the JSON-encoded message
-		if err := json.Unmarshal(message.Value, &msg); err != nil {
-			logger.LogError("Error decoding JSON message", err)
-			continue // Skip malformed messages
-		}
-
-		// Call StartSyncingCommits with the extracted repo_url
-		reposync.StartSyncingCommits(consumer.database, consumer.conn, "repos", consumer.env.GitguruUrl, false, msg.RepoURL)
-
+		fmt.Printf("Consumer %s received message: %s\n", session.MemberID(), string(message.Value))
 		// Mark the message as processed
 		session.MarkMessage(message, "")
 	}

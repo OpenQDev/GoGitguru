@@ -22,24 +22,9 @@ func StartSyncingCommits(
 	prefixPath string,
 	gitguruUrl string,
 	resyncAll bool,
+	repoUrl string,
 ) {
-
 	for {
-		repoUrl := ""
-		var err error
-		if resyncAll {
-			logger.LogBlue("fetching first resync repo to sync...")
-			repoUrl, err = GetDueURLV2(conn)
-			if err != nil {
-				logger.LogError("error fetching due repo url", err)
-			}
-		} else {
-			logger.LogBlue("fetching first repo to sync...")
-			repoUrl, err = GetDueURL(conn)
-			if err != nil {
-				logger.LogError("error fetching due repo url", err)
-			}
-		}
 
 		if repoUrl == "" {
 			logger.LogBlue("no new repo urls to sync. exiting...")
@@ -115,7 +100,7 @@ func StartSyncingCommits(
 			logger.LogBlue("repository %s cloned!", repoUrl)
 		}
 
-		err = ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db, resyncAll)
+		err := ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db, resyncAll)
 		if err != nil {
 			logger.LogFatalRedAndExit("error while processing repository %s: %s", repoUrl, err)
 		}
