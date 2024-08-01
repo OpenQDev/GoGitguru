@@ -20,6 +20,7 @@ type EnvConfig struct {
 	UserSyncInterval             int
 	UserDependenciesSyncInterval int
 	GitguruUrl                   string
+	GitguruApiKey                string
 }
 
 func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
@@ -38,6 +39,7 @@ func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
 		UserSyncInterval:             getEnvVar("USERSYNC_INTERVAL", "int").(int),
 		UserDependenciesSyncInterval: getEnvVar("USERSYNC_DEPDENCIES_INTERVAL", "int").(int),
 		GitguruUrl:                   getEnvVar("GITGURU_URL", "string").(string),
+		GitguruApiKey:                getEnvVar("API_KEY", "string").(string),
 	}
 }
 
