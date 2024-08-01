@@ -14,10 +14,16 @@ import (
 func SyncUserDependencies(db *database.Queries) error {
 
 	// get all recent repoDependencies  @flacojones, do you want a smaller time window?
-	tenMinutesAgo := lib.Now().Add(-1000 * time.Minute).Unix()
+	fiveMinutesAgo := lib.Now().Add(-5 * time.Minute).Unix()
+	fifteenMinutesAgo := lib.Now().Add(-15 * time.Minute).Unix()
 	// find user deps based off recent repos
-	fmt.Println("Getting user dependencies to sync", tenMinutesAgo)
-	usersDependenciesToSync, err := db.GetUserDependenciesByUpdatedAt(context.Background(), sql.NullInt64{Int64: tenMinutesAgo, Valid: true})
+
+	usersToDependenciesParams := database.GetUserDependenciesByUpdatedAtParams{
+		Since: sql.NullInt64{Int64: fifteenMinutesAgo, Valid: true},
+		Until: sql.NullInt64{Int64: fiveMinutesAgo, Valid: true},
+	}
+
+	usersDependenciesToSync, err := db.GetUserDependenciesByUpdatedAt(context.Background(), usersToDependenciesParams)
 	if err != nil {
 		logger.LogError("error getting user dependencies to sync since: %s", err)
 		return err
@@ -30,6 +36,7 @@ func SyncUserDependencies(db *database.Queries) error {
 		UserIds:       []int32{},
 		DependencyIds: []int32{},
 	}
+
 	for _, userDependency := range usersDependenciesToSync {
 		getPreviousUserDeps.UserIds = append(getPreviousUserDeps.UserIds, userDependency.UserID.Int32)
 		getPreviousUserDeps.DependencyIds = append(getPreviousUserDeps.DependencyIds, userDependency.DependencyID)

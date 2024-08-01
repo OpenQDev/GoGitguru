@@ -15,7 +15,7 @@ FROM repos_to_dependencies rd
 LEFT JOIN commits c ON c.repo_url = rd.url
 LEFT JOIN github_user_rest_id_author_emails guriae ON guriae.email = c.author_email
 LEFT JOIN github_users gu ON gu.github_rest_id = guriae.rest_id
-WHERE (rd.updated_at > $1 OR rd.updated_at IS NULL  ) AND
+WHERE (((rd.updated_at > sqlc.arg(since) AND rd.updated_at< sqlc.arg(until) ) OR rd.updated_at IS NULL ) ) AND
  gu.internal_id > 0
 GROUP BY gu.internal_id, rd.dependency_id, rd.url
 ) s
@@ -29,7 +29,8 @@ GROUP BY s.internal_id, s.dependency_id;
 SELECT ud.first_use_date,
 ud.last_use_date,
 ud.dependency_id,
-ud.user_id
+ud.user_id,
+ud.resync_all
 FROM users_to_dependencies ud
 WHERE (ud.user_id, ud.dependency_id) IN
 (SELECT unnest(sqlc.arg(user_ids)::int[]), unnest(sqlc.arg(dependency_ids)::int[]));
