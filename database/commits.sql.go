@@ -236,6 +236,96 @@ func (q *Queries) GetCommitsWithAuthorInfo(ctx context.Context, arg GetCommitsWi
 	return items, nil
 }
 
+const getRepoAuthorsInfo = `-- name: GetRepoAuthorsInfo :many
+SELECT DISTINCT ON (github_graphql_id)  author, author_email, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type
+FROM (
+    SELECT author, author_email, author_date, repo_url
+    FROM commits
+    WHERE repo_url = ANY($1::VARCHAR[])
+    AND author_date BETWEEN $2 AND $3
+	AND author NOT LIKE '%[bot]%'
+) c
+INNER JOIN github_user_rest_id_author_emails gure
+ON c.author_email = gure.email
+INNER JOIN github_users gu
+ON gure.rest_id = gu.github_rest_id
+WHERE github_graphql_id IS NOT NULL AND github_graphql_id != ''
+`
+
+type GetRepoAuthorsInfoParams struct {
+	RepoUrls 	[]string `json:"repo_urls"`
+	AuthorDate   sql.NullInt64  `json:"author_date"`
+	AuthorDate_2 sql.NullInt64  `json:"author_date_2"`
+}
+
+type GetRepoAuthorsInfoRow struct {
+	Author          sql.NullString `json:"author"`
+	AuthorEmail     sql.NullString `json:"author_email"`
+	RestID          int32          `json:"rest_id"`
+	Email           string         `json:"email"`
+	InternalID      int32          `json:"internal_id"`
+	GithubRestID    int32          `json:"github_rest_id"`
+	GithubGraphqlID string         `json:"github_graphql_id"`
+	Login           string         `json:"login"`
+	Name            sql.NullString `json:"name"`
+	Email_2         sql.NullString `json:"email_2"`
+	AvatarUrl       sql.NullString `json:"avatar_url"`
+	Company         sql.NullString `json:"company"`
+	Location        sql.NullString `json:"location"`
+	Bio             sql.NullString `json:"bio"`
+	Blog            sql.NullString `json:"blog"`
+	Hireable        sql.NullBool   `json:"hireable"`
+	TwitterUsername sql.NullString `json:"twitter_username"`
+	Followers       sql.NullInt32  `json:"followers"`
+	Following       sql.NullInt32  `json:"following"`
+	Type            string         `json:"type"`
+	
+}
+
+func (q *Queries) GetRepoAuthorsInfo(ctx context.Context, arg GetRepoAuthorsInfoParams) ([]GetRepoAuthorsInfoRow, error) {
+	rows, err := q.query(ctx, q.getRepoAuthorsInfoStmt, getRepoAuthorsInfo, pq.Array(arg.RepoUrls), arg.AuthorDate, arg.AuthorDate_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetRepoAuthorsInfoRow
+	for rows.Next() {
+		var i GetRepoAuthorsInfoRow
+		if err := rows.Scan(
+			&i.Author,
+			&i.AuthorEmail,
+			&i.RestID,
+			&i.Email,
+			&i.InternalID,
+			&i.GithubRestID,
+			&i.GithubGraphqlID,
+			&i.Login,
+			&i.Name,
+			&i.Email_2,
+			&i.AvatarUrl,
+			&i.Company,
+			&i.Location,
+			&i.Bio,
+			&i.Blog,
+			&i.Hireable,
+			&i.TwitterUsername,
+			&i.Followers,
+			&i.Following,
+			&i.Type,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getFirstAndLastCommit = `-- name: GetFirstAndLastCommit :one
 SELECT 
     MIN(author_date) as first_commit_date,

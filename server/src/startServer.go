@@ -36,6 +36,7 @@ func StartServer(apiCfg ApiConfig, portString string, originUrl string) {
 	v1Router.Get("/repos/github/{owner}/{name}", apiCfg.HandlerGithubRepoByOwnerAndName)
 	v1Router.Get("/repos/github/{owner}", apiCfg.HandlerGithubReposByOwner)
 	v1Router.Post("/repos/commits", apiCfg.HandlerRepoCommits)
+	v1Router.Post("/repos/authors", apiCfg.HandlerRepoAuthors)
 
 	// USER
 	v1Router.Get("/users/github/{login}", apiCfg.HandlerGithubUserByLogin)

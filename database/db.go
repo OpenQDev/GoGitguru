@@ -75,6 +75,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getCommitsWithAuthorInfoStmt, err = db.PrepareContext(ctx, getCommitsWithAuthorInfo); err != nil {
 		return nil, fmt.Errorf("error preparing query GetCommitsWithAuthorInfo: %w", err)
 	}
+	if q.getRepoAuthorsInfoStmt, err = db.PrepareContext(ctx, getRepoAuthorsInfo); err != nil {
+		return nil, fmt.Errorf("error preparing query GetRepoAuthorsInfo: %w", err)
+	}
 	if q.getDependenciesStmt, err = db.PrepareContext(ctx, getDependencies); err != nil {
 		return nil, fmt.Errorf("error preparing query GetDependencies: %w", err)
 	}
@@ -262,6 +265,11 @@ func (q *Queries) Close() error {
 	if q.getCommitsWithAuthorInfoStmt != nil {
 		if cerr := q.getCommitsWithAuthorInfoStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getCommitsWithAuthorInfoStmt: %w", cerr)
+		}
+	}
+	if q.getRepoAuthorsInfoStmt != nil {
+		if cerr := q.getRepoAuthorsInfoStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getRepoAuthorsInfoStmt: %w", cerr)
 		}
 	}
 	if q.getDependenciesStmt != nil {
@@ -485,6 +493,7 @@ type Queries struct {
 	getCommitStmt                              *sql.Stmt
 	getCommitsStmt                             *sql.Stmt
 	getCommitsWithAuthorInfoStmt               *sql.Stmt
+	getRepoAuthorsInfoStmt                     *sql.Stmt
 	getDependenciesStmt                        *sql.Stmt
 	getDependenciesByFilesStmt                 *sql.Stmt
 	getDependenciesByNamesStmt                 *sql.Stmt
@@ -541,6 +550,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getCommitStmt:                              q.getCommitStmt,
 		getCommitsStmt:                             q.getCommitsStmt,
 		getCommitsWithAuthorInfoStmt:               q.getCommitsWithAuthorInfoStmt,
+		getRepoAuthorsInfoStmt:                     q.getRepoAuthorsInfoStmt,
 		getDependenciesStmt:                        q.getDependenciesStmt,
 		getDependenciesByFilesStmt:                 q.getDependenciesByFilesStmt,
 		getDependenciesByNamesStmt:                 q.getDependenciesByNamesStmt,

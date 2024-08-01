@@ -6,6 +6,3 @@ CREATE TABLE file_patterns (
     updated_at INTEGER NOT NULL,
     creator TEXT NOT NULL
 );
-
--- +goose Down
-DROP TABLE file_patterns;

@@ -11,5 +11,4 @@ CREATE TABLE repos_to_dependencies (
     FOREIGN KEY (url) REFERENCES repo_urls(url),
     FOREIGN KEY (dependency_id) REFERENCES dependencies (internal_id) ON DELETE CASCADE,
     UNIQUE (url, dependency_id)
-
 );
