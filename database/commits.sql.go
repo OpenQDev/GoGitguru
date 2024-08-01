@@ -244,6 +244,8 @@ FROM (
     WHERE repo_url = ANY($1::VARCHAR[])
     AND author_date BETWEEN $2 AND $3
 	AND author NOT LIKE '%[bot]%'
+	AND author_email NOT LIKE '%[bot]%'
+	AND author_email != 'action@github.com'
 ) c
 INNER JOIN github_user_rest_id_author_emails gure
 ON c.author_email = gure.email
