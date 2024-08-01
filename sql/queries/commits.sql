@@ -99,3 +99,17 @@ SELECT
     MAX(author_date) as last_commit_date
 FROM commits
 WHERE author_email = $1;
+
+
+-- name: GetRepoAuthorsInfo :many
+SELECT DISTINCT ON (github_graphql_id)  author, author_email, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type
+FROM (
+    SELECT author, author_email, author_date, repo_url
+    FROM commits
+    WHERE repo_url = ANY(sqlc.arg(repo_urls)::VARCHAR[])
+    AND author_date BETWEEN $1 AND $2
+) c
+INNER JOIN github_user_rest_id_author_emails gure
+ON c.author_email = gure.email
+INNER JOIN github_users gu
+ON gure.rest_id = gu.github_rest_id;

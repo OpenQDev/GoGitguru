@@ -31,7 +31,8 @@ func PrepareUserDependencies(usersDependenciesToSync []database.GetUserDependenc
 				if alreadySynced.FirstUseDate.Int64 < firstUseDate && alreadySynced.FirstUseDate.Int64 != 0 {
 					firstUseDate = alreadySynced.FirstUseDate.Int64
 				}
-				if alreadySynced.LastUseDate.Int64 > lastUseDate && alreadySynced.LastUseDate.Int64 != 0 {
+				newDepIsActive := lastUseDate == 0 && firstUseDate != 0
+				if alreadySynced.LastUseDate.Int64 > lastUseDate && alreadySynced.LastUseDate.Int64 != 0 && !newDepIsActive {
 					lastUseDate = alreadySynced.LastUseDate.Int64
 				}
 			}

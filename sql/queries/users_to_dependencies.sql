@@ -45,7 +45,8 @@ INSERT INTO users_to_dependencies (user_id, dependency_id, first_use_date, last_
 
 ON CONFLICT (user_id, dependency_id) DO UPDATE
 SET last_use_date = excluded.last_use_date,
-first_use_date = excluded.first_use_date
+first_use_date = excluded.first_use_date,
+resync_all = false
 RETURNING user_id, dependency_id;
 
 

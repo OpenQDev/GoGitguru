@@ -16,6 +16,9 @@ RETURNING *;
 -- name: UpdateStatusAndUpdatedAt :exec
 UPDATE repo_urls SET status = $1, updated_at = NOW() WHERE url = $2;
 
+-- name: UpdateStatusAndUpdatedAtepoUrlV2 :exec
+UPDATE repo_urls_v2 SET status = $1, updated_at = NOW() WHERE url = $2;
+
 -- name: GetReposStatus :many
 SELECT 
     r.url,
@@ -51,3 +54,5 @@ WITH selected AS (
 SELECT * FROM updated;
 
 COMMIT;
+
+

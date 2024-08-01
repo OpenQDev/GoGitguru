@@ -75,9 +75,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getCommitsWithAuthorInfoStmt, err = db.PrepareContext(ctx, getCommitsWithAuthorInfo); err != nil {
 		return nil, fmt.Errorf("error preparing query GetCommitsWithAuthorInfo: %w", err)
 	}
-	if q.getRepoAuthorsInfoStmt, err = db.PrepareContext(ctx, getRepoAuthorsInfo); err != nil {
-		return nil, fmt.Errorf("error preparing query GetRepoAuthorsInfo: %w", err)
-	}
 	if q.getDependenciesStmt, err = db.PrepareContext(ctx, getDependencies); err != nil {
 		return nil, fmt.Errorf("error preparing query GetDependencies: %w", err)
 	}
@@ -119,6 +116,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getLatestUncheckedCommitPerAuthorStmt, err = db.PrepareContext(ctx, getLatestUncheckedCommitPerAuthor); err != nil {
 		return nil, fmt.Errorf("error preparing query GetLatestUncheckedCommitPerAuthor: %w", err)
+	}
+	if q.getRepoAuthorsInfoStmt, err = db.PrepareContext(ctx, getRepoAuthorsInfo); err != nil {
+		return nil, fmt.Errorf("error preparing query GetRepoAuthorsInfo: %w", err)
 	}
 	if q.getRepoDependenciesStmt, err = db.PrepareContext(ctx, getRepoDependencies); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRepoDependencies: %w", err)
@@ -167,6 +167,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.updateStatusAndUpdatedAtStmt, err = db.PrepareContext(ctx, updateStatusAndUpdatedAt); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateStatusAndUpdatedAt: %w", err)
+	}
+	if q.updateStatusAndUpdatedAtepoUrlV2Stmt, err = db.PrepareContext(ctx, updateStatusAndUpdatedAtepoUrlV2); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateStatusAndUpdatedAtepoUrlV2: %w", err)
 	}
 	if q.upsertMissingDependenciesStmt, err = db.PrepareContext(ctx, upsertMissingDependencies); err != nil {
 		return nil, fmt.Errorf("error preparing query UpsertMissingDependencies: %w", err)
@@ -267,11 +270,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getCommitsWithAuthorInfoStmt: %w", cerr)
 		}
 	}
-	if q.getRepoAuthorsInfoStmt != nil {
-		if cerr := q.getRepoAuthorsInfoStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getRepoAuthorsInfoStmt: %w", cerr)
-		}
-	}
 	if q.getDependenciesStmt != nil {
 		if cerr := q.getDependenciesStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getDependenciesStmt: %w", cerr)
@@ -340,6 +338,11 @@ func (q *Queries) Close() error {
 	if q.getLatestUncheckedCommitPerAuthorStmt != nil {
 		if cerr := q.getLatestUncheckedCommitPerAuthorStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getLatestUncheckedCommitPerAuthorStmt: %w", cerr)
+		}
+	}
+	if q.getRepoAuthorsInfoStmt != nil {
+		if cerr := q.getRepoAuthorsInfoStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getRepoAuthorsInfoStmt: %w", cerr)
 		}
 	}
 	if q.getRepoDependenciesStmt != nil {
@@ -422,6 +425,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updateStatusAndUpdatedAtStmt: %w", cerr)
 		}
 	}
+	if q.updateStatusAndUpdatedAtepoUrlV2Stmt != nil {
+		if cerr := q.updateStatusAndUpdatedAtepoUrlV2Stmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateStatusAndUpdatedAtepoUrlV2Stmt: %w", cerr)
+		}
+	}
 	if q.upsertMissingDependenciesStmt != nil {
 		if cerr := q.upsertMissingDependenciesStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing upsertMissingDependenciesStmt: %w", cerr)
@@ -493,7 +501,6 @@ type Queries struct {
 	getCommitStmt                              *sql.Stmt
 	getCommitsStmt                             *sql.Stmt
 	getCommitsWithAuthorInfoStmt               *sql.Stmt
-	getRepoAuthorsInfoStmt                     *sql.Stmt
 	getDependenciesStmt                        *sql.Stmt
 	getDependenciesByFilesStmt                 *sql.Stmt
 	getDependenciesByNamesStmt                 *sql.Stmt
@@ -508,6 +515,7 @@ type Queries struct {
 	getGroupOfEmailsStmt                       *sql.Stmt
 	getLatestCommitterDateStmt                 *sql.Stmt
 	getLatestUncheckedCommitPerAuthorStmt      *sql.Stmt
+	getRepoAuthorsInfoStmt                     *sql.Stmt
 	getRepoDependenciesStmt                    *sql.Stmt
 	getRepoDependenciesByURLStmt               *sql.Stmt
 	getRepoURLStmt                             *sql.Stmt
@@ -524,6 +532,7 @@ type Queries struct {
 	switchReposRelationToSimpleStmt            *sql.Stmt
 	switchUsersRelationToSimpleStmt            *sql.Stmt
 	updateStatusAndUpdatedAtStmt               *sql.Stmt
+	updateStatusAndUpdatedAtepoUrlV2Stmt       *sql.Stmt
 	upsertMissingDependenciesStmt              *sql.Stmt
 	upsertRepoToUserByIdStmt                   *sql.Stmt
 	upsertRepoURLStmt                          *sql.Stmt
@@ -550,7 +559,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getCommitStmt:                              q.getCommitStmt,
 		getCommitsStmt:                             q.getCommitsStmt,
 		getCommitsWithAuthorInfoStmt:               q.getCommitsWithAuthorInfoStmt,
-		getRepoAuthorsInfoStmt:                     q.getRepoAuthorsInfoStmt,
 		getDependenciesStmt:                        q.getDependenciesStmt,
 		getDependenciesByFilesStmt:                 q.getDependenciesByFilesStmt,
 		getDependenciesByNamesStmt:                 q.getDependenciesByNamesStmt,
@@ -565,6 +573,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getGroupOfEmailsStmt:                       q.getGroupOfEmailsStmt,
 		getLatestCommitterDateStmt:                 q.getLatestCommitterDateStmt,
 		getLatestUncheckedCommitPerAuthorStmt:      q.getLatestUncheckedCommitPerAuthorStmt,
+		getRepoAuthorsInfoStmt:                     q.getRepoAuthorsInfoStmt,
 		getRepoDependenciesStmt:                    q.getRepoDependenciesStmt,
 		getRepoDependenciesByURLStmt:               q.getRepoDependenciesByURLStmt,
 		getRepoURLStmt:                             q.getRepoURLStmt,
@@ -581,6 +590,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		switchReposRelationToSimpleStmt:            q.switchReposRelationToSimpleStmt,
 		switchUsersRelationToSimpleStmt:            q.switchUsersRelationToSimpleStmt,
 		updateStatusAndUpdatedAtStmt:               q.updateStatusAndUpdatedAtStmt,
+		updateStatusAndUpdatedAtepoUrlV2Stmt:       q.updateStatusAndUpdatedAtepoUrlV2Stmt,
 		upsertMissingDependenciesStmt:              q.upsertMissingDependenciesStmt,
 		upsertRepoToUserByIdStmt:                   q.upsertRepoToUserByIdStmt,
 		upsertRepoURLStmt:                          q.upsertRepoURLStmt,

@@ -151,6 +151,20 @@ func (q *Queries) UpdateStatusAndUpdatedAt(ctx context.Context, arg UpdateStatus
 	return err
 }
 
+const updateStatusAndUpdatedAtepoUrlV2 = `-- name: UpdateStatusAndUpdatedAtepoUrlV2 :exec
+UPDATE repo_urls_v2 SET status = $1, updated_at = NOW() WHERE url = $2
+`
+
+type UpdateStatusAndUpdatedAtepoUrlV2Params struct {
+	Status RepoStatus `json:"status"`
+	Url    string     `json:"url"`
+}
+
+func (q *Queries) UpdateStatusAndUpdatedAtepoUrlV2(ctx context.Context, arg UpdateStatusAndUpdatedAtepoUrlV2Params) error {
+	_, err := q.exec(ctx, q.updateStatusAndUpdatedAtepoUrlV2Stmt, updateStatusAndUpdatedAtepoUrlV2, arg.Status, arg.Url)
+	return err
+}
+
 const upsertRepoURL = `-- name: UpsertRepoURL :exec
 INSERT INTO repo_urls (url, created_at, updated_at) 
 VALUES ($1, NOW(), NOW())
