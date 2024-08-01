@@ -17,7 +17,7 @@ func ProcessRepo(prefixPath string, organization string, repo string, repoUrl st
 		Url:    repoUrl,
 	})
 
-	commitCount, err := StoreGitLogsAndDepsHistoryForRepo(GitLogParams{prefixPath, organization, repo, repoUrl, startDate, db})
+	commitCount, err := StoreGitLogsAndDepsHistoryForRepo(GitLogParams{prefixPath, organization, repo, repoUrl, startDate, db, resyncAll})
 	if err != nil {
 		db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
 			Status: database.RepoStatusFailed,

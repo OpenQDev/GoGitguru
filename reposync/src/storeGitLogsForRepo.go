@@ -21,7 +21,7 @@ type GitLogParams struct {
 
 // from commitDate should be the date of the last commit that was synced for the repository or any of the dependencies.
 
-func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams) (int, error) {
+func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams, resyncAll bool) (int, error) {
 
 	repoDir := filepath.Join(params.prefixPath, params.organization, params.repo)
 
@@ -53,7 +53,7 @@ func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams) (int, error) {
 		dependencyFiles = append(dependencyFiles, dep.Pattern)
 	}
 
-	dependencyHistoryObjects, commitObject, usersToReposObject, numberOfCommitsToSync, err := GetObjectsFromCommitList(params, commitList, numberOfCommitsToSync, currentDependencies, dependencyFiles)
+	dependencyHistoryObjects, commitObject, usersToReposObject, numberOfCommitsToSync, err := GetObjectsFromCommitList(params, commitList, numberOfCommitsToSync, currentDependencies, dependencyFiles, resyncAll)
 
 	if err != nil {
 		return 0, fmt.Errorf("error getting structs from commit list %s: %s", params.repoUrl, err)
