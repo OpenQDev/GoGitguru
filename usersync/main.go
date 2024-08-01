@@ -31,8 +31,8 @@ func main() {
 	stopChan := make(chan struct{})
 	setupSignalHandler(stopChan)
 
-	go syncUserDependencies(database, env.UserDependenciesSyncInterval, stopChan)
 	go syncUsers(database, env.UserSyncInterval, randomToken, stopChan)
+	go syncUserDependencies(database, env.UserDependenciesSyncInterval, stopChan)
 
 	<-stopChan
 	logger.LogBlue("shutting down gracefully...")
