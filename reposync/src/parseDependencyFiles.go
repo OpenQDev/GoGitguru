@@ -27,6 +27,130 @@ type PomXML struct {
 	} `xml:"dependencies>dependency"`
 }
 
+var blockChains = []string{
+	"Ethereum",
+	"Gnosis",
+	"Polkadot",
+	"Polygon",
+	"Cosmos",
+	"Arbitrum",
+	"BNB",
+	"Avalanche",
+	"Solana",
+	"Optimism",
+	"Bitcoin",
+	"Kusama",
+	"NEAR",
+	"Celo",
+	"Fantom",
+	"Gnosis Chain",
+	"Starknet",
+	"Base",
+	"ZKSync",
+	"Moonbeam",
+	"Cardano",
+	"Internet Computer",
+	"Aptos",
+	"Moonriver",
+	"IPFS",
+	"Filecoin",
+	"Lightning",
+	"Aurora",
+	"Polygon zkEVM",
+	"Osmosis",
+	"Tezos",
+	"Mina Protocol",
+	"Harmony",
+	"Sui Network",
+	"Oasis",
+	"Hedera",
+	"Stellar",
+	"Status",
+	"Flow",
+	"Linea",
+	"Acala",
+	"Stacks",
+	"Boba",
+	"Algorand",
+	"Klaytn",
+	"MultiversX (Elrond)",
+	"Arweave",
+	"Astar Network",
+	"XRP",
+	"Scroll",
+	"Basic Attention Token",
+	"Terra",
+	"EOS",
+	"Fuel",
+	"Chainlink",
+	"Celestia",
+	"TON",
+	"Aztec Protocol",
+	"Mantle",
+	"Metis Token",
+	"Litecoin",
+	"Sora",
+	"IOTA",
+	"Cronos",
+	"Monero",
+	"Decentraland",
+	"Injective",
+	"Terra Classic",
+	"Vega Protocol",
+	"Sei Network",
+	"The Graph",
+	"EVMOS",
+	"Kava.io",
+	"Kujira",
+	"Nostr",
+	"Urbit",
+	"Chia",
+	"Zcash",
+	"Axelar Network",
+	"Anoma",
+	"Holochain",
+	"Huobi Token",
+	"Radix DLT",
+	"Kadena",
+	"HECO",
+	"dYdX",
+	"Aragon",
+	"Rootstock",
+	"Audius",
+	"Wormhole",
+	"Dogecoin",
+	"Dash",
+	"Synthetix",
+	"THORChain",
+	"Balancer",
+	"Aleo",
+	"Canto",
+	"Ergo",
+	"Tron",
+	"Golem",
+	"Ocean Protocol",
+}
+
+func addBlockhainsInString(input string) []string {
+	blockChainsContained := []string{}
+	lowerContents := strings.ToLower(input)
+
+	for _, blockChain := range blockChains {
+		lowerBlockChain := strings.ToLower(blockChain)
+
+		if strings.Contains(lowerContents, lowerBlockChain) {
+			blockChainsContained = append(blockChainsContained, lowerBlockChain)
+		}
+	}
+
+	// special cases
+	if strings.Contains(lowerContents, "eth-mainnet") {
+		blockChainsContained = append(blockChainsContained, "ethereum")
+	}
+
+	return blockChainsContained
+}
+
 // Helper function to read lines from a file
 func readLines(file *object.File) ([]string, error) {
 	reader, err := file.Reader()
@@ -64,6 +188,8 @@ func parsePipfile(file *object.File) ([]string, error) {
 		if workingOnDependencies {
 			dep := strings.Split(line, " = ")[0]
 			dependencies = append(dependencies, strings.TrimSpace(dep))
+			blockChains := addBlockhainsInString(line)
+			dependencies = append(dependencies, blockChains...)
 		}
 
 	}
@@ -82,6 +208,8 @@ func parseRequirementsTxt(file *object.File) ([]string, error) {
 		dep := strings.Split(line, " ")[0]
 		if strings.TrimSpace(dep) != "" {
 			dependencies = append(dependencies, strings.TrimSpace(dep))
+			blockChains := addBlockhainsInString(line)
+			dependencies = append(dependencies, blockChains...)
 		}
 	}
 	return dependencies, nil
@@ -115,6 +243,14 @@ func parsePackageJSON(file *object.File) ([]string, error) {
 	for devDep := range pkg.DevDependencies {
 		dependencies = append(dependencies, devDep)
 	}
+
+	plainText, err := file.Contents()
+	if err != nil {
+		fmt.Println(err, "error in package.json parser")
+	}
+
+	blockChains := addBlockhainsInString(plainText)
+	dependencies = append(dependencies, blockChains...)
 	return dependencies, nil
 }
 
@@ -127,6 +263,8 @@ func parseGoMod(file *object.File) ([]string, error) {
 	dependencies := []string{}
 	workingOnDependencies := false
 	for _, line := range lines {
+		blockChains := addBlockhainsInString(line)
+		dependencies = append(dependencies, blockChains...)
 		if strings.HasPrefix(line, "require") {
 			workingOnDependencies = true
 			continue
@@ -164,7 +302,11 @@ func parsePomXML(file *object.File) ([]string, error) {
 		return nil, err
 	}
 
-	var dependencies []string
+	plainText, err := file.Contents()
+	if err != nil {
+		fmt.Println(err, "error in package.json parser")
+	}
+	dependencies := addBlockhainsInString(plainText)
 	for _, dep := range pom.Dependencies {
 		dependencies = append(dependencies, fmt.Sprintf("%s:%s", dep.GroupID, dep.ArtifactID))
 	}
@@ -181,6 +323,9 @@ func parseBuildGradle(file *object.File) ([]string, error) {
 	var dependencies []string
 	inDependenciesBlock := false
 	for _, line := range lines {
+
+		blockChains := addBlockhainsInString(line)
+		dependencies = append(dependencies, blockChains...)
 		line = strings.TrimSpace(line)
 		if line == "dependencies {" {
 			inDependenciesBlock = true
@@ -207,6 +352,8 @@ func parseGemfile(file *object.File) ([]string, error) {
 
 	var dependencies []string
 	for _, line := range lines {
+		blockChains := addBlockhainsInString(line)
+		dependencies = append(dependencies, blockChains...)
 		if strings.HasPrefix(line, "gem ") {
 			dep := strings.Fields(line)[1]
 			dependencies = append(dependencies, strings.Trim(dep, `"',`))
@@ -225,6 +372,8 @@ func parseCargoToml(file *object.File) ([]string, error) {
 	var dependencies []string
 	workingOnDependencies := false
 	for _, line := range lines {
+		blockChains := addBlockhainsInString(line)
+		dependencies = append(dependencies, blockChains...)
 		if strings.HasPrefix(line, "[dependencies]") || strings.HasPrefix(line, "[dev-dependencies]") {
 			workingOnDependencies = true
 			continue
@@ -249,6 +398,8 @@ func parseCabal(file *object.File) ([]string, error) {
 
 	var dependencies []string
 	for _, line := range lines {
+		blockChains := addBlockhainsInString(line)
+		dependencies = append(dependencies, blockChains...)
 		if strings.Contains(line, "build-depends:") {
 			allDeps := strings.Split(line, ":")[1]
 			deps := strings.Split(allDeps, ",")
@@ -303,109 +454,6 @@ func parseBlockChains(file *object.File) ([]string, error) {
 	blockChainsContained := []string{}
 	lowerContents := strings.ToLower(contents)
 
-	blockChains := []string{
-		"Ethereum",
-		"Gnosis",
-		"Polkadot",
-		"Polygon",
-		"Cosmos",
-		"Arbitrum",
-		"BNB",
-		"Avalanche",
-		"Solana",
-		"Optimism",
-		"Bitcoin",
-		"Kusama",
-		"NEAR",
-		"Celo",
-		"Fantom",
-		"Gnosis Chain",
-		"Starknet",
-		"Base",
-		"ZKSync",
-		"Moonbeam",
-		"Cardano",
-		"Internet Computer",
-		"Aptos",
-		"Moonriver",
-		"IPFS",
-		"Filecoin",
-		"Lightning",
-		"Aurora",
-		"Polygon zkEVM",
-		"Osmosis",
-		"Tezos",
-		"Mina Protocol",
-		"Harmony",
-		"Sui Network",
-		"Oasis",
-		"Hedera",
-		"Stellar",
-		"Status",
-		"Flow",
-		"Linea",
-		"Acala",
-		"Stacks",
-		"Boba",
-		"Algorand",
-		"Klaytn",
-		"MultiversX (Elrond)",
-		"Arweave",
-		"Astar Network",
-		"XRP",
-		"Scroll",
-		"Basic Attention Token",
-		"Terra",
-		"EOS",
-		"Fuel",
-		"Chainlink",
-		"Celestia",
-		"TON",
-		"Aztec Protocol",
-		"Mantle",
-		"Metis Token",
-		"Litecoin",
-		"Sora",
-		"IOTA",
-		"Cronos",
-		"Monero",
-		"Decentraland",
-		"Injective",
-		"Terra Classic",
-		"Vega Protocol",
-		"Sei Network",
-		"The Graph",
-		"EVMOS",
-		"Kava.io",
-		"Kujira",
-		"Nostr",
-		"Urbit",
-		"Chia",
-		"Zcash",
-		"Axelar Network",
-		"Anoma",
-		"Holochain",
-		"Huobi Token",
-		"Radix DLT",
-		"Kadena",
-		"HECO",
-		"dYdX",
-		"Aragon",
-		"Rootstock",
-		"Audius",
-		"Wormhole",
-		"Dogecoin",
-		"Dash",
-		"Synthetix",
-		"THORChain",
-		"Balancer",
-		"Aleo",
-		"Canto",
-		"Ergo",
-		"Tron",
-		"Golem",
-		"Ocean Protocol",
-	}
 	for _, blockChain := range blockChains {
 		lowerBlockChain := strings.ToLower(blockChain)
 
