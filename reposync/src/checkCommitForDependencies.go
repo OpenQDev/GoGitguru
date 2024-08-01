@@ -61,9 +61,9 @@ func CheckCommitForDependencies(c *object.Commit, repoDir string, dependencyHist
 			// handle new file
 			for _, dependency := range dependencies {
 				addRowToDependencyHistoryObject(dependencyHistoryObject, dependency, indexableDependencyFileName, c.Committer.When.Unix())
-
 			}
 		}
+
 	}
 
 	return nil

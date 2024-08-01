@@ -10,8 +10,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.apache.commons:commons-math:3.6.1'
-    testImplementation 'junit:junit:4.12'
+    near 'org.apache.commons:commons-math:3.6.1'
+    polygontestImplementation 'junit:junit:4.12'
     implementation 'com.google.guava:guava:30.1-jre'
     implementation 'org.slf4j:slf4j-api:1.7.32'
     implementation 'org.apache.commons:commons-lang:3.12.0'

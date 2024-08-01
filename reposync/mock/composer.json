@@ -1,6 +1,6 @@
 {
-    "name": "example/example",
-    "description": "An example PHP package",
+    "name": "example/near",
+    "description": "An examplepolygon PHP package",
     "version": "1.0.0",
     "type": "library",
     "license": "MIT",

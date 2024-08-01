@@ -27,6 +27,7 @@ func validParseFileTest() []ParseFileTestCase {
 				"aurora",
 				"prettier",
 				"prettier-plugin-solidity",
+				"near",
 			},
 		},
 		{
@@ -37,6 +38,7 @@ func validParseFileTest() []ParseFileTestCase {
 				"containers",
 				"mtl",
 				"transformers",
+				"near",
 			},
 		}, {
 			file:     nil,
@@ -48,6 +50,7 @@ func validParseFileTest() []ParseFileTestCase {
 				"org.slf4j:slf4j-api",
 				"org.apache.commons:commons-lang",
 				"com.fasterxml.jackson.core:jackson-databind",
+				"near",
 			},
 		},
 		{
@@ -58,6 +61,7 @@ func validParseFileTest() []ParseFileTestCase {
 				"serde_json",
 				"reqwest",
 				"tokio",
+				"near",
 			},
 		},
 		{
@@ -67,6 +71,7 @@ func validParseFileTest() []ParseFileTestCase {
 				"symfony/property-info",
 				"php",
 				"ext-json",
+				"near",
 			},
 		},
 		{
@@ -76,6 +81,7 @@ func validParseFileTest() []ParseFileTestCase {
 				"sqlite3",
 				"puma",
 				"sass-rails",
+				"near",
 			},
 		},
 		{
@@ -84,6 +90,7 @@ func validParseFileTest() []ParseFileTestCase {
 			dependencies: []string{
 				"github.com/stretchr/testify",
 				"github.com/OpenQDev/GoGitguru",
+				"near",
 			},
 		},
 		{
@@ -93,6 +100,7 @@ func validParseFileTest() []ParseFileTestCase {
 				"pip-review-req-multi",
 				"pip-sync-req-multi",
 				"setuptools",
+				"near",
 			},
 		}, {
 			file:     nil,
@@ -109,6 +117,7 @@ func validParseFileTest() []ParseFileTestCase {
 				"junit:junit",
 				"org.apache.commons:commons-math",
 				"org.apache.maven.plugins:maven-compiler-plugin",
+				"near",
 			},
 		},
 	}
@@ -138,7 +147,9 @@ func validParseFileTest() []ParseFileTestCase {
 	})
 	newFiles := make([]ParseFileTestCase, 0)
 	for _, mockFile := range NO_FILE_LIST {
-		path := fmt.Sprintf("reposync/src/mock/%s", mockFile.fileName)
+
+		path := fmt.Sprintf("reposync/mock/%s", mockFile.fileName)
+
 		file, err := commit.File(path)
 		if err != nil {
 			panic(err)

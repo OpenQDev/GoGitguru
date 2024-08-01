@@ -36,12 +36,19 @@ func main() {
 			logger.LogBlue("shutting down gracefully...")
 			os.Exit(0)
 		default:
-			for i := 0; i < MAX_CONCURRENT_INSTANCES; i++ {
-				sem <- true
-				go func() {
-					defer func() { <-sem }()
-					reposync.StartSyncingCommits(database, conn, "repos", env.GitguruUrl)
-				}()
+			{
+				reposync.StartSyncingCommits(database, conn, "repos", env.GitguruUrl, true)
+
+				for i := 0; i < MAX_CONCURRENT_INSTANCES; i++ {
+					sem <- true
+					go func() {
+						defer func() { <-sem }()
+						reposync.StartSyncingCommits(database, conn, "repos", env.GitguruUrl, false)
+						if err != nil {
+							logger.LogError("error fetching due repo url", err)
+						}
+					}()
+				}
 			}
 			time.Sleep(time.Duration(env.RepoSyncInterval) * time.Second)
 		}

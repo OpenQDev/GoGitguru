@@ -23,7 +23,7 @@ type GetObjectsFromCommitListTestCase struct {
 
 func makeCommitByReference(hashString string, author string, authorEmail string, index int) *object.Commit {
 
-	repoDir := filepath.Join("mock", organization, repo)
+	repoDir := filepath.Join("../mock", organization, repo)
 	commitList, err := CreateCommitList(repoDir)
 	if err != nil {
 		panic(err)
@@ -48,7 +48,7 @@ func validGetObjectsFromCommitListTest() GetObjectsFromCommitListTestCase {
 
 		name: THREE_COMMITS,
 		params: GitLogParams{
-			prefixPath:   "mock",
+			prefixPath:   "../mock",
 			organization: organization,
 			repo:         repo,
 			repoUrl:      "repoUrl",

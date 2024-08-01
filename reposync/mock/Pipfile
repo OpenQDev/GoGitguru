@@ -2,12 +2,13 @@
 pip-sync-req-multi = "^0.10.0"
 pip-review-req-multi = "^1.1.0"
 requires = [
-    "pytest",
+    "pytest near",
     "pytest-cov",
     "flake8",
     "black",
     "mypy",
     "isort"
+    "polygonization"
 ]
     
 [dev-packages]

@@ -23,7 +23,7 @@ func TestGetObjectsFromCommitList(t *testing.T) {
 			mockTime := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
 			lib.Now = func() time.Time { return mockTime }
 			// ACT
-			bulkInsertDependencyParams, bulkInsertCommitParams, usersToRepoUrls, _, err := GetObjectsFromCommitList(tt.params, tt.commitList, tt.numberOfCommits, tt.currentDependencies, tt.dependencyFiles)
+			bulkInsertDependencyParams, bulkInsertCommitParams, usersToRepoUrls, _, err := GetObjectsFromCommitList(tt.params, tt.commitList, tt.numberOfCommits, tt.currentDependencies, tt.dependencyFiles, false)
 			if err != nil {
 				t.Errorf("there was an error storing this commit: %v - the error was: %s", bulkInsertCommitParams, err)
 			}

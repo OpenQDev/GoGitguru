@@ -22,7 +22,8 @@ INSERT INTO users_to_dependencies (user_id, dependency_id, first_use_date, last_
 
 ON CONFLICT (user_id, dependency_id) DO UPDATE
 SET last_use_date = excluded.last_use_date,
-first_use_date = excluded.first_use_date
+first_use_date = excluded.first_use_date,
+resync_all = false
 RETURNING user_id, dependency_id
 `
 
@@ -107,7 +108,7 @@ FROM repos_to_dependencies rd
 LEFT JOIN commits c ON c.repo_url = rd.url
 LEFT JOIN github_user_rest_id_author_emails guriae ON guriae.email = c.author_email
 LEFT JOIN github_users gu ON gu.github_rest_id = guriae.rest_id
-WHERE (rd.updated_at > $1 OR rd.updated_at IS NULL  ) AND
+WHERE (((rd.updated_at > $1 AND rd.updated_at< $2 ) OR rd.updated_at IS NULL ) ) AND
  gu.internal_id > 0
 GROUP BY gu.internal_id, rd.dependency_id, rd.url
 ) s
@@ -117,6 +118,11 @@ LEFT JOIN users_to_dependencies ud ON s.internal_id = ud.user_id AND s.dependenc
 GROUP BY s.internal_id, s.dependency_id
 `
 
+type GetUserDependenciesByUpdatedAtParams struct {
+	Since sql.NullInt64 `json:"since"`
+	Until sql.NullInt64 `json:"until"`
+}
+
 type GetUserDependenciesByUpdatedAtRow struct {
 	UserID       sql.NullInt32 `json:"user_id"`
 	FirstUseDate interface{}   `json:"first_use_date"`
@@ -124,8 +130,8 @@ type GetUserDependenciesByUpdatedAtRow struct {
 	DependencyID int32         `json:"dependency_id"`
 }
 
-func (q *Queries) GetUserDependenciesByUpdatedAt(ctx context.Context, updatedAt sql.NullInt64) ([]GetUserDependenciesByUpdatedAtRow, error) {
-	rows, err := q.query(ctx, q.getUserDependenciesByUpdatedAtStmt, getUserDependenciesByUpdatedAt, updatedAt)
+func (q *Queries) GetUserDependenciesByUpdatedAt(ctx context.Context, arg GetUserDependenciesByUpdatedAtParams) ([]GetUserDependenciesByUpdatedAtRow, error) {
+	rows, err := q.query(ctx, q.getUserDependenciesByUpdatedAtStmt, getUserDependenciesByUpdatedAt, arg.Since, arg.Until)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +162,8 @@ const getUserDependenciesByUser = `-- name: GetUserDependenciesByUser :many
 SELECT ud.first_use_date,
 ud.last_use_date,
 ud.dependency_id,
-ud.user_id
+ud.user_id,
+ud.resync_all
 FROM users_to_dependencies ud
 WHERE (ud.user_id, ud.dependency_id) IN
 (SELECT unnest($1::int[]), unnest($2::int[]))
@@ -172,6 +179,7 @@ type GetUserDependenciesByUserRow struct {
 	LastUseDate  sql.NullInt64 `json:"last_use_date"`
 	DependencyID int32         `json:"dependency_id"`
 	UserID       int32         `json:"user_id"`
+	ResyncAll    sql.NullBool  `json:"resync_all"`
 }
 
 func (q *Queries) GetUserDependenciesByUser(ctx context.Context, arg GetUserDependenciesByUserParams) ([]GetUserDependenciesByUserRow, error) {
@@ -188,6 +196,7 @@ func (q *Queries) GetUserDependenciesByUser(ctx context.Context, arg GetUserDepe
 			&i.LastUseDate,
 			&i.DependencyID,
 			&i.UserID,
+			&i.ResyncAll,
 		); err != nil {
 			return nil, err
 		}

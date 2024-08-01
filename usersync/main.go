@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/OpenQDev/GoGitguru/database"
 	usersync "github.com/OpenQDev/GoGitguru/usersync/src"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/setup"
@@ -30,23 +31,40 @@ func main() {
 	stopChan := make(chan struct{})
 	setupSignalHandler(stopChan)
 
+	go syncUsers(database, env.UserSyncInterval, randomToken, stopChan)
+	go syncUserDependencies(database, env.UserDependenciesSyncInterval, stopChan)
+
+	<-stopChan
+	logger.LogBlue("shutting down gracefully...")
+}
+
+func syncUserDependencies(database *database.Queries, interval int, stopChan <-chan struct{}) {
 	for {
 		select {
 		case <-stopChan:
-			logger.LogBlue("shutting down gracefully...")
-			os.Exit(0)
+			return
 		default:
-			logger.LogBlue("beginning user syncing...")
-
-			logger.LogBlue("syncing commits...")
-			usersync.StartUserSyncing(database, "repos", randomToken, 10, "https://api.github.com/graphql")
-			logger.LogBlue("commits synced!")
-
 			logger.LogBlue("syncing user dependencies...")
 			usersync.SyncUserDependencies(database)
 			logger.LogBlue("user dependencies synced!")
 
-			time.Sleep(time.Duration(env.UserSyncInterval) * time.Second)
+			time.Sleep(time.Duration(interval) * time.Second)
+		}
+	}
+}
+
+func syncUsers(database *database.Queries, interval int, token string, stopChan <-chan struct{}) {
+	for {
+		select {
+		case <-stopChan:
+			return
+		default:
+			logger.LogBlue("beginning user syncing...")
+			logger.LogBlue("syncing commits...")
+			usersync.StartUserSyncing(database, "repos", token, 10, "https://api.github.com/graphql")
+			logger.LogBlue("commits synced!")
+
+			time.Sleep(time.Duration(interval) * time.Second)
 		}
 	}
 }

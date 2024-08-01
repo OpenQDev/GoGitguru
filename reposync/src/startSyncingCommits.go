@@ -3,6 +3,7 @@ package reposync
 import (
 	"context"
 	"database/sql"
+	"strings"
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
@@ -20,14 +21,23 @@ func StartSyncingCommits(
 	conn *sql.DB,
 	prefixPath string,
 	gitguruUrl string,
+	resyncAll bool,
 ) {
 
 	for {
 		logger.LogBlue("fetching first repo to sync...")
-
-		repoUrl, err := GetDueURL(conn)
-		if err != nil {
-			logger.LogError("error fetching due repo url", err)
+		repoUrl := ""
+		var err error
+		if resyncAll {
+			repoUrl, err = GetDueURLV2(conn)
+			if err != nil {
+				logger.LogError("error fetching due repo url", err)
+			}
+		} else {
+			repoUrl, err = GetDueURL(conn)
+			if err != nil {
+				logger.LogError("error fetching due repo url", err)
+			}
 		}
 
 		if repoUrl == "" {
@@ -63,22 +73,22 @@ func StartSyncingCommits(
 				continue
 			}
 			logger.LogBlue("repository %s pulled!", repoUrl)
-			// there are cases where the repository may exist in local, but hasn't been synced
-			// no rows in result set just means it didn't have any commit entries for that repo
-			// latestCommitterDate, err := db.GetLatestCommitterDate(context.Background(), repoUrl)
-			// if err != nil {
-			// 	if !strings.Contains(err.Error(), "sql: no rows in result set") {
-			// 		logger.LogFatalRedAndExit("error getting latest committer date: %s ", err)
-			// 	}
-			// }
+			//	 there are cases where the repository may exist in local, but hasn't been synced
+			//	 no rows in result set just means it didn't have any commit entries for that repo
+			latestCommitterDate, err := db.GetLatestCommitterDate(context.Background(), repoUrl)
+			if err != nil {
+				if !strings.Contains(err.Error(), "sql: no rows in result set") {
+					logger.LogFatalRedAndExit("error getting latest committer date: %s ", err)
+				}
+			}
 
-			// latestCommitterDateTime := time.Unix(int64(latestCommitterDate), 0)
-			// // Unsure why but sometimes commits before JAN_1_2020 were being stored after initia clone-sync, causing issues
-			// if latestCommitterDateTime.After(JAN_1_2020) {
-			// 	startDate = latestCommitterDateTime
-			// }
+			latestCommitterDateTime := time.Unix(int64(latestCommitterDate), 0)
+			/// Unsure why but sometimes commits before JAN_1_2020 were being stored after initia clone-sync, causing issues
+			if latestCommitterDateTime.After(JAN_1_2020) && !resyncAll {
+				startDate = latestCommitterDateTime
+			}
 
-			err = ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db)
+			err = ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db, resyncAll)
 			if err != nil {
 				logger.LogFatalRedAndExit("error while processing repository %s: %s", repoUrl, err)
 			}
@@ -104,7 +114,7 @@ func StartSyncingCommits(
 			logger.LogBlue("repository %s cloned!", repoUrl)
 		}
 
-		err = ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db)
+		err = ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db, resyncAll)
 		if err != nil {
 			logger.LogFatalRedAndExit("error while processing repository %s: %s", repoUrl, err)
 		}

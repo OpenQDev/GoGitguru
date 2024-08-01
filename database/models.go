@@ -172,6 +172,7 @@ type UsersToDependency struct {
 	FirstUseDate sql.NullInt64 `json:"first_use_date"`
 	LastUseDate  sql.NullInt64 `json:"last_use_date"`
 	UpdatedAt    sql.NullInt64 `json:"updated_at"`
+	ResyncAll    sql.NullBool  `json:"resync_all"`
 }
 
 type UsersToRepoUrl struct {

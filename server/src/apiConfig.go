@@ -1,6 +1,10 @@
 package server
 
-import "github.com/OpenQDev/GoGitguru/database"
+import (
+	"database/sql"
+
+	"github.com/OpenQDev/GoGitguru/database"
+)
 
 type ApiConfig struct {
 	DB                   *database.Queries
@@ -8,4 +12,5 @@ type ApiConfig struct {
 	GithubGraphQLBaseUrl string
 	PrefixPath           string
 	DBURL                string
+	Conn                 *sql.DB
 }

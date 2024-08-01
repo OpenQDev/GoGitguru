@@ -11,7 +11,7 @@ import (
 
 func TestProcessRepo(t *testing.T) {
 	// BEFORE ALL
-	prefixPath := "mock"
+	prefixPath := "../mock"
 
 	// ARRANGE - TESTS
 	tests := ProcessRepoTestCases()
@@ -29,7 +29,7 @@ func TestProcessRepo(t *testing.T) {
 			tt.setupMock(mock, tt.gitLogs, tt.repoUrl)
 
 			// ACT
-			err := ProcessRepo(prefixPath, tt.organization, tt.repo, tt.repoUrl, tt.fromCommitDate, queries)
+			err := ProcessRepo(prefixPath, tt.organization, tt.repo, tt.repoUrl, tt.fromCommitDate, queries, false)
 			if err != nil {
 				t.Errorf("there was an error processing repo: %s", err)
 			}

@@ -14,8 +14,8 @@ import (
 
 type HandlerRepoAuthorsRequest struct {
 	RepoUrls []string `json:"repo_urls"`
-	Since   string `json:"since"`
-	Until   string `json:"until"`
+	Since    string   `json:"since"`
+	Until    string   `json:"until"`
 }
 
 type HandlerRepoAuthorsResponse struct{}
@@ -42,7 +42,7 @@ func (apiConfig *ApiConfig) HandlerRepoAuthors(w http.ResponseWriter, r *http.Re
 	}
 
 	params := database.GetRepoAuthorsInfoParams{
-		RepoUrls:      body.RepoUrls,
+		RepoUrls:     body.RepoUrls,
 		AuthorDate:   sql.NullInt64{Int64: since.Unix(), Valid: true},
 		AuthorDate_2: sql.NullInt64{Int64: until.Unix(), Valid: true},
 	}
@@ -88,24 +88,24 @@ func ConvertToAuthorInfo(rows []database.GetRepoAuthorsInfoRow) []AuthorInfo {
 }
 
 type AuthorInfo struct {
-	Author          string    `json:"author"`
-	AuthorEmail     string    `json:"author_email"`
-	RestID          int32     `json:"rest_id"`
-	Email           string    `json:"email"`
-	InternalID      int32     `json:"internal_id"`
-	GithubRestID    int32     `json:"github_rest_id"`
-	GithubGraphqlID string    `json:"github_graphql_id"`
-	Login           string    `json:"login"`
-	Name            string    `json:"name"`
-	Email_2         string    `json:"email_2"`
-	AvatarUrl       string    `json:"avatar_url"`
-	Company         string    `json:"company"`
-	Location        string    `json:"location"`
-	Bio             string    `json:"bio"`
-	Blog            string    `json:"blog"`
-	Hireable        bool      `json:"hireable"`
-	TwitterUsername string    `json:"twitter_username"`
-	Followers       int32     `json:"followers"`
-	Following       int32     `json:"following"`
-	Type            string    `json:"type"`
+	Author          string `json:"author"`
+	AuthorEmail     string `json:"author_email"`
+	RestID          int32  `json:"rest_id"`
+	Email           string `json:"email"`
+	InternalID      int32  `json:"internal_id"`
+	GithubRestID    int32  `json:"github_rest_id"`
+	GithubGraphqlID string `json:"github_graphql_id"`
+	Login           string `json:"login"`
+	Name            string `json:"name"`
+	Email_2         string `json:"email_2"`
+	AvatarUrl       string `json:"avatar_url"`
+	Company         string `json:"company"`
+	Location        string `json:"location"`
+	Bio             string `json:"bio"`
+	Blog            string `json:"blog"`
+	Hireable        bool   `json:"hireable"`
+	TwitterUsername string `json:"twitter_username"`
+	Followers       int32  `json:"followers"`
+	Following       int32  `json:"following"`
+	Type            string `json:"type"`
 }
