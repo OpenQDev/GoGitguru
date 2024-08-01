@@ -66,7 +66,7 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 					return dependencyHistoryObject, commitObject, usersToRepoUrl, 0, err
 				}
 			}
-			if resyncAll {
+			if !resyncAll {
 				AddCommitToCommitObject(commit, &commitObject, commitIndex)
 			}
 

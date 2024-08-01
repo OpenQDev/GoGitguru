@@ -2,6 +2,7 @@ package reposync
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -138,7 +139,13 @@ func validParseFileTest() []ParseFileTestCase {
 	})
 	newFiles := make([]ParseFileTestCase, 0)
 	for _, mockFile := range NO_FILE_LIST {
-		path := fmt.Sprintf("reposync/src/mock/%s", mockFile.fileName)
+		path := filepath.Join("..", "reposync", "mock", mockFile.fileName)
+		fmt.Println(path)
+		files, err := commit.Files()
+		files.ForEach(func(file *object.File) error {
+			fmt.Println(file.Name)
+			return nil
+		})
 		file, err := commit.File(path)
 		if err != nil {
 			panic(err)
