@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/OpenQDev/GoGitguru/util/setup"
 )
 
 type HandlerSetCurrentRepoUrlsToPendingV2Response struct {
@@ -14,6 +16,10 @@ type HandlerSetCurrentRepoUrlsToPendingV2Response struct {
 }
 
 func (apiCfg *ApiConfig) HandlerSetCurrentRepoUrlsToPendingV2(w http.ResponseWriter, r *http.Request) {
+	env := setup.ExtractAndVerifyEnvironment("../../.env")
+
+	// TODO add 401 for env.GitguruApiKey
+
 	// Read off the JSON body to bodyBytes for use in error logging if needed
 	bodyBytes, _ := io.ReadAll(r.Body)
 
