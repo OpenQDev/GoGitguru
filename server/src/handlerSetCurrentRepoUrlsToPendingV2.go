@@ -17,6 +17,14 @@ type HandlerSetCurrentRepoUrlsToPendingV2Response struct {
 
 func (apiCfg *ApiConfig) HandlerSetCurrentRepoUrlsToPendingV2(w http.ResponseWriter, r *http.Request) {
 	env := setup.ExtractAndVerifyEnvironment("../../.env")
+	// Get the contents of the authorization header
+	authHeader := r.Header.Get("Authorization")
+
+	// Match the authorization header with env.api key
+	if authHeader != env.GitguruApiKey {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
 	// TODO add 401 for env.GitguruApiKey
 
