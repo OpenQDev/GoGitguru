@@ -9,16 +9,17 @@ import (
 )
 
 type EnvConfig struct {
-	PortString       string
-	DbUrl            string
-	OriginUrl        string
-	Debug            bool
-	GhAccessToken    string
-	GhAccessTokens   string
-	TargetLiveGithub bool
-	RepoSyncInterval int
-	UserSyncInterval int
-	GitguruUrl       string
+	PortString                   string
+	DbUrl                        string
+	OriginUrl                    string
+	Debug                        bool
+	GhAccessToken                string
+	GhAccessTokens               string
+	TargetLiveGithub             bool
+	RepoSyncInterval             int
+	UserSyncInterval             int
+	UserDependenciesSyncInterval int
+	GitguruUrl                   string
 }
 
 func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
@@ -27,15 +28,16 @@ func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
 	}
 
 	return EnvConfig{
-		PortString:       getEnvVar("PORT", "string").(string),
-		DbUrl:            getEnvVar("DB_URL", "string").(string),
-		OriginUrl:        getEnvVar("ORIGIN_URL", "string").(string),
-		Debug:            getEnvVar("DEBUG_MODE", "bool").(bool),
-		GhAccessTokens:   getEnvVar("GH_ACCESS_TOKENS", "string").(string),
-		TargetLiveGithub: getEnvVar("TARGET_LIVE_GITHUB", "bool").(bool),
-		RepoSyncInterval: getEnvVar("REPOSYNC_INTERVAL", "int").(int),
-		UserSyncInterval: getEnvVar("USERSYNC_INTERVAL", "int").(int),
-		GitguruUrl:       getEnvVar("GITGURU_URL", "string").(string),
+		PortString:                   getEnvVar("PORT", "string").(string),
+		DbUrl:                        getEnvVar("DB_URL", "string").(string),
+		OriginUrl:                    getEnvVar("ORIGIN_URL", "string").(string),
+		Debug:                        getEnvVar("DEBUG_MODE", "bool").(bool),
+		GhAccessTokens:               getEnvVar("GH_ACCESS_TOKENS", "string").(string),
+		TargetLiveGithub:             getEnvVar("TARGET_LIVE_GITHUB", "bool").(bool),
+		RepoSyncInterval:             getEnvVar("REPOSYNC_INTERVAL", "int").(int),
+		UserSyncInterval:             getEnvVar("USERSYNC_INTERVAL", "int").(int),
+		UserDependenciesSyncInterval: getEnvVar("USERSYNC_DEPDENCIES_INTERVAL", "int").(int),
+		GitguruUrl:                   getEnvVar("GITGURU_URL", "string").(string),
 	}
 }
 
