@@ -336,8 +336,15 @@ func parseBuildGradle(file *object.File) ([]string, error) {
 				inDependenciesBlock = false
 				break
 			}
-			componentArray := strings.Split(strings.Split(line, " '")[1], ":")
-			dependencies = append(dependencies, componentArray[0]+":"+componentArray[1])
+
+			splitLine := strings.Split(line, " '")
+			if len(splitLine) > 1 {
+				componentArray := strings.Split(splitLine[1], ":")
+				if len(componentArray) > 1 {
+					dependencies = append(dependencies, componentArray[0]+":"+componentArray[1])
+				}
+
+			}
 		}
 	}
 	return dependencies, nil
