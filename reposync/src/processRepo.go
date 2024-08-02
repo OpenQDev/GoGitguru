@@ -11,9 +11,6 @@ import (
 
 func ProcessRepo(prefixPath string, organization string, repo string, repoUrl string, startDate time.Time, db *database.Queries, resyncAll bool) error {
 	logger.LogGreenDebug("beginning to process %s", repoUrl)
-	if resyncAll {
-		logger.LogGreenDebug("resyncing all commits for %s", repoUrl)
-	}
 
 	db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
 		Status: database.RepoStatusSyncingRepo,

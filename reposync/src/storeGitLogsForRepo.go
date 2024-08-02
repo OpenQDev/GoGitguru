@@ -8,7 +8,6 @@ import (
 
 	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/OpenQDev/GoGitguru/util/gitutil"
-	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
 type GitLogParams struct {
@@ -55,9 +54,6 @@ func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams, resyncAll bool) (int
 	}
 
 	dependencyHistoryObjects, commitObject, usersToReposObject, numberOfCommitsToSync, err := GetObjectsFromCommitList(params, commitList, numberOfCommitsToSync, currentDependencies, dependencyFiles, resyncAll)
-	if resyncAll {
-		logger.LogGreenDebug("resyncing all deps for %s", dependencyHistoryObjects.Url, dependencyHistoryObjects.Dependencynames, dependencyHistoryObjects.UpdatedAt.Int64)
-	}
 
 	if err != nil {
 		return 0, fmt.Errorf("error getting structs from commit list %s: %s", params.repoUrl, err)
