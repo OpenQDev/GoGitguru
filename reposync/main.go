@@ -37,7 +37,7 @@ func main() {
 			os.Exit(0)
 		default:
 			{
-				reposync.StartSyncingCommits(database, conn, "repos", env.GitguruUrl, true)
+				go func() { reposync.StartSyncingCommits(database, conn, "repos", env.GitguruUrl, true) }()
 
 				for i := 0; i < MAX_CONCURRENT_INSTANCES; i++ {
 					sem <- true

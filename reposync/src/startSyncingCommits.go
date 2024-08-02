@@ -25,15 +25,16 @@ func StartSyncingCommits(
 ) {
 
 	for {
-		logger.LogBlue("fetching first repo to sync...")
 		repoUrl := ""
 		var err error
 		if resyncAll {
+			logger.LogBlue("fetching first resync repo to sync...")
 			repoUrl, err = GetDueURLV2(conn)
 			if err != nil {
 				logger.LogError("error fetching due repo url", err)
 			}
 		} else {
+			logger.LogBlue("fetching first repo to sync...")
 			repoUrl, err = GetDueURL(conn)
 			if err != nil {
 				logger.LogError("error fetching due repo url", err)
