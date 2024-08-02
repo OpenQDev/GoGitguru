@@ -53,7 +53,8 @@ FROM
 ON CONFLICT (url, dependency_id) DO UPDATE 
 SET 
   first_use_date = EXCLUDED.first_use_date,
-  last_use_date = EXCLUDED.last_use_date;
+  last_use_date = EXCLUDED.last_use_date,
+  updated_at = EXCLUDED.updated_at;
 
 
 
