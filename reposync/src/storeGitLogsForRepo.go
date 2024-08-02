@@ -56,7 +56,7 @@ func StoreGitLogsAndDepsHistoryForRepo(params GitLogParams, resyncAll bool) (int
 
 	dependencyHistoryObjects, commitObject, usersToReposObject, numberOfCommitsToSync, err := GetObjectsFromCommitList(params, commitList, numberOfCommitsToSync, currentDependencies, dependencyFiles, resyncAll)
 	if resyncAll {
-		logger.LogGreenDebug("resyncing all deps for %s", dependencyHistoryObjects.Url, dependencyHistoryObjects.Dependencynames)
+		logger.LogGreenDebug("resyncing all deps for %s", dependencyHistoryObjects.Url, dependencyHistoryObjects.Dependencynames, dependencyHistoryObjects.UpdatedAt.Int64)
 	}
 
 	if err != nil {
