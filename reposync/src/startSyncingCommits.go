@@ -14,10 +14,6 @@ import (
 	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
-type GetDueUrlResponse struct {
-	RepoUrl string `json:"repo_url"`
-}
-
 func StartSyncingCommits(
 	db *database.Queries,
 	conn *sql.DB,
@@ -109,26 +105,38 @@ func StartSyncingCommits(
 
 		// Produce Kafka messages for each email in the list
 		for _, user := range emailList {
-			message := GithubUserKafkaMessage{
-				AuthorEmail: user.AuthorEmail,
-				AuthorDate:  user.AuthorDate,
-				RepoUrl:     user.RepoUrl,
-			}
-
-			jsonMessage, err := json.Marshal(message)
+			// Check if the email already exists in the rest_id_to_email table
+			exists, err := db.CheckGithubUserRestIdAuthorEmailExists(context.Background(), user.AuthorEmail)
 			if err != nil {
-				logger.LogError("Failed to marshal message to JSON: %s", err)
+				logger.LogError("Failed to check if email exists: %s", err)
 				continue
 			}
 
-			_, _, err = producer.SendMessage(&sarama.ProducerMessage{
-				Topic: "user-sync",
-				Value: sarama.StringEncoder(jsonMessage),
-			})
-			if err != nil {
-				logger.LogError("Failed to send message to Kafka: %s", err)
+			// If the email doesn't exist, produce a Kafka message
+			if !exists {
+				message := GithubUserKafkaMessage{
+					AuthorEmail: user.AuthorEmail,
+					AuthorDate:  user.AuthorDate,
+					RepoUrl:     user.RepoUrl,
+				}
+
+				jsonMessage, err := json.Marshal(message)
+				if err != nil {
+					logger.LogError("Failed to marshal message to JSON: %s", err)
+					continue
+				}
+
+				_, _, err = producer.SendMessage(&sarama.ProducerMessage{
+					Topic: "user-sync",
+					Value: sarama.StringEncoder(jsonMessage),
+				})
+				if err != nil {
+					logger.LogError("Failed to send message to Kafka: %s", err)
+				} else {
+					logger.LogGreenDebug("Message sent to Kafka: %s", user.AuthorEmail)
+				}
 			} else {
-				logger.LogGreenDebug("Message sent to Kafka: %s", user.AuthorEmail)
+				logger.LogGreenDebug("Email already exists, skipping Kafka message: %s", user.AuthorEmail)
 			}
 		}
 	}
