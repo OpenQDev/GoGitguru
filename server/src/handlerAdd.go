@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/IBM/sarama"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
@@ -40,6 +41,15 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 
 	accepted := []string{}
 
+	// Create a Kafka producer
+	producer, err := sarama.NewSyncProducer(apiCfg.KafkaBrokers, apiCfg.KafkaConfig)
+	if err != nil {
+		logger.LogError("Failed to create Kafka producer", err)
+		RespondWithError(w, 500, "Internal server error")
+		return
+	}
+	defer producer.Close()
+
 	for _, repoUrl := range request.RepoUrls {
 
 		err = addToList(apiCfg, r, repoUrl)
@@ -48,6 +58,18 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 			logger.LogError(msg)
 			RespondWithError(w, 500, msg)
 			return
+		}
+
+		// Publish message to Kafka
+		message := map[string]string{"repo_url": repoUrl}
+		messageJSON, _ := json.Marshal(message)
+		_, _, err = producer.SendMessage(&sarama.ProducerMessage{
+			Topic: "repo-urls",
+			Value: sarama.StringEncoder(messageJSON),
+		})
+		if err != nil {
+			logger.LogError(fmt.Sprintf("Failed to publish message for %s to Kafka", repoUrl), err)
+			// Continue processing other URLs even if Kafka publish fails
 		}
 
 		accepted = append(accepted, repoUrl)

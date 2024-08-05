@@ -3,6 +3,7 @@ package server
 import (
 	"database/sql"
 
+	"github.com/IBM/sarama"
 	"github.com/OpenQDev/GoGitguru/database"
 )
 
@@ -13,4 +14,6 @@ type ApiConfig struct {
 	PrefixPath           string
 	DBURL                string
 	Conn                 *sql.DB
+	KafkaBrokers         []string
+	KafkaConfig          *sarama.Config
 }
