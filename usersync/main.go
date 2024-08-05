@@ -79,7 +79,7 @@ func main() {
 	// Define the consumer group and brokers
 	group := "new-users-group"
 	brokers := []string{"localhost:9092"} // Replace with your broker addresses
-	topics := []string{"usersync"}
+	topics := []string{"user-sync"}
 
 	// Create a wait group to manage goroutines
 	var wg sync.WaitGroup
