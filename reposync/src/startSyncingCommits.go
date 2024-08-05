@@ -3,9 +3,11 @@ package reposync
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"strings"
 	"time"
 
+	"github.com/IBM/sarama"
 	"github.com/OpenQDev/GoGitguru/database"
 
 	"github.com/OpenQDev/GoGitguru/util/gitutil"
@@ -68,11 +70,6 @@ func StartSyncingCommits(
 		if latestCommitterDateTime.After(JAN_1_2020) {
 			startDate = latestCommitterDateTime
 		}
-
-		err = ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db)
-		if err != nil {
-			logger.LogFatalRedAndExit("error while processing repository %s: %s", repoUrl, err)
-		}
 	} else {
 		// If not, clone it
 		logger.LogBlue("repository %s does not exist. cloning...", repoUrl)
@@ -91,7 +88,51 @@ func StartSyncingCommits(
 		logger.LogBlue("repository %s cloned!", repoUrl)
 	}
 
-	err := ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db)
+	emailList, err := ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db)
+	if err != nil {
+		logger.LogError("error processing repo %s: %s", repoUrl, err)
+		return
+	}
+
+	type GithubUserKafkaMessage struct {
+		AuthorEmail string    `json:"author_email"`
+		AuthorDate  time.Time `json:"author_date"`
+		RepoUrl     string    `json:"repo_url"`
+	}
+
+	// Create a Kafka producer
+	producer, err := sarama.NewSyncProducer([]string{"localhost:9092"}, nil)
+	if err != nil {
+		logger.LogError("Failed to create Kafka producer: %s", err)
+	} else {
+		defer producer.Close()
+
+		// Produce Kafka messages for each email in the list
+		for _, user := range emailList {
+			message := GithubUserKafkaMessage{
+				AuthorEmail: user.AuthorEmail,
+				AuthorDate:  user.AuthorDate,
+				RepoUrl:     user.RepoUrl,
+			}
+
+			jsonMessage, err := json.Marshal(message)
+			if err != nil {
+				logger.LogError("Failed to marshal message to JSON: %s", err)
+				continue
+			}
+
+			_, _, err = producer.SendMessage(&sarama.ProducerMessage{
+				Topic: "github-users",
+				Value: sarama.StringEncoder(jsonMessage),
+			})
+			if err != nil {
+				logger.LogError("Failed to send message to Kafka: %s", err)
+			} else {
+				logger.LogGreenDebug("Message sent to Kafka: %s", user.AuthorEmail)
+			}
+		}
+	}
+
 	if err != nil {
 		logger.LogFatalRedAndExit("error while processing repository %s: %s", repoUrl, err)
 	}

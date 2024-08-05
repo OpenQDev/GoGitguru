@@ -1,6 +1,7 @@
 package reposync
 
 import (
+	"fmt"
 	"slices"
 
 	"github.com/go-git/go-git/v5"
@@ -8,7 +9,7 @@ import (
 )
 
 func CreateCommitList(repoDir string) ([]*object.Commit, error) {
-
+	fmt.Println(repoDir)
 	r, err := git.PlainOpen(repoDir)
 	if err != nil {
 		return nil, err

@@ -9,7 +9,7 @@ import (
 	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
-func ProcessRepo(prefixPath string, organization string, repo string, repoUrl string, startDate time.Time, db *database.Queries) error {
+func ProcessRepo(prefixPath string, organization string, repo string, repoUrl string, startDate time.Time, db *database.Queries) ([]GithubUser, error) {
 	logger.LogGreenDebug("beginning to process %s", repoUrl)
 
 	db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
@@ -23,17 +23,11 @@ func ProcessRepo(prefixPath string, organization string, repo string, repoUrl st
 			Status: database.RepoStatusFailed,
 			Url:    repoUrl,
 		})
-		return err
+		return []GithubUser{}, err
 	}
 
 	if commitCount == 0 {
 		logger.LogBlue("no new commits in repo %s", repoUrl)
-	}
-
-	type GithubUser struct {
-		AuthorEmail string
-		AuthorDate  time.Time
-		RepoUrl     string
 	}
 
 	// Create a map to store unique emails with their associated info
@@ -69,5 +63,5 @@ func ProcessRepo(prefixPath string, organization string, repo string, repoUrl st
 
 	logger.LogBlue("Successfully stored %d commits for %s in the database.", commitCount, repoUrl)
 
-	return nil
+	return emailList, nil
 }

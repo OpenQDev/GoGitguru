@@ -1,5 +1,7 @@
 package reposync
 
+import "time"
+
 type GitLog struct {
 	CommitHash    string
 	AuthorName    string
@@ -30,6 +32,12 @@ type DependencyWithUpdatedTime struct {
 	DependencyFile string
 	UpdatedAt      int64
 	InternalID     int32
+}
+
+type GithubUser struct {
+	AuthorEmail string
+	AuthorDate  time.Time
+	RepoUrl     string
 }
 
 const organization = "openqdev"
