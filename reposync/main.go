@@ -31,6 +31,27 @@ type Consumer struct {
 	env      setup.EnvConfig
 }
 
+// setupProducer will create a SyncProducer and returns it
+func setupProducer(environment string, kafkaBrokers []string) (sarama.SyncProducer, error) {
+	config := sarama.NewConfig()
+	config.Producer.Return.Successes = true
+
+	fmt.Printf("Starting producer for environment %s\n", environment)
+	if environment != "LOCAL" {
+		// Set the SASL/OAUTHBEARER configuration
+		config.Net.SASL.Enable = true
+		config.Net.SASL.Mechanism = sarama.SASLTypeOAuth
+		config.Net.SASL.TokenProvider = &reposync.MSKAccessTokenProvider{}
+
+		// Enable TLS
+		tlsConfig := tls.Config{}
+		config.Net.TLS.Enable = true
+		config.Net.TLS.Config = &tlsConfig
+	}
+
+	return sarama.NewSyncProducer(kafkaBrokers, config)
+}
+
 func setUpConsumerGroup(environment string, kafkaBrokers []string, group string) (sarama.ConsumerGroup, error) {
 	// Set the SASL/OAUTHBEARER configuration
 	// Set up the Sarama configuration
