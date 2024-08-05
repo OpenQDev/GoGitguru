@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -15,6 +16,7 @@ import (
 	"github.com/IBM/sarama"
 
 	"github.com/OpenQDev/GoGitguru/database"
+	reposync "github.com/OpenQDev/GoGitguru/reposync/src"
 	usersync "github.com/OpenQDev/GoGitguru/usersync/src"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/setup"
@@ -25,6 +27,29 @@ type Consumer struct {
 	database *database.Queries // Replace with your actual database type
 	conn     *sql.DB           // Replace with your actual connection type
 	env      setup.EnvConfig   // Replace with your actual connection type
+}
+
+func setUpConsumerGroup(environment string, kafkaBrokers []string, group string) (sarama.ConsumerGroup, error) {
+	// Set the SASL/OAUTHBEARER configuration
+	// Set up the Sarama configuration
+	config := sarama.NewConfig()
+	config.Version = sarama.V2_5_0_0
+	config.Consumer.Group.Rebalance.Strategy = sarama.NewBalanceStrategyRange()
+	config.Consumer.Offsets.Initial = sarama.OffsetNewest
+	config.Consumer.Offsets.AutoCommit.Enable = false
+
+	fmt.Printf("Starting consumer for environment %s\n", environment)
+	if environment == "production" {
+		config.Net.SASL.Enable = true
+		config.Net.SASL.Mechanism = sarama.SASLTypeOAuth
+		config.Net.SASL.TokenProvider = &reposync.MSKAccessTokenProvider{}
+
+		tlsConfig := tls.Config{}
+		config.Net.TLS.Enable = true
+		config.Net.TLS.Config = &tlsConfig
+	}
+
+	return sarama.NewConsumerGroup(kafkaBrokers, group, config)
 }
 
 func main() {
@@ -44,23 +69,16 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// Set up the Sarama configuration
-	config := sarama.NewConfig()
-	config.Version = sarama.V2_5_0_0 // Set the version to match your Kafka cluster
-	config.Consumer.Group.Rebalance.Strategy = sarama.NewBalanceStrategyRange()
-	config.Consumer.Offsets.Initial = sarama.OffsetNewest // Start from the newest message
-	config.Consumer.Offsets.AutoCommit.Enable = false     // Disable auto commit for manual control
-
 	// Define the consumer group and brokers
-	group := "new-users-group"
-	brokers := []string{"localhost:9092"} // Replace with your broker addresses
-	topics := []string{"usersync"}
+	group := env.UserSyncConsumerGroup
+	brokers := strings.Split(env.KafkaBrokerUrls, ",")
+	topics := []string{env.UserSyncTopic}
 
 	// Create a wait group to manage goroutines
 	var wg sync.WaitGroup
 
 	// Spawn consumers
-	numConsumers := 5 // Set the number of concurrent consumer instances
+	numConsumers := env.UserSyncConsumerCount // Set the number of concurrent consumer instances
 	for i := 0; i < numConsumers; i++ {
 		wg.Add(1)
 		go func(consumerID int) {
@@ -71,7 +89,7 @@ func main() {
 				conn:     conn,
 			}
 
-			client, err := sarama.NewConsumerGroup(brokers, group, config)
+			client, err := setUpConsumerGroup(env.Environment, brokers, group)
 			if err != nil {
 				logger.LogError(fmt.Sprintf("Error creating consumer group client for consumer %d", consumerID), err)
 				return

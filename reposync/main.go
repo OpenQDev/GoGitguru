@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 
@@ -29,6 +30,28 @@ type Consumer struct {
 	database *database.Queries
 	conn     *sql.DB
 	env      setup.EnvConfig
+	producer sarama.SyncProducer
+}
+
+// setupProducer will create a SyncProducer and returns it
+func setupProducer(environment string, kafkaBrokers []string) (sarama.SyncProducer, error) {
+	config := sarama.NewConfig()
+	config.Producer.Return.Successes = true
+
+	fmt.Printf("Starting producer for environment %s\n", environment)
+	if environment == "production" {
+		// Set the SASL/OAUTHBEARER configuration
+		config.Net.SASL.Enable = true
+		config.Net.SASL.Mechanism = sarama.SASLTypeOAuth
+		config.Net.SASL.TokenProvider = &reposync.MSKAccessTokenProvider{}
+
+		// Enable TLS
+		tlsConfig := tls.Config{}
+		config.Net.TLS.Enable = true
+		config.Net.TLS.Config = &tlsConfig
+	}
+
+	return sarama.NewSyncProducer(kafkaBrokers, config)
 }
 
 func setUpConsumerGroup(environment string, kafkaBrokers []string, group string) (sarama.ConsumerGroup, error) {
@@ -41,7 +64,7 @@ func setUpConsumerGroup(environment string, kafkaBrokers []string, group string)
 	config.Consumer.Offsets.AutoCommit.Enable = false
 
 	fmt.Printf("Starting consumer for environment %s\n", environment)
-	if environment != "LOCAL" {
+	if environment == "production" {
 		config.Net.SASL.Enable = true
 		config.Net.SASL.Mechanism = sarama.SASLTypeOAuth
 		config.Net.SASL.TokenProvider = &reposync.MSKAccessTokenProvider{}
@@ -64,9 +87,13 @@ func main() {
 	}
 	defer conn.Close()
 
-	group := "repo-urls-group"
-	brokers := []string{"localhost:9092"}
-	topics := []string{"repo-urls"}
+	group := env.RepoUrlsConsumerGroup
+	brokers := strings.Split(env.KafkaBrokerUrls, ",")
+	topics := []string{env.RepoUrlsTopic}
+	producer, err := setupProducer(env.Environment, brokers)
+	if err != nil {
+		logger.LogError("Failed to setup Kafka producer:", err)
+	}
 
 	logger.SetDebugMode(env.Debug)
 	logger.LogBlue("beginning repo syncing...")
@@ -81,7 +108,7 @@ func main() {
 	var wg sync.WaitGroup
 
 	// Spawn consumers
-	numConsumers := 5
+	numConsumers := env.RepoSyncConsumerCount
 	for i := 0; i < numConsumers; i++ {
 		wg.Add(1)
 		go func(consumerID int) {
@@ -91,6 +118,7 @@ func main() {
 				database: database,
 				conn:     conn,
 				env:      env,
+				producer: producer,
 			}
 
 			client, err := setUpConsumerGroup(env.Environment, brokers, group)
@@ -161,7 +189,7 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 				continue
 			}
 
-			reposync.StartSyncingCommits(consumer.database, consumer.conn, "repos", consumer.env.GitguruUrl, msg.RepoURL)
+			reposync.StartSyncingCommits(consumer.database, consumer.conn, "repos", consumer.env.GitguruUrl, msg.RepoURL, consumer.producer)
 
 			session.MarkMessage(message, "")
 			session.Commit()

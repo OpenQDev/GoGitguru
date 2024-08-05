@@ -22,6 +22,14 @@ type EnvConfig struct {
 	GitguruUrl                   string
 	GitguruApiKey                string
 	Environment                  string
+	RepoSyncConsumerCount        int
+	RepoUrlsConsumerGroup        string
+	RepoUrlsTopic                string
+	UserSyncConsumerCount        int
+	UserSyncConsumerGroup        string
+	UserSyncTopic                string
+	KafkaBrokerUrls              string
+	AwsRegion                    string
 }
 
 func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
@@ -41,7 +49,15 @@ func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
 		UserDependenciesSyncInterval: getEnvVar("USERSYNC_DEPDENCIES_INTERVAL", "int").(int),
 		GitguruUrl:                   getEnvVar("GITGURU_URL", "string").(string),
 		GitguruApiKey:                getEnvVar("API_KEY", "string").(string),
-		Environment:                  getEnvVar("ENVIRONMENT", "string").(string),
+		Environment:                  getEnvVar("APP_ENV", "string").(string),
+		RepoSyncConsumerCount:        getEnvVar("REPO_SYNC_CONSUMER_COUNT", "int").(int),
+		RepoUrlsConsumerGroup:        getEnvVar("REPO_URLS_CONSUMER_GROUP", "string").(string),
+		RepoUrlsTopic:                getEnvVar("REPO_URLS_TOPIC", "string").(string),
+		UserSyncConsumerCount:        getEnvVar("USER_SYNC_CONSUMER_COUNT", "int").(int),
+		UserSyncConsumerGroup:        getEnvVar("USER_SYNC_CONSUMER_GROUP", "string").(string),
+		UserSyncTopic:                getEnvVar("USER_SYNC_TOPIC", "string").(string),
+		KafkaBrokerUrls:              getEnvVar("KAFKA_BROKER_URLS", "string").(string),
+		AwsRegion:                    getEnvVar("AWS_REGION", "string").(string),
 	}
 }
 
