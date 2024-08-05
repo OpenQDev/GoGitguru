@@ -38,6 +38,7 @@ type GithubUser struct {
 	AuthorEmail string
 	AuthorDate  time.Time
 	RepoUrl     string
+	CommitHash  string
 }
 
 const organization = "openqdev"
