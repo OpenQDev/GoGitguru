@@ -9,7 +9,7 @@ import (
 	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
-func ProcessRepo(prefixPath string, organization string, repo string, repoUrl string, startDate time.Time, db *database.Queries) ([]GithubUser, error) {
+func ProcessRepo(prefixPath string, organization string, repo string, repoUrl string, startDate time.Time, db *database.Queries) ([]GithubUser, []string, error) {
 	logger.LogGreenDebug("beginning to process %s", repoUrl)
 
 	db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
@@ -17,13 +17,13 @@ func ProcessRepo(prefixPath string, organization string, repo string, repoUrl st
 		Url:    repoUrl,
 	})
 
-	commitCount, commitObject, err := StoreGitLogsAndDepsHistoryForRepo(GitLogParams{prefixPath, organization, repo, repoUrl, startDate, db})
+	commitCount, commitObject, repoUrlsUpdated, err := StoreGitLogsAndDepsHistoryForRepo(GitLogParams{prefixPath, organization, repo, repoUrl, startDate, db})
 	if err != nil {
 		db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
 			Status: database.RepoStatusFailed,
 			Url:    repoUrl,
 		})
-		return []GithubUser{}, err
+		return []GithubUser{}, []string{}, err
 	}
 
 	if commitCount == 0 {
@@ -51,6 +51,17 @@ func ProcessRepo(prefixPath string, organization string, repo string, repoUrl st
 		emailList = append(emailList, user)
 	}
 
+	uniqueReposUpdated := make(map[string]bool)
+	for _, repoUrl := range repoUrlsUpdated {
+		if _, exists := uniqueReposUpdated[repoUrl]; !exists {
+			uniqueReposUpdated[repoUrl] = true
+		}
+	}
+	var reposUpdated []string
+	for repo := range uniqueReposUpdated {
+		reposUpdated = append(reposUpdated, repo)
+	}
+
 	// Print emailList
 	logger.LogBlue("Email List:")
 	for _, user := range emailList {
@@ -64,5 +75,5 @@ func ProcessRepo(prefixPath string, organization string, repo string, repoUrl st
 
 	logger.LogBlue("Successfully stored %d commits for %s in the database.", commitCount, repoUrl)
 
-	return emailList, nil
+	return emailList, reposUpdated, nil
 }

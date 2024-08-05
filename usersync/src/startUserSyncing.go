@@ -2,7 +2,11 @@ package usersync
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"slices"
 
+	"github.com/IBM/sarama"
 	"github.com/OpenQDev/GoGitguru/database"
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
@@ -37,6 +41,8 @@ func StartUserSyncing(
 
 	// Create batches of repos for GraphQL query
 	repoToAuthorBatches := generateBatchAuthors(repoUrlToAuthorsMap, batchSize)
+
+	repoUrlsWithNewUsers := []string{}
 
 	// Get info for each batch
 	for _, repoToAuthorBatch := range repoToAuthorBatches {
@@ -104,9 +110,50 @@ func StartUserSyncing(
 			logger.LogError("error occured while getting repos to users: %s", err)
 		}
 
+		if slices.Contains(repoUrlsWithNewUsers, repoToAuthorBatch.RepoURL) {
+			repoUrlsWithNewUsers = append(repoUrlsWithNewUsers, repoToAuthorBatch.RepoURL)
+		}
+
 		err = db.UpsertRepoToUserById(context.Background(), upsertRepoToUserByIdParams)
 		if err != nil {
 			logger.LogError("error occured while upserting repo to user by id: %s", err)
+		}
+	}
+
+	type UserDependencyKafkaMessage struct {
+		RepoUrl string `json:"repo_url"`
+	}
+
+	// Create a Kafka producer
+	producer, err := sarama.NewSyncProducer([]string{"localhost:9092"}, nil)
+	if err != nil {
+		logger.LogError("Failed to create Kafka producer: %s", err)
+	} else {
+		defer producer.Close()
+
+		// Produce Kafka messages for each email in the list
+
+		for _, repo := range repoUrlsWithNewUsers {
+
+			message := UserDependencyKafkaMessage{
+				RepoUrl: repo,
+			}
+
+			jsonMessage, err := json.Marshal(message)
+			if err != nil {
+				logger.LogError("Failed to marshal message to JSON: %s", err)
+				continue
+			}
+			fmt.Println(string(jsonMessage))
+			_, _, err = producer.SendMessage(&sarama.ProducerMessage{
+				Topic: "user-dependency-sync",
+				Value: sarama.StringEncoder(jsonMessage),
+			})
+			if err != nil {
+				logger.LogError("Failed to send message to Kafka: %s", err)
+			} else {
+				logger.LogGreenDebug("Message sent to Kafka: looking at latest dependency")
+			}
 		}
 	}
 

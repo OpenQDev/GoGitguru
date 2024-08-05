@@ -12,7 +12,7 @@ import (
 	"github.com/lib/pq"
 )
 
-const batchInsertRepoDependencies = `-- name: BatchInsertRepoDependencies :exec
+const batchInsertRepoDependencies = `-- name: BatchInsertRepoDependencies :many
 WITH new_dependencies AS (
   INSERT INTO dependencies (dependency_file, dependency_name)
   SELECT
@@ -69,6 +69,7 @@ SET
   first_use_date = EXCLUDED.first_use_date,
   last_use_date = EXCLUDED.last_use_date,
   updated_at = EXCLUDED.updated_at
+RETURNING url
 `
 
 type BatchInsertRepoDependenciesParams struct {
@@ -80,8 +81,8 @@ type BatchInsertRepoDependenciesParams struct {
 	Lastusedates    []int64       `json:"lastusedates"`
 }
 
-func (q *Queries) BatchInsertRepoDependencies(ctx context.Context, arg BatchInsertRepoDependenciesParams) error {
-	_, err := q.exec(ctx, q.batchInsertRepoDependenciesStmt, batchInsertRepoDependencies,
+func (q *Queries) BatchInsertRepoDependencies(ctx context.Context, arg BatchInsertRepoDependenciesParams) ([]string, error) {
+	rows, err := q.query(ctx, q.batchInsertRepoDependenciesStmt, batchInsertRepoDependencies,
 		arg.UpdatedAt,
 		pq.Array(arg.Filenames),
 		pq.Array(arg.Dependencynames),
@@ -89,7 +90,25 @@ func (q *Queries) BatchInsertRepoDependencies(ctx context.Context, arg BatchInse
 		pq.Array(arg.Firstusedates),
 		pq.Array(arg.Lastusedates),
 	)
-	return err
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var url string
+		if err := rows.Scan(&url); err != nil {
+			return nil, err
+		}
+		items = append(items, url)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getRepoDependencies = `-- name: GetRepoDependencies :many

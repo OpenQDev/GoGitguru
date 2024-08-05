@@ -1,4 +1,4 @@
--- name: BatchInsertRepoDependencies :exec
+-- name: BatchInsertRepoDependencies :many
 WITH new_dependencies AS (
   INSERT INTO dependencies (dependency_file, dependency_name)
   SELECT
@@ -54,7 +54,8 @@ ON CONFLICT (url, dependency_id) DO UPDATE
 SET 
   first_use_date = EXCLUDED.first_use_date,
   last_use_date = EXCLUDED.last_use_date,
-  updated_at = EXCLUDED.updated_at;
+  updated_at = EXCLUDED.updated_at
+RETURNING url;
 
 
 

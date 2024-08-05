@@ -85,7 +85,7 @@ func StartSyncingCommits(
 		logger.LogBlue("repository %s cloned!", repoUrl)
 	}
 
-	emailList, err := ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db)
+	emailList, repoWithUpdatedDeps, err := ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db)
 	if err != nil {
 		logger.LogError("error processing repo %s: %s", repoUrl, err)
 		return
@@ -96,6 +96,11 @@ func StartSyncingCommits(
 		AuthorDate  time.Time `json:"author_date"`
 		RepoUrl     string    `json:"repo_url"`
 		CommitHash  string    `json:"commit_hash"`
+	}
+
+	type UserDependencyKafkaMessage struct {
+		RepoUrl      string `json:"repo_url"`
+		DependencyId int32  `json:"dependency_id"`
 	}
 
 	// Create a Kafka producer
@@ -140,6 +145,29 @@ func StartSyncingCommits(
 				}
 			} else {
 				logger.LogGreenDebug("Email already exists, skipping Kafka message: %s", user.AuthorEmail)
+			}
+		}
+
+		for _, repo := range repoWithUpdatedDeps {
+
+			message := UserDependencyKafkaMessage{
+				RepoUrl: repo,
+			}
+
+			jsonMessage, err := json.Marshal(message)
+			if err != nil {
+				logger.LogError("Failed to marshal message to JSON: %s", err)
+				continue
+			}
+			fmt.Println(string(jsonMessage))
+			_, _, err = producer.SendMessage(&sarama.ProducerMessage{
+				Topic: "user-dependency-sync",
+				Value: sarama.StringEncoder(jsonMessage),
+			})
+			if err != nil {
+				logger.LogError("Failed to send message to Kafka: %s", err)
+			} else {
+				logger.LogGreenDebug("Message sent to Kafka: looking at latest dependency")
 			}
 		}
 	}
