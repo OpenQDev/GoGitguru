@@ -22,6 +22,9 @@ type EnvConfig struct {
 	GitguruUrl                   string
 	GitguruApiKey                string
 	Environment                  string
+	RepoUrlsConsumerGroup        string
+	KafkaBrokerUrls              string
+	RepoUrlsTopic                string
 }
 
 func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
@@ -42,6 +45,9 @@ func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
 		GitguruUrl:                   getEnvVar("GITGURU_URL", "string").(string),
 		GitguruApiKey:                getEnvVar("API_KEY", "string").(string),
 		Environment:                  getEnvVar("APP_ENV", "string").(string),
+		RepoUrlsConsumerGroup:        getEnvVar("REPO_URLS_CONSUMER_GROUP", "string").(string),
+		RepoUrlsTopic:                getEnvVar("REPO_URLS_TOPIC", "string").(string),
+		KafkaBrokerUrls:              getEnvVar("KAFKA_BROKER_URLS", "string").(string),
 	}
 }
 

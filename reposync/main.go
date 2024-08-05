@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 
@@ -85,9 +86,9 @@ func main() {
 	}
 	defer conn.Close()
 
-	group := "repo-urls-group"
-	brokers := []string{"localhost:9092"}
-	topics := []string{"repo-urls"}
+	group := env.RepoUrlsConsumerGroup
+	brokers := strings.Split(env.KafkaBrokerUrls, ",")
+	topics := []string{env.RepoUrlsTopic}
 
 	logger.SetDebugMode(env.Debug)
 	logger.LogBlue("beginning repo syncing...")
