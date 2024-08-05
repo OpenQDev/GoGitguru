@@ -40,6 +40,7 @@ func ProcessRepo(prefixPath string, organization string, repo string, repoUrl st
 				AuthorEmail: email,
 				AuthorDate:  time.Unix(commitObject.Authordates[i], 0),
 				RepoUrl:     commitObject.Repourl.String,
+				CommitHash:  commitObject.Commithashes[i],
 			}
 		}
 	}
@@ -53,7 +54,7 @@ func ProcessRepo(prefixPath string, organization string, repo string, repoUrl st
 	// Print emailList
 	logger.LogBlue("Email List:")
 	for _, user := range emailList {
-		logger.LogBlue("Email: %s, Author Date: %s, Repo URL: %s", user.AuthorEmail, user.AuthorDate.Format(time.RFC3339), user.RepoUrl)
+		logger.LogBlue("Email: %s, Author Date: %s, Repo URL: %s, Commit Hash: %s", user.AuthorEmail, user.AuthorDate.Format(time.RFC3339), user.RepoUrl, user.CommitHash)
 	}
 
 	db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{

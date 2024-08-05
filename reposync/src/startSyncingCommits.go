@@ -95,6 +95,7 @@ func StartSyncingCommits(
 		AuthorEmail string    `json:"author_email"`
 		AuthorDate  time.Time `json:"author_date"`
 		RepoUrl     string    `json:"repo_url"`
+		CommitHash  string    `json:"commit_hash"`
 	}
 
 	// Create a Kafka producer
@@ -119,6 +120,7 @@ func StartSyncingCommits(
 					AuthorEmail: user.AuthorEmail,
 					AuthorDate:  user.AuthorDate,
 					RepoUrl:     user.RepoUrl,
+					CommitHash:  user.CommitHash,
 				}
 
 				jsonMessage, err := json.Marshal(message)
