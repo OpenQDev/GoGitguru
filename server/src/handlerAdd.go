@@ -67,6 +67,7 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 			Topic: "repo-urls",
 			Value: sarama.StringEncoder(messageJSON),
 		})
+
 		if err != nil {
 			logger.LogError(fmt.Sprintf("Failed to publish message for %s to Kafka", repoUrl), err)
 			// Continue processing other URLs even if Kafka publish fails
