@@ -8,7 +8,7 @@ require (
 	github.com/OpenQDev/GoGitguru/util v1.0.0
 	github.com/go-git/go-git/v5 v5.9.0
 	github.com/lib/pq v1.10.9
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.8.4
 )
 
 replace (
@@ -21,6 +21,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371 // indirect
 	github.com/acomagu/bufpipe v1.0.4 // indirect
+	github.com/aws/aws-msk-iam-sasl-signer-go v1.0.0 // indirect
 	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
