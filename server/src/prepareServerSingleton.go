@@ -14,7 +14,7 @@ func PrepareServerSingleton(dbUrl string, env setup.EnvConfig) (*sql.DB, ApiConf
 		logger.LogError("error getting database: %s", err)
 	}
 
-	apiCfg, err := GetApiConfig(database, dbUrl, conn, env.Environment)
+	apiCfg, err := GetApiConfig(database, dbUrl, conn, env)
 	if err != nil {
 		logger.LogFatalRedAndExit("can't connect to DB: %s", err)
 	}

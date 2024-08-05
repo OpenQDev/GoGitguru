@@ -4,10 +4,12 @@ import (
 	"crypto/tls"
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/IBM/sarama"
 	"github.com/OpenQDev/GoGitguru/database"
 	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/setup"
 )
 
 // setupProducer will create a SyncProducer and returns it
@@ -31,8 +33,9 @@ func setupProducer(environment string, kafkaBrokers []string) (sarama.SyncProduc
 	return sarama.NewSyncProducer(kafkaBrokers, config)
 }
 
-func GetApiConfig(database *database.Queries, dbUrl string, conn *sql.DB, environment string) (ApiConfig, error) {
-	producer, err := setupProducer(environment, []string{"localhost:9092"})
+func GetApiConfig(database *database.Queries, dbUrl string, conn *sql.DB, environment setup.EnvConfig) (ApiConfig, error) {
+	kafkaBrokers := strings.Split(environment.KafkaBrokerUrls, ",")
+	producer, err := setupProducer(environment.Environment, kafkaBrokers)
 	if err != nil {
 		logger.LogFatalRedAndExit("Failed to setup Kafka producer: %v", err)
 	}
@@ -44,7 +47,6 @@ func GetApiConfig(database *database.Queries, dbUrl string, conn *sql.DB, enviro
 		PrefixPath:           "./repos",
 		DBURL:                dbUrl,
 		Conn:                 conn,
-		KafkaBrokers:         []string{"localhost:9092"},
 		KafkaProducer:        producer,
 	}
 
