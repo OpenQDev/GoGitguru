@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -30,6 +31,29 @@ type Consumer struct {
 	env      setup.EnvConfig
 }
 
+func setUpConsumerGroup(environment string, kafkaBrokers []string, group string) (sarama.ConsumerGroup, error) {
+	// Set the SASL/OAUTHBEARER configuration
+	// Set up the Sarama configuration
+	config := sarama.NewConfig()
+	config.Version = sarama.V2_5_0_0
+	config.Consumer.Group.Rebalance.Strategy = sarama.NewBalanceStrategyRange()
+	config.Consumer.Offsets.Initial = sarama.OffsetNewest
+	config.Consumer.Offsets.AutoCommit.Enable = false
+
+	fmt.Printf("Starting consumer for environment %s\n", environment)
+	if environment != "LOCAL" {
+		config.Net.SASL.Enable = true
+		config.Net.SASL.Mechanism = sarama.SASLTypeOAuth
+		config.Net.SASL.TokenProvider = &reposync.MSKAccessTokenProvider{}
+
+		tlsConfig := tls.Config{}
+		config.Net.TLS.Enable = true
+		config.Net.TLS.Config = &tlsConfig
+	}
+
+	return sarama.NewConsumerGroup(kafkaBrokers, group, config)
+}
+
 func main() {
 	env := setup.ExtractAndVerifyEnvironment("../.env")
 
@@ -40,6 +64,10 @@ func main() {
 	}
 	defer conn.Close()
 
+	group := "repo-urls-group"
+	brokers := []string{"localhost:9092"}
+	topics := []string{"repo-urls"}
+
 	logger.SetDebugMode(env.Debug)
 	logger.LogBlue("beginning repo syncing...")
 
@@ -48,18 +76,6 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
-	// Set up the Sarama configuration
-	config := sarama.NewConfig()
-	config.Version = sarama.V2_5_0_0
-	config.Consumer.Group.Rebalance.Strategy = sarama.NewBalanceStrategyRange()
-	config.Consumer.Offsets.Initial = sarama.OffsetNewest
-	config.Consumer.Offsets.AutoCommit.Enable = false
-
-	// Define the consumer group and brokers
-	group := "repo-urls-group"
-	brokers := []string{"localhost:9092"}
-	topics := []string{"repo-urls"}
 
 	// Create a wait group to manage goroutines
 	var wg sync.WaitGroup
@@ -77,7 +93,7 @@ func main() {
 				env:      env,
 			}
 
-			client, err := sarama.NewConsumerGroup(brokers, group, config)
+			client, err := setUpConsumerGroup(env.Environment, brokers, group)
 			if err != nil {
 				logger.LogError(fmt.Sprintf("Error creating consumer group client for consumer %d", consumerID), err)
 				return
