@@ -41,7 +41,7 @@ func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
 		UserDependenciesSyncInterval: getEnvVar("USERSYNC_DEPDENCIES_INTERVAL", "int").(int),
 		GitguruUrl:                   getEnvVar("GITGURU_URL", "string").(string),
 		GitguruApiKey:                getEnvVar("API_KEY", "string").(string),
-		Environment:                  getEnvVar("API_KEY", "string").(string),
+		Environment:                  getEnvVar("ENVIRONMENT", "string").(string),
 	}
 }
 
