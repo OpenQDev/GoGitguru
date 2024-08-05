@@ -25,9 +25,9 @@ type Message struct {
 
 type Consumer struct {
 	ready    chan bool
-	database *database.Queries // Replace with your actual database type
-	conn     *sql.DB           // Replace with your actual connection type
-	env      setup.EnvConfig   // Replace with your actual connection type
+	database *database.Queries
+	conn     *sql.DB
+	env      setup.EnvConfig
 }
 
 func main() {
@@ -46,23 +46,26 @@ func main() {
 	stopChan := make(chan struct{})
 	setupSignalHandler(stopChan)
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	// Set up the Sarama configuration
 	config := sarama.NewConfig()
-	config.Version = sarama.V2_5_0_0 // Set the version to match your Kafka cluster
+	config.Version = sarama.V2_5_0_0
 	config.Consumer.Group.Rebalance.Strategy = sarama.NewBalanceStrategyRange()
-	config.Consumer.Offsets.Initial = sarama.OffsetNewest // Start from the newest message
-	config.Consumer.Offsets.AutoCommit.Enable = false     // Disable auto commit for manual control
+	config.Consumer.Offsets.Initial = sarama.OffsetNewest
+	config.Consumer.Offsets.AutoCommit.Enable = false
 
 	// Define the consumer group and brokers
 	group := "repo-urls-group"
-	brokers := []string{"localhost:9092"} // Replace with your broker addresses
+	brokers := []string{"localhost:9092"}
 	topics := []string{"repo-urls"}
 
 	// Create a wait group to manage goroutines
 	var wg sync.WaitGroup
 
 	// Spawn consumers
-	numConsumers := 5 // Set the number of concurrent consumer instances
+	numConsumers := 5
 	for i := 0; i < numConsumers; i++ {
 		wg.Add(1)
 		go func(consumerID int) {
@@ -71,6 +74,7 @@ func main() {
 				ready:    make(chan bool),
 				database: database,
 				conn:     conn,
+				env:      env,
 			}
 
 			client, err := sarama.NewConsumerGroup(brokers, group, config)
@@ -84,15 +88,14 @@ func main() {
 				}
 			}()
 
-			ctx := context.Background()
-
 			for {
-				if err := client.Consume(ctx, topics, &consumer); err != nil {
-					logger.LogError(fmt.Sprintf("Error from consumer %d", consumerID), err)
-				}
-				// Check if context was canceled, signaling that the consumer should stop
-				if ctx.Err() != nil {
+				select {
+				case <-ctx.Done():
 					return
+				default:
+					if err := client.Consume(ctx, topics, &consumer); err != nil {
+						logger.LogError(fmt.Sprintf("Error from consumer %d", consumerID), err)
+					}
 				}
 				consumer.ready = make(chan bool)
 			}
@@ -102,13 +105,14 @@ func main() {
 	log.Println("All consumers are up and running!")
 	<-stopChan
 	log.Println("Terminating: via signal")
+	cancel() // Cancel the context to stop all consumers
 	wg.Wait()
 	log.Println("All consumers have been shut down.")
 }
 
 func setupSignalHandler(stopChan chan<- struct{}) {
 	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
 		<-sigChan
@@ -118,7 +122,6 @@ func setupSignalHandler(stopChan chan<- struct{}) {
 
 // Setup is run at the beginning of a new session, before ConsumeClaim
 func (consumer *Consumer) Setup(sarama.ConsumerGroupSession) error {
-	// Mark the consumer as ready
 	close(consumer.ready)
 	return nil
 }
@@ -130,23 +133,25 @@ func (consumer *Consumer) Cleanup(sarama.ConsumerGroupSession) error {
 
 // ConsumeClaim must start a consumer loop of ConsumerGroupClaim's Messages().
 func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	for message := range claim.Messages() {
-		var msg Message
-		// Parse the JSON-encoded message
-		if err := json.Unmarshal(message.Value, &msg); err != nil {
-			logger.LogError("Error decoding JSON message", err)
-			continue // Skip malformed messages
+	for {
+		select {
+		case message, ok := <-claim.Messages():
+			if !ok {
+				return nil // Channel closed
+			}
+			var msg Message
+			if err := json.Unmarshal(message.Value, &msg); err != nil {
+				logger.LogError("Error decoding JSON message", err)
+				continue
+			}
+
+			reposync.StartSyncingCommits(consumer.database, consumer.conn, "repos", consumer.env.GitguruUrl, msg.RepoURL)
+
+			session.MarkMessage(message, "")
+			session.Commit()
+
+		case <-session.Context().Done():
+			return nil // Session canceled
 		}
-
-		// Call StartSyncingCommits with the extracted repo_url
-		reposync.StartSyncingCommits(consumer.database, consumer.conn, "repos", consumer.env.GitguruUrl, msg.RepoURL)
-
-		// Mark the message as processed
-		session.MarkMessage(message, "")
 	}
-
-	// Manually commit offsets after processing messages
-	session.Commit()
-
-	return nil
 }
