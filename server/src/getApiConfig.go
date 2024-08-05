@@ -16,7 +16,7 @@ func setupProducer(environment string, kafkaBrokers []string) (sarama.SyncProduc
 	config.Producer.Return.Successes = true
 
 	fmt.Printf("Starting producer for environment %s\n", environment)
-	if environment != "LOCAL" {
+	if environment == "production" {
 		// Set the SASL/OAUTHBEARER configuration
 		config.Net.SASL.Enable = true
 		config.Net.SASL.Mechanism = sarama.SASLTypeOAuth

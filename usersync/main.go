@@ -39,7 +39,7 @@ func setUpConsumerGroup(environment string, kafkaBrokers []string, group string)
 	config.Consumer.Offsets.AutoCommit.Enable = false
 
 	fmt.Printf("Starting consumer for environment %s\n", environment)
-	if environment != "LOCAL" {
+	if environment == "production" {
 		config.Net.SASL.Enable = true
 		config.Net.SASL.Mechanism = sarama.SASLTypeOAuth
 		config.Net.SASL.TokenProvider = &reposync.MSKAccessTokenProvider{}
