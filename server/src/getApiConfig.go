@@ -1,21 +1,12 @@
 package server
 
 import (
-	"context"
 	"crypto/tls"
 	"database/sql"
 
 	"github.com/IBM/sarama"
 	"github.com/OpenQDev/GoGitguru/database"
-	"github.com/aws/aws-msk-iam-sasl-signer-go/signer"
 )
-
-type MSKAccessTokenProvider struct{}
-
-func (m *MSKAccessTokenProvider) Token() (*sarama.AccessToken, error) {
-	token, _, err := signer.GenerateAuthToken(context.TODO(), "<region>")
-	return &sarama.AccessToken{Token: token}, err
-}
 
 // setupProducer will create a AsyncProducer and returns it
 func setupProducer(environment string, kafkaBrokers []string) (sarama.SyncProducer, error) {
