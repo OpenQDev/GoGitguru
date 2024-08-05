@@ -18,21 +18,26 @@ func (m *MSKAccessTokenProvider) Token() (*sarama.AccessToken, error) {
 }
 
 // setupProducer will create a AsyncProducer and returns it
-func setupProducer(kafkaBrokers []string) (sarama.SyncProducer, error) {
-	// Set the SASL/OAUTHBEARER configuration
+func setupProducer(environment string, kafkaBrokers []string) (sarama.SyncProducer, error) {
 	config := sarama.NewConfig()
-	config.Net.SASL.Enable = true
-	config.Net.SASL.Mechanism = sarama.SASLTypeOAuth
-	config.Net.SASL.TokenProvider = &MSKAccessTokenProvider{}
 
-	tlsConfig := tls.Config{}
-	config.Net.TLS.Enable = true
-	config.Net.TLS.Config = &tlsConfig
+	if environment != "LOCAL" {
+		// Set the SASL/OAUTHBEARER configuration
+		config.Net.SASL.Enable = true
+		config.Net.SASL.Mechanism = sarama.SASLTypeOAuth
+		config.Net.SASL.TokenProvider = &MSKAccessTokenProvider{}
+
+		// Enable TLS
+		tlsConfig := tls.Config{}
+		config.Net.TLS.Enable = true
+		config.Net.TLS.Config = &tlsConfig
+	}
+
 	return sarama.NewSyncProducer(kafkaBrokers, config)
 }
 
-func GetApiConfig(database *database.Queries, dbUrl string, conn *sql.DB) (ApiConfig, error) {
-	producer, err := setupProducer([]string{"localhost:9092"})
+func GetApiConfig(database *database.Queries, dbUrl string, conn *sql.DB, environment string) (ApiConfig, error) {
+	producer, err := setupProducer(environment, []string{"localhost:9092"})
 	if err != nil {
 		return ApiConfig{}, err
 	}
