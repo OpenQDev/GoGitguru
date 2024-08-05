@@ -30,6 +30,7 @@ type Consumer struct {
 	database *database.Queries
 	conn     *sql.DB
 	env      setup.EnvConfig
+	producer sarama.SyncProducer
 }
 
 // setupProducer will create a SyncProducer and returns it
@@ -89,6 +90,10 @@ func main() {
 	group := env.RepoUrlsConsumerGroup
 	brokers := strings.Split(env.KafkaBrokerUrls, ",")
 	topics := []string{env.RepoUrlsTopic}
+	producer, err := setupProducer(env.Environment, brokers)
+	if err != nil {
+		logger.LogError("Failed to setup Kafka producer:", err)
+	}
 
 	logger.SetDebugMode(env.Debug)
 	logger.LogBlue("beginning repo syncing...")
@@ -113,6 +118,7 @@ func main() {
 				database: database,
 				conn:     conn,
 				env:      env,
+				producer: producer,
 			}
 
 			client, err := setUpConsumerGroup(env.Environment, brokers, group)
@@ -183,7 +189,7 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 				continue
 			}
 
-			reposync.StartSyncingCommits(consumer.database, consumer.conn, "repos", consumer.env.GitguruUrl, msg.RepoURL)
+			reposync.StartSyncingCommits(consumer.database, consumer.conn, "repos", consumer.env.GitguruUrl, msg.RepoURL, consumer.producer)
 
 			session.MarkMessage(message, "")
 			session.Commit()

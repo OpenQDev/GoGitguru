@@ -21,6 +21,7 @@ func StartSyncingCommits(
 	prefixPath string,
 	gitguruUrl string,
 	repoUrl string,
+	producer sarama.SyncProducer,
 ) {
 	if repoUrl == "" {
 		logger.LogBlue("no new repo urls to sync. exiting...")
@@ -98,49 +99,41 @@ func StartSyncingCommits(
 		CommitHash  string    `json:"commit_hash"`
 	}
 
-	// Create a Kafka producer
-	producer, err := sarama.NewSyncProducer([]string{"localhost:9092"}, nil)
-	if err != nil {
-		logger.LogError("Failed to create Kafka producer: %s", err)
-	} else {
-		defer producer.Close()
+	// Produce Kafka messages for each email in the list
+	for _, user := range emailList {
+		// Check if the email already exists in the rest_id_to_email table
+		exists, err := db.CheckGithubUserRestIdAuthorEmailExists(context.Background(), user.AuthorEmail)
+		if err != nil {
+			logger.LogError("Failed to check if email exists: %s", err)
+			continue
+		}
 
-		// Produce Kafka messages for each email in the list
-		for _, user := range emailList {
-			// Check if the email already exists in the rest_id_to_email table
-			exists, err := db.CheckGithubUserRestIdAuthorEmailExists(context.Background(), user.AuthorEmail)
+		// If the email doesn't exist, produce a Kafka message
+		if !exists {
+			message := GithubUserKafkaMessage{
+				AuthorEmail: user.AuthorEmail,
+				AuthorDate:  user.AuthorDate,
+				RepoUrl:     user.RepoUrl,
+				CommitHash:  user.CommitHash,
+			}
+
+			jsonMessage, err := json.Marshal(message)
 			if err != nil {
-				logger.LogError("Failed to check if email exists: %s", err)
+				logger.LogError("Failed to marshal message to JSON: %s", err)
 				continue
 			}
-
-			// If the email doesn't exist, produce a Kafka message
-			if !exists {
-				message := GithubUserKafkaMessage{
-					AuthorEmail: user.AuthorEmail,
-					AuthorDate:  user.AuthorDate,
-					RepoUrl:     user.RepoUrl,
-					CommitHash:  user.CommitHash,
-				}
-
-				jsonMessage, err := json.Marshal(message)
-				if err != nil {
-					logger.LogError("Failed to marshal message to JSON: %s", err)
-					continue
-				}
-				fmt.Println(string(jsonMessage))
-				_, _, err = producer.SendMessage(&sarama.ProducerMessage{
-					Topic: "user-sync",
-					Value: sarama.StringEncoder(jsonMessage),
-				})
-				if err != nil {
-					logger.LogError("Failed to send message to Kafka: %s", err)
-				} else {
-					logger.LogGreenDebug("Message sent to Kafka: %s", user.AuthorEmail)
-				}
+			fmt.Println(string(jsonMessage))
+			_, _, err = producer.SendMessage(&sarama.ProducerMessage{
+				Topic: "user-sync",
+				Value: sarama.StringEncoder(jsonMessage),
+			})
+			if err != nil {
+				logger.LogError("Failed to send message to Kafka: %s", err)
 			} else {
-				logger.LogGreenDebug("Email already exists, skipping Kafka message: %s", user.AuthorEmail)
+				logger.LogGreenDebug("Message sent to Kafka: %s", user.AuthorEmail)
 			}
+		} else {
+			logger.LogGreenDebug("Email already exists, skipping Kafka message: %s", user.AuthorEmail)
 		}
 	}
 
