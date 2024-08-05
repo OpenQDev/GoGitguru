@@ -168,9 +168,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.updateStatusAndUpdatedAtStmt, err = db.PrepareContext(ctx, updateStatusAndUpdatedAt); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateStatusAndUpdatedAt: %w", err)
 	}
-	if q.updateStatusAndUpdatedAtepoUrlV2Stmt, err = db.PrepareContext(ctx, updateStatusAndUpdatedAtepoUrlV2); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateStatusAndUpdatedAtepoUrlV2: %w", err)
-	}
 	if q.upsertMissingDependenciesStmt, err = db.PrepareContext(ctx, upsertMissingDependencies); err != nil {
 		return nil, fmt.Errorf("error preparing query UpsertMissingDependencies: %w", err)
 	}
@@ -425,11 +422,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updateStatusAndUpdatedAtStmt: %w", cerr)
 		}
 	}
-	if q.updateStatusAndUpdatedAtepoUrlV2Stmt != nil {
-		if cerr := q.updateStatusAndUpdatedAtepoUrlV2Stmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateStatusAndUpdatedAtepoUrlV2Stmt: %w", cerr)
-		}
-	}
 	if q.upsertMissingDependenciesStmt != nil {
 		if cerr := q.upsertMissingDependenciesStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing upsertMissingDependenciesStmt: %w", cerr)
@@ -532,7 +524,6 @@ type Queries struct {
 	switchReposRelationToSimpleStmt            *sql.Stmt
 	switchUsersRelationToSimpleStmt            *sql.Stmt
 	updateStatusAndUpdatedAtStmt               *sql.Stmt
-	updateStatusAndUpdatedAtepoUrlV2Stmt       *sql.Stmt
 	upsertMissingDependenciesStmt              *sql.Stmt
 	upsertRepoToUserByIdStmt                   *sql.Stmt
 	upsertRepoURLStmt                          *sql.Stmt
@@ -590,7 +581,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		switchReposRelationToSimpleStmt:            q.switchReposRelationToSimpleStmt,
 		switchUsersRelationToSimpleStmt:            q.switchUsersRelationToSimpleStmt,
 		updateStatusAndUpdatedAtStmt:               q.updateStatusAndUpdatedAtStmt,
-		updateStatusAndUpdatedAtepoUrlV2Stmt:       q.updateStatusAndUpdatedAtepoUrlV2Stmt,
 		upsertMissingDependenciesStmt:              q.upsertMissingDependenciesStmt,
 		upsertRepoToUserByIdStmt:                   q.upsertRepoToUserByIdStmt,
 		upsertRepoURLStmt:                          q.upsertRepoURLStmt,

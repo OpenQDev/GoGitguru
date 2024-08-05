@@ -139,7 +139,7 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 		}
 
 		// Call StartSyncingCommits with the extracted repo_url
-		reposync.StartSyncingCommits(consumer.database, consumer.conn, "repos", consumer.env.GitguruUrl, false, msg.RepoURL)
+		reposync.StartSyncingCommits(consumer.database, consumer.conn, "repos", consumer.env.GitguruUrl, msg.RepoURL)
 
 		// Mark the message as processed
 		session.MarkMessage(message, "")

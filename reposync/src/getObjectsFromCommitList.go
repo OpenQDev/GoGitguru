@@ -15,7 +15,7 @@ type UsersToRepoUrl struct {
 	LastCommitDates  []int64
 }
 
-func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, numberOfCommits int, currentDependencies []database.GetRepoDependenciesByURLRow, dependencyFiles []string, resyncAll bool) (database.BatchInsertRepoDependenciesParams, database.BulkInsertCommitsParams, UsersToRepoUrl, int, error) {
+func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, numberOfCommits int, currentDependencies []database.GetRepoDependenciesByURLRow, dependencyFiles []string) (database.BatchInsertRepoDependenciesParams, database.BulkInsertCommitsParams, UsersToRepoUrl, int, error) {
 	// sync this from the db
 
 	repoDir := filepath.Join(params.prefixPath, params.organization, params.repo)
@@ -66,10 +66,8 @@ func GetObjectsFromCommitList(params GitLogParams, commitList []*object.Commit, 
 					return dependencyHistoryObject, commitObject, usersToRepoUrl, 0, err
 				}
 			}
-			if !resyncAll {
-				AddCommitToCommitObject(commit, &commitObject, commitIndex)
-			}
 
+			AddCommitToCommitObject(commit, &commitObject, commitIndex)
 			AddFirstLastCommitDateByEmail(&usersToRepoUrl, commit)
 
 		}

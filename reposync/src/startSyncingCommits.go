@@ -21,7 +21,6 @@ func StartSyncingCommits(
 	conn *sql.DB,
 	prefixPath string,
 	gitguruUrl string,
-	resyncAll bool,
 	repoUrl string,
 ) {
 	if repoUrl == "" {
@@ -66,11 +65,11 @@ func StartSyncingCommits(
 
 		latestCommitterDateTime := time.Unix(int64(latestCommitterDate), 0)
 		/// Unsure why but sometimes commits before JAN_1_2020 were being stored after initia clone-sync, causing issues
-		if latestCommitterDateTime.After(JAN_1_2020) && !resyncAll {
+		if latestCommitterDateTime.After(JAN_1_2020) {
 			startDate = latestCommitterDateTime
 		}
 
-		err = ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db, resyncAll)
+		err = ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db)
 		if err != nil {
 			logger.LogFatalRedAndExit("error while processing repository %s: %s", repoUrl, err)
 		}
@@ -92,7 +91,7 @@ func StartSyncingCommits(
 		logger.LogBlue("repository %s cloned!", repoUrl)
 	}
 
-	err := ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db, resyncAll)
+	err := ProcessRepo(prefixPath, organization, repo, repoUrl, startDate, db)
 	if err != nil {
 		logger.LogFatalRedAndExit("error while processing repository %s: %s", repoUrl, err)
 	}
