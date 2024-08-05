@@ -10,19 +10,18 @@ type AuthorCommitTuple struct {
 }
 
 // Create a map with repoUrl as key and array of authors as value
-func getRepoToAuthorsMap(repoAuthorCommits []UserSync) RepoToAuthorCommitTuples {
+func getRepoToAuthorsMap(repoAuthorCommit Message) RepoToAuthorCommitTuples {
 	repoToAuthorCommitTuples := RepoToAuthorCommitTuples{Repos: make(map[string][]AuthorCommitTuple)}
-	for _, repoAuthorCommit := range repoAuthorCommits {
-		if repoAuthorCommit.RepoUrl != "" {
-			authorCommitTuple := AuthorCommitTuple{
-				Author:     repoAuthorCommit.AuthorEmail,
-				CommitHash: repoAuthorCommit.CommitHash,
-			}
 
-			repoToAuthorCommitTuples.Repos[repoAuthorCommit.RepoUrl] = append(
-				repoToAuthorCommitTuples.Repos[repoAuthorCommit.RepoUrl], authorCommitTuple,
-			)
+	if repoAuthorCommit.Repo_URL != "" {
+		authorCommitTuple := AuthorCommitTuple{
+			Author:     repoAuthorCommit.Author_Email,
+			CommitHash: repoAuthorCommit.CommitHash,
 		}
+
+		repoToAuthorCommitTuples.Repos[repoAuthorCommit.Repo_URL] = append(
+			repoToAuthorCommitTuples.Repos[repoAuthorCommit.Repo_URL], authorCommitTuple,
+		)
 	}
 
 	return repoToAuthorCommitTuples

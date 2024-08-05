@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -125,7 +126,7 @@ func StartSyncingCommits(
 					logger.LogError("Failed to marshal message to JSON: %s", err)
 					continue
 				}
-
+				fmt.Println(string(jsonMessage))
 				_, _, err = producer.SendMessage(&sarama.ProducerMessage{
 					Topic: "user-sync",
 					Value: sarama.StringEncoder(jsonMessage),

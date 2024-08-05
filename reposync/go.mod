@@ -9,6 +9,7 @@ require (
 	github.com/go-git/go-git/v5 v5.9.0
 	github.com/lib/pq v1.10.9
 	github.com/stretchr/testify v1.4.0
+	github.com/IBM/sarama v1.0.0
 )
 
 replace (
