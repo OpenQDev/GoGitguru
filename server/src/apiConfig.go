@@ -15,5 +15,5 @@ type ApiConfig struct {
 	DBURL                string
 	Conn                 *sql.DB
 	KafkaBrokers         []string
-	KafkaConfig          *sarama.Config
+	KafkaProducer        sarama.SyncProducer
 }

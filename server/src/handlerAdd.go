@@ -41,15 +41,6 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 
 	accepted := []string{}
 
-	// Create a Kafka producer
-	producer, err := sarama.NewSyncProducer(apiCfg.KafkaBrokers, apiCfg.KafkaConfig)
-	if err != nil {
-		logger.LogError("Failed to create Kafka producer", err)
-		RespondWithError(w, 500, "Internal server error")
-		return
-	}
-	defer producer.Close()
-
 	for _, repoUrl := range request.RepoUrls {
 
 		err = addToList(apiCfg, r, repoUrl)
@@ -63,7 +54,7 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 		// Publish message to Kafka
 		message := map[string]string{"repo_url": repoUrl}
 		messageJSON, _ := json.Marshal(message)
-		_, _, err = producer.SendMessage(&sarama.ProducerMessage{
+		_, _, err = apiCfg.KafkaProducer.SendMessage(&sarama.ProducerMessage{
 			Topic: "repo-urls",
 			Value: sarama.StringEncoder(messageJSON),
 		})
