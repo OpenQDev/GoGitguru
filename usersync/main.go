@@ -69,17 +69,10 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// Set up the Sarama configuration
-	config := sarama.NewConfig()
-	config.Version = sarama.V2_5_0_0 // Set the version to match your Kafka cluster
-	config.Consumer.Group.Rebalance.Strategy = sarama.NewBalanceStrategyRange()
-	config.Consumer.Offsets.Initial = sarama.OffsetNewest // Start from the newest message
-	config.Consumer.Offsets.AutoCommit.Enable = false     // Disable auto commit for manual control
-
 	// Define the consumer group and brokers
-	group := "new-users-group"
-	brokers := []string{"localhost:9092"} // Replace with your broker addresses
-	topics := []string{"user-sync"}
+	group := env.UserSyncConsumerGroup
+	brokers := strings.Split(env.KafkaBrokerUrls, ",")
+	topics := []string{env.UserSyncTopic}
 
 	// Create a wait group to manage goroutines
 	var wg sync.WaitGroup
