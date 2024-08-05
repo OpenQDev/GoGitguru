@@ -54,8 +54,8 @@ func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
 		RepoUrlsConsumerGroup:        getEnvVar("REPO_URLS_CONSUMER_GROUP", "string").(string),
 		RepoUrlsTopic:                getEnvVar("REPO_URLS_TOPIC", "string").(string),
 		UserSyncConsumerCount:        getEnvVar("USER_SYNC_CONSUMER_COUNT", "int").(int),
-		UserSyncConsumerGroup:        getEnvVar("REPO_URLS_TOPIC", "string").(string),
-		UserSyncTopic:                getEnvVar("REPO_URLS_TOPIC", "string").(string),
+		UserSyncConsumerGroup:        getEnvVar("USER_SYNC_CONSUMER_GROUP", "string").(string),
+		UserSyncTopic:                getEnvVar("USER_SYNC_TOPIC", "string").(string),
 		KafkaBrokerUrls:              getEnvVar("KAFKA_BROKER_URLS", "string").(string),
 		AwsRegion:                    getEnvVar("AWS_REGION", "string").(string),
 	}
