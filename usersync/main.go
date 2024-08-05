@@ -78,7 +78,7 @@ func main() {
 	var wg sync.WaitGroup
 
 	// Spawn consumers
-	numConsumers := 5 // Set the number of concurrent consumer instances
+	numConsumers := env.UserSyncConsumerCount // Set the number of concurrent consumer instances
 	for i := 0; i < numConsumers; i++ {
 		wg.Add(1)
 		go func(consumerID int) {

@@ -108,7 +108,7 @@ func main() {
 	var wg sync.WaitGroup
 
 	// Spawn consumers
-	numConsumers := 5
+	numConsumers := env.RepoSyncConsumerCount
 	for i := 0; i < numConsumers; i++ {
 		wg.Add(1)
 		go func(consumerID int) {
