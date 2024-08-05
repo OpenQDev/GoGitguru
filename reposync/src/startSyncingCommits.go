@@ -122,7 +122,7 @@ func StartSyncingCommits(
 			}
 
 			_, _, err = producer.SendMessage(&sarama.ProducerMessage{
-				Topic: "github-users",
+				Topic: "user-sync",
 				Value: sarama.StringEncoder(jsonMessage),
 			})
 			if err != nil {
