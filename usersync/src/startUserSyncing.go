@@ -110,7 +110,7 @@ func StartUserSyncing(
 			logger.LogError("error occured while getting repos to users: %s", err)
 		}
 
-		if slices.Contains(repoUrlsWithNewUsers, repoToAuthorBatch.RepoURL) {
+		if !slices.Contains(repoUrlsWithNewUsers, repoToAuthorBatch.RepoURL) {
 			repoUrlsWithNewUsers = append(repoUrlsWithNewUsers, repoToAuthorBatch.RepoURL)
 		}
 
@@ -132,7 +132,7 @@ func StartUserSyncing(
 		defer producer.Close()
 
 		// Produce Kafka messages for each email in the list
-
+		fmt.Println("repoUrlsWithNewUsers", repoUrlsWithNewUsers)
 		for _, repo := range repoUrlsWithNewUsers {
 
 			message := UserDependencyKafkaMessage{

@@ -15,7 +15,7 @@ FROM repos_to_dependencies rd
 LEFT JOIN commits c ON c.repo_url = rd.url
 LEFT JOIN github_user_rest_id_author_emails guriae ON guriae.email = c.author_email
 LEFT JOIN github_users gu ON gu.github_rest_id = guriae.rest_id
-WHERE (((rd.updated_at > sqlc.arg(since) AND rd.updated_at< sqlc.arg(until) ) OR rd.updated_at IS NULL ) ) AND
+WHERE rd.url = $1 AND
  gu.internal_id > 0
 GROUP BY gu.internal_id, rd.dependency_id, rd.url
 ) s

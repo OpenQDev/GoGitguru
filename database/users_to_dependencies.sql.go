@@ -109,7 +109,7 @@ FROM repos_to_dependencies rd
 LEFT JOIN commits c ON c.repo_url = rd.url
 LEFT JOIN github_user_rest_id_author_emails guriae ON guriae.email = c.author_email
 LEFT JOIN github_users gu ON gu.github_rest_id = guriae.rest_id
-WHERE (((rd.updated_at > $1 AND rd.updated_at< $2 ) OR rd.updated_at IS NULL ) ) AND
+WHERE rd.url = $1 AND
  gu.internal_id > 0
 GROUP BY gu.internal_id, rd.dependency_id, rd.url
 ) s
@@ -119,11 +119,6 @@ LEFT JOIN users_to_dependencies ud ON s.internal_id = ud.user_id AND s.dependenc
 GROUP BY s.internal_id, s.dependency_id
 `
 
-type GetUserDependenciesByUpdatedAtParams struct {
-	Since sql.NullInt64 `json:"since"`
-	Until sql.NullInt64 `json:"until"`
-}
-
 type GetUserDependenciesByUpdatedAtRow struct {
 	UserID       sql.NullInt32 `json:"user_id"`
 	FirstUseDate interface{}   `json:"first_use_date"`
@@ -131,8 +126,8 @@ type GetUserDependenciesByUpdatedAtRow struct {
 	DependencyID int32         `json:"dependency_id"`
 }
 
-func (q *Queries) GetUserDependenciesByUpdatedAt(ctx context.Context, arg GetUserDependenciesByUpdatedAtParams) ([]GetUserDependenciesByUpdatedAtRow, error) {
-	rows, err := q.query(ctx, q.getUserDependenciesByUpdatedAtStmt, getUserDependenciesByUpdatedAt, arg.Since, arg.Until)
+func (q *Queries) GetUserDependenciesByUpdatedAt(ctx context.Context, url string) ([]GetUserDependenciesByUpdatedAtRow, error) {
+	rows, err := q.query(ctx, q.getUserDependenciesByUpdatedAtStmt, getUserDependenciesByUpdatedAt, url)
 	if err != nil {
 		return nil, err
 	}

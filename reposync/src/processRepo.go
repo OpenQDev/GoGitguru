@@ -2,6 +2,7 @@ package reposync
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
@@ -62,11 +63,8 @@ func ProcessRepo(prefixPath string, organization string, repo string, repoUrl st
 		reposUpdated = append(reposUpdated, repo)
 	}
 
+	fmt.Println(reposUpdated, "reposUpdated")
 	// Print emailList
-	logger.LogBlue("Email List:")
-	for _, user := range emailList {
-		logger.LogBlue("Email: %s, Author Date: %s, Repo URL: %s, Commit Hash: %s", user.AuthorEmail, user.AuthorDate.Format(time.RFC3339), user.RepoUrl, user.CommitHash)
-	}
 
 	db.UpdateStatusAndUpdatedAt(context.Background(), database.UpdateStatusAndUpdatedAtParams{
 		Status: database.RepoStatusSynced,

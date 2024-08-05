@@ -2,28 +2,19 @@ package usersync
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/OpenQDev/GoGitguru/database"
-	"github.com/OpenQDev/GoGitguru/util/lib"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 )
 
-func SyncUserDependencies(db *database.Queries) error {
+type DepsMessage struct {
+	RepoUrl string `json:"repo_url"`
+}
 
-	// get all recent repoDependencies  @flacojones, do you want a smaller time window?
-	fiveMinutesAgo := lib.Now().Add(-5 * time.Minute).Unix()
-	fifteenMinutesAgo := lib.Now().Add(-15 * time.Minute).Unix()
-	// find user deps based off recent repos
-
-	usersToDependenciesParams := database.GetUserDependenciesByUpdatedAtParams{
-		Since: sql.NullInt64{Int64: fifteenMinutesAgo, Valid: true},
-		Until: sql.NullInt64{Int64: fiveMinutesAgo, Valid: true},
-	}
-
-	usersDependenciesToSync, err := db.GetUserDependenciesByUpdatedAt(context.Background(), usersToDependenciesParams)
+func SyncUserDependencies(db *database.Queries, repoUrl string) error {
+	fmt.Println("Syncing user dependencies for repo: ", repoUrl)
+	usersDependenciesToSync, err := db.GetUserDependenciesByUpdatedAt(context.Background(), repoUrl)
 	if err != nil {
 		logger.LogError("error getting user dependencies to sync since: %s", err)
 		return err

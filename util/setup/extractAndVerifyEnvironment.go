@@ -28,8 +28,11 @@ type EnvConfig struct {
 	UserSyncConsumerCount        int
 	UserSyncConsumerGroup        string
 	UserSyncTopic                string
-	KafkaBrokerUrls              string
-	AwsRegion                    string
+	UserDepsSyncTopic            string
+	UserDepsSyncConsumerGroup    string
+
+	KafkaBrokerUrls string
+	AwsRegion       string
 }
 
 func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
@@ -55,6 +58,8 @@ func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
 		RepoUrlsTopic:                getEnvVar("REPO_URLS_TOPIC", "string").(string),
 		UserSyncConsumerCount:        getEnvVar("USER_SYNC_CONSUMER_COUNT", "int").(int),
 		UserSyncConsumerGroup:        getEnvVar("USER_SYNC_CONSUMER_GROUP", "string").(string),
+		UserDepsSyncTopic:            getEnvVar("USER_DEPS_SYNC_TOPIC", "string").(string),
+		UserDepsSyncConsumerGroup:    getEnvVar("USER_DEPS_SYNC_CONSUMER_GROUP", "string").(string),
 		UserSyncTopic:                getEnvVar("USER_SYNC_TOPIC", "string").(string),
 		KafkaBrokerUrls:              getEnvVar("KAFKA_BROKER_URLS", "string").(string),
 		AwsRegion:                    getEnvVar("AWS_REGION", "string").(string),
