@@ -2,14 +2,17 @@ package usersync
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/IBM/sarama"
 	"github.com/OpenQDev/GoGitguru/database"
 
 	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/setup"
 )
 
 type UserSync struct {
@@ -25,6 +28,26 @@ type Message struct {
 	CommitHash   string `json:"commit_hash"`
 }
 
+func setupProducer(environment string, kafkaBrokers []string) (sarama.SyncProducer, error) {
+	config := sarama.NewConfig()
+	config.Producer.Return.Successes = true
+
+	fmt.Printf("Starting producer for environment %s\n", environment)
+	if environment == "production" {
+		// Set the SASL/OAUTHBEARER configuration
+		config.Net.SASL.Enable = true
+		config.Net.SASL.Mechanism = sarama.SASLTypeOAuth
+		config.Net.SASL.TokenProvider = &MSKAccessTokenProvider{}
+
+		// Enable TLS
+		tlsConfig := tls.Config{}
+		config.Net.TLS.Enable = true
+		config.Net.TLS.Config = &tlsConfig
+	}
+
+	return sarama.NewSyncProducer(kafkaBrokers, config)
+}
+
 func StartUserSyncing(
 	db *database.Queries,
 	prefixPath string,
@@ -33,6 +56,7 @@ func StartUserSyncing(
 	githubGraphQLUrl string,
 	message Message,
 ) {
+	env := setup.ExtractAndVerifyEnvironment("../.env")
 
 	logger.LogBlue("identifying %d new authors", len(message.Author_Email))
 
@@ -125,7 +149,9 @@ func StartUserSyncing(
 	}
 
 	// Create a Kafka producer
-	producer, err := sarama.NewSyncProducer([]string{"localhost:9092"}, nil)
+
+	brokers := strings.Split(env.KafkaBrokerUrls, ",")
+	producer, err := setupProducer(env.Environment, brokers)
 	if err != nil {
 		logger.LogError("Failed to create Kafka producer: %s", err)
 	} else {
