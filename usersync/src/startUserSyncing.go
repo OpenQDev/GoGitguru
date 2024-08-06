@@ -132,7 +132,6 @@ func StartUserSyncing(
 		defer producer.Close()
 
 		// Produce Kafka messages for each email in the list
-		fmt.Println("repoUrlsWithNewUsers", repoUrlsWithNewUsers)
 		for _, repo := range repoUrlsWithNewUsers {
 
 			message := UserDependencyKafkaMessage{

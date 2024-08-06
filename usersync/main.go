@@ -143,7 +143,7 @@ func handleUserDepsGroup(wg *sync.WaitGroup) {
 	topics := []string{env.UserDepsSyncTopic}
 
 	// Spawn consumers
-	numConsumers := env.UserSyncConsumerCount // Set the number of concurrent consumer instances
+	numConsumers := env.UserDepsSyncConsumerCount // Set the number of concurrent consumer instances
 	for i := 0; i < numConsumers; i++ {
 		wg.Add(1)
 		go func(consumerID int) {
