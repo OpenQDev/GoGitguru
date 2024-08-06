@@ -7,15 +7,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
-	"os/signal"
 	"strings"
 	"sync"
-	"syscall"
 
 	"github.com/IBM/sarama"
 	"github.com/OpenQDev/GoGitguru/database"
 	reposync "github.com/OpenQDev/GoGitguru/reposync/src"
+	kafkahelpers "github.com/OpenQDev/GoGitguru/util/kafkaHelpers"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/setup"
 )
@@ -54,29 +52,6 @@ func setupProducer(environment string, kafkaBrokers []string) (sarama.SyncProduc
 	return sarama.NewSyncProducer(kafkaBrokers, config)
 }
 
-func setUpConsumerGroup(environment string, kafkaBrokers []string, group string) (sarama.ConsumerGroup, error) {
-	// Set the SASL/OAUTHBEARER configuration
-	// Set up the Sarama configuration
-	config := sarama.NewConfig()
-	config.Version = sarama.V2_5_0_0
-	config.Consumer.Group.Rebalance.Strategy = sarama.NewBalanceStrategyRange()
-	config.Consumer.Offsets.Initial = sarama.OffsetNewest
-	config.Consumer.Offsets.AutoCommit.Enable = false
-
-	fmt.Printf("Starting consumer for environment %s\n", environment)
-	if environment == "production" {
-		config.Net.SASL.Enable = true
-		config.Net.SASL.Mechanism = sarama.SASLTypeOAuth
-		config.Net.SASL.TokenProvider = &reposync.MSKAccessTokenProvider{}
-
-		tlsConfig := tls.Config{}
-		config.Net.TLS.Enable = true
-		config.Net.TLS.Config = &tlsConfig
-	}
-
-	return sarama.NewConsumerGroup(kafkaBrokers, group, config)
-}
-
 func main() {
 	env := setup.ExtractAndVerifyEnvironment("../.env")
 
@@ -90,7 +65,7 @@ func main() {
 	group := env.RepoUrlsConsumerGroup
 	brokers := strings.Split(env.KafkaBrokerUrls, ",")
 	topics := []string{env.RepoUrlsTopic}
-	producer, err := setupProducer(env.Environment, brokers)
+	producer, err := kafkahelpers.SetupProducer(env.Environment, brokers)
 	if err != nil {
 		logger.LogError("Failed to setup Kafka producer:", err)
 	}
@@ -99,7 +74,7 @@ func main() {
 	logger.LogBlue("beginning repo syncing...")
 
 	stopChan := make(chan struct{})
-	setupSignalHandler(stopChan)
+	setup.SignalHandler(stopChan)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -121,7 +96,7 @@ func main() {
 				producer: producer,
 			}
 
-			client, err := setUpConsumerGroup(env.Environment, brokers, group)
+			client, err := kafkahelpers.SetUpConsumerGroup(env.Environment, brokers, group)
 			if err != nil {
 				logger.LogError(fmt.Sprintf("Error creating consumer group client for consumer %d", consumerID), err)
 				return
@@ -152,16 +127,6 @@ func main() {
 	cancel() // Cancel the context to stop all consumers
 	wg.Wait()
 	log.Println("All consumers have been shut down.")
-}
-
-func setupSignalHandler(stopChan chan<- struct{}) {
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-
-	go func() {
-		<-sigChan
-		close(stopChan)
-	}()
 }
 
 // Setup is run at the beginning of a new session, before ConsumeClaim

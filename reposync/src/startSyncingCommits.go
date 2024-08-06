@@ -12,7 +12,9 @@ import (
 	"github.com/OpenQDev/GoGitguru/database"
 
 	"github.com/OpenQDev/GoGitguru/util/gitutil"
+	kafkahelpers "github.com/OpenQDev/GoGitguru/util/kafkaHelpers"
 	"github.com/OpenQDev/GoGitguru/util/logger"
+	"github.com/OpenQDev/GoGitguru/util/setup"
 )
 
 func StartSyncingCommits(
@@ -139,29 +141,8 @@ func StartSyncingCommits(
 		} else {
 			logger.LogGreenDebug("Email already exists, skipping Kafka message: %s", user.AuthorEmail)
 		}
-
-		for _, repo := range repoWithUpdatedDeps {
-
-			message := UserDependencyKafkaMessage{
-				RepoUrl: repo,
-			}
-
-			jsonMessage, err := json.Marshal(message)
-			if err != nil {
-				logger.LogError("Failed to marshal message to JSON: %s", err)
-				continue
-			}
-			fmt.Println(string(jsonMessage))
-			_, _, err = producer.SendMessage(&sarama.ProducerMessage{
-				Topic: "user-dependency-sync",
-				Value: sarama.StringEncoder(jsonMessage),
-			})
-			if err != nil {
-				logger.LogError("Failed to send message to Kafka: %s", err)
-			} else {
-				logger.LogGreenDebug("Message sent to Kafka: looking at latest dependency")
-			}
-		}
+		env := setup.ExtractAndVerifyEnvironment("../.env")
+		kafkahelpers.ProduceUserDependencyMessage(producer, env, repoWithUpdatedDeps)
 	}
 
 	if err != nil {

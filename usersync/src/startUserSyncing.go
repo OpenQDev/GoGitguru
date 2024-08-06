@@ -2,15 +2,12 @@ package usersync
 
 import (
 	"context"
-	"crypto/tls"
-	"encoding/json"
-	"fmt"
 	"slices"
-	"strings"
 
 	"github.com/IBM/sarama"
 	"github.com/OpenQDev/GoGitguru/database"
 
+	kafkahelpers "github.com/OpenQDev/GoGitguru/util/kafkaHelpers"
 	"github.com/OpenQDev/GoGitguru/util/logger"
 	"github.com/OpenQDev/GoGitguru/util/setup"
 )
@@ -28,26 +25,6 @@ type Message struct {
 	CommitHash   string `json:"commit_hash"`
 }
 
-func setupProducer(environment string, kafkaBrokers []string) (sarama.SyncProducer, error) {
-	config := sarama.NewConfig()
-	config.Producer.Return.Successes = true
-
-	fmt.Printf("Starting producer for environment %s\n", environment)
-	if environment == "production" {
-		// Set the SASL/OAUTHBEARER configuration
-		config.Net.SASL.Enable = true
-		config.Net.SASL.Mechanism = sarama.SASLTypeOAuth
-		config.Net.SASL.TokenProvider = &MSKAccessTokenProvider{}
-
-		// Enable TLS
-		tlsConfig := tls.Config{}
-		config.Net.TLS.Enable = true
-		config.Net.TLS.Config = &tlsConfig
-	}
-
-	return sarama.NewSyncProducer(kafkaBrokers, config)
-}
-
 func StartUserSyncing(
 	db *database.Queries,
 	prefixPath string,
@@ -55,6 +32,7 @@ func StartUserSyncing(
 	batchSize int,
 	githubGraphQLUrl string,
 	message Message,
+	producer sarama.SyncProducer,
 ) {
 	env := setup.ExtractAndVerifyEnvironment("../.env")
 
@@ -144,42 +122,6 @@ func StartUserSyncing(
 		}
 	}
 
-	type UserDependencyKafkaMessage struct {
-		RepoUrl string `json:"repo_url"`
-	}
-
-	// Create a Kafka producer
-
-	brokers := strings.Split(env.KafkaBrokerUrls, ",")
-	producer, err := setupProducer(env.Environment, brokers)
-	if err != nil {
-		logger.LogError("Failed to create Kafka producer: %s", err)
-	} else {
-		defer producer.Close()
-
-		// Produce Kafka messages for each email in the list
-		for _, repo := range repoUrlsWithNewUsers {
-
-			message := UserDependencyKafkaMessage{
-				RepoUrl: repo,
-			}
-
-			jsonMessage, err := json.Marshal(message)
-			if err != nil {
-				logger.LogError("Failed to marshal message to JSON: %s", err)
-				continue
-			}
-			fmt.Println(string(jsonMessage))
-			_, _, err = producer.SendMessage(&sarama.ProducerMessage{
-				Topic: "user-dependency-sync",
-				Value: sarama.StringEncoder(jsonMessage),
-			})
-			if err != nil {
-				logger.LogError("Failed to send message to Kafka: %s", err)
-			} else {
-				logger.LogGreenDebug("Message sent to Kafka: looking at latest dependency")
-			}
-		}
-	}
+	kafkahelpers.ProduceUserDependencyMessage(producer, env, repoUrlsWithNewUsers)
 
 }
