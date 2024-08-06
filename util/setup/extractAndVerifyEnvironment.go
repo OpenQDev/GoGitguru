@@ -60,7 +60,7 @@ func ExtractAndVerifyEnvironment(pathToDotenv string) EnvConfig {
 		UserSyncConsumerCount:        getEnvVar("USER_SYNC_CONSUMER_COUNT", "int").(int),
 		UserSyncTopic:                getEnvVar("USER_SYNC_TOPIC", "string").(string),
 		UserSyncConsumerGroup:        getEnvVar("USER_SYNC_CONSUMER_GROUP", "string").(string),
-		UserDepsSyncConsumerCount:    getEnvVar("USER_DEPS_SYNC_COUNT", "int").(int),
+		UserDepsSyncConsumerCount:    getEnvVar("USER_DEPS_SYNC_CONSUMER_COUNT", "int").(int),
 		UserDepsSyncTopic:            getEnvVar("USER_DEPS_SYNC_TOPIC", "string").(string),
 		UserDepsSyncConsumerGroup:    getEnvVar("USER_DEPS_SYNC_CONSUMER_GROUP", "string").(string),
 
