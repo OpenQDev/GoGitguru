@@ -237,7 +237,7 @@ func (q *Queries) GetCommitsWithAuthorInfo(ctx context.Context, arg GetCommitsWi
 }
 
 const getRepoAuthorsInfo = `-- name: GetRepoAuthorsInfo :many
-SELECT DISTINCT ON (github_graphql_id)  author, author_email, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type
+SELECT DISTINCT ON (github_graphql_id)  author, author_email, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at
 FROM (
     SELECT author, author_email, author_date, repo_url
     FROM commits
@@ -281,6 +281,8 @@ type GetRepoAuthorsInfoRow struct {
 	Followers       sql.NullInt32  `json:"followers"`
 	Following       sql.NullInt32  `json:"following"`
 	Type            string         `json:"type"`
+	CreatedAt       sql.NullTime   `json:"created_at"`
+	UpdatedAt       sql.NullTime   `json:"updated_at"`
 	
 }
 
@@ -314,6 +316,8 @@ func (q *Queries) GetRepoAuthorsInfo(ctx context.Context, arg GetRepoAuthorsInfo
 			&i.Followers,
 			&i.Following,
 			&i.Type,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}

@@ -81,6 +81,8 @@ func ConvertToAuthorInfo(rows []database.GetRepoAuthorsInfoRow) []AuthorInfo {
 			Followers:       row.Followers.Int32,
 			Following:       row.Following.Int32,
 			Type:            row.Type,
+			CreatedAt:       row.CreatedAt.Time,
+			UpdatedAt:       row.UpdatedAt.Time,
 		}
 		authors = append(authors, author)
 	}
@@ -108,4 +110,6 @@ type AuthorInfo struct {
 	Followers       int32     `json:"followers"`
 	Following       int32     `json:"following"`
 	Type            string    `json:"type"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
