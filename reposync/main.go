@@ -137,6 +137,7 @@ func (consumer *Consumer) Setup(sarama.ConsumerGroupSession) error {
 
 // Cleanup is run at the end of a session, once all ConsumeClaim goroutines have exited
 func (consumer *Consumer) Cleanup(sarama.ConsumerGroupSession) error {
+	consumer.producer.Close()
 	return nil
 }
 

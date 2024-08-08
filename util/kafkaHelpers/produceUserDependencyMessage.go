@@ -14,8 +14,6 @@ type UserDependencyKafkaMessage struct {
 
 func ProduceUserDependencyMessage(producer sarama.SyncProducer, env setup.EnvConfig, repoUrlsWithNewUsers []string) {
 
-	defer producer.Close()
-
 	// Produce Kafka messages for each email in the list
 	for _, repo := range repoUrlsWithNewUsers {
 
