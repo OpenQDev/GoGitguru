@@ -29,7 +29,7 @@ func ProduceUserDependencyMessage(producer sarama.SyncProducer, env setup.EnvCon
 			continue
 		}
 		_, _, err = producer.SendMessage(&sarama.ProducerMessage{
-			Topic: "user-dependency-sync",
+			Topic: env.UserDepsSyncTopic,
 			Value: sarama.StringEncoder(jsonMessage),
 		})
 		if err != nil {
