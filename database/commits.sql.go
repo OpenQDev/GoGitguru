@@ -427,7 +427,7 @@ func (q *Queries) GetRepoAuthorsInfo(ctx context.Context, arg GetRepoAuthorsInfo
 			&i.Following,
 			&i.Type,
 			&i.CreatedAt,
-			&i.UpdatedAt
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
