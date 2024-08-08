@@ -28,17 +28,17 @@ func PrepareUserDependencies(usersDependenciesToSync []database.GetUserDependenc
 		for _, alreadySynced := range alreadySyncedUserDependencies {
 
 			// only check previous records if we aren't running resync all
-			if !alreadySynced.ResyncAll.Bool {
-				if userDependency.UserID.Int32 == alreadySynced.UserID && userDependency.DependencyID == alreadySynced.DependencyID {
-					if alreadySynced.FirstUseDate.Int64 < firstUseDate && alreadySynced.FirstUseDate.Int64 != 0 {
-						firstUseDate = alreadySynced.FirstUseDate.Int64
-					}
-					newDepIsActive := lastUseDate == 0 && firstUseDate != 0
-					if alreadySynced.LastUseDate.Int64 > lastUseDate && alreadySynced.LastUseDate.Int64 != 0 && !newDepIsActive {
-						lastUseDate = alreadySynced.LastUseDate.Int64
-					}
+
+			if userDependency.UserID.Int32 == alreadySynced.UserID && userDependency.DependencyID == alreadySynced.DependencyID {
+				if alreadySynced.FirstUseDate.Int64 < firstUseDate && alreadySynced.FirstUseDate.Int64 != 0 {
+					firstUseDate = alreadySynced.FirstUseDate.Int64
+				}
+				newDepIsActive := lastUseDate == 0 && firstUseDate != 0
+				if alreadySynced.LastUseDate.Int64 > lastUseDate && alreadySynced.LastUseDate.Int64 != 0 && !newDepIsActive {
+					lastUseDate = alreadySynced.LastUseDate.Int64
 				}
 			}
+
 		}
 		bulkInsertUserDependenciesParams.UserID = append(bulkInsertUserDependenciesParams.UserID, userDependency.UserID.Int32)
 		bulkInsertUserDependenciesParams.DependencyID = append(bulkInsertUserDependenciesParams.DependencyID, userDependency.DependencyID)

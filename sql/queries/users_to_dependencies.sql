@@ -29,8 +29,7 @@ GROUP BY s.internal_id, s.dependency_id;
 SELECT ud.first_use_date,
 ud.last_use_date,
 ud.dependency_id,
-ud.user_id,
-ud.resync_all
+ud.user_id
 FROM users_to_dependencies ud
 WHERE (ud.user_id, ud.dependency_id) IN
 (SELECT unnest(sqlc.arg(user_ids)::int[]), unnest(sqlc.arg(dependency_ids)::int[]));
@@ -47,8 +46,7 @@ INSERT INTO users_to_dependencies (user_id, dependency_id, first_use_date, last_
 ON CONFLICT (user_id, dependency_id) DO UPDATE
 SET last_use_date = excluded.last_use_date,
 first_use_date = excluded.first_use_date,
-updated_at = excluded.updated_at,
-resync_all = false
+updated_at = excluded.updated_at
 RETURNING user_id, dependency_id;
 
 

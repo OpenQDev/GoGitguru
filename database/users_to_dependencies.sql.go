@@ -23,8 +23,7 @@ INSERT INTO users_to_dependencies (user_id, dependency_id, first_use_date, last_
 ON CONFLICT (user_id, dependency_id) DO UPDATE
 SET last_use_date = excluded.last_use_date,
 first_use_date = excluded.first_use_date,
-updated_at = excluded.updated_at,
-resync_all = false
+updated_at = excluded.updated_at
 RETURNING user_id, dependency_id
 `
 
@@ -158,8 +157,7 @@ const getUserDependenciesByUser = `-- name: GetUserDependenciesByUser :many
 SELECT ud.first_use_date,
 ud.last_use_date,
 ud.dependency_id,
-ud.user_id,
-ud.resync_all
+ud.user_id
 FROM users_to_dependencies ud
 WHERE (ud.user_id, ud.dependency_id) IN
 (SELECT unnest($1::int[]), unnest($2::int[]))
@@ -175,7 +173,6 @@ type GetUserDependenciesByUserRow struct {
 	LastUseDate  sql.NullInt64 `json:"last_use_date"`
 	DependencyID int32         `json:"dependency_id"`
 	UserID       int32         `json:"user_id"`
-	ResyncAll    sql.NullBool  `json:"resync_all"`
 }
 
 func (q *Queries) GetUserDependenciesByUser(ctx context.Context, arg GetUserDependenciesByUserParams) ([]GetUserDependenciesByUserRow, error) {
@@ -192,7 +189,6 @@ func (q *Queries) GetUserDependenciesByUser(ctx context.Context, arg GetUserDepe
 			&i.LastUseDate,
 			&i.DependencyID,
 			&i.UserID,
-			&i.ResyncAll,
 		); err != nil {
 			return nil, err
 		}
