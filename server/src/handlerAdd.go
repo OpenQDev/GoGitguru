@@ -40,9 +40,10 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 	}
 
 	accepted := []string{}
-
+	fmt.Println("request.RepoUrls", request.RepoUrls)
 	for _, repoUrl := range request.RepoUrls {
 
+		fmt.Println("repoUrl", repoUrl, "adding to list")
 		err = addToList(apiCfg, r, repoUrl)
 		if err != nil {
 			msg := fmt.Sprintf("error adding %s to repo_urls: %s", repoUrl, err)
@@ -63,6 +64,9 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 			logger.LogError(fmt.Sprintf("Failed to publish message for %s to Kafka", repoUrl), err)
 			// Continue processing other URLs even if Kafka publish fails
 		}
+		if err == nil {
+			logger.LogBlue(fmt.Sprintf("Published message for %s to Kafka", repoUrl))
+		}
 
 		accepted = append(accepted, repoUrl)
 
@@ -77,6 +81,7 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 
 func addToList(apiCfg *ApiConfig, r *http.Request, repoUrl string) error {
 	err := apiCfg.DB.UpsertRepoURL(r.Context(), repoUrl)
+	fmt.Println("created", repoUrl)
 
 	return err
 }
