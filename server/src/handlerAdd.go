@@ -43,15 +43,6 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("request.RepoUrls", request.RepoUrls)
 	for _, repoUrl := range request.RepoUrls {
 
-		fmt.Println("repoUrl", repoUrl, "adding to list")
-		err = addToList(apiCfg, r, repoUrl)
-		if err != nil {
-			msg := fmt.Sprintf("error adding %s to repo_urls: %s", repoUrl, err)
-			logger.LogError(msg)
-			RespondWithError(w, 500, msg)
-			return
-		}
-
 		// Publish message to Kafka
 		message := map[string]string{"repo_url": repoUrl}
 		messageJSON, _ := json.Marshal(message)
@@ -66,6 +57,14 @@ func (apiCfg *ApiConfig) HandlerAdd(w http.ResponseWriter, r *http.Request) {
 		}
 		if err == nil {
 			logger.LogBlue(fmt.Sprintf("Published message for %s to Kafka", repoUrl))
+			fmt.Println("repoUrl", repoUrl, "adding to list")
+			err = addToList(apiCfg, r, repoUrl)
+			if err != nil {
+				msg := fmt.Sprintf("error adding %s to repo_urls: %s", repoUrl, err)
+				logger.LogError(msg)
+				RespondWithError(w, 500, msg)
+				return
+			}
 		}
 
 		accepted = append(accepted, repoUrl)
