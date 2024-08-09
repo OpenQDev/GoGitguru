@@ -102,14 +102,18 @@ WHERE author_email = $1;
 
 
 -- name: GetRepoAuthorsInfo :many
-SELECT DISTINCT ON (github_graphql_id)  author, author_email, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type
+SELECT DISTINCT ON (github_graphql_id)  author, author_email, rest_id, gure.email, internal_id, github_rest_id, github_graphql_id, login, name, gu.email, avatar_url, company, location, bio, blog, hireable, twitter_username, followers, following, type, created_at, updated_at
 FROM (
     SELECT author, author_email, author_date, repo_url
     FROM commits
     WHERE repo_url = ANY(sqlc.arg(repo_urls)::VARCHAR[])
     AND author_date BETWEEN $1 AND $2
+	AND author NOT LIKE '%[bot]%'
+	AND author_email NOT LIKE '%[bot]%'
+	AND author_email != 'action@github.com'
 ) c
 INNER JOIN github_user_rest_id_author_emails gure
 ON c.author_email = gure.email
 INNER JOIN github_users gu
-ON gure.rest_id = gu.github_rest_id;
+ON gure.rest_id = gu.github_rest_id
+WHERE github_graphql_id IS NOT NULL AND github_graphql_id != '';
